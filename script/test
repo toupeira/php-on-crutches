@@ -1,0 +1,23 @@
+#!/usr/bin/php
+<? # vim: ft=php
+
+   require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
+   require LIB.'test_runner.php';
+
+   switch ($argv[1]) {
+      case 'functional':
+      case 'integration':
+      case 'unit':
+         $dirs = $argv[1];
+         $what = $argv[1];
+         break;
+      default:
+         $dirs = array('functional', 'integration', 'unit');
+         $what = "all";
+   }
+
+   $runner = new TestRunner("Running $what tests");
+   $runner->add_dirs($dirs);
+   $runner->run();
+
+?>
