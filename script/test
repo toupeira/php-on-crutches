@@ -2,7 +2,7 @@
 <? # vim: ft=php
 
    require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
-   require LIB.'test_runner.php';
+   require LIB.'tests.php';
 
    switch ($argv[1]) {
       case 'functional':
@@ -16,8 +16,6 @@
          $what = "all";
    }
 
-   $runner = new TestRunner("Running $what tests");
-   $runner->add_dirs($dirs);
-   $runner->run();
+   run_tests($dirs, "Running $what tests");
 
 ?>
