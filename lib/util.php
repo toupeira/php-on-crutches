@@ -78,8 +78,14 @@
 
    function tempfile() {
       $file = tempnam(sys_get_temp_dir(), 'phpcrutch.');
-      register_shutdown_function(unlink, $file);
+      register_shutdown_function(rm_f, $file);
       return $file;
+   }
+
+   function rm_f($file) {
+      if (file_exists($file)) {
+         return unlink($file);
+      }
    }
 
 	class ApplicationError extends Exception {};
