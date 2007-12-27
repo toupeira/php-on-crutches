@@ -8,8 +8,7 @@
           $template = $this->find_template("$path/index")) {
         $this->render($template);
       } else {
-        $this->render_text("sali, no $path");
-        #$this->error(404);
+        $this->error(404);
       }
     }
   }
