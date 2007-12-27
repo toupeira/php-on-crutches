@@ -1,23 +1,30 @@
 <?# $Id$ ?>
 <?
 
-	$_CONFIG = array(
+  $_CONFIG = array(
+    # Application name
+    'application'     => '',
+    # Application version
+    'version'         => '',
 
-		# Framework settings
+    # Default site
+    'default_path'    => '',
+    # mod_rewrite or something similar configured
+    'rewrite_urls'    => true,
+    # Start sessions
+    'use_sessions'    => true,
 
-		'name'              => ROOT_NAME,
-		'email'             => null,
+    # Log file
+    'log_file'        => LOG.'phpcrutch.log',
+    # Log level, see lib/logger.php
+    'log_level'       => LOG_WARN,
+    # Log SQL queries
+    'log_sql'         => false,
 
-		'default_path'      => '',
-		'rewrite_urls'      => true,
-		'use_sessions'      => true,
-
-		'log_file'          => LOG.ROOT_NAME.'.log',
-		'log_level'         => LOG_INFO,
-		'debug'             => false,
-
-		# Application settings
-
-	);
+    # Show debug information
+    'debug'           => false,
+    # Show redirects with link
+    'debug_redirects' => false,
+  );
 
 ?>

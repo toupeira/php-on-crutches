@@ -1,31 +1,31 @@
 #!/usr/bin/rlwrap php5
 <? # vim: ft=php
 
-   require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
+  require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
 
-   function get($path, $params=null) {
-      if (is_array($params)) {
-         $_GET = $_POST = $params;
-      }
-      print Dispatcher::run($path);
-   }
+  function get($path, $params=null) {
+    if (is_array($params)) {
+      $_GET = $_POST = $params;
+    }
+    print Dispatcher::run($path);
+  }
 
-   function post($path, $params=null) {
-      $_GET = $_POST = (array) $params;
-      print Dispatcher::run($path);
-   }
+  function post($path, $params=null) {
+    $_GET = $_POST = (array) $params;
+    print Dispatcher::run($path);
+  }
 
-   print "\n\n".`php -v`."\n";
-   while (!feof(STDIN)) {
-      print ">>> ";
-      $input = trim(fgets(STDIN));
-      if (in_array($input, array('exit', 'quit'))) {
-         exit;
-      } elseif ($input) {
-         eval("$input;");
-         print "\n";
-      }
-   }
-   print "\n";
+  print "\n\n".`php -v`."\n";
+  while (!feof(STDIN)) {
+    print ">>> ";
+    $input = trim(fgets(STDIN));
+    if (in_array($input, array('exit', 'quit'))) {
+      exit;
+    } elseif ($input) {
+      eval("$input;");
+      print "\n";
+    }
+  }
+  print "\n";
 
 ?>

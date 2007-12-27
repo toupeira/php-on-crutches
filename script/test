@@ -1,21 +1,21 @@
 #!/usr/bin/php
 <? # vim: ft=php
 
-   require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
-   require LIB.'tests.php';
+  require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
+  require LIB.'tests.php';
 
-   switch ($argv[1]) {
-      case 'functional':
-      case 'integration':
-      case 'unit':
-         $dirs = $argv[1];
-         $what = $argv[1];
-         break;
-      default:
-         $dirs = array('functional', 'integration', 'unit');
-         $what = "all";
-   }
+  switch ($argv[1]) {
+    case 'functional':
+    case 'integration':
+    case 'unit':
+      $dirs = $argv[1];
+      $what = $argv[1];
+      break;
+    default:
+      $dirs = array('functional', 'integration', 'unit');
+      $what = "all";
+  }
 
-   run_tests($dirs, "Running $what tests");
+  run_tests($dirs, "Running $what tests");
 
 ?>

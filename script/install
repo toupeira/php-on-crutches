@@ -1,52 +1,52 @@
 #!/usr/bin/php
 <? # vim: ft=php
 
-   require dirname(__FILE__).'/../config/environment.php';
+  require dirname(__FILE__).'/../config/environment.php';
 
-   if (!ctype_print($target_root = $argv[1])) {
-      print "Usage: {$argv[0]} TARGET\n";
-      exit(255);
-   } elseif (file_exists($target_root = realpath($target_root))) {
-      print "\nTarget path $target_root already exists, continue? [y/n] ";
-      if (($reply = trim(fgets(STDIN))) != 'y') {
-         print "\n";
-         exit(1);
-      }
-   }
+  if (!ctype_print($target_root = $argv[1])) {
+    print "Usage: {$argv[0]} TARGET\n";
+    exit(255);
+  } elseif (file_exists($target_root = realpath($target_root))) {
+    print "\nTarget path $target_root already exists, continue? [y/n] ";
+    if (($reply = trim(fgets(STDIN))) != 'y') {
+      print "\n";
+      exit(1);
+    }
+  }
 
-   print "\nInstalling phpcrutch in $target_root\n\n";
+  print "\nInstalling phpcrutch in $target_root\n\n";
 
-   if (!is_dir($target_root)) {
-      mkdir($target_root)
-         or die("Couldn't create target directory $target_root\n");
-   }
+  if (!is_dir($target_root)) {
+    mkdir($target_root)
+      or die("Couldn't create target directory $target_root\n");
+  }
 
-   $source_root = realpath(LIB.'..').'/';
+  $source_root = realpath(LIB.'..').'/';
 
-   $links = array('lib', 'script');
-   foreach ($links as $link) {
-      print "Creating link $link...\n";
-      $source = $source_root.$link;
-      $target = $target_root.'/'.$link;
-      if (!is_link($target)) {
-         symlink($source, $target)
-            or die("couldn't create symlink for $source\n");
-      }
-   }
+  $links = array('lib', 'script');
+  foreach ($links as $link) {
+    print "Creating link $link...\n";
+    $source = $source_root.$link;
+    $target = $target_root.'/'.$link;
+    if (!is_link($target)) {
+      symlink($source, $target)
+        or die("couldn't create symlink for $source\n");
+    }
+  }
 
-   print "\n";
+  print "\n";
 
-   $dirs = array('app', 'config', 'log', 'public', 'test');
-   foreach ($dirs as $dir) {
-      print "Copying directory $dir...\n";
-      $source = $source_root.$dir;
-      $target = $target_root.'/';
-      if (system("cp -Ruvi --preserve=mode $source $target | sed 's/^.* -> /  /'") === false) {
-         die("Error while copying directory $source\n\n");
-      }
-   }
+  $dirs = array('app', 'config', 'log', 'public', 'test');
+  foreach ($dirs as $dir) {
+    print "Copying directory $dir...\n";
+    $source = $source_root.$dir;
+    $target = $target_root.'/';
+    if (system("cp -Ruvi --preserve=mode $source $target | sed 's/^.* -> /  /'") === false) {
+      die("Error while copying directory $source\n\n");
+    }
+  }
 
-   print "\n";
+  print "\n";
 
 # vim: ft=php
 ?>
