@@ -4,18 +4,45 @@
   require_once 'simpletest/unit_tester.php';
   require_once 'simpletest/reporter.php';
 
-  function run_tests($dirs, $message=null, $reporter=null) {
+  function run_tests($dir, $message=null, $reporter=null) {
     $group = new GroupTest($message);
-    foreach ((array) $dirs as $dir) {
-      foreach (glob(TEST.basename($dir)."/*.php") as $file) {
-        $group->addTestFile($file);
-      }
+    foreach (glob(TEST.basename($dir)."/*.php") as $file) {
+      $group->addTestFile($file);
     }
 
-    $reporter = any($reporter, new TextReporter());
-    print "\n";
-    $group->run($reporter);
-    print "\n";
+    if ($group->getSize() > 0) {
+      print "Running ".basename($dir)." tests";
+      $reporter = any($reporter, new Reporter());
+      $group->run($reporter);
+    }
+  }
+
+  class Reporter extends TextReporter
+  {
+    function paintPass($message) {
+      print ".";
+      parent::paintPass($message);
+    }
+
+    function paintFail($message) {
+      print "F\n";
+      parent::paintFail($message);
+    }
+
+    function paintError($message) {
+      print "E\n";
+      parent::paintError($message);
+    }
+
+    function paintGroupEnd($test_name) {
+      parent::paintGroupEnd($test_name);
+      print "\n";
+    }
+
+    function paintCaseStart($test_name) {
+      print "$test_name:\n";
+      parent::paintCaseStart($test_name);
+    }
   }
 
   class TestCase extends UnitTestCase
@@ -58,6 +85,18 @@
   }
 
   class ControllerTest extends TestCase
+  {
+  }
+
+  class HelperTest extends ControllerTest
+  {
+  }
+
+  class ViewTest extends ControllerTest
+  {
+  }
+
+  class IntegrationTest extends ControllerTest
   {
   }
 
