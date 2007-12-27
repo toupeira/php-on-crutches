@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <? # vim: ft=php
 
-  require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
+  require dirname(__FILE__).'/../config/environment.php';
 
 ?>
