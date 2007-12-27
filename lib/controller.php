@@ -89,8 +89,8 @@
       }
 
       # Call before filters
-      $this->call_if_defined('before');
-      $this->call_if_defined('before_'.$action);
+      $this->call_if_defined("before");
+      $this->call_if_defined("before_$action");
 
       # Call the action itself if it's defined
       if (in_array($action, $this->actions)) {
@@ -98,8 +98,8 @@
       }
 
       # Call after filters
-      $this->call_if_defined('after_'.$action);
-      $this->call_if_defined('after');
+      $this->call_if_defined("after_$action");
+      $this->call_if_defined("after");
 
       # Send all headers
       $this->send_headers();
@@ -203,7 +203,7 @@
         $this->render_text("Redirect to ".link_to($url, $url));
       } else {
         $this->headers['Location'] = $url;
-        $this->render_text('');
+        $this->render_text(' ');
       }
     }
 
@@ -268,17 +268,13 @@
     }
 
     protected function find_template($action) {
-      $template = $this->template_path().$action.'.thtml';
-      if (is_file($template)) {
-        return $template;
-      } else {
-        return null;
+      foreach (array(VIEWS, LIB.'views') as $dir) {
+        if (is_file($template = "$dir/{$this->name}/$action.thtml")) {
+          return $template;
+        }
       }
-    }
 
-    # Build a template path
-    protected function template_path() {
-      return VIEWS.strtolower(substr(get_class($this), 0, -10)).'/';
+      return null;
     }
 
     # Call a function if it is defined

@@ -44,8 +44,12 @@
       require_once $file;
     } elseif (is_file($file = MODELS."$class.php")) {
       require_once $file;
-    } elseif (is_file($file = CONTROLLERS."$class.php")) {
-      require_once $file;
+    } elseif (substr($class, -10) == 'controller') {
+      if (is_file($file = CONTROLLERS."$class.php")) {
+        require_once $file;
+      } elseif (is_file($file = LIB."controllers/$class.php")) {
+        require_once $file;
+      }
     }
   }
 
