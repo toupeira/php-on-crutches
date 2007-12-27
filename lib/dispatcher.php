@@ -30,66 +30,97 @@
           );
         }
 
-        log_debug(
-          "\nProcessing {$_SERVER['REQUEST_URI']} "
-          . "(for {$_SERVER['REMOTE_ADDR']} at ".strftime("%F %T").") "
-          . "[{$_SERVER['REQUEST_METHOD']}]"
-        );
-        log_debug("  Prefix: ".self::$prefix);
-        if (config('use_sessions')) {
-          log_debug("  Session ID: ".session_id());
-        }
-
+        # Detect controller, action and arguments
+        self::log_header();
         list($controller, $action, $args) = self::recognize($path);
+        self::log_request($controller, $action, $args);
 
-        log_info("  Controller: {$controller->name}");
-        log_info("  Action: $action");
-        if (config('debug')) {
-          if ($args) {
-            log_debug("  Arguments: ".str_replace("\n", "\n  ", var_export($args, true)));
-          }
-          if ($_REQUEST) {
-            log_debug("  Parameters: ".str_replace("\n", "\n  ", var_export($_REQUEST, true)));
-          }
-        }
-
+        # Perform the action
         return $controller->perform($action, $args);
-      } catch (ApplicationError $e) {
-        print "<h1>Application Error</h1>".N;
-        print "<p>".$e->getMessage()."</p>".N;
+
+      } catch (MissingTemplate $e) {
+        # Catch 404 errors
         if (config('debug')) {
-          print "<pre>".$e->getTraceAsString()."</pre>";
+          header("Status: 404");
+          self::dump_error($e);
+        } else {
+          $controller->rescue_error_in_public($e);
+          print $controller->output;
+        }
+      } catch (ApplicationError $e) {
+        # Catch other errors
+        if (config('debug')) {
+          header("Status: 500");
+          self::dump_error($e);
+        } else {
+          $controller->rescue_error_in_public($e);
+          print $controller->output;
         }
       }
+    }
+
+    # Dump an exception
+    static function dump_error($exception) {
+      print "<h1>".humanize(get_class($exception))."</h1>".N;
+      print "<p>".$exception->getMessage()."</p>".N;
+      print "<pre>".$exception->getTraceAsString()."</pre>";
     }
 
     # Extract controller, action and arguments from a path
     static function recognize($path) {
       $args = explode('/', $path);
 
-      if (ctype_alpha($controller = array_shift($args))) {
-        if (!ctype_print($action = array_shift($args))) {
-          $action = 'index';
-        }
-      } else {
-        # Use default pages controller
-        $controller = 'pages';
-        $action = 'show';
-        $args = array(implode('/', $args));
-      }
+      $controller = array_shift($args);
+      $action = array_shift($args);
 
       $class = ucfirst(strtolower($controller)).'Controller';
-      if (class_exists($class)) {
-        $controller = new $class();
-        if (is_object($controller)) {
-          self::$controller = $controller;
-          self::$action = $action;
-          return array($controller, $action, $args);
-        }
+
+      if (!class_exists($class)) {
+        $class = 'PagesController';
+        $action = 'show';
+        $args = rtrim($path, '/');
+      }
+
+      if (!ctype_print($action)) {
+        $action = 'index';
+      }
+
+      $controller = new $class();
+      if (is_object($controller)) {
+        self::$controller = $controller;
+        self::$action = $action;
+        return array($controller, $action, $args);
       }
 
       # Controller not found or invalid
       raise("Invalid controller '$class'");
+    }
+
+    # Log request header
+    static function log_header() {
+      log_debug(
+        "\nProcessing {$_SERVER['REQUEST_URI']} "
+        . "(for {$_SERVER['REMOTE_ADDR']} at ".strftime("%F %T").") "
+        . "[{$_SERVER['REQUEST_METHOD']}]"
+      );
+      log_debug("  Prefix: ".self::$prefix);
+      if (config('use_sessions')) {
+        log_debug("  Session ID: ".session_id());
+      }
+    }
+
+    # Log request details
+    static function log_request($controller, $action, $args) {
+      log_info("  Controller: {$controller->name}");
+      log_info("  Action: $action");
+      if (config('debug')) {
+        if ($args) {
+          log_debug("  Arguments: ".str_replace("\n", "\n  ", var_export($args, true)));
+        }
+        if ($_REQUEST) {
+          log_debug("  Parameters: ".str_replace("\n", "\n  ", var_export($_REQUEST, true)));
+        }
+      }
     }
   }
 

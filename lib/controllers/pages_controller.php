@@ -8,7 +8,7 @@
           $template = $this->find_template("$path/index")) {
         $this->render($template);
       } else {
-        $this->error(404);
+        raise(MissingTemplate);
       }
     }
   }

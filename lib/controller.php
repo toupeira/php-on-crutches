@@ -23,6 +23,16 @@
     protected $errors = array();
     protected $msg = array();
 
+    static function find_template($action) {
+      foreach (array(VIEWS, LIB.'views') as $dir) {
+        if (is_file($template = "$dir/$action.thtml")) {
+          return $template;
+        }
+      }
+
+      return null;
+    }
+
     function __construct() {
       $this->name = strtolower(substr(get_class($this), 0, -10));
 
@@ -63,6 +73,10 @@
 
     function get_name() {
       return $this->name;
+    }
+
+    function get_output() {
+      return $this->output;
     }
 
     function perform($action, $args=null) {
@@ -128,6 +142,25 @@
       }
     }
 
+    # Catches all errors, default behaviour is to render VIEWS/errors/404.thtml or 500.thtml
+    function rescue_error_in_public($exception) {
+      if ($exception instanceof MissingTemplate) {
+        $code = "404";
+        $text = "Not Found";
+      } else {
+        $code = "500";
+        $text = "Application Error";
+      }
+
+      header("Status: $code");
+      if ($template = self::find_template("errors/$code")) {
+        $this->layout = null;
+        $this->render($template);
+      } else {
+        $this->render_text("<h1>$code $text</h1>");
+      }
+    }
+
     # Get error messages from template objects
     private function set_error_messages() {
       $messages = array();
@@ -170,7 +203,7 @@
         if (is_file($action)) {
           $template = $action;
         } else {
-          $template = $this->find_template($action);
+          $template = self::find_template("{$this->name}/$action");
         }
 
         if ($template) {
@@ -179,7 +212,7 @@
           $view = new View($template, $this->data);
           $this->output = $view->render($this->layout);
         } else {
-          raise("No template found for action '$action'");
+          raise(MissingTemplate);
         }
       } else {
         raise("Can only render once per request");
@@ -243,12 +276,6 @@
       $this->msg['error'] = $message;
     }
 
-    # Send a HTTP error code with no output
-    protected function error($code) {
-      header("Status: $code");
-      $this->render_text('');
-    }
-
     # Check if this is a POST request
     protected function is_post() {
       global $_is_post;
@@ -265,16 +292,6 @@
         $_is_xhr = (preg_match('/XMLHttpRequest/', $_SERVER['HTTP_X_REQUESTED_WITH']) > 0);
       }
       return $_is_xhr;
-    }
-
-    protected function find_template($action) {
-      foreach (array(VIEWS, LIB.'views') as $dir) {
-        if (is_file($template = "$dir/{$this->name}/$action.thtml")) {
-          return $template;
-        }
-      }
-
-      return null;
     }
 
     # Call a function if it is defined

@@ -89,12 +89,21 @@
   }
 
   class ApplicationError extends Exception {};
+  class MissingTemplate extends ApplicationError {};
 
-  function raise($message) {
+  function raise($exception) {
+    if (class_exists($exception)) {
+      $exception = new $exception();
+      $message = get_class($exception);
+    } else {
+      $message = $exception;
+      $exception = new ApplicationError($message);
+    }
+
     if (is_object($GLOBALS['logger'])) {
       log_error("$message");
     }
-    throw new ApplicationError($message);
+    throw $exception;
   }
 
 ?>

@@ -10,7 +10,7 @@
   }
 
   function humanize($text) {
-    return ucfirst(str_replace('_', ' ', $text));
+    return ucfirst(str_replace('_', ' ', underscore($text)));
   }
 
   function underscore($text) {
