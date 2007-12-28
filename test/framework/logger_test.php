@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-   class LoggerTest extends TestCase
-   {
-   }
+  class LoggerTest extends TestCase
+  {
+  }
 
 ?>

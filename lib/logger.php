@@ -2,10 +2,11 @@
 <?
 
   # Log levels
-  define('LOG_INFO',  0);
-  define('LOG_WARN',  1);
-  define('LOG_ERROR', 2);
-  define('LOG_DEBUG', 3);
+  define('LOG_DISABLED', -1);
+  define('LOG_ERROR',    0);
+  define('LOG_WARN',     1);
+  define('LOG_INFO',     2);
+  define('LOG_DEBUG',    3);
 
   # Create the global logger instance
   $logger = new Logger(
@@ -39,15 +40,23 @@
       }
     }
 
-    function log($msg, $level=LOG_INFO) {
-      if (!is_resource($this->buffer)) {
-        if (($this->buffer = fopen($this->file, 'a')) === false) {
-          $GLOBALS['logger'] = null;
-          raise("Couldn't open logfile {$this->file}");
-        }
-      }
+    function get_level() {
+      return $this->level;
+    }
 
+    function set_level($value) {
+      $this->level = intval($value);
+    }
+
+    function log($msg, $level=LOG_INFO) {
       if ($level <= $this->level) {
+        if (!is_resource($this->buffer)) {
+          if (($this->buffer = fopen($this->file, 'a')) === false) {
+            $GLOBALS['logger'] = null;
+            raise("Couldn't open logfile {$this->file}");
+          }
+        }
+
         if (is_resource(STDERR)) {
           print "$msg\n";
         }

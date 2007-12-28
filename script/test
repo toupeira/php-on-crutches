@@ -4,13 +4,13 @@
   require dirname(__FILE__).'/../config/environment.php';
   require LIB.'tests.php';
 
+  $logger->level = LOG_DISABLED;
+
   $tests = GLOB(TEST.'*');
   $tests = array_filter($tests, is_dir);
   $tests = array_map(basename, $tests);
 
-  if (in_array($argv[1], $tests)) {
-    $dirs = $argv[1];
-  } elseif (empty($argv[1])) {
+  if (empty($argv[1])) {
     $dirs = $tests;
     foreach ($dirs as $i => $dir) {
       if ($dir == 'framework') {
@@ -18,10 +18,15 @@
       }
     }
   } else {
-    print "Usage: $argv[0] [";
-    print implode("|", $tests);
-    print "]\n";
-    exit(255);
+    $dirs = array_slice($argv, 1);
+    foreach ($dirs as $dir) {
+      if (!in_array($dir, $tests)) {
+        print "Usage: $argv[0] [";
+        print implode("|", $tests);
+        print "]\n";
+        exit(255);
+      }
+    }
   }
 
   print "\n";

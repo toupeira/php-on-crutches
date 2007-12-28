@@ -11,7 +11,7 @@
 
     foreach (explode("\n", `find "$dir" -type f -name '*.php'`) as $file) {
       if (is_file($file)) {
-         $group->addTestFile($file);
+        $group->addTestFile($file);
       }
     }
 
@@ -19,12 +19,17 @@
       print "Running ".basename($dir)." tests...";
       $reporter = any($reporter, new Reporter());
       $group->run($reporter);
+      print "\n";
     }
   }
 
   class TestCase extends UnitTestCase
   {
-    function assertInArray($member, $array, $message = "%s") {
+    function assertMatch($pattern, $subject, $message="%s") {
+      return $this->assertWantedPattern($pattern, $subject, $message);
+    }
+
+    function assertInArray($member, $array, $message="%s") {
       $dumper = &new SimpleDumper();
       $message = sprintf(
         $message,
@@ -35,7 +40,7 @@
         in_array($member, $array), $message);
     }
 
-    function assertCount($count, $value, $message = "%s") {
+    function assertCount($count, $value, $message="%s") {
       $dumper = &new SimpleDumper();
       $message = sprintf(
         $message,
@@ -46,7 +51,7 @@
         $count, count($value), $message);
     }
 
-    function assertError($object, $key, $message="%s") {
+    function assertHasError($object, $key, $message="%s") {
       $dumper = &new SimpleDumper();
       $message = sprintf(
         $message,
@@ -73,16 +78,6 @@
     function paintError($message) {
       print "E\n";
       parent::paintError($message);
-    }
-
-    function paintGroupEnd($test_name) {
-      parent::paintGroupEnd($test_name);
-      print "\n";
-    }
-
-    function paintCaseStart($test_name) {
-      print "$test_name:\n";
-      parent::paintCaseStart($test_name);
     }
   }
 

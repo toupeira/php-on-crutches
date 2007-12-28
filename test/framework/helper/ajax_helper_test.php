@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-   class AjaxHelperTest extends TestCase
-   {
-   }
+  class AjaxHelperTest extends TestCase
+  {
+  }
 
 ?>

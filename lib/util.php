@@ -5,13 +5,21 @@
   {
     function __get($key) {
       $getter = "get_$key";
-      return $this->$getter();
+      if (method_exists($this, $getter)) {
+        return $this->$getter();
+      } else {
+        raise("Can't get property '$key'");
+      }
     }
 
     function __set($key, $value) {
       $setter = "set_$key";
-      $this->$setter($value);
-      return $this;
+      if (method_exists($this, $setter)) {
+        $this->$setter($value);
+        return $this;
+      } else {
+        raise("Can't set property '$key'");
+      }
     }
   }
 
@@ -23,53 +31,6 @@
     }
   }
 
-  function array_delete(&$array, $keys) {
-    if (is_array($keys)) {
-      foreach ($keys as $key) {
-        if ($value = $array[$key]) {
-          $values[] = $array[$key];
-          unset($array[$key]);
-        }
-      }
-
-      return $values;
-    } else {
-      if ($value = $array[$keys]) {
-        unset($array[$keys]);
-        return $value;
-      }
-
-      return null;
-    }
-  }
-
-  function array_get($array, $key) {
-    return $array[$key];
-  }
-
-  function array_find($array, $key, $value) {
-    foreach ($array as $object) {
-      if ($object->$key == $value) {
-        return $object;
-      }
-    }
-  }
-
-  function array_pluck($array, $key, $hash=false) {
-    $values = array();
-    foreach ($array as $object) {
-      if ($value = $object->$key) {
-        if ($hash) {
-          $values[$value] = $value;
-        } else {
-          $values[] = $value;
-        }
-      }
-    }
-
-    return $values;
-  }
-
   function run($command) {
     log_debug("Running '$command'");
     exec($command, $output, $code);
@@ -77,7 +38,7 @@
   }
 
   function tempfile() {
-    $file = tempnam(sys_get_temp_dir(), 'phpcrutch.');
+    $file = tempnam(sys_get_temp_dir(), config('application').'.');
     register_shutdown_function(rm_f, $file);
     return $file;
   }
@@ -92,7 +53,9 @@
   class MissingTemplate extends ApplicationError {};
 
   function raise($exception) {
-    if (class_exists($exception)) {
+    if ($exception instanceof Exception) {
+      $message = get_class($exception);
+    } elseif (class_exists($exception)) {
       $exception = new $exception();
       $message = get_class($exception);
     } else {

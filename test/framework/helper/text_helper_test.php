@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-   class TextHelperTest extends TestCase
-   {
-   }
+  class TextHelperTest extends TestCase
+  {
+  }
 
 ?>

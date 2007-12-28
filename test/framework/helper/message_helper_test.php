@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-   class MessageHelperTest extends TestCase
-   {
-   }
+  class MessageHelperTest extends TestCase
+  {
+  }
 
 ?>

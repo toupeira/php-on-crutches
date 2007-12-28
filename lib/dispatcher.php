@@ -59,13 +59,6 @@
       }
     }
 
-    # Dump an exception
-    static function dump_error($exception) {
-      print "<h1>".humanize(get_class($exception))."</h1>".N;
-      print "<p>".$exception->getMessage()."</p>".N;
-      print "<pre>".$exception->getTraceAsString()."</pre>";
-    }
-
     # Extract controller, action and arguments from a path
     static function recognize($path) {
       $args = explode('/', $path);
@@ -121,6 +114,13 @@
           log_debug("  Parameters: ".str_replace("\n", "\n  ", var_export($_REQUEST, true)));
         }
       }
+    }
+
+    # Dump an exception
+    static function dump_error($exception) {
+      print "<h1>".humanize(get_class($exception))."</h1>".N;
+      print "<p>".$exception->getMessage()."</p>".N;
+      print "<pre>".$exception->getTraceAsString()."</pre>";
     }
   }
 

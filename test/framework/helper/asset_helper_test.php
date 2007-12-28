@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-   class AssetHelperTest extends TestCase
-   {
-   }
+  class AssetHelperTest extends TestCase
+  {
+  }
 
 ?>
