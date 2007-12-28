@@ -6,8 +6,13 @@
 
   function run_tests($dir, $message=null, $reporter=null) {
     $group = new GroupTest($message);
-    foreach (glob(TEST.basename($dir)."/*.php") as $file) {
-      $group->addTestFile($file);
+    $name = basename($dir);
+    $dir = TEST.$name;
+
+    foreach (explode("\n", `find "$dir" -type f -name '*.php'`) as $file) {
+      if (is_file($file)) {
+         $group->addTestFile($file);
+      }
     }
 
     if ($group->getSize() > 0) {
@@ -40,10 +45,7 @@
       return $this->assertEqual(
         $count, count($value), $message);
     }
-  }
 
-  class ModelTest extends TestCase
-  {
     function assertError($object, $key, $message="%s") {
       $dumper = &new SimpleDumper();
       $message = sprintf(
@@ -54,22 +56,6 @@
       return $this->assertInArray(
         $key, $object->errors, $message);
     }
-  }
-
-  class ControllerTest extends TestCase
-  {
-  }
-
-  class HelperTest extends TestCase
-  {
-  }
-
-  class ViewTest extends TestCase
-  {
-  }
-
-  class IntegrationTest extends TestCase
-  {
   }
 
   class Reporter extends TextReporter
