@@ -20,7 +20,7 @@
   } else {
     $dirs = array_slice($argv, 1);
     foreach ($dirs as $dir) {
-      if (!in_array($dir, $tests)) {
+      if (!in_array($dir, $tests) and !is_file($dir)) {
         print "Usage: $argv[0] [";
         print implode("|", $tests);
         print "]\n";

@@ -4,19 +4,26 @@
   require_once 'simpletest/unit_tester.php';
   require_once 'simpletest/reporter.php';
 
-  function run_tests($dir, $message=null, $reporter=null) {
+  function run_tests($path, $message=null, $reporter=null) {
     $group = new GroupTest($message);
-    $name = basename($dir);
-    $dir = TEST.$name;
+    $name = basename($path);
 
-    foreach (explode("\n", `find "$dir" -type f -name '*.php'`) as $file) {
-      if (is_file($file)) {
-        $group->addTestFile($file);
+    if (is_file($path)) {
+      $message = "Running $path...";
+      $group->addTestFile($path);
+    } else {
+      $message = "Running $name tests...";
+
+      $dir = TEST.$name;
+      foreach (explode("\n", `find "$dir" -type f -name '*.php'`) as $file) {
+        if (is_file($file)) {
+          $group->addTestFile($file);
+        }
       }
     }
 
     if ($group->getSize() > 0) {
-      print "Running ".basename($dir)." tests...";
+      print $message;
       $reporter = any($reporter, new Reporter());
       $group->run($reporter);
       print "\n";
