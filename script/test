@@ -1,8 +1,7 @@
 #!/usr/bin/php
 <? # vim: ft=php
 
-  require dirname(dirname(getcwd().'/'.$argv[0])).'/config/environment.php';
-  #require dirname(__FILE__).'/../config/environment.php';
+  require dirname(__FILE__).'/../config/environment.php';
   require LIB.'tests.php';
 
   $tests = array(
@@ -11,6 +10,10 @@
     'model',
     'view',
   );
+
+  if (is_dir(TEST.'framework')) {
+    array_push($tests, 'framework');
+  }
 
   if (in_array($argv[1], $tests)) {
     $dirs = $argv[1];
@@ -24,6 +27,6 @@
   }
 
   print "\n";
-  array_map(run_tests, $dirs);
+  array_map(run_tests, (array) $dirs);
 
 ?>
