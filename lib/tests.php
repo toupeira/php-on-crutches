@@ -88,15 +88,15 @@
   {
   }
 
-  class HelperTest extends ControllerTest
+  class HelperTest extends TestCase
   {
   }
 
-  class ViewTest extends ControllerTest
+  class ViewTest extends TestCase
   {
   }
 
-  class IntegrationTest extends ControllerTest
+  class IntegrationTest extends TestCase
   {
   }
 
