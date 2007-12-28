@@ -17,34 +17,6 @@
     }
   }
 
-  class Reporter extends TextReporter
-  {
-    function paintPass($message) {
-      print ".";
-      parent::paintPass($message);
-    }
-
-    function paintFail($message) {
-      print "F\n";
-      parent::paintFail($message);
-    }
-
-    function paintError($message) {
-      print "E\n";
-      parent::paintError($message);
-    }
-
-    function paintGroupEnd($test_name) {
-      parent::paintGroupEnd($test_name);
-      print "\n";
-    }
-
-    function paintCaseStart($test_name) {
-      print "$test_name:\n";
-      parent::paintCaseStart($test_name);
-    }
-  }
-
   class TestCase extends UnitTestCase
   {
     function assertInArray($member, $array, $message = "%s") {
@@ -98,6 +70,34 @@
 
   class IntegrationTest extends TestCase
   {
+  }
+
+  class Reporter extends TextReporter
+  {
+    function paintPass($message) {
+      print ".";
+      parent::paintPass($message);
+    }
+
+    function paintFail($message) {
+      print "F\n";
+      parent::paintFail($message);
+    }
+
+    function paintError($message) {
+      print "E\n";
+      parent::paintError($message);
+    }
+
+    function paintGroupEnd($test_name) {
+      parent::paintGroupEnd($test_name);
+      print "\n";
+    }
+
+    function paintCaseStart($test_name) {
+      print "$test_name:\n";
+      parent::paintCaseStart($test_name);
+    }
   }
 
 ?>
