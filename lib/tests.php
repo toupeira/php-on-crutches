@@ -11,7 +11,7 @@
     }
 
     if ($group->getSize() > 0) {
-      print "Running ".basename($dir)." tests";
+      print "Running ".basename($dir)." tests...";
       $reporter = any($reporter, new Reporter());
       $group->run($reporter);
     }
