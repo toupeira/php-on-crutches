@@ -103,8 +103,9 @@
       }
 
       # Call before filters
-      $this->call_if_defined("before");
-      $this->call_if_defined("before_$action");
+      if (!$this->call_if_defined("global_before")) return;
+      if (!$this->call_if_defined("before")) return;
+      if (!$this->call_if_defined("before_$action")) return;
 
       # Call the action itself if it's defined
       if (in_array($action, $this->actions)) {
@@ -112,18 +113,16 @@
       }
 
       # Call after filters
-      $this->call_if_defined("after_$action");
-      $this->call_if_defined("after");
+      if (!$this->call_if_defined("after_$action")) return;
+      if (!$this->call_if_defined("after")) return;
+      if (!$this->call_if_defined("global_after")) return;
 
-      # Send all headers
-      $this->send_headers();
-
-      # Render the action template if the action didn't set any output already
+      # Render the action template if the action didn't generate any output
       if ($this->output === null) {
         $this->render($action);
       }
 
-      return $this->output;
+      return true;
     }
 
     # Send the configured headers
@@ -294,11 +293,32 @@
       return $_is_xhr;
     }
 
+    # Check if SSL is enabled
+    protected function is_ssl() {
+      global $_is_ssl;
+      if ($_is_ssl === null) {
+        $_is_ssl = ($_SERVER['HTTPS'] != '' and $_SERVER['HTTPS'] != 'off');
+      }
+      return $_is_ssl;
+    }
+
+    # Redirect to a SSL connection if necessary
+    protected function require_ssl() {
+      if ($this->is_ssl()) {
+        return true;
+      } else {
+        $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");
+        return false;
+      }
+    }
+
     # Call a function if it is defined
     protected function call_if_defined($method) {
       if (in_array($method, $this->methods)) {
-        return $this->$method();
+        return $this->$method() !== false;
       }
+
+      return true;
     }
   }
 

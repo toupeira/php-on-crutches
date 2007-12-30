@@ -36,7 +36,9 @@
         self::log_request($controller, $action, $args);
 
         # Perform the action
-        return $controller->perform($action, $args);
+        $controller->perform($action, $args);
+        $controller->send_headers();
+        return $controller->output;
 
       } catch (MissingTemplate $e) {
         # Catch 404 errors
