@@ -4,7 +4,7 @@
   class UtilTest extends TestCase
   {
     function test_object() {
-      $test = $this->test = new TestObject();
+      $test = $this->test = new UtilTestObject();
       $this->assertEqual('readonly', $test->readonly);
       $this->assertEqual('readwrite', $test->readwrite);
       $this->assertEqual('shadowed', $test->shadowed);
@@ -66,7 +66,7 @@
     }
   }
 
-  class TestObject extends Object
+  class UtilTestObject extends Object
   {
     private $private = 'private';
     private $readonly = 'readonly';

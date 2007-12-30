@@ -26,7 +26,7 @@
   }
 
   function array_find($array, $key, $value) {
-    foreach ($array as $object) {
+    foreach ((array) $array as $object) {
       if ($object->$key == $value) {
         return $object;
       }
@@ -35,7 +35,7 @@
 
   function array_pluck($array, $key, $hash=false) {
     $values = array();
-    foreach ($array as $object) {
+    foreach ((array) $array as $object) {
       if ($value = $object->$key) {
         if ($hash) {
           $values[$value] = $value;
