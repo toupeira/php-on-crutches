@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-  require_once CONFIG.'config.php';
-  @include_once CONFIG.config('application').'.php';
+  require CONFIG.'config.php';
+  @include CONFIG.config('application').'.php';
 
   $_CONFIG = array_merge($_CONFIG, (array) $_APP_CONFIG);
 

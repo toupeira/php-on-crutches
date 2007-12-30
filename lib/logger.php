@@ -9,15 +9,20 @@
   define('LOG_DEBUG',    3);
 
   # Create the global logger instance
+  if (is_resource(STDIN)) {
+    $log_file = STDERR;
+  } else {
+    $log_file = any(config('log_file'), LOG.'application.log');
+  }
+
   $logger = new Logger(
-    any(config('log_file'), LOG.'application.log'),
-    any(config('log_level'), LOG_INFO)
+    $log_file, any(config('log_level'), LOG_INFO)
   );
 
   # Wrappers for all log levels
-  function log_info($msg) { return $GLOBALS['logger']->log($msg, LOG_INFO); }
-  function log_warn($msg) { return $GLOBALS['logger']->log($msg, LOG_WARN); }
   function log_error($msg) { return $GLOBALS['logger']->log($msg, LOG_ERROR); }
+  function log_warn($msg) { return $GLOBALS['logger']->log($msg, LOG_WARN); }
+  function log_info($msg) { return $GLOBALS['logger']->log($msg, LOG_INFO); }
   function log_debug($msg) { return $GLOBALS['logger']->log($msg, LOG_DEBUG); }
 
   # Dump values to logfile
@@ -25,13 +30,20 @@
 
   class Logger extends Object
   {
-    private $level;
     private $file;
+    private $level;
     private $buffer;
 
-    function __construct($file, $level) {
-      $this->file = $file;
-      $this->level = is_numeric($level) ? $level : config('log_level');
+    function __construct($file=STDERR, $level=LOG_INFO) {
+      if (is_resource($file)) {
+        $this->buffer = $file;
+      } else {
+        $this->file = $file;
+      }
+
+      if (is_numeric($level)) {
+        $this->level = $level;
+      }
     }
 
     function __destruct() {
@@ -40,25 +52,29 @@
       }
     }
 
+    function get_file() {
+      return $this->file;
+    }
+
+    function set_file($file) {
+      $this->__destruct();
+      $this->file = $file;
+    }
+
     function get_level() {
       return $this->level;
     }
 
-    function set_level($value) {
-      $this->level = intval($value);
+    function set_level($level) {
+      $this->level = intval($level);
     }
 
     function log($msg, $level=LOG_INFO) {
       if ($level <= $this->level) {
         if (!is_resource($this->buffer)) {
           if (($this->buffer = fopen($this->file, 'a')) === false) {
-            $GLOBALS['logger'] = null;
             raise("Couldn't open logfile {$this->file}");
           }
-        }
-
-        if (is_resource(STDERR)) {
-          print "$msg\n";
         }
 
         if (fwrite($this->buffer, "$msg\n") === false) {

@@ -31,7 +31,7 @@
   # Load standard helpers
   $helpers = glob(LIB.'helpers/*.php');
   foreach ($helpers as $helper) {
-    require_once $helper;
+    require $helper;
   }
 
   # Load application helper
@@ -41,14 +41,14 @@
   function __autoload($class) {
     $class = underscore($class);
     if (is_file($file = LIB."$class.php")) {
-      require_once $file;
+      require $file;
     } elseif (is_file($file = MODELS."$class.php")) {
-      require_once $file;
+      require $file;
     } elseif (substr($class, -10) == 'controller') {
       if (is_file($file = CONTROLLERS."$class.php")) {
-        require_once $file;
+        require $file;
       } elseif (is_file($file = LIB."controllers/$class.php")) {
-        require_once $file;
+        require $file;
       }
     }
   }

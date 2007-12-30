@@ -8,7 +8,7 @@
       if (method_exists($this, $getter)) {
         return $this->$getter();
       } else {
-        raise("Can't get property '$key'");
+        raise("Can't access private property '$key'");
       }
     }
 
@@ -18,7 +18,7 @@
         $this->$setter($value);
         return $this;
       } else {
-        raise("Can't set property '$key'");
+        raise("Can't change private property '$key'");
       }
     }
   }

@@ -18,14 +18,14 @@
   }
 
   function truncate($text, $length=40) {
-    if (count($text) > $length) {
-      return substr($text, 0, 40)."...";
+    if (strlen($text) > $length) {
+      return substr($text, 0, $length)."...";
     } else {
       return $text;
     }
   }
 
-  function br2ln($text) {
+  function br2nl($text) {
     return str_replace("<br />", "\n", $text);
   }
 

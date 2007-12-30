@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-  require_once 'simpletest/unit_tester.php';
-  require_once 'simpletest/reporter.php';
+  require 'simpletest/unit_tester.php';
+  require 'simpletest/reporter.php';
 
   function run_tests($path, $message=null, $reporter=null) {
     $group = new GroupTest($message);
@@ -67,6 +67,27 @@
         $dumper->describeValue($key) . "]");
       return $this->assertInArray(
         $key, $object->errors, $message);
+    }
+
+    function assertRaise($code, $class=ApplicationError, $message="%s") {
+      $raised = false;
+      try {
+        eval("$code;");
+      } catch (ApplicationError $e) {
+        if ($e instanceof $class) {
+          $raised = true;
+        }
+      }
+      $this->assertTrue($raised, "expected code to raise $class");
+      return $e;
+    }
+
+    function assertFileContents($text, $file, $message="%s") {
+      return $this->assertEqual($text, trim(file_get_contents($file)), $message);
+    }
+
+    function assertFileMatch($pattern, $file, $message="%s") {
+      return $this->assertWantedPattern($pattern, file_get_contents($file), $message);
     }
   }
 

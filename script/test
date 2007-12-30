@@ -11,16 +11,16 @@
   $tests = array_map(basename, $tests);
 
   if (empty($argv[1])) {
-    $dirs = $tests;
-    foreach ($dirs as $i => $dir) {
-      if ($dir == 'framework') {
-         unset($dirs[$i]);
+    $paths = $tests;
+    foreach ($paths as $i => $path) {
+      if ($path == 'framework') {
+         unset($paths[$i]);
       }
     }
   } else {
-    $dirs = array_slice($argv, 1);
-    foreach ($dirs as $dir) {
-      if (!in_array($dir, $tests) and !is_file($dir)) {
+    $paths = array_slice($argv, 1);
+    foreach ($paths as $path) {
+      if (!in_array($path, $tests) and !is_file($path)) {
         print "Usage: $argv[0] [";
         print implode("|", $tests);
         print "]\n";
@@ -30,6 +30,6 @@
   }
 
   print "\n";
-  array_map(run_tests, (array) $dirs);
+  array_map(run_tests, array_unique((array) $paths));
 
 ?>

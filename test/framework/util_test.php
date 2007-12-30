@@ -4,18 +4,13 @@
   class UtilTest extends TestCase
   {
     function test_object() {
-      $test = new TestObject();
+      $test = $this->test = new TestObject();
       $this->assertEqual('readonly', $test->readonly);
       $this->assertEqual('readwrite', $test->readwrite);
       $this->assertEqual('shadowed', $test->shadowed);
 
-      $failed = false;
-      try {
-        $test->readonly = 'foo';
-      } catch (ApplicationError $e) {
-        $failed = true;
-      }
-      $this->assertTrue($failed);
+      $this->assertRaise('$this->test->private');
+      $this->assertRaise('$this->test->readonly = "foo"');
 
       $test->readwrite = 'foo';
       $this->assertEqual('foo', $test->readwrite);
@@ -48,56 +43,32 @@
       $this->assertFalse(is_file($file));
     }
 
-    function test_raise_with_message() {
-      $raised = false;
-
-      try {
-        raise('test');
-      } catch (Exception $e) {
-        $raised = true;
-        $this->assertIsA($e, ApplicationError);
-        $this->assertEqual('test', $e->getMessage());
-      }
-
-      $this->assertTrue($raised);
-    }
-
-    function test_raise_with_exception() {
-      $raised = false;
-
-      try {
-        raise(new ApplicationError('test'));
-      } catch (Exception $e) {
-        $raised = true;
-        $this->assertIsA($e, ApplicationError);
-        $this->assertEqual('test', $e->getMessage());
-      }
-
-      $this->assertTrue($raised);
-    }
-
     function test_exceptions() {
       $this->assertTrue(class_exists(ApplicationError));
       $this->assertTrue(class_exists(MissingTemplate));
     }
 
+    function test_raise_with_message() {
+      $e = $this->assertRaise('raise("foo")');
+      $this->assertEqual('foo', $e->getMessage());
+    }
+
+    function test_raise_with_exception() {
+      $e = $this->assertRaise('raise(new MissingTemplate("bar"))');
+      $this->assertIsA($e, MissingTemplate);
+      $this->assertEqual('bar', $e->getMessage());
+    }
+
     function test_raise_with_class() {
-      $raised = false;
-
-      try {
-        raise(MissingTemplate);
-      } catch (Exception $e) {
-        $raised = true;
-        $this->assertIsA($e, MissingTemplate);
-        $this->assertEqual('', $e->getMessage());
-      }
-
-      $this->assertTrue($raised);
+      $e = $this->assertRaise('raise(MissingTemplate)');
+      $this->assertIsA($e, MissingTemplate);
+      $this->assertEqual('', $e->getMessage());
     }
   }
 
   class TestObject extends Object
   {
+    private $private = 'private';
     private $readonly = 'readonly';
     private $readwrite = 'readwrite';
     public $shadowed = 'shadowed';
