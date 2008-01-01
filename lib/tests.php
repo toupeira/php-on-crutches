@@ -9,10 +9,10 @@
     $name = basename($path);
 
     if (is_file($path)) {
-      $message = "Running $path...";
+      $message = "Testing $path...";
       $group->addTestFile($path);
     } else {
-      $message = "Running $name tests...";
+      $message = "Testing $name...";
 
       $dir = TEST.$name;
       foreach (explode("\n", `find "$dir" -type f -name '*.php'`) as $file) {

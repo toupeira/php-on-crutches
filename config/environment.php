@@ -12,6 +12,7 @@
   define('CONFIG',       ROOT.'config/');
   define('LOG',          ROOT.'log/');
   define('TEST',         ROOT.'test/');
+  define('FIXTURES',     TEST.'fixtures/');
 
   # Application paths
   define('CONTROLLERS',  APP.'controllers/');
