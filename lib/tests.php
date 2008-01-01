@@ -4,6 +4,8 @@
   require 'simpletest/unit_tester.php';
   require 'simpletest/reporter.php';
 
+  @include TEST.'test_helper.php';
+
   function run_tests($path, $message=null, $reporter=null) {
     $group = new GroupTest($message);
     $name = basename($path);
