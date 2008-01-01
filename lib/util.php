@@ -57,6 +57,15 @@
   }
 
   function run($command) {
+    $args = func_get_args();
+    $command = array_shift($args);
+
+    if ($args) {
+      $args = array_map(escapeshellarg, $args);
+      array_unshift($args, $command);
+      $command = call_user_func_array(sprintf, $args);
+    }
+
     log_debug("Running '$command'");
     exec($command, $output, $code);
     return ($code === 0);

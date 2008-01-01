@@ -9,14 +9,11 @@
   $tests = GLOB(TEST.'*');
   $tests = array_filter($tests, is_dir);
   $tests = array_map(basename, $tests);
+  array_remove($tests, 'fixtures');
 
   if (empty($argv[1])) {
     $paths = $tests;
-    foreach ($paths as $i => $path) {
-      if ($path == 'framework') {
-         unset($paths[$i]);
-      }
-    }
+    array_remove($paths, 'framework');
   } else {
     $paths = array_slice($argv, 1);
     foreach ($paths as $path) {

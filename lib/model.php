@@ -100,7 +100,6 @@
     }
 
     # Generate cached property value with PHP code
-
     protected function cache($key, $code) {
       if (!isset($this->cache[$key])) {
         $this->cache[$key] = eval("return $code;");
