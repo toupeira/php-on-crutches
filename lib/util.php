@@ -1,8 +1,25 @@
 <?# $Id$ ?>
 <?
 
+  # Auto-load libraries, models and controllers
+  function __autoload($class) {
+    $class = underscore($class);
+    if (is_file($file = LIB."$class.php")) {
+      require $file;
+    } elseif (is_file($file = MODELS."$class.php")) {
+      require $file;
+    } elseif (substr($class, -10) == 'controller') {
+      if (is_file($file = CONTROLLERS."$class.php")) {
+        require $file;
+      } elseif (is_file($file = LIB."controllers/$class.php")) {
+        require $file;
+      }
+    }
+  }
+
   class Object
   {
+    # Call getters
     function __get($key) {
       $getter = "get_$key";
       if (method_exists($this, $getter)) {
@@ -12,6 +29,7 @@
       }
     }
 
+    # Call setters
     function __set($key, $value) {
       $setter = "set_$key";
       if (method_exists($this, $setter)) {
@@ -19,6 +37,13 @@
         return $this;
       } else {
         raise("Can't change private property '$key'");
+      }
+    }
+
+    # Call a function if it is defined
+    function call_if_defined($method) {
+      if (method_exists($this, $method)) {
+        return $this->$method();
       }
     }
   }
@@ -67,6 +92,12 @@
       log_error("$message");
     }
     throw $exception;
+  }
+
+  function dump_error($exception) {
+    return "<h1>".humanize(get_class($exception))."</h1>".N
+         . "<p>".$exception->getMessage()."</p>".N
+         . "<pre>".$exception->getTraceAsString()."</pre>";
   }
 
 ?>

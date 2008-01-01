@@ -3,36 +3,43 @@
 
   # Log levels
   define('LOG_DISABLED', -1);
-  define('LOG_ERROR',    0);
-  define('LOG_WARN',     1);
-  define('LOG_INFO',     2);
-  define('LOG_DEBUG',    3);
+  define('LOG_ERROR',    LOG_ERR);
+  define('LOG_WARN',     LOG_WARNING);
 
-  # Create the global logger instance
-  if (is_resource(STDIN)) {
-    $log_file = STDERR;
-  } else {
-    $log_file = any(config('log_file'), LOG.'application.log');
-  }
-
-  $logger = new Logger(
-    $log_file, any(config('log_level'), LOG_INFO)
-  );
-
-  # Wrappers for all log levels
-  function log_error($msg) { return $GLOBALS['logger']->log($msg, LOG_ERROR); }
-  function log_warn($msg) { return $GLOBALS['logger']->log($msg, LOG_WARN); }
-  function log_info($msg) { return $GLOBALS['logger']->log($msg, LOG_INFO); }
+  # A few wrappers
+  function log_error($msg) { return $GLOBALS['logger']->log($msg, LOG_ERR); }
+  function log_warn($msg)  { return $GLOBALS['logger']->log($msg, LOG_WARNING); }
+  function log_info($msg)  { return $GLOBALS['logger']->log($msg, LOG_INFO); }
   function log_debug($msg) { return $GLOBALS['logger']->log($msg, LOG_DEBUG); }
-
-  # Dump values to logfile
-  function log_dump($data) { return $GLOBALS['logger']->log(var_export($data, true), LOG_DEBUG); }
+  function log_dump($data) { return log_debug(var_export($data, true)); }
 
   class Logger extends Object
   {
     private $file;
     private $level;
     private $buffer;
+
+    static function init() {
+      # Configure error reporting
+      if (config('debug') or is_resource(STDIN)) {
+        error_reporting(E_ALL ^ E_NOTICE);
+        ini_set('display_errors', 1);
+      } else {
+        error_reporting(0);
+        ini_set('display_errors', 0);
+      }
+
+      # Create the global logger instance
+      if (is_resource(STDIN)) {
+        $log_file = STDERR;
+      } else {
+        $log_file = any(config('log_file'), LOG.'application.log');
+      }
+
+      $GLOBALS['logger'] = new Logger(
+        $log_file, any(config('log_level'), LOG_INFO)
+      );
+    }
 
     function __construct($file=STDERR, $level=LOG_INFO) {
       if (is_resource($file)) {

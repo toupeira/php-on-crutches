@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-  class TestController extends ApplicationController {};
+  class DispatcherTestController extends ApplicationController {};
 
   class DispatcherTest extends TestCase
   {
@@ -9,8 +9,8 @@
     }
 
     function test_recognize() {
-      list($controller, $action, $args) = Dispatcher::recognize('test/show/foo');
-      $this->assertIsA($controller, TestController);
+      list($controller, $action, $args) = Dispatcher::recognize('dispatcher_test/show/foo');
+      $this->assertIsA($controller, DispatcherTestController);
       $this->assertEqual('show', $action);
       $this->assertEqual(array('foo'), $args);
 
@@ -19,8 +19,8 @@
     }
 
     function test_recognize_without_action() {
-      list($controller, $action, $args) = Dispatcher::recognize('test');
-      $this->assertIsA($controller, TestController);
+      list($controller, $action, $args) = Dispatcher::recognize('dispatcher_test');
+      $this->assertIsA($controller, DispatcherTestController);
       $this->assertEqual('index', $action);
     }
 
@@ -35,16 +35,6 @@
     }
 
     function test_log_request() {
-    }
-
-    function test_dump_error() {
-      ob_start();
-      $output = Dispatcher::dump_error(new MissingTemplate('foo'));
-      $output = ob_get_clean();
-
-      $this->assertMatch(
-        "#^<h1>Missing template</h1>\n<p>foo</p>\n<pre>.*#",
-        $output);
     }
   }
 

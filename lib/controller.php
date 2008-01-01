@@ -3,26 +3,25 @@
 
   abstract class Controller extends Object
   {
+    public $require_post;
+    public $require_ajax;
+    public $require_ssl;
+
     protected $name;
+    protected $view;
+    protected $output;
 
     protected $params;
+    protected $headers;
     protected $cookies;
     protected $files;
 
     protected $methods;
+    protected $actions;
+    protected $errors;
+    protected $msg;
 
-    protected $output;
-    protected $layout;
-
-    protected $verify_post;
-    protected $verify_xhr;
-
-    protected $headers = array();
-    protected $actions = array();
-    protected $data = array();
-    protected $errors = array();
-    protected $msg = array();
-
+    # Find a template path for the given action
     static function find_template($action) {
       foreach (array(VIEWS, LIB.'views') as $dir) {
         if (is_file($template = "$dir/$action.thtml")) {
@@ -34,7 +33,7 @@
     }
 
     function __construct() {
-      $this->name = strtolower(substr(get_class($this), 0, -10));
+      $this->name = underscore(substr(get_class($this), 0, -10));
 
       # Load controller helper, ignore errors
       @include_once HELPERS.$this->name.'.php';
@@ -50,6 +49,9 @@
         session_unregister('msg');
       }
 
+      # Create the view
+      $this->view = new View();
+
       # Standard variables for the view
       $this->set('controller', $this->name);
       $this->set('params', &$this->params);
@@ -57,88 +59,164 @@
       $this->set('msg', &$this->msg);
 
       # Collect all methods defined in this controller
-      $this->methods = array_diff(
+      $this->actions = array_diff(
         get_class_methods($this),
         get_class_methods(Controller)
       );
 
-      # Collect all public actions
-      foreach ($this->methods as $method) {
-        $reflect = new ReflectionMethod($this, $method);
-        if ($reflect->isPublic() and !$reflect->isConstructor()) {
-          $this->actions[] = $method;
-        }
-      }
+      # Call custom initializer
+      $this->call_if_defined('init');
     }
 
     function get_name() {
-      return $this->name;
+      return (string) $this->name;
+    }
+
+    function get_view() {
+      return $this->view;
     }
 
     function get_output() {
-      return $this->output;
+      return (string) $this->output;
     }
 
-    function perform($action, $args=null) {
-      # Catch invalid action names
-      if (!ctype_alpha($action)
-         or substr($action, 0, 6) == 'before'
-         or substr($action, 0, 5) == 'after') {
-        raise("Invalid action '$action'");
+    function get_params() {
+      return (array) $this->params;
+    }
+
+    function get_headers() {
+      return (array) $this->headers;
+    }
+
+    function get_cookies() {
+      return (array) $this->cookies;
+    }
+
+    function get_files() {
+      return (array) $this->files;
+    }
+
+    function get_actions() {
+      return (array) $this->actions;
+    }
+
+    function get_errors() {
+      return (array) $this->errors;
+    }
+
+    function get_msg() {
+      return (array) $this->msg;
+    }
+
+    # Set a value for the template
+    function set($key, $value) {
+      $this->view->data[$key] = &$value;
+    }
+
+    # Check if this is a POST request
+    function is_post() {
+      return $_SERVER['REQUEST_METHOD'] == 'POST';
+    }
+
+    # Check if this is an Ajax request
+    function is_ajax() {
+      return strstr($_SERVER['HTTP_X_REQUESTED_WITH'], 'XMLHttpRequest');
+    }
+
+    # Check if SSL is enabled
+    function is_ssl() {
+      return $_SERVER['HTTPS'] != '' and $_SERVER['HTTPS'] != 'off';
+    }
+
+    # Check request requirements
+    function is_valid_request($action) {
+      # Check POST and Ajax requirements
+      if (
+        (!$this->is_post() and
+          ($this->require_post === true or
+            in_array($action, (array) $this->require_post))) or
+        (!$this->is_ajax() and
+          ($this->require_ajax === true or
+            in_array($action, (array) $this->require_ajax)))
+      ) {
+        log_debug("Invalid request for this action");
+        if ($action == 'index') {
+          # Redirect to default path if the default action was requested
+          $this->redirect_to(config('default_path'));
+        } else {
+          # Or else try the default action
+          $this->redirect_to('.');
+        }
+        return false;
       }
 
-      # Check if the request is valid for this action
-      if ((!$this->is_post() and in_array($action, (array) $this->verify_post)) or
-         (!$this->is_xhr() and in_array($action, (array) $this->verify_xhr))) {
-        $this->redirect_to('.');
-      }
-
-      $this->set('action', $action);
-
-      # Reset the layout, don't use one for Ajax requests
-      if ($this->is_xhr()) {
-        $this->layout = null;
-      } else {
-        $this->layout = 'application';
-      }
-
-      # Call before filters
-      if (!$this->call_if_defined("global_before")) return;
-      if (!$this->call_if_defined("before")) return;
-      if (!$this->call_if_defined("before_$action")) return;
-
-      # Call the action itself if it's defined
-      if (in_array($action, $this->actions)) {
-        call_user_func_array(array($this, $action), (array) $args);
-      }
-
-      # Call after filters
-      if (!$this->call_if_defined("after_$action")) return;
-      if (!$this->call_if_defined("after")) return;
-      if (!$this->call_if_defined("global_after")) return;
-
-      # Render the action template if the action didn't generate any output
-      if ($this->output === null) {
-        $this->render($action);
+      # Check SSL requirements
+      if (!$this->is_ssl() and ($this->require_ssl === true or
+                                in_array($action, (array) $this->require_ssl))) {
+        $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");
+        return false;
       }
 
       return true;
     }
 
-    # Send the configured headers
-    function send_headers() {
-      foreach ($this->headers as $header => $value) {
-        header("$header: $value");
-      }
-    }
+    # Perform an action
+    function perform($action, $args=null) {
+      try {
+        # Catch invalid action names
+        if (!ctype_alpha($action)
+          or $action == 'init'
+          or substr($action, 0, 6) == 'before'
+          or substr($action, 0, 5) == 'after') {
+          raise("Invalid action '$action'");
+        }
 
-    # Check if a form value has errors
-    function has_errors($key) {
-      if (substr($name, -2) == '[]') {
-        return in_array(substr($key, 0, -2), $this->errors);
-      } else {
-        return in_array($key, $this->errors);
+        if ($this->is_valid_request($action)) {
+          $this->set('action', $action);
+
+          # Reset the layout, don't use one for Ajax requests
+          $this->view->layout = ($this->is_ajax() ? null : 'application');
+
+          # Call before filters
+          $this->call_filter("global_before");
+          $this->call_filter("before");
+          $this->call_filter("before_$action");
+
+          # Call the action itself if it's defined
+          if (in_array($action, $this->actions)) {
+            call_user_func_array(array($this, $action), (array) $args);
+          }
+
+          # Call after filters
+          $this->call_filter("after_$action");
+          $this->call_filter("after");
+          $this->call_filter("global_after");
+
+          # Render the action template if the action didn't generate any output
+          if ($this->output === null) {
+            $this->render($action);
+          }
+        }
+      } catch (MissingTemplate $e) {
+        # Catch 404 errors
+        if (config('debug')) {
+          $this->headers['Status'] = 404;
+          $this->render_text(dump_error($e));
+        } else {
+          $this->rescue_error_in_public($e);
+        }
+      } catch (ApplicationError $e) {
+        # Catch other errors
+        if (config('debug')) {
+          $this->headers['Status'] = 500;
+          $this->render_text(dump_error($e));
+        } else {
+          $this->rescue_error_in_public($e);
+        }
       }
+
+      $this->send_headers();
+      return $output;
     }
 
     # Catches all errors, default behaviour is to render VIEWS/errors/404.thtml or 500.thtml
@@ -151,53 +229,16 @@
         $text = "Application Error";
       }
 
-      header("Status: $code");
+      $this->header['Status'] = $code;
       if ($template = self::find_template("errors/$code")) {
-        $this->layout = null;
-        $this->render($template);
+        $this->render($template, '');
       } else {
         $this->render_text("<h1>$code $text</h1>");
       }
     }
 
-    # Get error messages from template objects
-    private function set_error_messages() {
-      $messages = array();
-      foreach ($this->data as $key => $value) {
-        if ($value instanceof Model) {
-          $messages = array_merge($messages, $value->messages);
-        }
-      }
-
-      if (count($messages) > 1) {
-        $this->msg['error'] = "<ul><li>".implode("</li><li>", $messages)."</li></ul>";
-      } elseif (count($messages) > 0) {
-        $this->msg['error'] = $messages[0];
-      }
-    }
-
-    # Get specified parameters from object
-    protected function params_filter() {
-      $keys = func_get_args();
-      $object = array_shift($keys);
-      if (is_array($data = $this->params[$object])) {
-        $filter = array();
-        foreach ($keys as $key) {
-          $filter[$key] = $data[$key];
-        }
-        return $filter;
-      } else {
-        return null;
-      }
-    }
-
-    # Set a value for the template
-    protected function set($key, $value) {
-      $this->data[$key] = &$value;
-    }
-
     # Render an action
-    protected function render($action) {
+    function render($action, $layout=null) {
       if ($this->output === null) {
         if (is_file($action)) {
           $template = $action;
@@ -208,8 +249,12 @@
         if ($template) {
           # Render the template with the stored data and layout
           $this->set_error_messages();
-          $view = new View($template, $this->data);
-          $this->output = $view->render($this->layout);
+          if (!is_null($layout)) {
+            $this->view->layout = $layout;
+          }
+          $this->view->template = $template;
+          #$this->view = new View($template, $this->data);
+          $this->output = $this->view->render();
         } else {
           raise(MissingTemplate);
         }
@@ -219,28 +264,38 @@
     }
 
     # Render only the given text without layout
-    protected function render_text($text) {
+    function render_text($text) {
       $this->output = $text;
     }
 
     # Redirect to a path
-    protected function redirect_to($path) {
+    function redirect_to($path, $code=302) {
       $url = url_for($path);
 
       # Save messages so they can be displayed in the next request
       $this->set_error_messages();
       $_SESSION['msg'] = $this->msg;
 
+      log_debug("Redirecting to $url...");
+
       if (config('debug_redirects')) {
         $this->render_text("Redirect to ".link_to($url, $url));
       } else {
         $this->headers['Location'] = $url;
+        $this->headers['Status'] = $code;
         $this->render_text(' ');
       }
     }
 
+    # Send the configured headers
+    function send_headers() {
+      foreach ((array) $this->headers as $header => $value) {
+        @header("$header: $value");
+      }
+    }
+
     # Send a file with the appropriate headers
-    protected function send_file($file, $options) {
+    function send_file($file, $options) {
       if (!is_file($file)) {
         raise("File $file not found");
       }
@@ -270,55 +325,41 @@
     }
 
     # Add invalid fields and an error message
-    protected function add_error($keys, $message) {
+    function add_error($keys, $message) {
       $this->errors = array_merge($this->errors, (array) $keys);
       $this->msg['error'] = $message;
     }
 
-    # Check if this is a POST request
-    protected function is_post() {
-      global $_is_post;
-      if ($_is_post === null) {
-        $_is_post = ($_SERVER['REQUEST_METHOD'] == 'POST');
-      }
-      return $_is_post;
-    }
-
-    # Check if this is an Ajax request
-    protected function is_xhr() {
-      global $_is_xhr;
-      if ($_is_xhr === null) {
-        $_is_xhr = (preg_match('/XMLHttpRequest/', $_SERVER['HTTP_X_REQUESTED_WITH']) > 0);
-      }
-      return $_is_xhr;
-    }
-
-    # Check if SSL is enabled
-    protected function is_ssl() {
-      global $_is_ssl;
-      if ($_is_ssl === null) {
-        $_is_ssl = ($_SERVER['HTTPS'] != '' and $_SERVER['HTTPS'] != 'off');
-      }
-      return $_is_ssl;
-    }
-
-    # Redirect to a SSL connection if necessary
-    protected function require_ssl() {
-      if ($this->is_ssl()) {
-        return true;
+    # Check if a form value has errors
+    function has_errors($key) {
+      if (substr($name, -2) == '[]') {
+        return in_array(substr($key, 0, -2), $this->errors);
       } else {
-        $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");
-        return false;
+        return in_array($key, (array) $this->errors);
       }
     }
 
-    # Call a function if it is defined
-    protected function call_if_defined($method) {
-      if (in_array($method, $this->methods)) {
-        return $this->$method() !== false;
+    # Get error messages from template objects
+    function set_error_messages() {
+      $messages = array();
+      foreach ((array) $this->view->data as $key => $value) {
+        if ($value instanceof Model) {
+          $messages = array_merge($messages, $value->messages);
+        }
       }
 
-      return true;
+      if (count($messages) > 1) {
+        $this->msg['error'] = "<ul><li>".implode("</li><li>", $messages)."</li></ul>";
+      } elseif (count($messages) > 0) {
+        $this->msg['error'] = $messages[0];
+      }
+    }
+
+    # Call a filter if it is defined
+    function call_filter($filter) {
+      if ($this->call_if_defined($filter) === false) {
+        raise("Filter '$filter' returned false");
+      }
     }
   }
 

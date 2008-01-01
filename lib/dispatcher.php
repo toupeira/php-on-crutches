@@ -10,55 +10,34 @@
     static public $action;
 
     static function run($path=null) {
-      try {
+      if (empty($path)) {
+        $path = $_GET['path'];
         if (empty($path)) {
-          $path = $_GET['path'];
-          if (empty($path)) {
-            $path = config('default_path');
-          }
-        }
-        unset($_GET['path']);
-
-        self::$path = $path;
-
-        # Detect the relative path used to reach the website
-        log_debug($_SERVER['REQUEST_URI']);
-        if (!self::$prefix) {
-          self::$prefix = preg_replace(
-            "#(index\.php)?(\?[^/]*)?($path)?(\?.*)?$#", '',
-            $_SERVER['REQUEST_URI']
-          );
-        }
-
-        # Detect controller, action and arguments
-        self::log_header();
-        list($controller, $action, $args) = self::recognize($path);
-        self::log_request($controller, $action, $args);
-
-        # Perform the action
-        $controller->perform($action, $args);
-        $controller->send_headers();
-        return $controller->output;
-
-      } catch (MissingTemplate $e) {
-        # Catch 404 errors
-        if (config('debug')) {
-          header("Status: 404");
-          self::dump_error($e);
-        } else {
-          $controller->rescue_error_in_public($e);
-          print $controller->output;
-        }
-      } catch (ApplicationError $e) {
-        # Catch other errors
-        if (config('debug')) {
-          header("Status: 500");
-          self::dump_error($e);
-        } else {
-          $controller->rescue_error_in_public($e);
-          print $controller->output;
+          $path = config('default_path');
         }
       }
+      unset($_GET['path']);
+
+      self::$path = $path;
+
+      # Detect the relative path used to reach the website
+      log_debug($_SERVER['REQUEST_URI']);
+      if (!self::$prefix) {
+        self::$prefix = preg_replace(
+          "#(index\.php)?(\?[^/]*)?($path)?(\?.*)?$#", '',
+          $_SERVER['REQUEST_URI']
+        );
+      }
+
+      # Detect controller, action and arguments
+      self::log_header();
+      list($controller, $action, $args) = self::recognize($path);
+      self::log_request($controller, $action, $args);
+
+      # Perform the action
+      $controller->perform($action, $args);
+
+      return $controller->output;
     }
 
     # Extract controller, action and arguments from a path
@@ -116,13 +95,6 @@
           log_debug("  Parameters: ".str_replace("\n", "\n  ", var_export($_REQUEST, true)));
         }
       }
-    }
-
-    # Dump an exception
-    static function dump_error($exception) {
-      print "<h1>".humanize(get_class($exception))."</h1>".N;
-      print "<p>".$exception->getMessage()."</p>".N;
-      print "<pre>".$exception->getTraceAsString()."</pre>";
     }
   }
 

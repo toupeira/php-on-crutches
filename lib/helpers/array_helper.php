@@ -1,28 +1,19 @@
 <?# $Id$ ?>
 <?
 
-  function array_delete(&$array, $keys) {
-    if (is_array($keys)) {
+  function array_get() {
+    $keys = func_get_args();
+    $array = array_shift($keys);
+
+    if (count($keys) > 1) {
+      $filter = array();
       foreach ($keys as $key) {
-        if ($value = $array[$key]) {
-          $values[] = $array[$key];
-          unset($array[$key]);
-        }
+        $filter[$key] = $array[$key];
       }
-
-      return $values;
+      return $filter;
     } else {
-      if ($value = $array[$keys]) {
-        unset($array[$keys]);
-        return $value;
-      }
-
-      return null;
+      return $array[$keys[0]];
     }
-  }
-
-  function array_get($array, $key) {
-    return $array[$key];
   }
 
   function array_find($array, $key, $value) {
@@ -46,6 +37,43 @@
     }
 
     return $values;
+  }
+
+  function array_delete(&$array, $keys) {
+    if (is_array($keys)) {
+      foreach ($keys as $key) {
+        if ($value = $array[$key]) {
+          $values[] = $array[$key];
+          unset($array[$key]);
+        }
+      }
+
+      return $values;
+    } else {
+      if ($value = $array[$keys]) {
+        unset($array[$keys]);
+        return $value;
+      }
+
+      return null;
+    }
+  }
+
+  function array_remove(&$array, $values) {
+    if (is_array($values)) {
+      foreach ($array as $key => $value) {
+        if (in_array($value, $values)) {
+          unset($array[$key]);
+        }
+      }
+    } else {
+      foreach ($array as $key => $value) {
+        if ($value == $values) {
+          unset($array[$key]);
+          return $value;
+        }
+      }
+    }
   }
 
 ?>

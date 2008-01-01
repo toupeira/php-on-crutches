@@ -3,29 +3,38 @@
 
   class View extends Object
   {
+    public $data;
+
+    private $layout;
     private $template;
-    private $data;
 
-    function __construct($template, $data=null) {
-      if (is_file($template)) {
-        $this->template = &$template;
-      } else {
-        raise("Template not found: $template");
-      }
-
-      if (is_array($data)) {
-        $this->data = &$data;
-      }
+    function __construct() {
     }
 
-    function render($layout='application') {
+    function get_layout() {
+      return $this->layout;
+    }
+
+    function set_layout($layout) {
+      $this->layout = $layout;
+    }
+
+    function get_template() {
+      return $this->template;
+    }
+
+    function set_template($template) {
+      $this->template = $template;
+    }
+
+    function render() {
       extract($this->data, EXTR_SKIP);
 
       ob_start();
       require $this->template;
       $content_for_layout = ob_get_clean();
 
-      $layout = VIEWS.'layouts/'.basename($layout).'.thtml';
+      $layout = VIEWS.'layouts/'.basename($this->layout).'.thtml';
       if (is_file($layout)) {
         ob_start();
         require $layout;

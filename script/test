@@ -4,7 +4,7 @@
   require dirname(__FILE__).'/../config/environment.php';
   require LIB.'tests.php';
 
-  $logger->level = LOG_DISABLED;
+  $logger->level = LOGGER_DISABLED;
 
   $tests = GLOB(TEST.'*');
   $tests = array_filter($tests, is_dir);
