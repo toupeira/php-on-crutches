@@ -47,7 +47,7 @@
       $controller = array_shift($args);
       $action = array_shift($args);
 
-      $class = ucfirst(strtolower($controller)).'Controller';
+      $class = camelize($controller).'Controller';
 
       if (!class_exists($class)) {
         $class = 'PagesController';

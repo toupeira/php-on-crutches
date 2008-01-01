@@ -13,6 +13,10 @@
     return ucfirst(str_replace('_', ' ', underscore($text)));
   }
 
+  function camelize($text) {
+    return str_replace(' ', '', humanize($text));
+  }
+
   function underscore($text) {
     return strtolower(preg_replace('/([a-z])([A-Z])/', '\1_\2', basename($text)));
   }
