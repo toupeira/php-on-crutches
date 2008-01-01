@@ -1,25 +1,20 @@
 <?# $Id$ ?>
 <?
 
-  require LIB.'util.php';
-  require LIB.'logger.php';
-  require LIB.'config.php';
+  # Load standard libraries
+  $libs = array(
+    'base',
+    'logger',
+    'config',
 
-  # Initialize the logger
-  Logger::init();
+    'dispatcher',
+    'controller',
+    'model',
+    'view',
+  );
 
-  # Start sessions if enabled and not running in a console
-  if (config('use_sessions') and !is_resource(STDIN)) {
-    session_start();
-  }
-
-  # Work around magic quotes
-  if (get_magic_quotes_gpc()) {
-    foreach ($_POST as $key => $value) {
-      if (!is_array($value)) {
-        $_POST[$key] = stripslashes($value);
-      }
-    }
+  foreach ($libs as $lib) {
+    require LIB."$lib.php";
   }
 
   # Load standard helpers
@@ -30,5 +25,8 @@
 
   # Load application helper
   @include_once HELPERS.'application_helper.php';
+
+  Logger::init();
+  Dispatcher::init();
 
 ?>

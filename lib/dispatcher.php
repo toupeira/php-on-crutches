@@ -9,6 +9,22 @@
     static public $controller;
     static public $action;
 
+    static function init() {
+      # Start sessions if enabled and not running in a console
+      if (config('use_sessions') and !is_resource(STDIN)) {
+        session_start();
+      }
+
+      # Work around magic quotes
+      if (get_magic_quotes_gpc()) {
+        foreach ($_POST as $key => $value) {
+          if (!is_array($value)) {
+            $_POST[$key] = stripslashes($value);
+          }
+        }
+      }
+    }
+
     static function run($path=null) {
       if (empty($path)) {
         $path = $_GET['path'];
