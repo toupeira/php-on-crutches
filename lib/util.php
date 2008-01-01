@@ -62,15 +62,24 @@
     return ($code === 0);
   }
 
-  function tempfile() {
-    $file = tempnam(sys_get_temp_dir(), config('application').'.');
-    register_shutdown_function(rm_f, $file);
-    return $file;
+  function mktemp($dir=false) {
+    $prefix = sys_get_temp_dir();
+    $template = config('application').'.XXXXXX';
+    $dir = $dir ? '-d' : '';
+    $path = trim(`mktemp $dir -p $prefix $template`);
+    register_shutdown_function(rm_rf, $path);
+    return $path;
   }
 
   function rm_f($file) {
     if (file_exists($file)) {
       return unlink($file);
+    }
+  }
+
+  function rm_rf($file) {
+    if (file_exists($file)) {
+      return system("rm -rf ".escapeshellarg($file));
     }
   }
 

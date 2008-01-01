@@ -326,7 +326,7 @@
 
     # Add invalid fields and an error message
     function add_error($keys, $message) {
-      $this->errors = array_merge($this->errors, (array) $keys);
+      $this->errors = array_merge((array) $this->errors, (array) $keys);
       $this->msg['error'] = $message;
     }
 

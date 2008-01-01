@@ -40,7 +40,7 @@
       if (!$message) {
         $dumper = &new SimpleDumper();
         $message = "[" . $dumper->describeValue($member)
-                 . "] should be in [" .
+                 . "] should be in ["
                  . $dumper->describeValue($array) . "]";
       }
       return $this->assertTrue(
@@ -78,10 +78,7 @@
     function assertFileMatch($pattern, $file, $message="%s") {
       return $this->assertWantedPattern($pattern, file_get_contents($file), $message);
     }
-  }
 
-  class ModelTestCase extends TestCase
-  {
     function assertHasError($object, $key) {
       $dumper = &new SimpleDumper();
       $message = "[" . $dumper->describeValue($object)
@@ -92,17 +89,22 @@
     }
   }
 
+  class ModelTestCase extends TestCase
+  {
+  }
+
   class ControllerTestCase extends TestCase
   {
-    function setup() {
+    function __construct() {
+      parent::__construct();
       $class = substr(get_class($this), 0, -4);
       $this->controller = Dispatcher::$controller = new $class();
     }
 
     function request($action, $get=null, $post=null) {
-      $GLOBALS['_SERVER']['REQUEST_METHOD'] = ($post ? 'POST' : 'GET');
-      $GLOBALS['_GET'] = (array) $get;
-      $GLOBALS['_POST'] = (array) $post;
+      $_SERVER['REQUEST_METHOD'] = (is_array($post) ? 'POST' : 'GET');
+      $_GET = (array) $get;
+      $_POST = (array) $post;
 
       list($this->controller, $this->action, $this->args) =
         Dispatcher::recognize("{$this->controller->name}/$action");
@@ -111,35 +113,14 @@
     }
 
     function get($action, $args=null) {
-      return $this->request($action, $args);
+      return $this->request($action, (array) $args);
     }
 
     function post($action, $args=null) {
-      return $this->request($action, null, $args);
+      return $this->request($action, null, (array) $args);
     }
 
-    function assertTemplate($template, $message="%s") {
-      $parts = explode('/', "$template.thtml");
-      $view_template = $this->controller->view->template;
-      $view_parts = explode('/', $view_template);
-      $this->assertEqual(
-        $parts,
-        array_slice($view_parts, -count($parts)),
-        "Expected template '$template', got '$view_template'");
-    }
-
-    function assertAssigns($assigns, $message="%s") {
-      foreach ($assigns as $key => $type) {
-        $this->assertTrue(
-          array_key_exists($key, $this->data),
-          "Expected assigned variable '$key'");
-        $this->assertEqual(
-          gettype($this->data[$key]), $type,
-          "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->data[$key])."'");
-      }
-    }
-
-    function assertResponse($response, $message="%s") {
+    function assertResponse($response) {
       $status = $this->controller->headers['Status'];
 
       switch ($response) {
@@ -159,14 +140,45 @@
       }
     }
 
-    function assertRedirect($path, $message="%s") {
+    function assertHeader($header, $value) {
+      $this->assertTrue(
+        strstr($this->controller->headers[$header], $value),
+        "Expected header '$header' to contain '$value'");
+    }
+
+    function assertTemplate($template) {
+      $this->assertResponse('success');
+
+      $parts = explode('/', "$template.thtml");
+      $view_template = $this->controller->view->template;
+      $view_parts = explode('/', $view_template);
+      $this->assertEqual(
+        $parts,
+        array_slice($view_parts, -count($parts)),
+        "Expected template '$template', got '$view_template'");
+    }
+
+    function assertAssigns($assigns) {
+      foreach ($assigns as $key => $type) {
+        $this->assertTrue(
+          array_key_exists($key, $this->data),
+          "Expected assigned variable '$key'");
+        $this->assertEqual(
+          gettype($this->data[$key]), $type,
+          "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->data[$key])."'");
+      }
+    }
+
+    function assertRedirect($path) {
+      $this->assertResponse('redirect');
+
       $url = url_for($path);
       $real_url = $this->controller->headers['Location'];
       $this->assertEqual($url, $real_url,
         "Expected redirect to '$url', got '$real_url'");
     }
 
-    function assertMessage($key, $message="%s") {
+    function assertMessage($key) {
       $this->assertFalse(empty($this->controller->msg[$key]),
         "Expected message on key '$key'");
     }
