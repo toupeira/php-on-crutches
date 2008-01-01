@@ -4,7 +4,7 @@
   class LoggerTest extends TestCase
   {
     function setup() {
-      $this->file = tempfile();
+      $this->file = mktemp();
       $this->logger = $GLOBALS['logger'];
       $this->logger->file = $this->file;
       $this->logger->level = LOG_INFO;
