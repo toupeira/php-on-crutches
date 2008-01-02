@@ -24,26 +24,6 @@
       $this->update_attributes($data);
     }
 
-    function update($data) {
-      if ($this->update_attributes($data) and $this->is_valid()) {
-        return $this->save();
-      } else {
-        return false;
-      }
-    }
-
-    function update_attributes($data) {
-      if (is_array($data)) {
-        array_delete($data, $this->protected);
-        foreach ($data as $key => $value) {
-          $this->__set($key, $value);
-        }
-        return true;
-      } else {
-        return false;
-      }
-    }
-
     # Stubs for implementation-specific actions
 
     static function find($name) {
@@ -69,7 +49,7 @@
       if (method_exists($this, $getter)) {
         return $this->$getter();
       } elseif (in_array($key, $this->attributes)) {
-        return $this->read_attribute($key);
+        return $this->data[$key];
       }
     }
 
@@ -81,7 +61,7 @@
         if (method_exists($this, $setter)) {
           $this->$setter(&$value);
         } elseif (in_array($key, $this->attributes)) {
-          $this->write_attribute($key, &$value);
+          $this->data[$key] = &$value;
         }
         unset($this->cache[$key]);
       }
@@ -97,6 +77,28 @@
     function write_attribute($key, $value) {
       $this->data[$key] = &$value;
       return $this;
+    }
+
+    # Update data and save
+    function update($data) {
+      if ($this->update_attributes($data) and $this->is_valid()) {
+        return $this->save();
+      } else {
+        return false;
+      }
+    }
+
+    # Load attributes from an array
+    function update_attributes($data) {
+      if (is_array($data)) {
+        array_delete($data, $this->protected);
+        foreach ($data as $key => $value) {
+          $this->__set($key, $value);
+        }
+        return true;
+      } else {
+        return false;
+      }
     }
 
     # Generate cached property value with PHP code

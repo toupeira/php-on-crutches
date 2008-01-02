@@ -2,17 +2,7 @@
 <?
 
   # Build the path for an asset.
-  function asset_path($type, $name) {
-    if ($type == 'css') {
-      $file = STYLESHEETS.$name.'.css';
-    } elseif ($type == 'js') {
-      $file = JAVASCRIPTS.$name.'.js';
-    } elseif ($type == 'image') {
-      $file = IMAGES.$name;
-    } else {
-      raise("Invalid asset type $type");
-    }
-
+  function asset_path($file) {
     $path = Dispatcher::$prefix.$file;
     if (file_exists(WEBROOT.$file)) {
       $path .= '?'.filemtime(WEBROOT.$file);
@@ -27,7 +17,7 @@
   function stylesheet_tag($name, $options=null) {
     return tag('link', $options, array(
       'rel' => 'stylesheet', 'type' => 'text/css',
-      'href' => asset_path('css', $name)
+      'href' => asset_path(STYLESHEETS.$name.'.css')
     ));
   }
 
@@ -35,14 +25,14 @@
   function javascript_tag($name, $options=null) {
     return content_tag('script', null, $options, array(
       'type' => 'text/javascript',
-      'src' => asset_path('js', $name)
+      'src' => asset_path(JAVASCRIPTS.$name.'.js')
     ));
   }
 
   # Build an image tag
   function image_tag($name, $options=null) {
     return tag('img', $options, array(
-      'src' => asset_path('image', $name), 'alt' => ''
+      'src' => asset_path(IMAGES.$name), 'alt' => ''
     ));
   }
 

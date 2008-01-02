@@ -4,9 +4,7 @@
   # Auto-load libraries, models and controllers
   function __autoload($class) {
     $class = underscore($class);
-    if (is_file($file = LIB."$class.php")) {
-      require $file;
-    } elseif (is_file($file = MODELS."$class.php")) {
+    if (is_file($file = MODELS."$class.php")) {
       require $file;
     } elseif (substr($class, -10) == 'controller') {
       if (is_file($file = CONTROLLERS."$class.php")) {
