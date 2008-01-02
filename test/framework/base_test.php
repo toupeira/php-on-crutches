@@ -1,10 +1,10 @@
 <?# $Id$ ?>
 <?
 
-  class UtilTest extends TestCase
+  class BaseTest extends TestCase
   {
     function test_object() {
-      $test = $this->test = new UtilTestObject();
+      $test = $this->test = new BaseTestObject();
       $this->assertEqual('readonly', $test->readonly);
       $this->assertEqual('readwrite', $test->readwrite);
       $this->assertEqual('shadowed', $test->shadowed);
@@ -78,7 +78,7 @@
     }
   }
 
-  class UtilTestObject extends Object
+  class BaseTestObject extends Object
   {
     private $private = 'private';
     private $readonly = 'readonly';
