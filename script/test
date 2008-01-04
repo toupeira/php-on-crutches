@@ -1,8 +1,8 @@
 #!/usr/bin/php5
 <? # vim: ft=php
 
-  require dirname(__FILE__).'/../config/environment.php';
-  require LIB.'tests.php';
+  require_once dirname(__FILE__).'/../config/environment.php';
+  require_once LIB.'tests.php';
 
   $logger->level = LOGGER_DISABLED;
 

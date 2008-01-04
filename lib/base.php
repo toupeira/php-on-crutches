@@ -15,9 +15,10 @@
     }
   }
 
+  # Base class for all objects
   class Object
   {
-    # Call getters
+    # Automatic getters
     function __get($key) {
       $getter = "get_$key";
       if (method_exists($this, $getter)) {
@@ -27,14 +28,14 @@
       }
     }
 
-    # Call setters
+    # Automatic setters
     function __set($key, $value) {
       $setter = "set_$key";
       if (method_exists($this, $setter)) {
         $this->$setter($value);
         return $this;
       } else {
-        raise("Can't change private property '$key'");
+        raise("Can't change read-only property '$key'");
       }
     }
 

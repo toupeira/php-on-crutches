@@ -1,0 +1,30 @@
+#!/usr/bin/php5
+<? # vim: ft=php
+
+  require_once dirname(__FILE__).'/../config/environment.php';
+  require_once LIB.'tests.php';
+
+  if (function_exists('xdebug_is_enabled') ? !xdebug_is_enabled() : true) {
+    print "Xdebug not found.";
+    exit(1);
+  }
+
+  xdebug_start_code_coverage();
+  require SCRIPT.'test';
+
+  print "\nCollecting coverage data...\n";
+
+  $include_framework = in_array('framework', $paths);
+
+  $coverage = array();
+  foreach (xdebug_get_code_coverage() as $file => $lines) {
+    if (strpos($file, APP) === 0 or
+       ($include_framework and strpos($file, LIB) === 0)) {
+      print "..adding $file\n";
+      $coverage[$file] = $lines;
+    }
+  }
+
+  print "Done.\n";
+
+?>
