@@ -1,6 +1,0 @@
-#!/usr/bin/php5
-<? # vim: ft=php
-
-  require dirname(__FILE__).'/../config/environment.php';
-
-?>

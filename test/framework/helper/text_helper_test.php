@@ -11,12 +11,16 @@
 
     function test_pluralize() {
       $this->assertEqual(
-        "days",
+        "3 days",
         pluralize(3, 'day', 'days'));
 
       $this->assertEqual(
-        "week",
+        "1 week",
         pluralize(1, 'week', 'weeks'));
+
+      $this->assertEqual(
+        "0 months",
+        pluralize(0, 'month', 'months'));
     }
 
     function test_humanize() {
