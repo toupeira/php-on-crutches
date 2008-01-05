@@ -1,0 +1,20 @@
+<table>
+<tr>
+  <th style="width: 100%">Name</th>
+  <th>Total lines</th>
+  <th>Lines of code</th>
+  <th colspan="2">Total coverage</th>
+  <th colspan="2">Code coverage</th>
+</tr>
+<tr class="gray1">
+  <td><tt><?= $title ?></tt></td>
+  <td class="right"><?= $report['size'] ?></td>
+  <td class="right"><?= $report['code'] ?></td>
+  <?= coverage_graph($report['coverage_total']) ?>
+  <?= coverage_graph($report['coverage_code']) ?>
+</tr>
+</table>
+<pre>
+<? foreach ($lines as $i => $line): ?>
+<span class="<?= $states[$i].cycle(0, 1) ?>" title="<?= $types[$i] ?>"><?= sprintf("%{$pad}d %s", $i + 1, h($line)) ?></span><? endforeach ?>
+</pre>

@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title><?= $title ? "$title -" : "" ?>C0 code coverage information</title>
+  <style type="text/css">
+
+    body { font-family: sans-serif; }
+    h3 { border-bottom: 1px solid #aaa; }
+
+    .right { text-align: right; }
+
+    table {
+      width: 100%;
+      border-spacing: 0;
+      border-collapse: collapse;
+      white-space: nowrap;
+    }
+
+    th, td { border: 1px solid #aaa; padding: 0.2em; }
+    th { background: #ccc; }
+    tr.gray0 { background: #fff; }
+    tr.gray1 { background: #eee; }
+    tr:hover td { background: #ddd; }
+
+    table.graph { width: 100px; height: 1em; border: 1px solid #aaa; }
+    table.graph td { padding: 0; }
+    td.leftnb { border-left: none; }
+    td.rightnb { border-right: none; }
+    td.tested   { background: #56d7a3 !important; }
+    td.untested { background: #eb5e5e !important; }
+
+    pre span { display: block; }
+    span.tested0   { background-color: rgb(185, 210, 200); }
+    span.tested1   { background-color: rgb(190, 215, 205); }
+    span.inferred0 { background-color: rgb(175, 200, 200); }
+    span.inferred1 { background-color: rgb(180, 205, 205); }
+    span.untested0 { background-color: rgb(225, 110, 110); }
+    span.untested1 { background-color: rgb(235, 120, 120); }
+
+  </style>
+</head>
+<body>
+<h3>C0 code coverage information</h3>
+<?= $content_for_layout ?>
+<p style="text-align: right">
+  <small><code>Generated on <?= $time ?></code></small>
+</p>
+</body>
+</html>

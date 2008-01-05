@@ -81,7 +81,7 @@
 
   function rm_f($file) {
     if (file_exists($file)) {
-      return unlink($file);
+      return @unlink($file);
     }
   }
 

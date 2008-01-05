@@ -11,6 +11,10 @@
     function __construct() {
     }
 
+    function set($key, $value) {
+      $this->data[$key] = $value;
+    }
+
     function get_layout() {
       return $this->layout;
     }
@@ -27,14 +31,30 @@
       $this->template = $template;
     }
 
-    function render() {
+    function render($template=null) {
+      if (count(func_get_args()) == 1) {
+        $this->template = $template;
+      }
+
+      if (!$this->template) {
+        raise("No template set.");
+      } elseif (!is_file($this->template)) {
+        raise("Template {$this->template} not found.");
+      }
+
+      # Reset cycler
+      $GLOBALS['_cycle'] = null;
+
       extract($this->data, EXTR_SKIP);
 
       ob_start();
       require $this->template;
       $content_for_layout = ob_get_clean();
 
-      $layout = VIEWS.'layouts/'.basename($this->layout).'.thtml';
+      $layout = is_file($this->layout)
+        ? $this->layout
+        : VIEWS.'layouts/'.basename($this->layout).'.thtml';
+
       if (is_file($layout)) {
         ob_start();
         require $layout;

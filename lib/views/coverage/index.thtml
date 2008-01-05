@@ -1,0 +1,18 @@
+<table class="reports">
+<tr>
+  <th style="width: 100%">Name</th>
+  <th>Total lines</th>
+  <th>Lines of code</th>
+  <th colspan="2">Total coverage</th>
+  <th colspan="2">Code coverage</th>
+</tr>
+<? foreach ($reports as $name => $report): ?>
+<tr class="gray<?= cycle(0, 1) ?>">
+  <td><?= $report['file'] ? link_to($name, $report['file']) : $name ?></td>
+  <td class="right"><?= $report['size'] ?></td>
+  <td class="right"><?= $report['code'] ?></td>
+  <?= coverage_graph($report['coverage_total']) ?>
+  <?= coverage_graph($report['coverage_code']) ?>
+</tr>
+<? endforeach ?>
+</table>

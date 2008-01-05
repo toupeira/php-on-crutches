@@ -9,24 +9,64 @@
   $tests = GLOB(TEST.'*');
   $tests = array_filter($tests, is_dir);
   $tests = array_map(basename, $tests);
-  array_remove($tests, 'fixtures');
+  array_remove($tests, array('coverage', 'fixtures', 'framework'));
 
-  if (empty($argv[1])) {
+  $paths = array();
+  $args = array_slice($argv, 1);
+  if (empty($args)) {
     $paths = $tests;
-    array_remove($paths, 'framework');
-  } else {
-    $paths = array_slice($argv, 1);
-    foreach ($paths as $path) {
-      if (!in_array($path, $tests) and !is_file($path)) {
-        print "Usage: $argv[0] [";
-        print implode("|", $tests);
-        print "]\n";
-        exit(255);
-      }
+  }
+
+  while ($arg = array_shift($args)) {
+    switch ($arg) {
+      case 'app':
+        $paths = array_merge($paths, $tests);
+        break;
+      case 'all':
+        $paths = array_merge($paths, $tests);
+        array_unshift($paths, 'framework');
+        break;
+      default:
+        if ($arg == 'framework' or in_array($arg, $tests) or is_file($arg)) {
+          $paths[] = $arg;
+        } else {
+          if (strstr($argv[0], 'coverage')) {
+            print "Usage: $argv[0] [OPTIONS] [TESTS..]\n";
+            print "\n";
+            print "  -d DIR       Target directory\n";
+            print "  -i PATH      Include path in report\n";
+            print "  -e PATH      Exclude path in report\n";
+            print "  -f           Force deletion of existing directory\n";
+          } else {
+            print "Usage: $argv[0] [TESTS..]\n";
+          }
+          print "\n";
+          print "  all          Run all tests\n";
+          print "  app          Run application tests\n";
+          print "  framework    Run framework tests\n";
+          print "\n";
+          foreach ($tests as $test) {
+            printf("  %-12s Run %s tests\n", $test, rtrim($test, 's'));
+          }
+          print "\n";
+          exit(255);
+        }
     }
   }
 
   print "\n";
-  array_map(run_tests, array_unique((array) $paths));
+  $errors = array();
+  foreach (array_unique((array) $paths) as $path) {
+    run_tests($path) or $errors[] = $path;
+  }
+
+  if ($errors) {
+    print "Encountered errors in the following tests:\n";
+    foreach ($errors as $error) {
+      print "  $error\n";
+    }
+    print "\n";
+    exit(1);
+  }
 
 ?>

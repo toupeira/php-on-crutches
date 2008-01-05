@@ -6,7 +6,7 @@
   }
 
   function pluralize($count, $singular, $plural) {
-    return $count == 1 ? $singular : $plural;
+    return $count == 1 ? "$count $singular" : "$count $plural";
   }
 
   function humanize($text) {
@@ -27,6 +27,16 @@
     } else {
       return $text;
     }
+  }
+
+  function cycle($values) {
+    global $_cycle;
+    $values = func_get_args();
+    $value = $values[intval($_cycle)];
+    if (++$_cycle >= count($values)) {
+      $_cycle = 0;
+    }
+    return $value;
   }
 
   function br2nl($text) {
