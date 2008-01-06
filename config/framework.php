@@ -9,17 +9,15 @@
 
     # Default site
     'default_path'    => '',
-    # mod_rewrite or something similar configured
+    # Use URL rewriting (needs to be configured on the webserver)
     'rewrite_urls'    => true,
     # Start sessions
     'use_sessions'    => true,
 
     # Log file
     'log_file'        => LOG.ROOT_NAME.'.log',
-    # Log level, see lib/logger.php
+    # Log level
     'log_level'       => LOG_WARN,
-    # Log SQL queries
-    'log_sql'         => false,
 
     # Show debug information
     'debug'           => false,
