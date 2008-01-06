@@ -1,0 +1,134 @@
+== PHP on Crutches
+
+PHP on Crutches (POC) is a minimalistic web application framework for PHP,
+loosely based on Ruby on Rails with a focus on expandability and testing.
+
+I made this framework for work projects where I can't use anything else,
+so this means there won't be much documentation and I will add features
+only when needed (though feature requests and patches are welcome).
+
+Currently PHP on Crutches includes the following features:
+ * MVC structure with dispatcher, controllers, models and views
+   with the views being normal PHP templates
+ * View helpers and support for custom helpers
+ * Builtin controller for static pages
+ * Configurable logger
+ * Basic configuration system
+ * Model class with support for validation and custom property accessors
+ * Interactive PHP console
+ * Test runner, base class for unit tests
+ * Code coverage generator
+
+Planned features:
+ * More view helpers
+ * Builtin admin interface
+ * Database abstraction layer
+ * Integration tests
+ * Scaffolding script
+
+POC also stands for:
+ * Pile of Crap
+ * Pissed Off Coder
+ * PHP Obfuscates Code
+
+This framework is in no way meant to be an endorsement of PHP, it's an ugly
+mess of a language that is wasting far too much of my precious time, and I
+really hate it for that.
+
+In this framework I tried a bit to reach the limits of the language, but
+unsurprisingly PHP doesn't leave much room for abstraction, and with its
+limited syntax everything quickly becomes ugly. Also, thanks to PHP's hailed
+shared-nothing "architecture" everything gets reloaded on every single request,
+so most abstractions come with a big cost.
+
+
+== Requirements
+
+ * PHP5 (probably with safe-mode off)
+ * Unix environment is expected
+ * SimpleTest 1.0.0 for the test runner
+ * Xdebug 2 for the code coverage generator
+
+It has only been tested on Debian with Apache 2.2.
+
+
+== Installation
+
+Currently there is no support to install the framework in a central location,
+so you can just copy the source directory for a new application.
+You can remove the files in the top folder and also /test/framework.
+
+If you want to keep the framework updated, you can use SVN externals for
+the /lib and /script folders, and also /test/framework if you want.
+
+
+== Configuration
+
+Webserver configuration:
+ * Use /public as document root.
+ * If you use FastCGI make sure /public/index.php is executable.
+ * To use friendly URLs you need to configure your webserver to
+   rewrite all requests for non-existant paths to index.php?path=PATH.
+
+There are a few settings in /config/framework.php you should know about:
+ * 'application' should be a shorthand for your application, it will be used
+   in several places, e.g. as the stylesheet name in the default layout.
+   By default it's the name of the root folder.
+ * 'default_path' will be used as the default route.
+ * If you don't want rewriting you need to set 'rewrite_urls' in
+   framework.php to 'false'.
+ * The logger by default logs to /log/APPLICATION.log, you probably need
+   to make this location writable first.
+ * Enable 'debug' if you want to display PHP error messages.
+ * Enable 'debug_redirects' to display a link on redirections.
+
+
+== Usage
+
+If you've used Ruby on Rails or another Rails clone like CakePHP before, you
+should get up and running quickly. I won't provide a full documentation, but
+here are a few pointers:
+
+ * Create controllers in /app/controllers, e.g. for the path /foo you
+   would create a FooController in /app/controllers/foo_controller.php.
+   The controller needs to extend ApplicationController.
+ * For each action, add a public method to the controller with the same
+   name as the action. Further path parts will be used as arguments to
+   this method, e.g. for the path /foo/edit/1 you would create a method
+   edit() with one required argument.
+ * Inside the action, use $this->set($key, $value) to assign values
+   to the view.
+ * Create views in /app/views/foo, e.g. for the action edit you would create
+   the file /app/views/foo/edit.thtml.
+ * Add generic helper functions in /app/helpers/application_helper.php
+ * Add helpers in /app/helpers, e.g. for the FooController you would
+   create /app/helpers/foo_helper.php
+ * The current model class only supports basic validation, database access
+   is not yet builtin. But it should be easy to use another ORM or write your
+   own wrapper.
+
+For further details please refer to the source code, it's pretty
+straight-forward for the most part.
+
+
+== Support
+
+A project tracker is available at http://dev.diarrhea.ch/projects/phpcrutch,
+please report bugs and feature requests there.
+
+
+== Acknowledgements
+
+ * Xdebug: I just found out about it now and it's the first development tool
+   for PHP that I can take seriously...
+ * Mauricio Fernandez's rcov: a very nice tool, I ripped off its report
+   design for my own code coverage generator.
+
+
+== License
+
+PHP on Crutches is licensed under the MIT license.
+
+Copyright (C) 2008 Markus Koller
+
+

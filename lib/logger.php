@@ -1,21 +1,21 @@
 <?
 /*
-  PHP on Crutches - Copyright 2008 Markus Koller
+  PHP on Crutches - Copyright (c) 2008 Markus Koller
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of the MIT License. See COPYING for details.
+  it under the terms of the MIT License.
 
   $Id$
 */
 
-  # Log levels
+  # Additional log levels
   define('LOG_DISABLED', -1);
   define('LOG_ERROR',    LOG_ERR);
   define('LOG_WARN',     LOG_WARNING);
 
   # A few wrappers
-  function log_error($msg) { return $GLOBALS['logger']->log($msg, LOG_ERR); }
-  function log_warn($msg)  { return $GLOBALS['logger']->log($msg, LOG_WARNING); }
+  function log_error($msg) { return $GLOBALS['logger']->log($msg, LOG_ERROR); }
+  function log_warn($msg)  { return $GLOBALS['logger']->log($msg, LOG_WARN); }
   function log_info($msg)  { return $GLOBALS['logger']->log($msg, LOG_INFO); }
   function log_debug($msg) { return $GLOBALS['logger']->log($msg, LOG_DEBUG); }
   function log_dump($data) { return log_debug(var_export($data, true)); }

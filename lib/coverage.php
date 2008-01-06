@@ -1,9 +1,9 @@
 <?
 /*
-  PHP on Crutches - Copyright 2008 Markus Koller
+  PHP on Crutches - Copyright (c) 2008 Markus Koller
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of the MIT License. See COPYING for details.
+  it under the terms of the MIT License.
 
   $Id$
 */
@@ -51,14 +51,15 @@
           foreach ((array) $this->exclude as $base_path) {
             if (strpos($file, $base_path) === 0) {
               $skip = true;
+              break;
             }
           }
-
           if ($skip) continue;
 
           foreach ((array) $this->include as $base_path) {
             if (strpos($file, $base_path) === 0) {
               $filtered[$file] = $lines;
+              break;
             }
           }
         }
