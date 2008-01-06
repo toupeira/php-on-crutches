@@ -1,0 +1,7 @@
+<?# $Id$ ?>
+<?
+
+  $_APPLICATION = array(
+  );
+
+?>
