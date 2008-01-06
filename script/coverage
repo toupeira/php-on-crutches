@@ -20,7 +20,7 @@
   require_once LIB.'testing.php';
   require LIB.'coverage.php';
 
-  $logger->level = LOGGER_DISABLED;
+  $logger->level = LOG_DISABLED;
 
   $tests = array();
   $include = array(APP);
@@ -38,15 +38,14 @@
   }
 
   $target = realpath(any($target, 'coverage'));
-
-  # Reset the arguments for script/test
-  array_unshift($tests, $argv[0]);
-  $argv = $tests;
-
   if (file_exists($target) and !$force) {
     print "Target path $target already exists.\n";
     exit(1);
   }
+
+  # Reset the arguments for script/test
+  array_unshift($tests, $argv[0]);
+  $argv = $tests;
 
   # Run the tests and collect coverage data
   require SCRIPT.'test';

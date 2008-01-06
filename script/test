@@ -12,7 +12,7 @@
   require_once dirname(__FILE__).'/../config/environment.php';
   require_once LIB.'testing.php';
 
-  $logger->level = LOGGER_DISABLED;
+  $logger->level = LOG_DISABLED;
 
   $tests = GLOB(TEST.'*');
   $tests = array_filter($tests, is_dir);
@@ -50,7 +50,7 @@
           }
           print "\n";
           print "  all          Run all tests\n";
-          print "  app          Run application tests\n";
+          print "  app          Run application tests (default)\n";
           print "  framework    Run framework tests\n";
           print "\n";
           foreach ($tests as $test) {
