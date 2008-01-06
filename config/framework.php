@@ -1,9 +1,9 @@
 <?# $Id$ ?>
 <?
 
-  $_CONFIG = array(
+  $_FRAMEWORK = array(
     # Application name
-    'application'     => '',
+    'application'     => ROOT_NAME,
     # Application version
     'version'         => '',
 
@@ -15,7 +15,7 @@
     'use_sessions'    => true,
 
     # Log file
-    'log_file'        => LOG.'phpcrutch.log',
+    'log_file'        => LOG.ROOT_NAME.'.log',
     # Log level, see lib/logger.php
     'log_level'       => LOG_WARN,
     # Log SQL queries

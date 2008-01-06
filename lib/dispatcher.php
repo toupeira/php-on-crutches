@@ -41,6 +41,10 @@
       }
       unset($_GET['path']);
 
+      if (empty($path)) {
+        raise("No default path set.");
+      }
+
       self::$path = $path;
 
       # Detect the relative path used to reach the website

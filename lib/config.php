@@ -8,10 +8,10 @@
   $Id$
 */
 
-  require CONFIG.'config.php';
+  require CONFIG.'framework.php';
   @include CONFIG.config('application').'.php';
 
-  $_CONFIG = array_merge($_CONFIG, (array) $_APP_CONFIG);
+  $_CONFIG = array_merge($_FRAMEWORK, (array) $_APPLICATION);
 
   function config($key) {
     return $GLOBALS['_CONFIG'][$key];
