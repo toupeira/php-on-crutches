@@ -1,5 +1,5 @@
 #!/usr/bin/rlwrap php5
-<? # vim: ft=php
+<?
 /*
   PHP on Crutches - Copyright (c) 2008 Markus Koller
 
@@ -36,4 +36,5 @@
   }
   print "\n";
 
+# vim: ft=php
 ?>
