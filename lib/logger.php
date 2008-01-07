@@ -28,7 +28,7 @@
 
     static function init() {
       # Configure error reporting
-      if (config('debug') or is_resource(STDIN)) {
+      if (config('debug') or PHP_SAPI == 'cli') {
         error_reporting(E_ALL ^ E_NOTICE);
         ini_set('display_errors', 1);
       } else {
@@ -37,7 +37,7 @@
       }
 
       # Create the global logger instance
-      if (is_resource(STDIN)) {
+      if (PHP_SAPI == 'cli') {
         $log_file = STDERR;
       } else {
         $log_file = any(config('log_file'), LOG.'application.log');

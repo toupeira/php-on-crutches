@@ -18,7 +18,7 @@
 
     static function init() {
       # Start sessions if enabled and not running in a console
-      if (config('use_sessions') and !is_resource(STDIN)) {
+      if (config('use_sessions') and PHP_SAPI != 'cli') {
         session_start();
       }
 
