@@ -113,8 +113,10 @@
     }
 
     if (is_object($GLOBALS['logger'])) {
-      log_error("$message");
+      log_error("\n".get_class($exception).": $message");
+      log_debug("  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
     }
+
     throw $exception;
   }
 

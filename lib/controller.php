@@ -236,11 +236,11 @@
         $text = "Application Error";
       }
 
-      $this->header['Status'] = $code;
+      $this->headers['Status'] = $code;
       if ($template = self::find_template("errors/$code")) {
         $this->render($template, $layout);
       } else {
-        $this->render_text("<h1>$code $text</h1>");
+        $this->render_text("<h1>$text</h1>");
       }
     }
 
