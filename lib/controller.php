@@ -227,7 +227,7 @@
     }
 
     # Catches all errors, default behaviour is to render VIEWS/errors/404.thtml or 500.thtml
-    function rescue_error_in_public($exception) {
+    function rescue_error_in_public($exception, $layout='') {
       if ($exception instanceof MissingTemplate) {
         $code = "404";
         $text = "Not Found";
@@ -238,7 +238,7 @@
 
       $this->header['Status'] = $code;
       if ($template = self::find_template("errors/$code")) {
-        $this->render($template, '');
+        $this->render($template, $layout);
       } else {
         $this->render_text("<h1>$code $text</h1>");
       }
