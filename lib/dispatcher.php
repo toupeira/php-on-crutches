@@ -42,7 +42,7 @@
       unset($_GET['path']);
 
       if (empty($path)) {
-        raise("No default path set.");
+        $path = 'index';
       }
 
       self::$path = $path;
