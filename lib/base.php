@@ -101,7 +101,7 @@
   class ApplicationError extends Exception {};
   class MissingTemplate extends ApplicationError {};
 
-  function raise($exception) {
+  function raise($exception, $log=true) {
     if ($exception instanceof Exception) {
       $message = get_class($exception);
     } elseif (class_exists($exception)) {
@@ -112,7 +112,7 @@
       $exception = new ApplicationError($message);
     }
 
-    if (log_running()) {
+    if ($log and log_running()) {
       log_error("\n".get_class($exception).": $message");
       log_debug("  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
     }

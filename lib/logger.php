@@ -96,15 +96,15 @@
       if ($level <= $this->level) {
         if (!$this->running()) {
           if (($this->buffer = fopen($this->file, 'a')) === false) {
-            raise("Couldn't open logfile {$this->file}");
+            return;
           }
         }
 
         if (fwrite($this->buffer, "$msg\n") === false) {
-          raise("Couldn't write to logfile {$this->file}");
+          raise("Couldn't write to logfile {$this->file}", false);
         }
         if (fflush($this->buffer) === false) {
-          raise("Couldn't flush logfile {$this->file}");
+          raise("Couldn't flush logfile {$this->file}", false);
         }
       }
     }
