@@ -16,6 +16,7 @@
     private $exclude;
     private $reports;
     private $view;
+    private $view_path;
 
     private $total_size = 0;
     private $total_code = 0;
@@ -37,10 +38,22 @@
       $this->exclude = (array) $exclude;
 
       $this->view = new View();
+      $this->view_path = LIB.'views/coverage/';
     }
 
     function generate() {
-      print "Generating report in {$this->target}...\n";
+      print "Generating code coverage report in {$this->target}...\n";
+
+      if (file_exists($this->target)) {
+        print "Error: Target path {$this->target} already exists.\n";
+        return false;
+      } elseif (!mkdir($this->target)) {
+        print "Error: Could not create target path {$this->target}.\n";
+        return false;
+      } elseif (!copy($this->view_path.'coverage.css', "{$this->target}/coverage.css")) {
+        print "Error: Could not copy stylesheet.\n";
+        return false;
+      }
 
       ksort($this->files);
       $filtered = array();
@@ -66,16 +79,7 @@
       }
 
       $this->files = $filtered;
-
       print pluralize(count($this->files), 'file', 'files')." found:\n";
-
-      if (file_exists($this->target)) {
-        print "Error: Target path {$this->target} already exists.\n";
-        return false;
-      } elseif (!mkdir($this->target)) {
-        print "Error: Could not create target path $target.\n";
-        return false;
-      }
 
       foreach ($this->files as $path => $coverage) {
         $this->render_file($path, $coverage);
@@ -182,8 +186,8 @@
 
     protected function render($template, $file) {
       $this->view->set('time', strftime('%a, %d %b %Y %H:%M:%S %z'));
-      $this->view->layout = LIB."views/coverage/layout.thtml";
-      $output = $this->view->render(LIB."views/coverage/$template.thtml");
+      $this->view->layout = $this->view_path."layout.thtml";
+      $output = $this->view->render($this->view_path."$template.thtml");
 
       file_put_contents("{$this->target}/$file", $output) or
         raise("Could not write file $file.");

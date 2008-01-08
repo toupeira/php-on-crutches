@@ -37,7 +37,7 @@
     }
   }
 
-  $target = realpath(any($target, 'coverage'));
+  $target = realpath(any($target, WEBROOT.'coverage'));
   if (file_exists($target) and !$force) {
     print "Target path $target already exists.\n";
     exit(1);
