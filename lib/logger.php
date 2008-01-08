@@ -95,7 +95,9 @@
     function log($msg, $level=LOG_INFO) {
       if ($level <= $this->level) {
         if (!$this->running()) {
-          if (($this->buffer = fopen($this->file, 'a')) === false) {
+          if (($this->buffer = @fopen($this->file, 'a')) === false) {
+            print "Warning: the logfile ".config('log_file')." is not writable";
+            $this->level = LOG_DISABLED;
             return;
           }
         }
