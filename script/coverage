@@ -9,11 +9,11 @@
   $Id$
 */
 
-  if (function_exists('xdebug_is_enabled') ? !xdebug_is_enabled() : true) {
+  if (function_exists('xdebug_start_code_coverage')) {
+    xdebug_start_code_coverage();
+  } else {
     print "You need Xdebug to collect code coverage.\n";
     exit(1);
-  } else {
-    xdebug_start_code_coverage();
   }
 
   require_once dirname(__FILE__).'/../config/environment.php';
