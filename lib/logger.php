@@ -96,7 +96,7 @@
       if ($level <= $this->level) {
         if (!$this->running()) {
           if (($this->buffer = @fopen($this->file, 'a')) === false) {
-            print "Warning: the logfile ".config('log_file')." is not writable";
+            print "<p><b>Warning:</b> the logfile <tt>".config('log_file')."</tt> is not writable</p>";
             $this->level = LOG_DISABLED;
             return;
           }
