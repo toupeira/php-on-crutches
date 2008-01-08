@@ -94,8 +94,12 @@
   <td><?= ROOT ?></td>
 </tr>
 <tr>
-  <th>Document root</th>
-  <td><?= WEBROOT ?></td>
+  <th>URL prefix</th>
+  <td><?= Dispatcher::$prefix ?></td>
+</tr>
+<tr>
+  <th>URL rewriting</th>
+  <td><?= config('rewrite_urls') ? 'on' : 'off' ?></td>
 </tr>
 <tr>
   <th>Debug Mode</th>
