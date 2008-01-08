@@ -20,6 +20,11 @@
   function log_debug($msg) { return $GLOBALS['logger']->log($msg, LOG_DEBUG); }
   function log_dump($data) { return log_debug(var_export($data, true)); }
 
+  function log_running() {
+    $logger = $GLOBALS['logger'];
+    return $logger instanceof Logger and $logger->running();
+  }
+
   class Logger extends Object
   {
     private $file;
@@ -61,9 +66,13 @@
     }
 
     function __destruct() {
-      if (is_resource($this->buffer)) {
+      if ($this->running()) {
         fclose($this->buffer);
       }
+    }
+
+    function running() {
+      return is_resource($this->buffer);
     }
 
     function get_file() {
@@ -85,7 +94,7 @@
 
     function log($msg, $level=LOG_INFO) {
       if ($level <= $this->level) {
-        if (!is_resource($this->buffer)) {
+        if (!$this->running()) {
           if (($this->buffer = fopen($this->file, 'a')) === false) {
             raise("Couldn't open logfile {$this->file}");
           }

@@ -112,7 +112,7 @@
       $exception = new ApplicationError($message);
     }
 
-    if (is_object($GLOBALS['logger'])) {
+    if (log_running()) {
       log_error("\n".get_class($exception).": $message");
       log_debug("  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
     }
