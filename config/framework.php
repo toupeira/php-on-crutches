@@ -17,10 +17,10 @@
     # Log file
     'log_file'        => LOG.ROOT_NAME.'.log',
     # Log level
-    'log_level'       => LOG_WARN,
+    'log_level'       => LOG_DEBUG,
 
     # Show debug information
-    'debug'           => false,
+    'debug'           => true,
     # Show redirects with link
     'debug_redirects' => false,
   );
