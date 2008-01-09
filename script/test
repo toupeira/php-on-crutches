@@ -34,25 +34,49 @@
         $paths = array_merge($paths, $tests);
         array_unshift($paths, 'framework');
         break;
+      case 'recent':
+        $_root = ROOT;
+        $_test = TEST;
+
+        $paths = array();
+        $files = explode("\n", trim(
+          `find $_root -name .svn -prune -o -type f -name '*.php' -mmin -1 -print`
+        ));
+        if ($files == array('')) {
+          break;
+        }
+
+        foreach ($files as $file) {
+          $name = substr(basename($file), 0, -4);
+          if ($test = trim(`find $_test -type f -name '{$name}_test.php'`)) {
+            $paths[] = $test;
+          }
+        }
+        break;
+      case 'uncommitted':
+        break;
       default:
         if ($arg == 'framework' or in_array($arg, $tests) or is_file($arg)) {
           $paths[] = $arg;
         } else {
           if (strstr($argv[0], 'coverage')) {
-            print "Usage: $argv[0] [OPTIONS] [TESTS..]\n";
-            print "\n";
-            print "  -d DIR       Target directory\n";
-            print "  -i PATH      Include path in report\n";
-            print "  -e PATH      Exclude path in report\n";
-            print "  -f           Force deletion of existing directory\n";
+            print "Usage: $argv[0] [OPTIONS] [TESTS..]\n"
+                . "\n"
+                . "  -d DIR       Target directory\n"
+                . "  -i PATH      Include path in report\n"
+                . "  -e PATH      Exclude path in report\n"
+                . "  -f           Force deletion of existing directory\n";
           } else {
             print "Usage: $argv[0] [TESTS..]\n";
           }
-          print "\n";
-          print "  all          Run all tests\n";
-          print "  app          Run application tests (default)\n";
-          print "  framework    Run framework tests\n";
-          print "\n";
+          print "\n"
+              . "  all          Run all tests\n"
+              . "  app          Run application tests (default)\n"
+              . "  framework    Run framework tests\n"
+              . "\n"
+              . "  recent       Test recently changed files\n"
+              . "  uncommitted  Test uncommitted files\n"
+              . "\n";
           foreach ($tests as $test) {
             printf("  %-12s Run %s tests\n", $test, rtrim($test, 's'));
           }
@@ -60,6 +84,11 @@
           exit(255);
         }
     }
+  }
+
+  if (empty($paths)) {
+    print "Nothing to test.\n";
+    exit(1);
   }
 
   print "\n";
