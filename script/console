@@ -11,6 +11,8 @@
 
   require dirname(__FILE__).'/../config/environment.php';
 
+  $logger->level = LOG_DISABLED;
+
   function get($path, $params=null) {
     if (is_array($params)) {
       $_GET = $_POST = $params;
@@ -27,6 +29,7 @@
   while (!feof(STDIN)) {
     print ">>> ";
     $command = trim(fgets(STDIN));
+
     if (in_array($command, array('exit', 'quit'))) {
       exit;
     } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
@@ -46,11 +49,26 @@
       $command = rtrim($command, ';');
     }
 
+    $result = null;
+
     if ($command) {
+      if (preg_match('/^([a-z]+) /', $command, $m) and $m[1] != 'new') {
+        $result = true;
+      } else {
+        $command = "\$result = ($command)";
+      }
+
       ob_start();
+
       try {
-        eval("\$result = ($command);");
+        eval("$command;");
       } catch (Exception $e) {
+        print "[1;31m".get_class($e)."[0m: [1m".$e->getMessage()."[0m\n";
+        foreach (explode("\n", $e->getTraceAsString()) as $line) {
+          list($line, $text) = explode(' ', $line, 2);
+          print "  [1m$line[0m $text\n";
+        }
+        #print '  '.str_replace("\n", "\n  ", $e->getTraceAsString());
         $result = $e;
       }
 
@@ -58,18 +76,16 @@
         print rtrim($output)."\n";
       }
 
-      print " [1;32m::[0m ";
+      print " :: [0;36m";
       if (is_object($result)) {
         print get_class($result);
-      } elseif (is_string($result)) {
-        var_export($result);
-      } elseif (is_null($result)) {
-        print 'null';
       } else {
-        print $result;
+        var_export($result);
       }
-      print "\n";
+      print "[0m\n";
     }
+
+    $_ = $result;
   }
   print "\n";
 

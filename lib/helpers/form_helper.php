@@ -10,7 +10,8 @@
 
   function form_tag($action=null, $options=null) {
     $defaults = array(
-      'action' => url_for(any($action, Dispatcher::$path)), 'method' => 'post', 'open' => true
+      'action' => url_for(any($action, Dispatcher::$path)),
+      'method' => 'post', 'open' => true,
     );
 
     if (array_delete($options, 'multipart')) {

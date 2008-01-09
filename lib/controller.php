@@ -262,6 +262,7 @@
           $this->view->template = $template;
           #$this->view = new View($template, $this->data);
           $this->output = $this->view->render();
+          return true;
         } else {
           raise(MissingTemplate);
         }
@@ -273,6 +274,7 @@
     # Render only the given text without layout
     function render_text($text) {
       $this->output = $text;
+      return true;
     }
 
     # Redirect to a path
@@ -292,6 +294,7 @@
         $this->headers['Status'] = $code;
         $this->render_text(' ');
       }
+      return true;
     }
 
     # Send the configured headers
@@ -299,6 +302,7 @@
       foreach ((array) $this->headers as $header => $value) {
         @header("$header: $value");
       }
+      return true;
     }
 
     # Send a file with the appropriate headers

@@ -57,6 +57,9 @@
         return $this->$getter();
       } elseif (in_array($key, $this->attributes)) {
         return $this->data[$key];
+      } else {
+        $class = get_class($this);
+        raise("Call to undefined method $class::$getter()");
       }
     }
 
@@ -69,6 +72,9 @@
           $this->$setter(&$value);
         } elseif (in_array($key, $this->attributes)) {
           $this->data[$key] = &$value;
+        } else {
+          $class = get_class($this);
+          raise("Call to undefined method $class::$setter()");
         }
         unset($this->cache[$key]);
       }
