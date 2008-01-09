@@ -26,11 +26,48 @@
   print "\n\n".`php -v`."\n";
   while (!feof(STDIN)) {
     print ">>> ";
-    $input = trim(fgets(STDIN));
-    if (in_array($input, array('exit', 'quit'))) {
+    $command = trim(fgets(STDIN));
+    if (in_array($command, array('exit', 'quit'))) {
       exit;
-    } elseif ($input) {
-      eval("$input;");
+    } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
+      print `$command -x --color`;
+      continue;
+    } elseif (substr($command, 0, 3) == 'cd ') {
+      chdir(substr($command, 3));
+      print getcwd()."\n";
+      continue;
+    } elseif ($command == '..') {
+      chdir('..');
+      print getcwd()."\n";
+      continue;
+    } elseif (preg_match('/^\$\w+\?$/', $command)) {
+      $command = "var_export(".rtrim($command, '?').")";
+    } else {
+      $command = rtrim($command, ';');
+    }
+
+    if ($command) {
+      ob_start();
+      try {
+        eval("\$result = ($command);");
+      } catch (Exception $e) {
+        $result = $e;
+      }
+
+      if ($output = ob_get_clean()) {
+        print rtrim($output)."\n";
+      }
+
+      print " [1;32m::[0m ";
+      if (is_object($result)) {
+        print get_class($result);
+      } elseif (is_string($result)) {
+        var_export($result);
+      } elseif (is_null($result)) {
+        print 'null';
+      } else {
+        print $result;
+      }
       print "\n";
     }
   }

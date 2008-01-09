@@ -31,7 +31,8 @@
       if (method_exists($this, $getter)) {
         return $this->$getter();
       } else {
-        raise("Can't access private property '$key'");
+        $class = get_class($this);
+        raise("Call to undefined method $class::$getter()");
       }
     }
 
@@ -42,7 +43,8 @@
         $this->$setter($value);
         return $this;
       } else {
-        raise("Can't change read-only property '$key'");
+        $class = get_class($this);
+        raise("Call to undefined method $class::$setter()");
       }
     }
 

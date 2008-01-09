@@ -33,6 +33,18 @@
       $this->assertCalls('init');
     }
 
+    function test_getters() {
+      foreach (array('name', 'output') as $attr) {
+        $this->assertTrue(is_string($this->controller->$attr));
+      }
+
+      foreach (array('params', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $attr) {
+        $this->assertTrue(is_array($this->controller->$attr));
+      }
+
+      $this->assertIsA($this->controller->view, View);
+    }
+
     function test_set() {
       $this->controller->set('foo', 'bar');
       $this->assertEqual('bar', $this->data['foo']);
