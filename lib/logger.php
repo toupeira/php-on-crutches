@@ -96,9 +96,9 @@
       if ($level <= $this->level) {
         if (!$this->running()) {
           if (($this->buffer = @fopen($this->file, 'a')) === false) {
-            print "<p><b>Warning:</b> the logfile <tt>".config('log_file')."</tt> is not writable</p>";
+            print "<p><b>Warning:</b> the logfile <tt>{$this->file}</tt> is not writable</p>";
             $this->level = LOG_DISABLED;
-            return;
+            return false;
           }
         }
 
@@ -108,6 +108,8 @@
         if (fflush($this->buffer) === false) {
           raise("Couldn't flush logfile {$this->file}", false);
         }
+
+        return true;
       }
     }
   }

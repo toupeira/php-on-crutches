@@ -45,9 +45,11 @@
 
     function test_log_with_invalid_file() {
       $this->logger = new Logger('/this/path/aint/there/i/say');
-      $this->assertRaise('$this->logger->log("foo")');
-
-      $this->assertErrorPattern("/failed to open stream/");
+      ob_start();
+      $this->assertFalse($this->logger->log('foo'));
+      $output = ob_get_clean();
+      $this->assertEqual(LOG_DISABLED, $this->logger->level);
+      $this->assertEqual('<p><b>Warning:</b> the logfile <tt>/this/path/aint/there/i/say</tt> is not writable</p>.', $output);
     }
 
     function test_log_wrappers() {
