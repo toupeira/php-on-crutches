@@ -22,7 +22,6 @@
       $group->addTestFile($path);
     } else {
       $message = "Testing $name: ";
-
       $dir = TEST.$name;
       foreach (explode("\n", `find "$dir" -type f -name '*.php'`) as $file) {
         if (is_file($file)) {

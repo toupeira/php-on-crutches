@@ -14,10 +14,12 @@
 
   $logger->level = LOG_DISABLED;
 
-  $tests = GLOB(TEST.'*');
-  $tests = array_filter($tests, is_dir);
-  $tests = array_map(basename, $tests);
+  $tests = glob(TEST.'*');
+  $tests = array_map(basename, array_filter($tests, is_dir));
   array_remove($tests, array('coverage', 'fixtures', 'framework'));
+
+  $framework = TEST.'framework';
+  is_dir($framework) or $framework = null;
 
   $paths = array();
   $args = array_slice($argv, 1);
@@ -32,7 +34,9 @@
         break;
       case 'all':
         $paths = array_merge($paths, $tests);
-        array_unshift($paths, 'framework');
+        if (framework) {
+          array_unshift($paths, $framework);
+        }
         break;
       case 'recent':
         $_root = ROOT;
@@ -40,7 +44,7 @@
 
         $paths = array();
         $files = explode("\n", trim(
-          `find $_root -name .svn -prune -o -type f -name '*.php' -mmin -1 -print`
+          `find $_root -name .svn -prune -o -type f -name '*.php' -mmin -10 -print`
         ));
         if ($files == array('')) {
           break;
@@ -53,10 +57,15 @@
           }
         }
         break;
+      case 'framework':
+        if ($framework) {
+          $paths[] = $framework;
+        }
+        break;
       case 'uncommitted':
         break;
       default:
-        if ($arg == 'framework' or in_array($arg, $tests) or is_file($arg)) {
+        if (in_array($arg, $tests) or file_exists($arg)) {
           $paths[] = $arg;
         } else {
           if (strstr($argv[0], 'coverage')) {
@@ -72,7 +81,7 @@
           print "\n"
               . "  all          Run all tests\n"
               . "  app          Run application tests (default)\n"
-              . "  framework    Run framework tests\n"
+. ($framework ? "  framework    Run framework tests\n" : "")
               . "\n"
               . "  recent       Test recently changed files\n"
               . "  uncommitted  Test uncommitted files\n"
