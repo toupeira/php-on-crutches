@@ -1,8 +1,12 @@
 <?# $Id$ ?>
 <?
 
-  class ControllerTest extends TestCase
+  class ControllerTest extends ControllerTestCase
   {
+    function __construct() {
+      TestCase::__construct();
+    }
+
     function setup() {
       $this->controller = new ControllerTestController();
       $this->data = &$this->controller->view->data;
@@ -27,7 +31,7 @@
       $this->assertEqual($this->controller->msg, $this->data['msg']);
 
       $this->assertEqual(
-        array('index', 'edit', 'filter'),
+        array('index', 'edit', 'filter', 'fail'),
         $this->controller->actions);
 
       $this->assertCalls('init');
@@ -112,6 +116,28 @@
     }
 
     function test_redirect_to() {
+      $this->controller->redirect_to('foo');
+      $this->assertEqual('foo', $this->controller->headers['Location']);
+      $this->assertEqual(302, $this->controller->headers['Status']);
+      $this->assertEqual(' ', $this->controller->output);
+    }
+
+    function test_redirect_to_with_status() {
+      $this->controller->redirect_to('foo', 404);
+      $this->assertEqual('foo', $this->controller->headers['Location']);
+      $this->assertEqual(404, $this->controller->headers['Status']);
+      $this->assertEqual(' ', $this->controller->output);
+    }
+
+    function test_redirect_to_with_debug() {
+      config_set('debug_redirects', true);
+
+      $this->controller->redirect_to('foo', 404);
+      $this->assertEqual(null, $this->controller->headers['Location']);
+      $this->assertEqual(null, $this->controller->headers['Status']);
+      $this->assertEqual('Redirect to <a href="foo">foo</a>', $this->controller->output);
+
+      config_set('debug_redirects', false);
     }
 
     function test_send_headers() {
@@ -167,6 +193,10 @@
       $this->calls[] = 'after_filter';
     }
 
+    protected function before_fail() {
+      return false;
+    }
+
     function index() {
       $this->set('string', 'foo');
       $this->set('array', array('bar'));
@@ -178,6 +208,9 @@
     }
 
     function filter() {
+    }
+
+    function fail() {
     }
   }
 

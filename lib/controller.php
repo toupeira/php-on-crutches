@@ -65,7 +65,7 @@
       $this->set('cookies', &$this->cookies);
       $this->set('msg', &$this->msg);
 
-      # Collect all methods defined in this controller
+      # Collect all public methods defined in this controller
       $this->actions = array_diff(
         get_class_methods($this),
         get_class_methods(Controller)
