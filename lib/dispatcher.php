@@ -33,7 +33,9 @@
     }
 
     static function run($path=null) {
-      self::$path = $path = any($path, $_GET['path'], config('default_path'), 'index');
+      self::$path = $path = any(
+        $path, $_GET['path'], config('default_path'), 'index'
+      );
       unset($_GET['path']);
 
       # Detect the relative path used to reach the website
