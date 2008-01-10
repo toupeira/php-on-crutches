@@ -10,6 +10,8 @@
 
   require CONFIG.'framework.php';
   @include CONFIG.'application.php';
+  @include CONFIG.'routes.php';
+
   $_CONFIG = array_merge($_FRAMEWORK, (array) $_APPLICATION);
 
   function config($key) {

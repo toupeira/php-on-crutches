@@ -33,27 +33,26 @@
     }
 
     static function run($path=null) {
-      if (empty($path)) {
-        $path = $_GET['path'];
-        if (empty($path)) {
-          $path = config('default_path');
-        }
-      }
+      self::$path = $path = any($path, $_GET['path'], config('default_path'), 'index');
       unset($_GET['path']);
 
-      if (empty($path)) {
-        $path = 'index';
-      }
-
-      self::$path = $path;
-
       # Detect the relative path used to reach the website
-      log_debug($_SERVER['REQUEST_URI']);
       if (!self::$prefix) {
         self::$prefix = preg_replace(
-          "#(index\.php)?(\?[^/]*)?($path)?(\?.*)?$#", '',
+          '#(index\.php)?(\?[^/]*)?('.self::$path.')?(\?.*)?$#', '',
           $_SERVER['REQUEST_URI']
         );
+      }
+
+      # Detect routes and rewrite path
+      $path == self::$path;
+      foreach ($GLOBALS['_ROUTES'] as $from => $to) {
+        $len = strlen($from);
+        if ($from == substr(self::$path, 0, $len)) {
+          $path = $to.substr(self::$path, $len);
+          log_debug("Routing to $path...");
+          break;
+        }
       }
 
       # Detect controller, action and arguments
