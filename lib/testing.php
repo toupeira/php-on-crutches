@@ -79,7 +79,7 @@
           $raised = true;
         }
       }
-      $this->assertTrue($raised, "expected code to raise $class");
+      $this->assertTrue($raised, "Expected code to raise $class");
       return $e;
     }
 
@@ -154,7 +154,7 @@
 
     function assertHeader($header, $value) {
       $this->assertTrue(
-        strstr($this->controller->headers[$header], $value),
+        strstr($this->controller->headers[$header], "$value"),
         "Expected header '$header' to contain '$value'");
     }
 
@@ -179,6 +179,14 @@
           gettype($this->data[$key]), $type,
           "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->data[$key])."'");
       }
+    }
+
+    function assertOutput($text) {
+      $this->assertEqual($text, $this->controller->output);
+    }
+
+    function assertOutputMatch($pattern) {
+      $this->assertMatch($pattern, $this->controller->output);
     }
 
     function assertRedirect($path) {

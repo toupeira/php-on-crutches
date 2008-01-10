@@ -337,14 +337,14 @@
 
     # Add invalid fields and an error message
     function add_error($keys, $message) {
-      $this->errors = array_merge((array) $this->errors, (array) $keys);
+      $this->errors = array_unique(array_merge((array) $this->errors, (array) $keys));
       $this->msg['error'] = $message;
     }
 
     # Check if a form value has errors
     function has_errors($key) {
-      if (substr($name, -2) == '[]') {
-        return in_array(substr($key, 0, -2), $this->errors);
+      if (substr($key, -2) == '[]') {
+        return in_array(substr($key, 0, -2), (array) $this->errors);
       } else {
         return in_array($key, (array) $this->errors);
       }

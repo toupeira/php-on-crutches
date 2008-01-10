@@ -125,7 +125,7 @@
 
     # Error handling and validation
 
-    protected function add_error($keys, $message) {
+    function add_error($keys, $message) {
       $this->errors = array_unique(array_merge($this->errors, (array) $keys));
       $this->messages[] = $message;
     }

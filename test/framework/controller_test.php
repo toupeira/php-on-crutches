@@ -31,7 +31,7 @@
       $this->assertEqual($this->controller->msg, $this->data['msg']);
 
       $this->assertEqual(
-        array('index', 'edit', 'filter', 'fail'),
+        array('index', 'edit', 'filter', 'fail', 'set_headers', 'set_errors'),
         $this->controller->actions);
 
       $this->assertCalls('init');
@@ -97,13 +97,69 @@
       $this->assertTrue($this->controller->is_ssl());
     }
 
-    function test_is_valid_request() {
+    function test_is_valid_request_without_requirements() {
+      $_SERVER['REQUEST_METHOD'] = 'GET';
+
+      $this->assertTrue($this->controller->is_valid_request('index'));
+    }
+
+    function test_is_valid_request_with_post_requirement() {
+      config_set('default_path', 'foo');
+      $_SERVER['REQUEST_METHOD'] = 'GET';
+
+      foreach (array(true, 'index') as $require) {
+        $this->controller->require_post = $require;
+        $this->assertFalse($this->controller->is_valid_request('index'));
+        $this->assertRedirect('foo');
+      }
+
+      foreach (array(true, 'edit') as $require) {
+        $this->controller->require_post = $require;
+        $this->assertFalse($this->controller->is_valid_request('edit'));
+        $this->assertRedirect('.');
+      }
+    }
+
+    function test_is_valid_request_with_ajax_requirement() {
+      config_set('default_path', 'foo');
+      unset($_SERVER['HTTP_X_REQUESTED_WITH']);
+
+      foreach (array(true, 'index') as $require) {
+        $this->controller->require_ajax = $require;
+        $this->assertFalse($this->controller->is_valid_request('index'));
+        $this->assertRedirect('foo');
+      }
+
+      foreach (array(true, 'edit') as $require) {
+        $this->controller->require_ajax = $require;
+        $this->assertFalse($this->controller->is_valid_request('edit'));
+        $this->assertRedirect('.');
+      }
+    }
+
+    function test_is_valid_request_with_ssl_requirement() {
+      unset($_SERVER['HTTPS']);
+      $_SERVER['SERVER_NAME'] = 'test';
+      $_SERVER['REQUEST_URI'] = '/foo?bar';
+
+      foreach (array(true, 'index') as $require) {
+        $this->controller->require_ssl = $require;
+        $this->assertFalse($this->controller->is_valid_request('index'));
+        $this->assertRedirect("https://test/foo?bar");
+      }
     }
 
     function test_perform() {
     }
 
-    function test_rescue_error_in_public() {
+    function test_rescue_error_in_public_404() {
+      $this->controller->rescue_error_in_public(new MissingTemplate());
+      $this->assertHeader('Status', 404);
+    }
+
+    function test_rescue_error_in_public_500() {
+      $this->controller->rescue_error_in_public(new ApplicationError());
+      $this->assertHeader('Status', 500);
     }
 
     function test_render() {
@@ -141,18 +197,69 @@
     }
 
     function test_send_headers() {
+      $headers = array(
+        'foo' => 'FOO',
+        'bar' => 'BAR',
+        'num' => 666,
+      );
+
+      $this->controller->headers = $headers;
+      $this->assertTrue($this->controller->send_headers());
     }
 
     function test_send_file() {
     }
 
     function test_add_error() {
+      $this->controller->add_error('foo', "foo is invalid");
+      $this->assertEqual(array('foo'), $this->controller->errors);
+      $this->assertEqual("foo is invalid", $this->controller->msg['error']);
+      $this->controller->add_error('foo', "foo is invalid");
+      $this->assertEqual(array('foo'), $this->controller->errors);
+      $this->assertEqual("foo is invalid", $this->controller->msg['error']);
+
+      $this->controller->add_error('bar', "bar is invalid");
+      $this->assertEqual(array('foo', 'bar'), $this->controller->errors);
+      $this->assertEqual("bar is invalid", $this->controller->msg['error']);
     }
 
     function test_has_errors() {
+      $this->controller->errors = array('foo');
+      $this->assertTrue($this->controller->has_errors('foo'));
+      $this->assertFalse($this->controller->has_errors('bar'));
+      $this->assertTrue($this->controller->has_errors('foo[]'));
+      $this->assertFalse($this->controller->has_errors('bar[]'));
     }
 
-    function test_set_error_messages() {
+    function test_set_error_messages_without_messages() {
+      $foo = new ControllerTestModel();
+
+      $this->controller->set('foo', $foo);
+      $this->controller->set_error_messages();
+      $this->assertNull($this->controller->msg['error']);
+    }
+
+    function test_set_error_messages_with_one_message() {
+      $foo = new ControllerTestModel();
+      $foo->add_error('foo', "foo is invalid");
+
+      $this->controller->set('foo', $foo);
+      $this->controller->set_error_messages();
+      $this->assertEqual(
+        "foo is invalid",
+        $this->controller->msg['error']);
+    }
+
+    function test_set_error_messages_with_multiple_messages() {
+      $foo = new ControllerTestModel();
+      $foo->add_error('foo', "foo is invalid");
+      $foo->add_error('bar', "bar is invalid");
+
+      $this->controller->set('foo', $foo);
+      $this->controller->set_error_messages();
+      $this->assertEqual(
+        "<ul><li>foo is invalid</li><li>bar is invalid</li></ul>",
+        $this->controller->msg['error']);
     }
 
     function test_call_filter() {
@@ -162,6 +269,8 @@
       $this->assertCalls('init', 'before', 'after');
       $this->controller->call_filter('foo');
       $this->assertCalls('init', 'before', 'after');
+
+      $this->assertRaise('$this->controller->call_filter("before_fail")');
     }
   }
 
@@ -204,13 +313,27 @@
     }
 
     function edit() {
-      
     }
 
     function filter() {
     }
 
     function fail() {
+    }
+
+    function set_headers($headers) {
+      $this->headers = $headers;
+    }
+
+    function set_errors($errors) {
+      $this->errors = $errors;
+    }
+  }
+
+  class ControllerTestModel extends Model
+  {
+    function __construct() {
+      $this->messages = func_get_args();
     }
   }
 
