@@ -1,118 +1,118 @@
 #!/usr/bin/php5
 <?
 /*
-  PHP on Crutches - Copyright (c) 2008 Markus Koller
+   PHP on Crutches - Copyright (c) 2008 Markus Koller
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the MIT License.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the MIT License.
 
-  $Id$
+   $Id$
 */
 
-  require_once dirname(__FILE__).'/../config/environment.php';
-  require_once LIB.'testing.php';
+   require_once dirname(__FILE__).'/../config/environment.php';
+   require_once LIB.'testing.php';
 
-  $logger->level = LOG_DISABLED;
+   $logger->level = LOG_DISABLED;
 
-  $tests = glob(TEST.'*');
-  $tests = array_map(basename, array_filter($tests, is_dir));
-  array_remove($tests, array('coverage', 'fixtures', 'framework'));
+   $tests = glob(TEST.'*');
+   $tests = array_map(basename, array_filter($tests, is_dir));
+   array_remove($tests, array('coverage', 'fixtures', 'framework'));
 
-  $framework = TEST.'framework';
-  is_dir($framework) or $framework = null;
+   $framework = TEST.'framework';
+   is_dir($framework) or $framework = null;
 
-  $paths = array();
-  $args = array_slice($argv, 1);
-  if (empty($args)) {
-    $paths = $tests;
-  }
+   $paths = array();
+   $args = array_slice($argv, 1);
+   if (empty($args)) {
+      $paths = $tests;
+   }
 
-  while ($arg = array_shift($args)) {
-    switch ($arg) {
-      case 'app':
-        $paths = array_merge($paths, $tests);
-        break;
-      case 'all':
-        $paths = array_merge($paths, $tests);
-        if (framework) {
-          array_unshift($paths, $framework);
-        }
-        break;
-      case 'recent':
-        $_root = ROOT;
-        $_test = TEST;
+   while ($arg = array_shift($args)) {
+      switch ($arg) {
+         case 'app':
+            $paths = array_merge($paths, $tests);
+            break;
+         case 'all':
+            $paths = array_merge($paths, $tests);
+            if (framework) {
+               array_unshift($paths, $framework);
+            }
+            break;
+         case 'recent':
+            $_root = ROOT;
+            $_test = TEST;
 
-        $paths = array();
-        $files = explode("\n", trim(
-          `find $_root -name .svn -prune -o -type f -name '*.php' -mmin -10 -print`
-        ));
-        if ($files == array('')) {
-          break;
-        }
+            $paths = array();
+            $files = explode("\n", trim(
+               `find $_root -name .svn -prune -o -type f -name '*.php' -mmin -10 -print`
+            ));
+            if ($files == array('')) {
+               break;
+            }
 
-        foreach ($files as $file) {
-          $name = substr(basename($file), 0, -4);
-          if ($test = trim(`find $_test -type f -name '{$name}_test.php'`)) {
-            $paths[] = $test;
-          }
-        }
-        break;
-      case 'framework':
-        if ($framework) {
-          $paths[] = $framework;
-        }
-        break;
-      case 'uncommitted':
-        break;
-      default:
-        if (in_array($arg, $tests) or file_exists($arg)) {
-          $paths[] = $arg;
-        } else {
-          if (strstr($argv[0], 'coverage')) {
-            print "Usage: $argv[0] [OPTIONS] [TESTS..]\n"
-                . "\n"
-                . "  -d DIR       Target directory\n"
-                . "  -i PATH      Include path in report\n"
-                . "  -e PATH      Exclude path in report\n"
-                . "  -f           Force deletion of existing directory\n";
-          } else {
-            print "Usage: $argv[0] [TESTS..]\n";
-          }
-          print "\n"
-              . "  all          Run all tests\n"
-              . "  app          Run application tests (default)\n"
-. ($framework ? "  framework    Run framework tests\n" : "")
-              . "\n"
-              . "  recent       Test recently changed files\n"
-              . "  uncommitted  Test uncommitted files\n"
-              . "\n";
-          foreach ($tests as $test) {
-            printf("  %-12s Run %s tests\n", $test, rtrim($test, 's'));
-          }
-          print "\n";
-          exit(255);
-        }
-    }
-  }
+            foreach ($files as $file) {
+               $name = substr(basename($file), 0, -4);
+               if ($test = trim(`find $_test -type f -name '{$name}_test.php'`)) {
+                  $paths[] = $test;
+               }
+            }
+            break;
+         case 'framework':
+            if ($framework) {
+               $paths[] = $framework;
+            }
+            break;
+         case 'uncommitted':
+            break;
+         default:
+            if (in_array($arg, $tests) or file_exists($arg)) {
+               $paths[] = $arg;
+            } else {
+               if (strstr($argv[0], 'coverage')) {
+                  print "Usage: $argv[0] [OPTIONS] [TESTS..]\n"
+                        . "\n"
+                        . "   -d DIR     Target directory\n"
+                        . "   -i PATH    Include path in report\n"
+                        . "   -e PATH    Exclude path in report\n"
+                        . "   -f         Force deletion of existing directory\n";
+               } else {
+                  print "Usage: $argv[0] [TESTS..]\n";
+               }
+               print "\n"
+                     . "  all          Run all tests\n"
+                     . "  app          Run application tests (default)\n"
+       . ($framework ? "  framework    Run framework tests\n" : "")
+                     . "\n"
+                     . "  recent       Test recently changed files\n"
+                     . "  uncommitted  Test uncommitted files\n"
+                     . "\n";
+               foreach ($tests as $test) {
+                  printf("  %-12s Run %s tests\n", $test, rtrim($test, 's'));
+               }
+               print "\n";
+               exit(255);
+            }
+      }
+   }
 
-  if (empty($paths)) {
-    print "Nothing to test.\n";
-    exit(1);
-  }
+   if (empty($paths)) {
+      print "Nothing to test.\n";
+      exit(1);
+   }
 
-  print "\n";
-  $errors = array();
-  foreach (array_unique((array) $paths) as $path) {
-    run_tests($path) or $errors[] = $path;
-  }
+   print "\n";
+   $errors = array();
+   foreach (array_unique((array) $paths) as $path) {
+      run_tests($path) or $errors[] = $path;
+   }
 
-  if ($errors) {
-    print "Encountered errors in the following tests:\n";
-    foreach ($errors as $error) {
-      print "  $error\n";
-    }
-    print "\n";
-    exit(1);
-  }
+   if ($errors) {
+      print "Encountered errors in the following tests:\n";
+      foreach ($errors as $error) {
+         print "  $error\n";
+      }
+      print "\n";
+      exit(1);
+   }
 
 ?>

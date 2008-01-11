@@ -1,55 +1,55 @@
 <?
 /*
-  PHP on Crutches - Copyright (c) 2008 Markus Koller
+   PHP on Crutches - Copyright (c) 2008 Markus Koller
 
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
+   Permission is hereby granted, free of charge, to any person obtaining
+   a copy of this software and associated documentation files (the
+   "Software"), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to
+   permit persons to whom the Software is furnished to do so, subject to
+   the following conditions:
 
-  The above copyright notice and this permission notice shall be
-  included in all copies or substantial portions of the Software.
+   The above copyright notice and this permission notice shall be
+   included in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  $Id$
+   $Id$
 */
 
-  # Load standard libraries
-  $libs = array(
-    'base',
-    'logger',
-    'config',
+   # Load standard libraries
+   $libs = array(
+      'base',
+      'logger',
+      'config',
 
-    'dispatcher',
-    'controller',
-    'model',
-    'view',
-  );
+      'dispatcher',
+      'controller',
+      'model',
+      'view',
+   );
 
-  foreach ($libs as $lib) {
-    require LIB."$lib.php";
-  }
+   foreach ($libs as $lib) {
+      require LIB."$lib.php";
+   }
 
-  # Load standard helpers
-  $helpers = glob(LIB.'helpers/*.php');
-  foreach ($helpers as $helper) {
-    require $helper;
-  }
+   # Load standard helpers
+   $helpers = glob(LIB.'helpers/*.php');
+   foreach ($helpers as $helper) {
+      require $helper;
+   }
 
-  # Load application helper
-  @include_once HELPERS.'application_helper.php';
+   # Load application helper
+   @include_once HELPERS.'application_helper.php';
 
-  Logger::init();
-  Dispatcher::init();
+   Logger::init();
+   Dispatcher::init();
 
 ?>

@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-  class TestsTest extends TestCase
-  {
-  }
+   class TestsTest extends TestCase
+   {
+   }
 
 ?>

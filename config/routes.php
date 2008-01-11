@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-  $_ROUTES = array(
-  );
+   $_ROUTES = array(
+   );
 
 ?>

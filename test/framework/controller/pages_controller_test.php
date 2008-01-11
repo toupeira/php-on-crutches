@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-  class PagesControllerTest extends TestCase
-  {
-  }
+   class PagesControllerTest extends TestCase
+   {
+   }
 
 ?>

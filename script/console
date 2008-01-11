@@ -1,93 +1,93 @@
 #!/usr/bin/rlwrap php5
 <?
 /*
-  PHP on Crutches - Copyright (c) 2008 Markus Koller
+   PHP on Crutches - Copyright (c) 2008 Markus Koller
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the MIT License.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the MIT License.
 
-  $Id$
+   $Id$
 */
 
-  require dirname(__FILE__).'/../config/environment.php';
+   require dirname(__FILE__).'/../config/environment.php';
 
-  $logger->level = LOG_DISABLED;
+   $logger->level = LOG_DISABLED;
 
-  function get($path, $params=null) {
-    if (is_array($params)) {
-      $_GET = $_POST = $params;
-    }
-    print Dispatcher::run($path);
-  }
+   function get($path, $params=null) {
+      if (is_array($params)) {
+         $_GET = $_POST = $params;
+      }
+      print Dispatcher::run($path);
+   }
 
-  function post($path, $params=null) {
-    $_GET = $_POST = (array) $params;
-    print Dispatcher::run($path);
-  }
+   function post($path, $params=null) {
+      $_GET = $_POST = (array) $params;
+      print Dispatcher::run($path);
+   }
 
-  print "\n\n".`php -v`."\n";
-  while (!feof(STDIN)) {
-    print ">>> ";
-    $command = trim(fgets(STDIN));
+   print "\n\n".`php -v`."\n";
+   while (!feof(STDIN)) {
+      print ">>> ";
+      $command = trim(fgets(STDIN));
 
-    if (in_array($command, array('exit', 'quit'))) {
-      exit;
-    } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
-      print `$command -x --color`;
-      continue;
-    } elseif (substr($command, 0, 3) == 'cd ') {
-      chdir(substr($command, 3));
-      print getcwd()."\n";
-      continue;
-    } elseif ($command == '..') {
-      chdir('..');
-      print getcwd()."\n";
-      continue;
-    } elseif (preg_match('/^\$\w+\?$/', $command)) {
-      $command = "var_export(".rtrim($command, '?').")";
-    } else {
-      $command = rtrim($command, ';');
-    }
-
-    $result = null;
-
-    if ($command) {
-      if (preg_match('/^([a-z]+) /', $command, $m) and $m[1] != 'new') {
-        $result = true;
+      if (in_array($command, array('exit', 'quit'))) {
+         exit;
+      } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
+         print `$command -x --color`;
+         continue;
+      } elseif (substr($command, 0, 3) == 'cd ') {
+         chdir(substr($command, 3));
+         print getcwd()."\n";
+         continue;
+      } elseif ($command == '..') {
+         chdir('..');
+         print getcwd()."\n";
+         continue;
+      } elseif (preg_match('/^\$\w+\?$/', $command)) {
+         $command = "var_export(".rtrim($command, '?').")";
       } else {
-        $command = "\$result = ($command)";
+         $command = rtrim($command, ';');
       }
 
-      ob_start();
+      $result = null;
 
-      try {
-        eval("$command;");
-      } catch (Exception $e) {
-        print "[1;31m".get_class($e)."[0m: [1m".$e->getMessage()."[0m\n";
-        foreach (explode("\n", $e->getTraceAsString()) as $line) {
-          list($line, $text) = explode(' ', $line, 2);
-          print "  [1m$line[0m $text\n";
-        }
-        #print '  '.str_replace("\n", "\n  ", $e->getTraceAsString());
-        $result = $e;
+      if ($command) {
+         if (preg_match('/^([a-z]+) /', $command, $m) and $m[1] != 'new') {
+            $result = true;
+         } else {
+            $command = "\$result = ($command)";
+         }
+
+         ob_start();
+
+         try {
+            eval("$command;");
+         } catch (Exception $e) {
+            print "[1;31m".get_class($e)."[0m: [1m".$e->getMessage()."[0m\n";
+            foreach (explode("\n", $e->getTraceAsString()) as $line) {
+               list($line, $text) = explode(' ', $line, 2);
+               print "   [1m$line[0m $text\n";
+            }
+            #print '   '.str_replace("\n", "\n   ", $e->getTraceAsString());
+            $result = $e;
+         }
+
+         if ($output = ob_get_clean()) {
+            print rtrim($output)."\n";
+         }
+
+         print " :: [0;36m";
+         if (is_object($result)) {
+            print get_class($result);
+         } else {
+            var_export($result);
+         }
+         print "[0m\n";
       }
 
-      if ($output = ob_get_clean()) {
-        print rtrim($output)."\n";
-      }
-
-      print " :: [0;36m";
-      if (is_object($result)) {
-        print get_class($result);
-      } else {
-        var_export($result);
-      }
-      print "[0m\n";
-    }
-
-    $_ = $result;
-  }
-  print "\n";
+      $_ = $result;
+   }
+   print "\n";
 
 # vim: ft=php
 ?>

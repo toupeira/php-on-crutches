@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-  $_DATABASE = array(
-  );
+   $_DATABASE = array(
+   );
 
 ?>

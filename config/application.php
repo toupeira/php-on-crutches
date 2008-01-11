@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-  $_APPLICATION = array(
-  );
+   $_APPLICATION = array(
+   );
 
 ?>

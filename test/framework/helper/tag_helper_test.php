@@ -1,8 +1,8 @@
 <?# $Id$ ?>
 <?
 
-  class TagHelperTest extends TestCase
-  {
-  }
+   class TagHelperTest extends TestCase
+   {
+   }
 
 ?>
