@@ -18,7 +18,7 @@
       $name = basename($path);
 
       if (is_file($path)) {
-         $message = "Testing $path: ";
+         $message = "Testing ".basename($path).": ";
          $group->addTestFile($path);
       } else {
          $message = "Testing $name: ";
@@ -30,7 +30,7 @@
          }
       }
 
-      print $message.$group->getSize().' tests';
+      print $message.pluralize($group->getSize(), 'test', 'tests');
       if ($group->getSize() > 0) {
          $reporter = any($reporter, new Reporter());
          $group->run($reporter);
@@ -40,6 +40,23 @@
          print "\n\n";
          return true;
       }
+   }
+
+   function find_tests($command) {
+      $tests = array();
+      $files = explode("\n", shell_exec($command));
+      if ($files == array('')) {
+         return $tests;
+      }
+
+      foreach ($files as $file) {
+         $name = str_replace('.php', '', basename($file));
+         $test = shell_exec("find ".TEST." -type f -name '{$name}_test.php' | head -1");
+         if ($test) {
+            $tests[] = trim($test);
+         }
+      }
+      return $tests;
    }
 
    class TestCase extends UnitTestCase

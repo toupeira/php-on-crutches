@@ -29,40 +29,27 @@
 
    while ($arg = array_shift($args)) {
       switch ($arg) {
-         case 'app':
-            $paths = array_merge($paths, $tests);
-            break;
          case 'all':
             $paths = array_merge($paths, $tests);
-            if (framework) {
+            if ($framework) {
                array_unshift($paths, $framework);
             }
             break;
-         case 'recent':
-            $_root = ROOT;
-            $_test = TEST;
-
-            $paths = array();
-            $files = explode("\n", trim(
-               `find $_root -name .svn -prune -o -type f -name '*.php' -mmin -10 -print`
-            ));
-            if ($files == array('')) {
-               break;
-            }
-
-            foreach ($files as $file) {
-               $name = substr(basename($file), 0, -4);
-               if ($test = trim(`find $_test -type f -name '{$name}_test.php'`)) {
-                  $paths[] = $test;
-               }
-            }
+         case 'app':
+            $paths = array_merge($paths, $tests);
             break;
          case 'framework':
             if ($framework) {
                $paths[] = $framework;
             }
             break;
+         case 'recent':
+            $paths = array_merge($paths, find_tests(
+               "find ".ROOT." -name .svn -prune -o -type f -name '*.php' -mmin -10 -print"));
+            break;
          case 'uncommitted':
+            $paths = array_merge($paths, find_tests(
+               "svn stat ".ROOT." | grep '^M ' | cut -dM -f2-"));
             break;
          default:
             if (in_array($arg, $tests) or file_exists($arg)) {
@@ -71,23 +58,26 @@
                if (strstr($argv[0], 'coverage')) {
                   print "Usage: $argv[0] [OPTIONS] [TESTS..]\n"
                         . "\n"
-                        . "   -d DIR     Target directory\n"
-                        . "   -i PATH    Include path in report\n"
-                        . "   -e PATH    Exclude path in report\n"
-                        . "   -f         Force deletion of existing directory\n";
+                        . "  -d DIR        Output directory for the report\n"
+                        . "  -i PATH       Include path in report\n"
+                        . "  -e PATH       Exclude path in report\n"
+                        . "  -f            Overwrite an existing directory\n";
                } else {
                   print "Usage: $argv[0] [TESTS..]\n";
                }
                print "\n"
-                     . "  all          Run all tests\n"
-                     . "  app          Run application tests (default)\n"
-       . ($framework ? "  framework    Run framework tests\n" : "")
+                     . "Tests:\n"
+                     . "  all           Run all tests\n"
+                     . "  app           Run application tests (default)\n"
+       . ($framework ? "  framework     Run framework tests\n" : "")
                      . "\n"
-                     . "  recent       Test recently changed files\n"
-                     . "  uncommitted  Test uncommitted files\n"
-                     . "\n";
+                     . "Special tests:\n"
+                     . "  recent        Test recently changed files\n"
+                     . "  uncommitted   Test uncommitted files\n"
+                     . "\n"
+                     . "Available tests:\n";
                foreach ($tests as $test) {
-                  printf("  %-12s Run %s tests\n", $test, rtrim($test, 's'));
+                  printf("  %-13s Run %s tests\n", $test, rtrim($test, 's'));
                }
                print "\n";
                exit(255);

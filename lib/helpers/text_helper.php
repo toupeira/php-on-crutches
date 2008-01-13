@@ -21,11 +21,18 @@
    }
 
    function camelize($text) {
-      return str_replace(' ', '', humanize($text));
+      $text = str_replace('_', ' ', $text);
+      for ($i = 0; $i < strlen($text); $i++) {
+         if ($text[$i] == ' ') {
+            $text[$i+1] = strtoupper($text[$i+1]);
+         }
+      }
+      return str_replace(' ', '', ucfirst($text));
    }
 
    function underscore($text) {
-      return strtolower(preg_replace('/([a-z])([A-Z])/', '\1_\2', basename($text)));
+      return strtolower(preg_replace('/([a-z]) ?([A-Z])/', '\1_\2',
+                                     basename($text)));
    }
 
    function truncate($text, $length=40) {

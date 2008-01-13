@@ -27,7 +27,7 @@
 
    print "\n\n".`php -v`."\n";
    while (!feof(STDIN)) {
-      print ">>> ";
+      print "php[".ROOT_NAME."] >>> ";
       $command = trim(fgets(STDIN));
 
       if (in_array($command, array('exit', 'quit'))) {
