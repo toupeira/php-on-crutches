@@ -27,11 +27,24 @@
 
    print "\n\n".`php -v`."\n";
    while (!feof(STDIN)) {
-      print "php[".ROOT_NAME."] >>> ";
+      print "php[".config('application')."] >>> ";
       $command = trim(fgets(STDIN));
 
-      if (in_array($command, array('exit', 'quit'))) {
+      if ($command == 'quit') {
          exit;
+      } elseif (in_array($command, array('?', 'help'))) {
+         print "\n";
+         print "  Special commands:\n";
+         print "    help, ?          Show this help\n";
+         print "    exit, quit       Exit the console\n";
+         print "    ls, cd, ..       Shell aliases\n";
+         print "    \$var?            Dump variable\n";
+         print "\n";
+         print "  Helpers:\n";
+         print "    get(\$path, \$params)\n";
+         print "    post(\$path, \$params)\n";
+         print "\n";
+         continue;
       } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
          print `$command -x --color`;
          continue;
