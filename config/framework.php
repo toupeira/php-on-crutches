@@ -3,24 +3,22 @@
 
    $_FRAMEWORK = array(
       # Application name
-      'application'       => ROOT_NAME,
-      # Application version
-      'version'             => '',
+      'application'     => ROOT_NAME,
 
       # Default site
-      'default_path'      => '',
+      'default_path'    => '',
       # Use URL rewriting (needs to be configured on the webserver)
-      'rewrite_urls'      => true,
+      'rewrite_urls'    => true,
       # Start sessions
-      'use_sessions'      => true,
+      'use_sessions'    => true,
 
       # Log file
-      'log_file'            => LOG.ROOT_NAME.'.log',
+      'log_file'        => LOG.ROOT_NAME.'.log',
       # Log level
-      'log_level'          => LOG_DEBUG,
+      'log_level'       => LOG_DEBUG,
 
       # Show debug information
-      'debug'                => true,
+      'debug'           => true,
       # Show redirects with link
       'debug_redirects' => false,
    );
