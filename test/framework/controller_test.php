@@ -8,7 +8,7 @@
       }
 
       function setup() {
-         $this->controller = new ControllerTestController();
+         $this->controller = new SampleController();
          $this->data = &$this->controller->view->data;
       }
 
@@ -17,7 +17,7 @@
       }
 
       function test_construct() {
-         $this->assertEqual('controller_test', $this->controller->name);
+         $this->assertEqual('sample', $this->controller->name);
          $this->assertEqual('', $this->controller->output);
          $this->assertIsA($this->controller->view, View);
 
@@ -139,13 +139,13 @@
 
       function test_is_valid_request_with_ssl_requirement() {
          unset($_SERVER['HTTPS']);
-         $_SERVER['SERVER_NAME'] = 'test';
+         $_SERVER['SERVER_NAME'] = 'example.com';
          $_SERVER['REQUEST_URI'] = '/foo?bar';
 
          foreach (array(true, 'index') as $require) {
             $this->controller->require_ssl = $require;
             $this->assertFalse($this->controller->is_valid_request('index'));
-            $this->assertRedirect("https://test/foo?bar");
+            $this->assertRedirect("https://example.com/foo?bar");
          }
       }
 
@@ -166,7 +166,7 @@
       }
 
       function test_render_text() {
-         $text = "<h1>Test</h1>";
+         $text = "<h1>Hi</h1>";
          $this->controller->render_text($text);
          $this->assertEqual($text, $this->controller->output);
       }
@@ -274,7 +274,7 @@
       }
    }
 
-   class ControllerTestController extends Controller
+   class SampleController extends Controller
    {
       public $require_post;
       public $require_ajax;

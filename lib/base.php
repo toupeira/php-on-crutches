@@ -19,6 +19,8 @@
          } elseif (is_file($file = LIB."controllers/$class.php")) {
             require $file;
          }
+      } elseif (is_file($file = LIB.str_replace('_', '/', $class).'.php')) {
+         require $file;
       }
    }
 
