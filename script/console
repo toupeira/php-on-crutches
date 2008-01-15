@@ -68,7 +68,6 @@
                list($line, $text) = explode(' ', $line, 2);
                print "   [1m$line[0m $text\n";
             }
-            #print '   '.str_replace("\n", "\n   ", $e->getTraceAsString());
             $result = $e;
          }
 
