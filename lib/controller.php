@@ -181,7 +181,7 @@
             if ($this->is_valid_request($action)) {
                $this->set('action', $action);
 
-               # Reset the layout, don't use one for Ajax requests
+               # Set the layout, don't use one for Ajax requests
                $this->view->layout = ($this->is_ajax() ? null : 'application');
 
                # Call before filters

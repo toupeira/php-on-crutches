@@ -3,10 +3,6 @@
 
    class ControllerTest extends ControllerTestCase
    {
-      function __construct() {
-         TestCase::__construct();
-      }
-
       function setup() {
          $this->controller = new SampleController();
          $this->data = &$this->controller->view->data;

@@ -124,11 +124,13 @@
 
    class ControllerTestCase extends TestCase
    {
-      function __construct() {
-         parent::__construct();
+      function setup() {
          $class = substr(get_class($this), 0, -4);
          $this->controller = Dispatcher::$controller = new $class();
+         $this->setup_controller();
       }
+
+      function setup_controller() {}
 
       function request($action, $get=null, $post=null) {
          $_SERVER['REQUEST_METHOD'] = (is_array($post) ? 'POST' : 'GET');
