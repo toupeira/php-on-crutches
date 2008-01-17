@@ -25,6 +25,44 @@
       print Dispatcher::run($path);
    }
 
+   function to_string($value) {
+      if (is_object($value)) {
+         return get_class($value);
+      } else {
+         return var_export($value, true);
+      }
+   }
+
+   function dump_function($function) {
+      print "\n  ";
+      try {
+         $reflect = new ReflectionFunction($function);
+      } catch (Exception $e) {
+         print "Function [1m$function()[0m does not exist\n\n";
+         return;
+      }
+
+      print "[1m$function ([0m ";
+      $signatures = array();
+      foreach ($reflect->getParameters() as $param) {
+         $signature = '$'.$param->getName();
+         if ($param->isPassedByReference()) {
+            $signature = "&$signature";
+         }
+         if ($param->isDefaultValueAvailable()) {
+            $signature .= "=".to_string($param->getDefaultValue());
+         }
+         if ($param->isOptional()) {
+            $signature = "[0;32m[ $signature ][0m";
+         } else {
+            $signature = "[0;36m$signature[0m";
+         }
+         $signatures[] = $signature;
+      }
+      print implode(', ', $signatures);
+      print " [1m)[0m\n\n";
+   }
+
    print "\n\n".`php -v`."\n";
    while (!feof(STDIN)) {
       print "php[".config('application')."] >>> ";
@@ -36,14 +74,18 @@
          print "\n";
          print "  Special commands:\n";
          print "    help, ?          Show this help\n";
+         print "    help FUNCTION    Show function signature\n";
          print "    exit, quit       Exit the console\n";
-         print "    ls, cd, ..       Shell aliases\n";
+         print "    ls, cd           Shell aliases\n";
          print "    \$var?            Dump variable\n";
          print "\n";
          print "  Helpers:\n";
          print "    get(\$path, \$params)\n";
          print "    post(\$path, \$params)\n";
          print "\n";
+         continue;
+      } elseif (substr($command, 0, 5) == 'help ') {
+         dump_function(substr($command, 5));
          continue;
       } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
          print `$command -x --color`;
@@ -88,13 +130,7 @@
             print rtrim($output)."\n";
          }
 
-         print " :: [0;36m";
-         if (is_object($result)) {
-            print get_class($result);
-         } else {
-            var_export($result);
-         }
-         print "[0m\n";
+         print " :: [0;36m".to_string($result)."[0m\n";
       }
 
       $_ = $result;
