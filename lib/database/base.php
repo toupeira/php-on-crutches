@@ -24,8 +24,8 @@
          return call_user_func_array(array(self::$connection, query), $args);
       }
 
-      static function create($class, $data) {
-         $model = new $class($data);
+      static function create($class, $attributes) {
+         $model = new $class($attributes);
          if ($model->save()) {
             return $model;
          }

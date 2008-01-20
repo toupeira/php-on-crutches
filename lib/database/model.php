@@ -13,7 +13,7 @@
       protected $new_record = true;
       protected $load_attributes = true;
 
-      function __construct() {
+      function __construct($attributes=null) {
          if (empty($this->database)) {
             raise("No database set for model '".get_class($this)."'");
          } elseif (empty($this->table)) {
@@ -23,19 +23,11 @@
          }
 
          if ($this->load_attributes and empty($this->attributes)) {
-            if (!($this->attributes = self::$table_attributes[$this->table])) {
-               $this->attributes = self::$table_attributes[$this->table] = array_pluck(
-                  $this->query("DESCRIBE {$this->table}")->fetchAll(),
-                  'Field');
-            }
+            $this->attributes = $this->table_attributes;
          }
 
-         $args = func_get_args();
-         call_user_func_array(array($this, 'parent::__construct'), $args);
+         $this->set_attributes($attributes);
       }
-
-      static function find() { raise("Sorry, but PHP won't let me do this"); }
-      static function find_all() { raise("Sorry, but PHP won't let me do this"); }
 
       function get_connection() {
          if (!$this->connection) {
@@ -45,13 +37,28 @@
          return $this->connection;
       }
 
+      # Load model attributes from database schema
+      function get_table_attributes() {
+         if ($attributes = self::$table_attributes[$this->table]) {
+            return $attributes;
+         } else {
+            $attributes = array();
+            $columns = $this->query("DESCRIBE {$this->table}")->fetchAll();
+            foreach ($columns as $column) {
+               $attributes[$column['Field']] = null;
+            }
+            return self::$table_attributes[$this->table] = $attributes;
+         }
+      }
+
       # Wrapper for database finders
-      function load($data) {
-         $this->data = $data;
+      function load($attributes) {
+         $this->attributes = $attributes;
          $this->new_record = false;
          return true;
       }
 
+      # Called from DB::find
       function _find($id, $value=null) {
          if ($value) {
             $key = $id;
@@ -65,6 +72,7 @@
          )->fetch_load($this);
       }
 
+      # Called from DB::find_all
       function _find_all($key=null, $value=null) {
          if ($key and $value) {
             $condition = "WHERE $key = ?";
@@ -84,40 +92,39 @@
             return false;
          }
 
-         $fields = array();
-         $params = array();
 
          if ($this->exists()) {
+            foreach ($this->attributes as $key => $value) {
+               if ($key != $this->primary_key) {
+                  $fields[] = "`$key` = ?";
+                  $params[] = $value;
+               }
+            }
+
             $action = 'update';
-
-            foreach ($this->attributes as $key) {
-               $fields[] = "`$key` = ?";
-               $params[] = $this->data[$key];
-            }
-
             $query = "UPDATE %s SET %s WHERE {$this->primary_key} = ?";
-            $params[] = $this->id;
+            $params[] = $this->attributes[$this->primary_key];
          } else {
-            $action = 'create';
-
-            foreach ($this->attributes as $key) {
+            foreach ($this->attributes as $key => $value) {
                $fields[] = '?';
-               $params[] = $this->data[$key];
+               $params[] = $value;
             }
 
+            $action = 'create';
             $query = "INSERT INTO %s VALUES (%s)";
          }
 
          $this->call_if_defined(before_save);
          $this->call_if_defined("before_$action");
 
-         $query = sprintf($query, $this->table, implode(", ", $fields));
-         array_unshift($params, $query);
-         call_user_func_array(array($this, query), $params);
+         $this->query(
+            sprintf($query, $this->table, implode(", ", $fields)),
+            $params
+         );
 
          if ($action == 'create') {
             $this->new_record = false;
-            $this->id = $this->connection->insert_id();
+            $this->attributes[$this->primary_key] = $this->connection->insert_id();
          }
 
          $this->call_if_defined("after_$action");
@@ -141,7 +148,7 @@
          if ($this->exists()) {
             $this->query(
                "DELETE FROM {$this->table} WHERE {$this->primary_key} = ?",
-               $this->id
+               $this->attributes[$this->primary_key]
             );
             return true;
          } else {

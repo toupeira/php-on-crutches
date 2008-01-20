@@ -11,34 +11,28 @@
    abstract class Model extends Object
    {
       # Model attributes
-      public $attributes = array();
+      protected $attributes = array();
+      # Cached attributes
+      protected $cache = array();
+
       # Read-only attributes can't be changed
       public $readonly = array();
       # Protected attributes can only be set explicitly
       public $protected = array();
-
-      # Data for the attributes
-      protected $data = array();
-      # Cached attributes
-      protected $cache = array();
 
       # List of attributes with errors
       protected $errors = array();
       # List of error messages
       protected $messages = array();
 
-      function __construct($data=null) {
-         $this->update_attributes($data);
+      function __construct($attributes=null) {
+         $this->set_attributes($attributes);
       }
 
       # Stubs for implementation-specific actions
 
       static function find($name) {
          raise("Model doesn't implement 'find'");
-      }
-
-      static function find_first() {
-         raise("Model doesn't implement 'find_first'");
       }
 
       static function find_all() {
@@ -49,14 +43,28 @@
          raise("Model doesn't implement 'save'");
       }
 
+      function create($name) {
+         raise("Model doesn't implement 'create'");
+      }
+
+      function update($name) {
+         raise("Model doesn't implement 'update'");
+      }
+
+      function destroy($name) {
+         raise("Model doesn't implement 'destroy'");
+      }
+
+      function validate() {}
+
       # Automatic property accessors for model attributes
 
       function __get($key) {
          $getter = "get_$key";
          if (method_exists($this, $getter)) {
             return $this->$getter();
-         } elseif (in_array($key, $this->attributes)) {
-            return $this->data[$key];
+         } elseif (array_key_exists($key, $this->attributes)) {
+            return $this->attributes[$key];
          } else {
             $class = get_class($this);
             raise("Call to undefined method $class::$getter()");
@@ -70,8 +78,8 @@
             $setter = "set_$key";
             if (method_exists($this, $setter)) {
                $this->$setter(&$value);
-            } elseif (in_array($key, $this->attributes)) {
-               $this->data[$key] = &$value;
+            } elseif (array_key_exists($key, $this->attributes)) {
+               $this->attributes[$key] = &$value;
             } else {
                $class = get_class($this);
                raise("Call to undefined method $class::$setter()");
@@ -84,31 +92,35 @@
       # Wrappers for use in custom setters and getters
 
       function read_attribute($key) {
-         return $this->data[$key];
+         return $this->attributes[$key];
       }
 
       function write_attribute($key, $value) {
-         $this->data[$key] = &$value;
+         $this->attributes[$key] = &$value;
          return $this;
       }
 
-      # Update data and save
-      function update($data) {
-         if ($this->update_attributes($data) and $this->is_valid()) {
-            return $this->save();
+      function get_attributes() {
+         return $this->attributes;
+      }
+
+      # Set attributes
+      function set_attributes($attributes) {
+         if (is_array($attributes) and !empty($attributes)) {
+            array_delete($attributes, $this->protected);
+            foreach ($attributes as $key => $value) {
+               $this->__set($key, $value);
+            }
+            return true;
          } else {
             return false;
          }
       }
 
-      # Load attributes from an array
-      function update_attributes($data) {
-         if (is_array($data)) {
-            array_delete($data, $this->protected);
-            foreach ($data as $key => $value) {
-               $this->__set($key, $value);
-            }
-            return true;
+      # Update attributes and save
+      function update_attributes($attributes) {
+         if ($this->set_attributes($attributes) and $this->is_valid()) {
+            return $this->save();
          } else {
             return false;
          }
@@ -138,9 +150,6 @@
          return $this->messages;
       }
 
-      # 
-      function validate() {}
-
       function is_valid() {
          $this->validate();
          return empty($this->errors) && empty($this->messages);
@@ -162,65 +171,65 @@
       protected function is_present($key) {
          return $this->validate_attribute($key,
             "can't be blank",
-            !empty($this->data[$key])
+            !empty($this->attributes[$key])
          );
       }
 
       protected function is_numeric($key) {
          return $this->validate_attribute($key,
             "is not numeric",
-            is_numeric($this->data[$key])
+            is_numeric($this->attributes[$key])
          );
       }
 
       protected function is_alpha($key) {
          return $this->validate_attribute($key,
             "can only contain letters",
-            ctype_alpha($this->data[$key])
+            ctype_alpha($this->attributes[$key])
          );
       }
 
       protected function is_alnum($key) {
          return $this->validate_attribute($key,
             "can only contain alphanumeric characters",
-            preg_match('/^[\w\.-]*$/', $this->data[$key])
+            preg_match('/^[\w\.-]*$/', $this->attributes[$key])
          );
       }
 
       protected function is_email($key) {
          return $this->validate_attribute($key,
             "is not a valid email address",
-            preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $this->data[$key])
+            preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $this->attributes[$key])
          );
       }
 
       protected function is_confirmed($key) {
          return $this->validate_attribute("{$key}_confirmation",
             "doesn't match",
-            $this->data[$key] == $this->data["{$key}_confirmation"]
+            $this->attributes[$key] == $this->attributes["{$key}_confirmation"]
          );
       }
 
       protected function in_array($key, $array) {
          return $this->validate_attribute($key,
             "is invalid",
-            in_array($this->data[$key], $array)
+            in_array($this->attributes[$key], $array)
          );
       }
 
       protected function has_length($key, $min, $max, $empty=false) {
-         $length = strlen($this->data[$key]);
+         $length = strlen($this->attributes[$key]);
          return $this->validate_attribute($key,
             "must be between $min and $max characters",
-            ($empty and empty($this->data[$key])) or ($length >= $min and $length <= $max)
+            ($empty and empty($this->attributes[$key])) or ($length >= $min and $length <= $max)
          );
       }
 
       protected function has_format($key, $format) {
-         $length = count($this->data[$key]);
+         $length = count($this->attributes[$key]);
          return $this->validate_attribute($key,
             "is invalid",
-            preg_match($format, $this->data[$key])
+            preg_match($format, $this->attributes[$key])
          );
       }
 
