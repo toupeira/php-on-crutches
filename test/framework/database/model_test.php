@@ -1,6 +1,8 @@
 <?# $Id$ ?>
 <?
 
+   require_once LIB.'database/base.php';
+
    class DatabaseModelTest extends TestCase
    {
       function setup() {
@@ -13,6 +15,8 @@
 
    class SampleDatabaseModel extends DatabaseModel
    {
+      protected $table = 'sample';
+      protected $load_attributes = false;
    }
 
 ?>
