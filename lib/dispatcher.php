@@ -8,7 +8,7 @@
    $Id$
 */
 
-   class Dispatcher extends Object
+   abstract class Dispatcher
    {
       static public $path;
       static public $prefix;

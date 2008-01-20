@@ -4,7 +4,7 @@
    require LIB.'database/connection.php';
    require LIB.'database/model.php';
 
-   class DB
+   abstract class DB
    {
       static private $connection;
       static private $models;
