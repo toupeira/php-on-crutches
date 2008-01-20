@@ -1,6 +1,9 @@
 <?# $Id$ ?>
 <?
 
+   require LIB.'database/connection.php';
+   require LIB.'database/model.php';
+
    class DB
    {
       static private $connection;
