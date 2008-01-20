@@ -79,6 +79,16 @@
       return ($code === 0);
    }
 
+   function proc($code, $argc=1) {
+      $args = array();
+      $argc = min(26, $argc);
+      for ($i = 0; $i < $argc; $i++) {
+         $args[] = '$'.chr(97 + $i);
+      }
+      $args = implode(',', $args);
+      return create_function($args, "return $code;");
+   }
+
    function mktemp($dir=false) {
       $prefix = sys_get_temp_dir();
       $template = config('application').'.XXXXXX';
