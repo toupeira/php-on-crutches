@@ -36,7 +36,9 @@
       }
 
       function query($sql, $params=null) {
-         $params = array_slice(func_get_args(), 1);
+         if (!is_array($params)) {
+            $params = array_slice(func_get_args(), 1);
+         }
 
          if (config('log_level') >= LOG_DEBUG) {
             $args = $params;
@@ -71,18 +73,22 @@
          return parent::fetchColumn($column);
       }
 
-      function fetch_construct($object) {
-         $class = get_class($object);
+      function fetch_load($class) {
+         $class = get_class($class);
          if ($data = $this->fetch()) {
-            return new $class($data);
+            $object = new $class();
+            $object->load($data);
+            return $object;
          }
       }
 
-      function fetch_all_construct($object) {
-         $class = get_class($object);
+      function fetch_all_load($class) {
+         $class = get_class($class);
          $objects = array();
          while ($data = $this->fetch()) {
-            $objects[] = new $class($data);
+            $object = new $class();
+            $object->load($data);
+            $objects[] = $object;
          }
          return $objects;
       }

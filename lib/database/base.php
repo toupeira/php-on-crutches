@@ -24,6 +24,13 @@
          return call_user_func_array(array(self::$connection, query), $args);
       }
 
+      static function create($class, $data) {
+         $model = new $class($data);
+         if ($model->save()) {
+            return $model;
+         }
+      }
+
       static function find($class) {
          if (empty($class)) return null;
          $args = func_get_args();

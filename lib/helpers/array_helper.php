@@ -46,6 +46,12 @@
       return $values;
    }
 
+   function array_map_method($method, $objects) {
+      foreach ($objects as $object) {
+         $object->$method();
+      }
+   }
+
    function array_delete(&$array, $keys) {
       if (is_array($keys)) {
          foreach ($keys as $key) {

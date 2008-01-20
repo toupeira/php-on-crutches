@@ -5,18 +5,21 @@
    {
       static protected $table_attributes;
 
-      protected $database = 'default';
       protected $connection;
-
+      protected $database = 'default';
       protected $table;
       protected $primary_key = 'id';
+
+      protected $new_record = true;
       protected $load_attributes = true;
 
       function __construct() {
-         if (empty($this->table)) {
-            raise("No table set for model '".get_class($this)."'");
-         } elseif (empty($this->database)) {
+         if (empty($this->database)) {
             raise("No database set for model '".get_class($this)."'");
+         } elseif (empty($this->table)) {
+            raise("No table set for model '".get_class($this)."'");
+         } elseif (empty($this->primary_key)) {
+            raise("No primary key set for model '".get_class($this)."'");
          }
 
          if ($this->load_attributes and empty($this->attributes)) {
@@ -42,20 +45,38 @@
          return $this->connection;
       }
 
-      function _find($id) {
-         return $this->query(
-            "SELECT * FROM {$this->table} WHERE {$this->primary_key} = ? LIMIT 1", $id
-         )->fetch_construct($this);
+      # Wrapper for database finders
+      function load($data) {
+         $this->data = $data;
+         $this->new_record = false;
+         return true;
       }
 
-      function _find_all() {
+      function _find($id, $value=null) {
+         if ($value) {
+            $key = $id;
+         } else {
+            $key = $this->primary_key;
+            $value = $id;
+         }
+
          return $this->query(
-            "SELECT * FROM {$this->table}"
-         )->fetch_all_construct($this);
+            "SELECT * FROM {$this->table} WHERE $key = ? LIMIT 1", $value
+         )->fetch_load($this);
+      }
+
+      function _find_all($key=null, $value=null) {
+         if ($key and $value) {
+            $condition = "WHERE $key = ?";
+         }
+
+         return $this->query(
+            "SELECT * FROM {$this->table} $condition", $value
+         )->fetch_all_load($this);
       }
 
       function exists() {
-         return !is_null($this->id);
+         return !$this->new_record;
       }
 
       function save() {
@@ -94,6 +115,11 @@
          array_unshift($params, $query);
          call_user_func_array(array($this, query), $params);
 
+         if ($action == 'create') {
+            $this->new_record = false;
+            $this->id = $this->connection->insert_id();
+         }
+
          $this->call_if_defined("after_$action");
          $this->call_if_defined(after_save);
 
@@ -103,14 +129,20 @@
       function destroy() {
          if ($this->exists()) {
             $this->call_if_defined(before_destroy);
+            $this->delete();
+            $this->call_if_defined(after_destroy);
+            return true;
+         } else {
+            return false;
+         }
+      }
 
+      function delete() {
+         if ($this->exists()) {
             $this->query(
                "DELETE FROM {$this->table} WHERE {$this->primary_key} = ?",
                $this->id
             );
-
-            $this->call_if_defined(after_destroy);
-
             return true;
          } else {
             return false;
