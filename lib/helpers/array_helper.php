@@ -34,7 +34,7 @@
    function array_pluck($array, $key, $hash=false) {
       $values = array();
       foreach ((array) $array as $object) {
-         if ($value = $object->$key) {
+         if ($value = (is_object($object) ? $object->$key : $object[$key])) {
             if ($hash) {
                $values[$value] = $value;
             } else {

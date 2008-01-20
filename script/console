@@ -76,6 +76,7 @@
          print "    help, ?          Show this help\n";
          print "    help FUNCTION    Show function signature\n";
          print "    exit, quit       Exit the console\n";
+         print "    time CODE        Show execution time\n";
          print "    ls, cd           Shell aliases\n";
          print "    \$var?            Dump variable\n";
          print "\n";
@@ -87,6 +88,9 @@
       } elseif (substr($command, 0, 5) == 'help ') {
          dump_function(substr($command, 5));
          continue;
+      } elseif (substr($command, 0, 5) == 'time ') {
+         $command = 'print ""; $__start = microtime(true); '.substr($command, 5)
+                  . '; printf("\n%.5f seconds\n", microtime(true) - $__start)';
       } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
          print `$command -x --color`;
          continue;

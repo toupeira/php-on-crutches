@@ -28,7 +28,7 @@
       protected $messages = array();
 
       function __construct($data=null) {
-         $this->update_attributes($data);
+         $this->update_attributes($data, true);
       }
 
       # Stubs for implementation-specific actions
@@ -102,9 +102,12 @@
       }
 
       # Load attributes from an array
-      function update_attributes($data) {
+      function update_attributes($data, $force=false) {
          if (is_array($data)) {
-            array_delete($data, $this->protected);
+            if (!$force) {
+               array_delete($data, $this->protected);
+            }
+
             foreach ($data as $key => $value) {
                $this->__set($key, $value);
             }

@@ -49,6 +49,20 @@
    # Load application helper
    @include_once HELPERS.'application_helper.php';
 
+   # Load route definitions
+   @include CONFIG.'routes.php';
+
+   # Load database definitions
+   @include CONFIG.'database.php';
+
+   # Load database support if necessary
+   if (!empty($_DATABASE)) {
+      foreach (glob(LIB.'database/*.php') as $lib) {
+         require $lib;
+      }
+   }
+
+   # Initialize the framework
    Logger::init();
    Dispatcher::init();
 
