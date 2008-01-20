@@ -57,9 +57,7 @@
 
    # Load database support if necessary
    if (!empty($_DATABASE)) {
-      foreach (glob(LIB.'database/*.php') as $lib) {
-         require $lib;
-      }
+      require LIB.'database/base.php';
    }
 
    # Initialize the framework
