@@ -103,13 +103,6 @@
          $covered_size = 0;
          $covered_code = 0;
 
-         foreach ($coverage as $i => $value) {
-            if ($i > 0 and $i < $size) {
-               $covered_size++;
-               $covered_code++;
-            }
-         }
-
          $states = array();
          $comments = array();
          $this->comment = false;
@@ -122,12 +115,15 @@
                $states[$i] = 'tested';
                $this->last = true;
                $code++;
+               $covered_size++;
+               $covered_code++;
             } elseif ($type = $this->infer($line)) {
                $states[$i] = 'inferred';
                $types[$i] = $type;
                $covered_size++;
 
-               if ($type != 'blank' and strpos($type, 'comment') === false) {
+               if ($type != 'blank' and $type != 'line noise'
+                     and strpos($type, 'comment') === false) {
                   $covered_code++;
                   $code++;
                }
