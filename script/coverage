@@ -1,13 +1,12 @@
 #!/usr/bin/php5
 <?
-/*
-   PHP on Crutches - Copyright (c) 2008 Markus Koller
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the MIT License.
-
-   $Id$
-*/
+# Copyright 2008 Markus Koller
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the MIT License.
+#
+# $Id$
+#
 
    if (function_exists('xdebug_start_code_coverage')) {
       xdebug_start_code_coverage();

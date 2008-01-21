@@ -1,12 +1,11 @@
 <?
-/*
-   PHP on Crutches - Copyright (c) 2008 Markus Koller
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the MIT License.
-
-   $Id$
-*/
+# Copyright 2008 Markus Koller
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the MIT License.
+#
+# $Id$
+#
 
    function messages($msg, $keys=null) {
       $messages = '';
