@@ -133,12 +133,15 @@
       function setup_controller() {}
 
       function request($action, $get=null, $post=null) {
+         $path = "{$this->controller->name}/$action";
+         $_SERVER['REQUEST_URI'] = "/$path";
+         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
          $_SERVER['REQUEST_METHOD'] = (is_array($post) ? 'POST' : 'GET');
          $_GET = (array) $get;
          $_POST = (array) $post;
 
          list($this->controller, $this->action, $this->args) =
-            Dispatcher::recognize("{$this->controller->name}/$action");
+            Dispatcher::recognize($path);
          $this->controller->perform($this->action, $this->args);
          $this->data = &$this->controller->view->data;
       }
