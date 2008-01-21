@@ -53,7 +53,7 @@
 
    # Include libraries in report if a framework test was selected
    foreach ($paths as $path) {
-      if ($path == 'framework' or strpos($path, 'test/framework/') !== false) {
+      if (strpos($path, 'test/framework') !== false) {
          $include[] = LIB;
          break;
       }

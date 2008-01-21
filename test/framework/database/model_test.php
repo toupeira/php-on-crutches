@@ -9,7 +9,10 @@
          $this->model = new SampleDatabaseModel();
       }
 
-      function test_construct() {
+      function test_construct_exceptions() {
+         foreach (array(EmptyDatabaseModel, EmptyTableModel, EmptyPrimaryKeyModel) as $class) {
+            $this->assertRaise("new $class()");
+         }
       }
    }
 
@@ -17,6 +20,20 @@
    {
       protected $table = 'sample';
       protected $load_attributes = false;
+   }
+
+   class EmptyDatabaseModel extends DatabaseModel {
+      protected $database = '';
+      protected $table = 'foo';
+   }
+
+   class EmptyTableModel extends DatabaseModel {
+      protected $table = '';
+   }
+
+   class EmptyPrimaryKeyModel extends DatabaseModel {
+      protected $table = 'foo';
+      protected $primary_key = '';
    }
 
 ?>
