@@ -11,8 +11,8 @@
    define('LIB',          ROOT.'lib/');
    define('CONFIG',       ROOT.'config/');
    define('LOG',          ROOT.'log/');
-   define('SCRIPT',       ROOT.'script/');
    define('TEST',         ROOT.'test/');
+   define('SCRIPT',       LIB.'script/');
    define('FIXTURES',     TEST.'fixtures/');
 
    # Application paths
