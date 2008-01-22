@@ -21,16 +21,21 @@
             session_start();
          }
 
-         # Work around magic quotes
+         # Work around magic quotes...
          if (get_magic_quotes_gpc()) {
             foreach ($_POST as $key => $value) {
-               if (!is_array($value)) {
+               if (is_string($value)) {
                   $_POST[$key] = stripslashes($value);
                }
             }
          }
       }
 
+      # Run a request for the given path.
+      #
+      # If $path is empty, the path in the query string, the default path
+      # in the configuration, and the path 'index' will be tried, in that order.
+      #
       static function run($path=null) {
          self::$path = $path = any(
             $path, $_GET['path'], config('default_path'), 'index'
@@ -45,7 +50,7 @@
             );
          }
 
-         # Detect routes and rewrite path
+         # Detect routes and rewrite path if necessary
          $path == self::$path;
          foreach ($GLOBALS['_ROUTES'] as $from => $to) {
             $len = strlen($from);
@@ -64,6 +69,7 @@
          # Perform the action
          $controller->perform($action, $args);
 
+         # Return the output as string
          return $controller->output;
       }
 
