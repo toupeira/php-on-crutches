@@ -17,9 +17,14 @@
       $logger->level = LOG_DISABLED;
    }
 
+   # Fake request information
+   $_SERVER['REQUEST_URI'] = "/";
+   $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+   $_SERVER['REQUEST_METHOD'] = 'GET';
+   $_SERVER['HTTPS'] = 'on';
+
    function request($path, $method) {
       $_SERVER['REQUEST_URI'] = "/$path";
-      $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
       $_SERVER['REQUEST_METHOD'] = $method;
       print Dispatcher::run($path);
    }
