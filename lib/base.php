@@ -108,9 +108,10 @@
    #
    # Returns true if the command was successful.
    #
-   function run($command) {
-      $args = func_get_args();
-      $command = array_shift($args);
+   function run($command, $args=null) {
+      if (!is_array($args)) {
+         $args = array_slice(func_get_args(), 1);
+      }
 
       if ($args) {
          $args = array_map(escapeshellarg, $args);
@@ -119,8 +120,13 @@
       }
 
       log_debug("Running '$command'");
-      exec("$command 2>/dev/null", $output, $code);
-      return ($code === 0);
+      exec("$command 2>/dev/null", $output, $status);
+      return ($status === 0);
+   }
+
+   # Run a shell command in the background.
+   function spawn($command) {
+      return run("$command &>/dev/null &", $args);
    }
 
    # Create a temporary file or directory which will be removed when
