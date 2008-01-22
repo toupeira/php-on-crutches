@@ -8,7 +8,7 @@
 # $Id$
 #
 
-   require dirname(__FILE__).'/../config/environment.php';
+   require_once dirname(__FILE__).'/../../config/environment.php';
 
    if (in_array('-d', $argv)) {
       config_set('debug', true);

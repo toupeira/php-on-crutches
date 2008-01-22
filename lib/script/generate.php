@@ -8,7 +8,7 @@
 # $Id$
 #
 
-   require dirname(__FILE__).'/../config/environment.php';
+   require_once dirname(__FILE__).'/../../config/environment.php';
 
    function status($action, $path) {
       printf("%12s  %s\n", $action, substr($path, strlen(ROOT)));

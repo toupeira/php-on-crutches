@@ -15,7 +15,7 @@
       exit(1);
    }
 
-   require_once dirname(__FILE__).'/../config/environment.php';
+   require_once dirname(__FILE__).'/../../config/environment.php';
    require_once LIB.'testing.php';
    require LIB.'coverage.php';
 
