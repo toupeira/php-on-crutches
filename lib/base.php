@@ -7,6 +7,9 @@
 # $Id$
 #
 
+   # Shorthand for newlines
+   define(N, "\n");
+
    # Auto-load libraries, models and controllers
    function __autoload($class) {
       $class = underscore($class);
