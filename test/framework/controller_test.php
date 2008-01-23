@@ -6,10 +6,26 @@
       function setup() {
          $this->controller = new SampleController();
          $this->data = &$this->controller->view->data;
+         $this->views = LIB.'views/sample/';
+
+         mkdir($this->views);
+         file_put_contents($this->views.'index.thtml', 'Index Template');
+         file_put_contents($this->views.'blank.thtml', 'Blank Template');
+
+         config_set('default_path', 'foo');
+         config_set('debug', true);
+         config_set('debug_redirects', false);
+      }
+
+      function teardown() {
+         rm_rf($this->views);
       }
 
       function assertCalls() {
          $this->assertEqual(func_get_args(), $this->controller->calls);
+      }
+
+      function test_find_template() {
       }
 
       function test_construct() {
@@ -100,7 +116,6 @@
       }
 
       function test_is_valid_request_with_post_requirement() {
-         config_set('default_path', 'foo');
          $_SERVER['REQUEST_METHOD'] = 'GET';
 
          foreach (array(true, 'index') as $require) {
@@ -117,7 +132,6 @@
       }
 
       function test_is_valid_request_with_ajax_requirement() {
-         config_set('default_path', 'foo');
          unset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
          foreach (array(true, 'index') as $require) {
@@ -145,7 +159,49 @@
          }
       }
 
-      function test_perform() {
+      function test_perform_with_valid_action() {
+         $this->assertMatch('/Index Template/', $this->controller->perform('index'));
+         $this->assertEqual('index', $this->data['action']);
+         $this->assertEqual('application', $this->controller->view->layout);
+
+         $this->assertAssigns(array(
+            'string' => 'string', 'array' => 'array', 'integer' => 'integer'
+         ));
+         $this->assertCalls('init', 'before', 'after');
+      }
+
+      function test_perform_with_empty_action() {
+         $this->assertMatch('/Blank Template/', $this->controller->perform('blank'));
+         $this->assertEqual('blank', $this->data['action']);
+         $this->assertEqual('application', $this->controller->view->layout);
+
+         $this->assertNull($this->data['blank']);
+         $this->assertCalls('init', 'before', 'after');
+      }
+
+      function test_perform_with_invalid_action() {
+         foreach (array('init', 'before', 'after', 'before_foo', 'after_foo', 'in-valid', '!@#$%') as $action) {
+            $this->controller->perform($action);
+            $this->assertEqual(500, $this->controller->headers['Status']);
+         }
+      }
+
+      function test_perform_with_invalid_request() {
+         $this->controller->require_post[] = 'index';
+         $this->controller->perform('index');
+         $this->assertEqual('foo', $this->controller->headers['Location']);
+         $this->assertEqual(302, $this->controller->headers['Status']);
+         $this->assertEqual(' ', $this->controller->output);
+      }
+
+      function test_perform_with_missing_template() {
+         $this->controller->perform('edit');
+      }
+
+      function test_perform_with_application_error() {
+      }
+
+      function test_perform_with_ajax_request() {
       }
 
       function test_rescue_error_in_public_404() {
@@ -188,8 +244,6 @@
          $this->assertEqual(null, $this->controller->headers['Location']);
          $this->assertEqual(null, $this->controller->headers['Status']);
          $this->assertEqual('Redirect to <a href="foo">foo</a>', $this->controller->output);
-
-         config_set('debug_redirects', false);
       }
 
       function test_send_headers() {
@@ -306,6 +360,10 @@
          $this->set('string', 'foo');
          $this->set('array', array('bar'));
          $this->set('integer', 23);
+      }
+
+      private function blank() {
+         $this->set('blank', true);
       }
 
       function edit() {

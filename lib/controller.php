@@ -222,7 +222,7 @@
          }
 
          $this->send_headers();
-         return $output;
+         return $this->output;
       }
 
       # Catches all errors, default behaviour is to render VIEWS/errors/404.thtml or 500.thtml
