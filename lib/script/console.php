@@ -127,7 +127,7 @@
       $result = null;
 
       if ($command) {
-         if (preg_match('/^([a-z]+) /', $command, $m) and $m[1] != 'new') {
+         if (preg_match('/^([a-z]+) /', $command, $m) and !in_array($m[1], array('new', 'null'))) {
             $result = true;
          } else {
             $command = "\$result = ($command)";
