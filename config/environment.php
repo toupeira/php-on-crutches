@@ -1,8 +1,6 @@
 <?# $Id$ ?>
 <?
 
-   define('N', "\n");
-
    # Default paths
    define('ROOT',         dirname(dirname(__FILE__)).'/');
    define('ROOT_NAME',    basename(ROOT));
