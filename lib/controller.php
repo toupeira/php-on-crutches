@@ -52,7 +52,7 @@
          # Load messages stored in the session
          if (is_array($_SESSION['msg'])) {
             $this->msg = $_SESSION['msg'];
-            session_unregister('msg');
+            unset($_SESSION['msg']);
          }
 
          # Create the view
@@ -170,8 +170,7 @@
       function perform($action, $args=null) {
          try {
             # Catch invalid action names
-            if (!ctype_alpha($action)
-               or $action == 'init'
+            if (!ctype_alpha($action) or $action == 'init'
                or substr($action, 0, 6) == 'before'
                or substr($action, 0, 5) == 'after') {
                raise("Invalid action '$action'");
@@ -232,7 +231,7 @@
             $text = "Not Found";
          } else {
             $code = "500";
-            $text = "Application Error";
+            $text = "Server Error";
          }
 
          $this->headers['Status'] = $code;
@@ -259,7 +258,6 @@
                   $this->view->layout = $layout;
                }
                $this->view->template = $template;
-               #$this->view = new View($template, $this->data);
                $this->output = $this->view->render();
                return true;
             } else {
@@ -305,7 +303,7 @@
       }
 
       # Send a file with the appropriate headers
-      function send_file($file, $options) {
+      function send_file($file, $options=null) {
          if (!is_file($file)) {
             raise("File $file not found");
          }
@@ -319,15 +317,22 @@
             }
          }
 
-         $this->headers['Content-Type'] = any(
-            $options['type'], mime_content_type($file)
-         );
+         if ($size = $options['size']) {
+            $this->headers['Content-Length'] = $size;
+         } else {
+            $this->headers['Content-Length'] = filesize($file);
+         }
 
-         $this->headers['Content-Length'] = filesize($file);
+         if ($type = $options['type']) {
+            $this->headers['Content-Type'] = $type;
+         } elseif ($type = @mime_content_type($file)) {
+            $this->headers['Content-Type'] = $type;
+         }
+
          $this->send_headers();
          $this->render_text('');
 
-         if (readfile($file)) {
+         if (@readfile($file)) {
             return true;
          } else {
             raise("Can't read file $file");

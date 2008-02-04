@@ -7,6 +7,7 @@
          $this->controller = new SampleController();
          $this->data = &$this->controller->view->data;
          $this->views = LIB.'views/sample/';
+         $this->send_file_output = null;
 
          mkdir($this->views);
          file_put_contents($this->views.'index.thtml', 'Index Template');
@@ -19,6 +20,13 @@
 
       function teardown() {
          rm_rf($this->views);
+      }
+
+      function send_file($file, $options=null) {
+         ob_start();
+         $status = $this->controller->send_file($file, $options);
+         $this->send_file_output = ob_get_clean();
+         return $status;
       }
 
       function assertCalls() {
@@ -47,6 +55,14 @@
             $this->controller->actions);
 
          $this->assertCalls('init');
+      }
+
+      function test_construct_with_saved_messages() {
+         $msg = array('info' => "Foobar!!!");
+         $_SESSION['msg'] = $msg;
+         $this->controller = new SampleController();
+         $this->assertEqual($msg, $this->controller->msg);
+         $this->assertNull($_SESSION['msg']);
       }
 
       function test_getters() {
@@ -160,9 +176,10 @@
       }
 
       function test_perform_with_valid_action() {
-         $this->assertMatch('/Index Template/', $this->controller->perform('index'));
+         $this->controller->perform('index');
+         $this->assertOutputMatch('/Index Template/');
          $this->assertEqual('index', $this->data['action']);
-         $this->assertEqual('application', $this->controller->view->layout);
+         $this->assertLayout('application');
 
          $this->assertAssigns(array(
             'string' => 'string', 'array' => 'array', 'integer' => 'integer'
@@ -171,9 +188,10 @@
       }
 
       function test_perform_with_empty_action() {
-         $this->assertMatch('/Blank Template/', $this->controller->perform('blank'));
+         $this->controller->perform('blank');
+         $this->assertOutputMatch('/Blank Template/');
          $this->assertEqual('blank', $this->data['action']);
-         $this->assertEqual('application', $this->controller->view->layout);
+         $this->assertLayout('application');
 
          $this->assertNull($this->data['blank']);
          $this->assertCalls('init', 'before', 'after');
@@ -182,39 +200,117 @@
       function test_perform_with_invalid_action() {
          foreach (array('init', 'before', 'after', 'before_foo', 'after_foo', 'in-valid', '!@#$%') as $action) {
             $this->controller->perform($action);
-            $this->assertEqual(500, $this->controller->headers['Status']);
+            $this->assertResponse('error');
          }
       }
 
       function test_perform_with_invalid_request() {
          $this->controller->require_post[] = 'index';
          $this->controller->perform('index');
-         $this->assertEqual('foo', $this->controller->headers['Location']);
-         $this->assertEqual(302, $this->controller->headers['Status']);
-         $this->assertEqual(' ', $this->controller->output);
+         $this->assertRedirect('foo');
       }
 
       function test_perform_with_missing_template() {
          $this->controller->perform('edit');
+         $this->assertResponse('notfound');
+      }
+
+      function test_perform_with_missing_template_in_public() {
+         config_set('debug', false);
+         $this->controller->perform('edit');
+         $this->assertResponse('notfound');
+         $this->assertOutput('<h1>Not Found</h1>');
       }
 
       function test_perform_with_application_error() {
+         $this->controller->perform('fail');
+         $this->assertResponse('error');
+      }
+
+      function test_perform_with_application_error_in_public() {
+         config_set('debug', false);
+         $this->controller->perform('fail');
+         $this->assertResponse('error');
+         $this->assertOutput('<h1>Server Error</h1>');
       }
 
       function test_perform_with_ajax_request() {
+         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest';
+
+         $this->controller->perform('index');
+         $this->assertOutput('Index Template');
+         $this->assertLayout('');
+
+         unset($_SERVER['HTTP_X_REQUESTED_WITH']);
       }
 
       function test_rescue_error_in_public_404() {
          $this->controller->rescue_error_in_public(new MissingTemplate());
-         $this->assertHeader('Status', 404);
+         $this->assertResponse('notfound');
+         $this->assertOutput('<h1>Not Found</h1>');
+      }
+
+      function test_rescue_error_in_public_404_with_template() {
+         $errors = LIB.'views/errors/';
+         mkdir($errors); file_put_contents($errors.'404.thtml', '404 Testing');
+
+         $this->controller->rescue_error_in_public(new MissingTemplate());
+         $this->assertResponse('notfound');
+         $this->assertOutput('404 Testing');
+
+         rm_rf($errors);
       }
 
       function test_rescue_error_in_public_500() {
          $this->controller->rescue_error_in_public(new ApplicationError());
-         $this->assertHeader('Status', 500);
+         $this->assertResponse('error');
+         $this->assertOutput('<h1>Server Error</h1>');
       }
 
-      function test_render() {
+      function test_rescue_error_in_public_500_with_template() {
+         $errors = LIB.'views/errors/';
+         mkdir($errors); file_put_contents($errors.'500.thtml', '500 Testing');
+
+         $this->controller->rescue_error_in_public(new ApplicationError());
+         $this->assertResponse('error');
+         $this->assertOutput('500 Testing');
+
+         rm_rf($errors);
+      }
+
+      function test_render_with_action() {
+         $this->assertTrue($this->controller->render('index'));
+         $this->assertOutput('Index Template');
+      }
+
+      function test_render_with_action_and_missing_template() {
+         $this->assertRaise('$this->controller->render("edit")', MissingTemplate);
+         $this->assertOutput(null);
+      }
+
+      function test_render_with_layout() {
+         $layout = md5(time());
+         file_put_contents(VIEWS."layouts/$layout.thtml", '<start><?= $content_for_layout ?><end>');
+
+         $this->assertTrue($this->controller->render('index', $layout));
+         $this->assertOutput('<start>Index Template<end>');
+
+         rm_f(VIEWS."layouts/$layout.thtml");
+      }
+
+      function test_render_with_template() {
+         $this->assertTrue($this->controller->render($this->views.'blank.thtml'));
+         $this->assertOutput('Blank Template');
+      }
+
+      function test_render_with_missing_template() {
+         $this->assertRaise('$this->controller->render("/invalid/template")', MissingTemplate);
+         $this->assertOutput(null);
+      }
+
+      function test_render_twice() {
+         $this->assertTrue($this->controller->render('index'));
+         $this->assertRaise('$this->controller->render("index")');
       }
 
       function test_render_text() {
@@ -225,15 +321,15 @@
 
       function test_redirect_to() {
          $this->controller->redirect_to('foo');
-         $this->assertEqual('foo', $this->controller->headers['Location']);
-         $this->assertEqual(302, $this->controller->headers['Status']);
+         $this->assertHeader('Location', 'foo');
+         $this->assertHeader('Status', 302);
          $this->assertEqual(' ', $this->controller->output);
       }
 
       function test_redirect_to_with_status() {
          $this->controller->redirect_to('foo', 404);
-         $this->assertEqual('foo', $this->controller->headers['Location']);
-         $this->assertEqual(404, $this->controller->headers['Status']);
+         $this->assertHeader('Location', 'foo');
+         $this->assertHeader('Status', 404);
          $this->assertEqual(' ', $this->controller->output);
       }
 
@@ -241,9 +337,9 @@
          config_set('debug_redirects', true);
 
          $this->controller->redirect_to('foo', 404);
-         $this->assertEqual(null, $this->controller->headers['Location']);
-         $this->assertEqual(null, $this->controller->headers['Status']);
-         $this->assertEqual('Redirect to <a href="foo">foo</a>', $this->controller->output);
+         $this->assertHeader('Location', null);
+         $this->assertHeader('Status', null);
+         $this->assertOutput('Redirect to <a href="foo">foo</a>', $this->controller->output);
       }
 
       function test_send_headers() {
@@ -257,7 +353,50 @@
          $this->assertTrue($this->controller->send_headers());
       }
 
-      function test_send_file() {
+      function test_send_file_with_valid_file() {
+         $this->assertTrue($this->send_file(__FILE__));
+         $this->assertHeader('Content-Disposition', 'attachment');
+         $this->assertHeader('Content-Type', mime_content_type(__FILE__));
+         $this->assertHeader('Content-Length', filesize(__FILE__));
+         $this->assertOutput('');
+         $this->assertEqual(file_get_contents(__FILE__), $this->send_file_output);
+      }
+
+      function test_send_file_with_missing_file() {
+         $this->assertRaise('$this->send_file("/invalid/file")');
+         $this->assertOutput(null);
+         $this->assertEqual(array(), $this->controller->headers);
+         $this->assertNull($this->send_file_output);
+      }
+
+      function test_send_file_with_invalid_file() {
+         $file = '/etc/shadow';
+         $this->assertRaise("\$this->send_file('$file')");
+         $this->assertHeader('Content-Disposition', 'attachment');
+         $this->assertHeader('Content-Type', null);
+         $this->assertHeader('Content-Length', filesize($file));
+         $this->assertOutput('');
+         $this->assertNull($this->send_file_output);
+      }
+
+      function test_send_file_with_name() {
+         $this->assertTrue($this->send_file(__FILE__, array('name' => 'foo"bar')));
+         $this->assertHeader('Content-Disposition', 'attachment; filename="foo\"bar"');
+      }
+
+      function test_send_file_with_size() {
+         $this->assertTrue($this->send_file(__FILE__, array('size' => '666')));
+         $this->assertHeader('Content-Length', 666);
+      }
+
+      function test_send_file_with_type() {
+         $this->assertTrue($this->send_file(__FILE__, array('type' => 'foo')));
+         $this->assertHeader('Content-Type', 'foo');
+      }
+
+      function test_send_file_inline() {
+         $this->assertTrue($this->send_file(__FILE__, array('inline' => true)));
+         $this->assertHeader('Content-Disposition', null);
       }
 
       function test_add_error() {
@@ -373,6 +512,7 @@
       }
 
       function fail() {
+         raise("I failed");
       }
 
       function set_headers($headers) {

@@ -126,6 +126,7 @@
       function setup() {
          $class = substr(get_class($this), 0, -4);
          $this->controller = Dispatcher::$controller = new $class();
+         $this->data = &$this->controller->view->data;
          $this->setup_controller();
       }
 
@@ -153,20 +154,37 @@
          return $this->request($action, null, (array) $args);
       }
 
+      function ajax($method, $action, $args=null) {
+         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest';
+         $this->$method($action, $args);
+         unset($_SERVER['HTTP_X_REQUESTED_WITH']);
+      }
+
       function assertResponse($response) {
          $status = $this->controller->headers['Status'];
 
          switch ($response) {
-            case 'redirect':
-               $this->assertInArray($status, array(301, 302),
-                  "Expected a redirect, got '$status'");
-               break;
+            case 200:
             case 'success':
                $this->assertInArray($status, array(200, null),
                   "Expected a successful response, got '$status'");
+               $this->assertFalse(empty($this->controller->output));
                break;
+            case 301:
+            case 302:
+            case 'redirect':
+               $this->assertInArray($status, array(301, 302),
+                  "Expected a redirect, got '$status'");
+               $this->assertOutput(' ');
+               break;
+            case 404:
+            case 'notfound':
+               $this->assertEqual(404, $status,
+                  "Expected a 404, got '$status'");
+               break;
+            case 500:
             case 'error':
-               $this->assertInArray($status, array(500),
+               $this->assertEqual(500, $status,
                   "Expected an error response, got '$status'");
                break;
             default:
@@ -174,9 +192,11 @@
       }
 
       function assertHeader($header, $value) {
+         $real_value = $this->controller->headers[$header];
          $this->assertTrue(
-            strstr($this->controller->headers[$header], "$value"),
-            "Expected header '$header' to contain '$value'");
+            is_null($value) ? is_null($real_value)
+                            : strstr($real_value, "$value"),
+            "Expected header '$header' to contain '$value', got '$real_value'");
       }
 
       function assertTemplate($template) {
@@ -200,6 +220,11 @@
                gettype($this->data[$key]), $type,
                "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->data[$key])."'");
          }
+      }
+
+      function assertLayout($layout) {
+         $this->assertEqual($layout, $this->controller->view->layout,
+           "Expected layout '$layout', got {$this->controller->view->layout}");
       }
 
       function assertOutput($text) {
