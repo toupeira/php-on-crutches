@@ -47,7 +47,7 @@
    $argv = $tests;
 
    # Run the tests and collect coverage data
-   require SCRIPT.'test';
+   require SCRIPT.'test.php';
    $coverage = xdebug_get_code_coverage();
    xdebug_stop_code_coverage();
 
