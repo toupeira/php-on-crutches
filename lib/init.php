@@ -24,8 +24,7 @@
    }
 
    # Load standard helpers
-   $helpers = glob(LIB.'helpers/*.php');
-   foreach ($helpers as $helper) {
+   foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;
    }
 
@@ -46,5 +45,10 @@
    # Initialize the framework
    Logger::init();
    Dispatcher::init();
+
+   # Initialize the application
+   foreach (glob(CONFIG.'initializers/*.php') as $initializer) {
+      require $initializer;
+   }
 
 ?>
