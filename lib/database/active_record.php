@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   abstract class DatabaseModel extends Model
+   abstract class ActiveRecord extends Model
    {
       static protected $table_attributes;
 
