@@ -8,7 +8,7 @@
 #
 
    require LIB.'database/connection.php';
-   require LIB.'database/model.php';
+   require LIB.'database/active_record.php';
 
    abstract class DB
    {
