@@ -17,10 +17,20 @@
       static function load($name) {
          if ($connection = self::$connections[$name]) {
             return $connection;
-         } elseif ($options = $GLOBALS['_DATABASE'][$name]) {
-            while (is_string($options)) {
-               $options = $GLOBALS['_DATABASE'][$options];
-            }
+         }
+
+         $config = &$GLOBALS['_DATABASE'];
+         if ($name == 'default' and !isset($config[$name])) {
+            $options = $config[0];
+         } else {
+            $options = $config[$name];
+         }
+
+         while (is_string($options)) {
+            $options = $config[$options];
+         }
+
+         if (is_array($options)) {
             return self::$connections[$name] = new DatabaseConnection($name, $options);
          } else {
             raise("Unconfigured database '$name'");

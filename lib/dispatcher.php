@@ -45,7 +45,7 @@
          # Detect the relative path used to reach the website
          if (!self::$prefix) {
             self::$prefix = preg_replace(
-               '#(index\.php)?(\?[^/]*)?('.self::$path.')?(\?.*)?$#', '',
+               '#(index\.(php|fcgi))?(\?[^/]*)?('.self::$path.')?(\?.*)?$#', '',
                $_SERVER['REQUEST_URI']
             );
          }
