@@ -13,15 +13,18 @@
 
       private $name;
       private $connection;
+      private $driver;
+      private $adapter;
+      private $table_attributes;
 
       static function load($name) {
          if ($connection = self::$connections[$name]) {
             return $connection;
          }
 
-         $config = &$GLOBALS['_DATABASE'];
+         $config = $GLOBALS['_DATABASE'];
          if ($name == 'default' and !isset($config[$name])) {
-            $options = $config[0];
+            $options = array_shift($config);
          } else {
             $options = $config[$name];
          }
@@ -39,12 +42,16 @@
 
       function __construct($name, $options) {
          $this->name = $name;
+
          $this->connection = new PDO(
             $options['dsn'], $options['username'], $options['password']
          );
          $this->connection->setAttribute(
             PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION
          );
+
+         $this->driver = substr($options['dsn'], 0, strpos($options['dsn'], ':'));
+         $this->adapter = DatabaseAdapter::load($this->driver, $this);
       }
 
       function get_name() {
@@ -72,6 +79,21 @@
       function insert_id() {
          return $this->connection->lastInsertId();
       }
+
+      # Find available tables
+      function get_tables() {
+         return $this->adapter->get_tables();
+      }
+
+      # Load model attributes from database schema
+      function get_table_attributes($table) {
+         if ($attributes = $this->table_attributes[$table]) {
+            return $attributes;
+         } else {
+            return $this->table_attributes[$table] = $this->adapter->get_table_attributes($table);
+         }
+      }
+
    }
 
    class DatabaseStatement extends PDOStatement

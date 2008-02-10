@@ -8,6 +8,7 @@
 #
 
    require LIB.'database/connection.php';
+   require LIB.'database/adapter.php';
    require LIB.'database/active_record.php';
 
    abstract class DB
@@ -19,15 +20,22 @@
          return self::$connection = DatabaseConnection::load($database);
       }
 
+      static function get_connection() {
+         if (self::$connection) {
+            return self::$connection;
+         } else {
+            return self::$connection = self::connect('default');
+         }
+      }
+
       static function query($sql) {
          if (empty($sql)) return null;
-
-         if (!self::$connection) {
-            self::connect('default');
-         }
-
          $args = func_get_args();
-         return call_user_func_array(array(self::$connection, query), $args);
+         return call_user_func_array(array(self::get_connection(), query), $args);
+      }
+
+      static function get_tables() {
+         return self::get_connection()->get_tables();
       }
 
       static function create($class, $attributes) {

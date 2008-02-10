@@ -42,7 +42,7 @@
          $this->name = underscore(substr(get_class($this), 0, -10));
 
          # Load controller helper, ignore errors
-         @include_once HELPERS.$this->name.'.php';
+         @include_once HELPERS.$this->name.'_helper.php';
 
          # Shortcuts
          $this->params = array_merge($_GET, $_POST);
@@ -170,7 +170,7 @@
       function perform($action, $args=null) {
          try {
             # Catch invalid action names
-            if (!ctype_alpha($action) or $action == 'init'
+            if (!preg_match('/^[a-z][a-z_]*$/', $action) or $action == 'init'
                or substr($action, 0, 6) == 'before'
                or substr($action, 0, 5) == 'after') {
                raise("Invalid action '$action'");

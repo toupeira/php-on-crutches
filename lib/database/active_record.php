@@ -9,8 +9,6 @@
 
    abstract class ActiveRecord extends Model
    {
-      static protected $table_attributes;
-
       protected $connection;
       protected $database = 'default';
       protected $table;
@@ -29,9 +27,13 @@
          }
 
          if ($this->load_attributes and empty($this->attributes)) {
-            $this->attributes = $this->table_attributes;
+            $columns = $this->get_connection()->get_table_attributes($this->table);
+            foreach ($columns as $column) {
+               $this->attributes[$column] = null;
+            }
          }
 
+         $this->protected[] = $this->primary_key;
          $this->set_attributes($attributes);
       }
 
@@ -41,20 +43,6 @@
          }
 
          return $this->connection;
-      }
-
-      # Load model attributes from database schema
-      function get_table_attributes() {
-         if ($attributes = self::$table_attributes[$this->table]) {
-            return $attributes;
-         } else {
-            $attributes = array();
-            $columns = $this->query("DESCRIBE {$this->table}")->fetchAll();
-            foreach ($columns as $column) {
-               $attributes[$column['Field']] = null;
-            }
-            return self::$table_attributes[$this->table] = $attributes;
-         }
       }
 
       # Wrapper for database finders
@@ -81,11 +69,11 @@
       # Called from DB::find_all
       function _find_all($key=null, $value=null) {
          if ($key and $value) {
-            $condition = "WHERE $key = ?";
+            $condition = " WHERE $key = ?";
          }
 
          return $this->query(
-            "SELECT * FROM {$this->table} $condition", $value
+            "SELECT * FROM {$this->table}$condition", (array) $value
          )->fetch_all_load($this);
       }
 
@@ -108,7 +96,7 @@
             }
 
             $action = 'update';
-            $query = "UPDATE %s SET %s WHERE {$this->primary_key} = ?";
+            $query = "UPDATE `%s` SET %s WHERE {$this->primary_key} = ?";
             $params[] = $this->attributes[$this->primary_key];
          } else {
             foreach ($this->attributes as $key => $value) {
@@ -117,7 +105,7 @@
             }
 
             $action = 'create';
-            $query = "INSERT INTO %s VALUES (%s)";
+            $query = "INSERT INTO `%s` VALUES (%s)";
          }
 
          $this->call_if_defined(before_save);
@@ -153,7 +141,7 @@
       function delete() {
          if ($this->exists()) {
             $this->query(
-               "DELETE FROM {$this->table} WHERE {$this->primary_key} = ?",
+               "DELETE FROM `{$this->table}` WHERE {$this->primary_key} = ?",
                $this->attributes[$this->primary_key]
             );
             return true;

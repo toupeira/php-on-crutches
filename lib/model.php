@@ -256,6 +256,10 @@
          return $this->form_element('text_field', $key, $options);
       }
 
+      function text_area($key, $options=null) {
+         return $this->form_element('text_area', $key, $options);
+      }
+
       function password_field($key, $options=null) {
          return $this->form_element('password_field', $key, $options);
       }

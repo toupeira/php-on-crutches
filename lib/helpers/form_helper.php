@@ -77,6 +77,12 @@
       ));
    }
 
+   function text_area($key, $value=null, $options=null) {
+      return form_element('textarea', $key, $value, $options, array(
+         'cols' => 40, 'rows' => 5
+      ));
+   }
+
    function password_field($key, $value=null, $options=null) {
       return form_element('input', $key, $value, $options, array(
          'type' => 'password', 'size' => 20
