@@ -3,35 +3,35 @@
 
    require_once LIB.'database/base.php';
 
-   class DatabaseModelTest extends TestCase
+   class ActiveRecordTest extends TestCase
    {
       function setup() {
-         $this->model = new SampleDatabaseModel();
+         $this->model = new SampleActiveRecord();
       }
 
       function test_construct_exceptions() {
-         foreach (array(EmptyDatabaseModel, EmptyTableModel, EmptyPrimaryKeyModel) as $class) {
+         foreach (array(EmptyActiveRecord, EmptyTableActiveRecord, EmptyPrimaryKeyActiveRecord) as $class) {
             $this->assertRaise("new $class()");
          }
       }
    }
 
-   class SampleDatabaseModel extends DatabaseModel
+   class SampleActiveRecord extends ActiveRecord
    {
       protected $table = 'sample';
       protected $load_attributes = false;
    }
 
-   class EmptyDatabaseModel extends DatabaseModel {
+   class EmptyActiveRecord extends ActiveRecord {
       protected $database = '';
       protected $table = 'foo';
    }
 
-   class EmptyTableModel extends DatabaseModel {
+   class EmptyTableActiveRecord extends ActiveRecord {
       protected $table = '';
    }
 
-   class EmptyPrimaryKeyModel extends DatabaseModel {
+   class EmptyPrimaryKeyActiveRecord extends ActiveRecord {
       protected $table = 'foo';
       protected $primary_key = '';
    }

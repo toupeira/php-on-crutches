@@ -198,7 +198,7 @@
       }
 
       function test_perform_with_invalid_action() {
-         foreach (array('init', 'before', 'after', 'before_foo', 'after_foo', 'in-valid', '!@#$%') as $action) {
+         foreach (array('init', 'before', 'after', 'before_foo', 'after_foo', 'in-valid', '_invalid', '!@#$%') as $action) {
             $this->controller->perform($action);
             $this->assertResponse('error');
          }
