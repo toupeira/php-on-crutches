@@ -23,11 +23,9 @@
       }
 
       function get_tables() {
-         raise("Adapter doesn't implement 'get_tables'");
       }
 
       function get_table_attributes($table) {
-         raise("Adapter doesn't implement 'get_table_attributes'");
       }
    }
 

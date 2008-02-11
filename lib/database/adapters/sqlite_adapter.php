@@ -7,11 +7,11 @@
 # $Id$
 #
 
-   class SqliteAdapter extends DatabaseAdapter
+   class SqliteAdapter extends DatabaseConnection
    {
-      function get_tables() {
+      function fetch_tables() {
          $tables = array();
-         $rows = $this->connection->query(
+         $rows = $this->query(
             "SELECT name FROM sqlite_master WHERE type='table'"
          )->fetch_all();
          foreach ($rows as $row) {
@@ -20,9 +20,9 @@
          return $tables;
       }
 
-      function get_table_attributes($table) {
+      function fetch_attributes($table) {
          $attributes = array();
-         $columns = $this->connection->query("PRAGMA table_info(`$table`)")->fetch_all();
+         $columns = $this->query("PRAGMA table_info(`$table`)")->fetch_all();
          foreach ($columns as $column) {
             $attributes[] = $column['name'];
          }

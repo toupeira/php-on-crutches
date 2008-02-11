@@ -14,8 +14,9 @@
       private $name;
       private $connection;
       private $driver;
-      private $adapter;
-      private $table_attributes;
+
+      private $cached_tables;
+      private $cached_attributes;
 
       static function load($name) {
          if ($connection = self::$connections[$name]) {
@@ -34,7 +35,10 @@
          }
 
          if (is_array($options)) {
-            return self::$connections[$name] = new DatabaseConnection($name, $options);
+            $driver = substr($options['dsn'], 0, strpos($options['dsn'], ':'));
+            require_once LIB."database/adapters/{$driver}_adapter.php";
+            $adapter = ucfirst($driver).'Adapter';
+            return self::$connections[$name] = new $adapter($name, $options);
          } else {
             raise("Unconfigured database '$name'");
          }
@@ -49,9 +53,6 @@
          $this->connection->setAttribute(
             PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION
          );
-
-         $this->driver = substr($options['dsn'], 0, strpos($options['dsn'], ':'));
-         $this->adapter = DatabaseAdapter::load($this->driver, $this);
       }
 
       function get_name() {
@@ -80,20 +81,29 @@
          return $this->connection->lastInsertId();
       }
 
-      # Find available tables
-      function get_tables() {
-         return $this->adapter->get_tables();
+      function fetch_tables() {
+         raise("Database adapter doesn't implement 'fetch_tables'");
       }
 
-      # Load model attributes from database schema
-      function get_table_attributes($table) {
-         if ($attributes = $this->table_attributes[$table]) {
-            return $attributes;
+      function fetch_attributes($table) {
+         raise("Database adapter doesn't implement 'fetch_attributes'");
+      }
+
+      function get_tables() {
+         if ($tables = $this->cached_tables) {
+            return $tables;
          } else {
-            return $this->table_attributes[$table] = $this->adapter->get_table_attributes($table);
+            return $this->cached_tables = $this->fetch_tables();
          }
       }
 
+      function get_table_attributes($table) {
+         if ($attributes = $this->cached_attributes[$table]) {
+            return $attributes;
+         } else {
+            return $this->cached_attributes[$table] = $this->fetch_attributes($table);
+         }
+      }
    }
 
    class DatabaseStatement extends PDOStatement
@@ -129,6 +139,32 @@
             $objects[] = $object;
          }
          return $objects;
+      }
+   }
+
+   class DatabaseTransaction {
+      private $connection;
+      private $finished;
+
+      function __construct($connection) {
+         $this->connection = $connection;
+         $this->connection->beginTransaction();
+      }
+
+      function __destruct() {
+         if (!$this->finished) {
+            $this->connection->rollback();
+         }
+      }
+
+      function commit() {
+         $this->connection->commit();
+         $this->finished = true;
+      }
+
+      function rollback() {
+         $this->connection->rollback();
+         $this->finished = true;
       }
    }
 

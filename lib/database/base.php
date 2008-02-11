@@ -8,8 +8,8 @@
 #
 
    require LIB.'database/connection.php';
-   require LIB.'database/adapter.php';
    require LIB.'database/active_record.php';
+   require LIB.'database/association.php';
 
    abstract class DB
    {

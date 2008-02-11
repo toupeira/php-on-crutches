@@ -12,18 +12,22 @@
       protected $connection;
       protected $database = 'default';
       protected $table;
-      protected $primary_key = 'id';
 
       protected $new_record = true;
       protected $load_attributes = true;
+
+      protected $associations;
+      protected $cached_associations;
+
+      protected $has_one;
+      protected $has_many;
+      protected $belongs_to;
 
       function __construct($attributes=null) {
          if (empty($this->database)) {
             raise("No database set for model '".get_class($this)."'");
          } elseif (empty($this->table)) {
             raise("No table set for model '".get_class($this)."'");
-         } elseif (empty($this->primary_key)) {
-            raise("No primary key set for model '".get_class($this)."'");
          }
 
          if ($this->load_attributes and empty($this->attributes)) {
@@ -33,8 +37,21 @@
             }
          }
 
-         $this->protected[] = $this->primary_key;
+         $this->protected[] = 'id';
          $this->set_attributes($attributes);
+         $this->add_associations();
+      }
+
+      function __get($key) {
+         if ($association = $this->associations[$key]) {
+            if ($data = $this->cached_associations[$key]) {
+               return $data;
+            } else {
+               return $this->cached_associations[$key] = $association->load($this);
+            }
+         } else {
+            return parent::__get($key);
+         }
       }
 
       function get_connection() {
@@ -43,6 +60,14 @@
          }
 
          return $this->connection;
+      }
+
+      function get_database() {
+         return $this->database;
+      }
+
+      function get_table() {
+         return $this->table;
       }
 
       # Wrapper for database finders
@@ -57,7 +82,7 @@
          if ($value) {
             $key = $id;
          } else {
-            $key = $this->primary_key;
+            $key = 'id';
             $value = $id;
          }
 
@@ -89,15 +114,15 @@
 
          if ($this->exists()) {
             foreach ($this->attributes as $key => $value) {
-               if ($key != $this->primary_key) {
+               if ($key != 'id') {
                   $fields[] = "`$key` = ?";
                   $params[] = $value;
                }
             }
 
             $action = 'update';
-            $query = "UPDATE `%s` SET %s WHERE {$this->primary_key} = ?";
-            $params[] = $this->attributes[$this->primary_key];
+            $query = "UPDATE `%s` SET %s WHERE `id` = ?";
+            $params[] = $this->attributes['id'];
          } else {
             foreach ($this->attributes as $key => $value) {
                $fields[] = '?';
@@ -118,7 +143,7 @@
 
          if ($action == 'create') {
             $this->new_record = false;
-            $this->attributes[$this->primary_key] = $this->connection->insert_id();
+            $this->attributes['id'] = $this->connection->insert_id();
          }
 
          $this->call_if_defined("after_$action");
@@ -141,8 +166,8 @@
       function delete() {
          if ($this->exists()) {
             $this->query(
-               "DELETE FROM `{$this->table}` WHERE {$this->primary_key} = ?",
-               $this->attributes[$this->primary_key]
+               "DELETE FROM `{$this->table}` WHERE `id` = ?",
+               $this->attributes['id']
             );
             return true;
          } else {
@@ -153,6 +178,18 @@
       protected function query() {
          $args = func_get_args();
          return call_user_func_array(array($this->get_connection(), query), $args);
+      }
+
+      protected function add_associations() {
+         foreach (array('has_one', 'has_many', 'has_many_through', 'belongs_to') as $type) {
+            if (!empty($this->$type)) {
+               require_once LIB."database/associations/{$type}_association.php";
+               $association = camelize($type).'Association';
+               foreach ($this->$type as $key => $model) {
+                  $this->associations[$key] = new $association($key, $model);
+               }
+            }
+         }
       }
    }
 

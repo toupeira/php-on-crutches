@@ -44,12 +44,13 @@
       }
    }
 
-   function generate_model($name) {
-      if (preg_match('/^\w+$/i', $name)) {
+   function generate_model($name, $table) {
+      if (preg_match('/^\w+$/', $name) and preg_match('/^\w+$/', $table)) {
          $class = camelize($name);
          create_file(MODELS.underscore($name).'.php', array(
             "class {$class} extends Model",
             "{",
+            "   protected \$table = '$table';",
             "}",
          ));
          create_file(TEST.'models/'.underscore($name).'_test.php', array(
@@ -58,7 +59,7 @@
             "}",
          ));
       } else {
-         print "Usage: {$argv[0]} model NAME\n";
+         print "Usage: {$argv[0]} model NAME TABLE\n";
          exit(1);
       }
    }
@@ -93,7 +94,7 @@
 
    $generator = "generate_{$argv[1]}";
    if (function_exists($generator)) {
-      $generator($argv[2]);
+      $generator($argv[2], $argv[3]);
    } else {
       print "Usage: {$argv[0]} [controller|model] NAME\n";
       exit(1);

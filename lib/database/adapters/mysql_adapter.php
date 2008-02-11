@@ -7,20 +7,20 @@
 # $Id$
 #
 
-   class MysqlAdapter extends DatabaseAdapter
+   class MysqlAdapter extends DatabaseConnection
    {
-      function get_tables() {
+      function fetch_tables() {
          $tables = array();
-         $rows = $this->connection->query("SHOW TABLES")->fetch_all();
+         $rows = $this->query("SHOW TABLES")->fetch_all();
          foreach ($rows as $row) {
             $tables[] = array_shift($row);
          }
          return $tables;
       }
 
-      function get_table_attributes($table) {
+      function fetch_attributes($table) {
          $attributes = array();
-         $columns = $this->connection->query("DESCRIBE `$table`")->fetch_all();
+         $columns = $this->query("DESCRIBE `$table`")->fetch_all();
          foreach ($columns as $column) {
             $attributes[] = $column['Field'];
          }
