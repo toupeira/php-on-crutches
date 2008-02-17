@@ -9,6 +9,9 @@
 
    class HasOneAssociation extends Association
    {
+      function load() {
+         return DB::find($this->class, $this->key, $this->model->id);
+      }
    }
 
 ?>

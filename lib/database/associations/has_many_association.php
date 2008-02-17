@@ -9,8 +9,8 @@
 
    class HasManyAssociation extends Association
    {
-      function load($model) {
-         return DB::find_all($this->class, "id_{$model->table}", $model->id);
+      function load() {
+         return DB::find_all($this->class, $this->key, $this->model->id);
       }
    }
 

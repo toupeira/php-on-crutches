@@ -8,7 +8,7 @@
 #
 
    function h($text) {
-      return htmlentities($text);
+      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
    }
 
    function pluralize($count, $singular, $plural) {

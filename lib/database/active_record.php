@@ -15,10 +15,9 @@
 
       protected $new_record = true;
       protected $load_attributes = true;
+      protected $changed_attributes;
 
       protected $associations;
-      protected $cached_associations;
-
       protected $has_one;
       protected $has_many;
       protected $belongs_to;
@@ -44,14 +43,20 @@
 
       function __get($key) {
          if ($association = $this->associations[$key]) {
-            if ($data = $this->cached_associations[$key]) {
-               return $data;
-            } else {
-               return $this->cached_associations[$key] = $association->load($this);
-            }
+            return $association->data;
          } else {
             return parent::__get($key);
          }
+      }
+
+      function __set($key, $value) {
+         $old_value = $this->__get($key);
+         parent::__set($key, $value);
+
+         if ($this->__get($key) != $old_value) {
+            $this->changed_attributes[] = $key;
+         }
+         return $this;
       }
 
       function get_connection() {
@@ -74,6 +79,7 @@
       function load($attributes) {
          $this->attributes = $attributes;
          $this->new_record = false;
+         $this->changed_attributes = null;
          return true;
       }
 
@@ -87,18 +93,18 @@
          }
 
          return $this->query(
-            "SELECT * FROM {$this->table} WHERE $key = ? LIMIT 1", $value
+            "SELECT * FROM `{$this->table}` WHERE `$key` = ? LIMIT 1", $value
          )->fetch_load($this);
       }
 
       # Called from DB::find_all
       function _find_all($key=null, $value=null) {
          if ($key and $value) {
-            $condition = " WHERE $key = ?";
+            $condition = " WHERE `$key` = ?";
          }
 
          return $this->query(
-            "SELECT * FROM {$this->table}$condition", (array) $value
+            "SELECT * FROM `{$this->table}`$condition", (array) $value
          )->fetch_all_load($this);
       }
 
@@ -111,10 +117,13 @@
             return false;
          }
 
-
          if ($this->exists()) {
+            if (empty($this->changed_attributes)) {
+               return true;
+            }
+
             foreach ($this->attributes as $key => $value) {
-               if ($key != 'id') {
+               if ($key != 'id' and in_array($key, (array) $this->changed_attributes)) {
                   $fields[] = "`$key` = ?";
                   $params[] = $value;
                }
@@ -145,6 +154,8 @@
             $this->new_record = false;
             $this->attributes['id'] = $this->connection->insert_id();
          }
+
+         $this->changed_attributes = null;
 
          $this->call_if_defined("after_$action");
          $this->call_if_defined(after_save);
@@ -185,8 +196,8 @@
             if (!empty($this->$type)) {
                require_once LIB."database/associations/{$type}_association.php";
                $association = camelize($type).'Association';
-               foreach ($this->$type as $key => $model) {
-                  $this->associations[$key] = new $association($key, $model);
+               foreach ($this->$type as $key => $class) {
+                  $this->associations[$key] = new $association($this, $class);
                }
             }
          }

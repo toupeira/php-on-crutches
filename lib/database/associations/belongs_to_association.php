@@ -9,6 +9,10 @@
 
    class BelongsToAssociation extends Association
    {
+      function load() {
+         $key = underscore($this->class).'_id';
+         return DB::find_all($this->class, 'id', $this->model->$key);
+      }
    }
 
 ?>
