@@ -7,34 +7,27 @@
 # $Id$
 #
 
-   # Load standard libraries
-   $libs = array(
-      'base',
-      'logger',
-      'config',
-
-      'dispatcher',
-      'controller',
-      'model',
-      'view',
-   );
-
-   foreach ($libs as $lib) {
-      require LIB."$lib.php";
+   # Load core extensions
+   foreach (glob(LIB.'core/*.php') as $core) {
+      require $core;
    }
 
-   # Load standard helpers
+   # Load framework libraries
+   require LIB.'base.php';
+   require LIB.'config.php';
+   require LIB.'dispatcher.php';
+   require LIB.'controller.php';
+   require LIB.'model.php';
+   require LIB.'view.php';
+
+   # Load helpers
    foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;
    }
-
-   # Load application helper
    @include_once HELPERS.'application_helper.php';
 
-   # Load route definitions
+   # Load application configuration
    @include CONFIG.'routes.php';
-
-   # Load database definitions
    @include CONFIG.'database.php';
 
    # Load database support if necessary
@@ -45,6 +38,20 @@
    # Initialize the framework
    Logger::init();
    Dispatcher::init();
+
+   # Auto-load models and controllers
+   function __autoload($class) {
+      $class = underscore($class);
+      if (is_file($file = MODELS."$class.php")) {
+         require $file;
+      } elseif (substr($class, -10) == 'controller') {
+         if (is_file($file = CONTROLLERS."$class.php")) {
+            require $file;
+         } elseif (is_file($file = LIB."controllers/$class.php")) {
+            require $file;
+         }
+      }
+   }
 
    # Initialize the application
    foreach (glob(CONFIG.'initializers/*.php') as $initializer) {

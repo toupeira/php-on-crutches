@@ -10,20 +10,6 @@
    # Shorthand for newlines
    define(N, "\n");
 
-   # Auto-load libraries, models and controllers
-   function __autoload($class) {
-      $class = underscore($class);
-      if (is_file($file = MODELS."$class.php")) {
-         require $file;
-      } elseif (substr($class, -10) == 'controller') {
-         if (is_file($file = CONTROLLERS."$class.php")) {
-            require $file;
-         } elseif (is_file($file = LIB."controllers/$class.php")) {
-            require $file;
-         }
-      }
-   }
-
    # Base class for all objects
    class Object
    {
@@ -86,14 +72,6 @@
    class ApplicationError extends Exception {};
    class MissingTemplate extends ApplicationError {};
 
-   # Dump an exception with backtrace.
-   # Returns the formatted string.
-   function dump_error($exception) {
-      return "<h1>".humanize(get_class($exception))."</h1>".N
-           . "<p>".$exception->getMessage()."</p>".N
-           . "<pre>".$exception->getTraceAsString()."</pre>";
-   }
-
    # Return the first non-empty value. Basically a workaround for
    # PHP's broken || operator, which only returns booleans.
    function any() {
@@ -102,53 +80,6 @@
             return $arg;
          }
       }
-   }
-
-   # Run a shell command silently.
-   #
-   # $command may contain placeholders which will be replaced
-   # by the remaining, shell-escaped arguments.
-   #
-   # Returns true if the command was successful.
-   #
-   function run($command, $args=null) {
-      if (!is_array($args)) {
-         $args = array_slice(func_get_args(), 1);
-      }
-
-      if ($args) {
-         $args = array_map(escapeshellarg, $args);
-         array_unshift($args, $command);
-         $command = call_user_func_array(sprintf, $args);
-      }
-
-      log_debug("Running '$command'");
-      exec("$command 2>/dev/null", $output, $status);
-      return ($status === 0);
-   }
-
-   # Run a shell command in the background.
-   function spawn($command) {
-      return run("$command &>/dev/null &", $args);
-   }
-
-   # Create a temporary file or directory which will be removed when
-   # the request is finished.
-   function mktemp($dir=false) {
-      $prefix = sys_get_temp_dir();
-      $template = config('application').'.XXXXXX';
-      $dir = $dir ? '-d' : '';
-      $path = trim(`mktemp $dir -p $prefix $template`);
-      register_shutdown_function(rm_rf, $path);
-      return $path;
-   }
-
-   function rm_f($file) {
-      if (file_exists($file)) { return @unlink($file); }
-   }
-
-   function rm_rf($file) {
-      if (file_exists($file)) { return system("rm -rf ".escapeshellarg($file)); }
    }
 
    # Create something almost, but not quite, entirely unlike a real closure.
