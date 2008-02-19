@@ -18,15 +18,25 @@
          $this->assertEqual("leave me", truncate("leave me"));
       }
 
+      function test_simple_format() {
+         $this->assertEqual("&lt;h1&gt;foo&lt;/h1&gt;<br />bar", simple_format("<h1>foo</h1>\nbar"));
+      }
+
+      function test_auto_link() {
+         $url = "http://foo/?id=1&bar=2";
+         $h_url = h($url);
+         $this->assertEqual("<a href=\"$h_url\">$h_url</a>", auto_link($url));
+      }
+
+      function test_br2nl() {
+         $this->assertEqual("foo\nbar", br2nl("foo<br />bar"));
+      }
+
       function test_cycle() {
          $this->assertEqual('foo', cycle('foo', 'bar'));
          $this->assertEqual('bar', cycle('foo', 'bar'));
          $this->assertEqual('foo', cycle('foo', 'bar'));
          $this->assertEqual('bar', cycle('foo', 'bar'));
-      }
-
-      function test_br2nl() {
-         $this->assertEqual("foo\nbar", br2nl("foo<br />bar"));
       }
    }
 

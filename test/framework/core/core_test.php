@@ -1,10 +1,10 @@
 <?# $Id$ ?>
 <?
 
-   class BaseTest extends TestCase
+   class CoreTest extends TestCase
    {
       function test_object() {
-         $test = $this->test = new BaseTestObject();
+         $test = $this->test = new CoreTestObject();
          $this->assertEqual('readonly', $test->readonly);
          $this->assertEqual('readwrite', $test->readwrite);
          $this->assertEqual('shadowed', $test->shadowed);
@@ -23,28 +23,6 @@
          $this->assertTrue(any(true, false));
          $this->assertTrue(any(false, true));
          $this->assertEqual('test', any(false, array(), '', 0, '0', null, 'test'));
-      }
-
-      function test_run() {
-         $this->assertTrue(run('true'));
-         $this->assertFalse(run('false'));
-      }
-
-      function test_mktemp() {
-         $file = mktemp();
-         $this->assertTrue(is_file($file));
-         $this->assertMatch('#^/tmp/'.config('application').'\.\w{6}#', $file);
-
-         $dir = mktemp(true);
-         $this->assertTrue(is_dir($dir));
-         $this->assertMatch('#^/tmp/'.config('application').'\.\w{6}#', $file);
-      }
-
-      function test_rm_f() {
-         $this->assertNull(rm_f('/tmp/invalid/file'));
-         $file = mktemp();
-         $this->assertTrue(rm_f($file));
-         $this->assertFalse(is_file($file));
       }
 
       function test_exceptions() {
@@ -68,17 +46,9 @@
          $this->assertIsA($e, MissingTemplate);
          $this->assertEqual('', $e->getMessage());
       }
-
-      function test_dump_error() {
-         $output = dump_error(new MissingTemplate('foo'));
-
-         $this->assertMatch(
-            "#^<h1>Missing template</h1>\n<p>foo</p>\n<pre>.*#",
-            $output);
-      }
    }
 
-   class BaseTestObject extends Object
+   class CoreTestObject extends Object
    {
       private $private = 'private';
       private $readonly = 'readonly';

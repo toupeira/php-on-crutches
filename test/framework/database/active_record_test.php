@@ -10,7 +10,7 @@
       }
 
       function test_construct_exceptions() {
-         foreach (array(EmptyActiveRecord, EmptyTableActiveRecord, EmptyPrimaryKeyActiveRecord) as $class) {
+         foreach (array(EmptyActiveRecord, EmptyTableActiveRecord) as $class) {
             $this->assertRaise("new $class()");
          }
       }
@@ -29,11 +29,6 @@
 
    class EmptyTableActiveRecord extends ActiveRecord {
       protected $table = '';
-   }
-
-   class EmptyPrimaryKeyActiveRecord extends ActiveRecord {
-      protected $table = 'foo';
-      protected $primary_key = '';
    }
 
 ?>

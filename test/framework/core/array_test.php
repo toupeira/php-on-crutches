@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-   class ArrayHelperTest extends TestCase
+   class ArrayTest extends TestCase
    {
       function setup() {
          $this->a = array(
