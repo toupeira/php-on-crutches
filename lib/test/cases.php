@@ -117,7 +117,7 @@
             case 'success':
                $this->assertInArray($status, array(200, null),
                   "Expected a successful response, got '$status'");
-               $this->assertFalse(empty($this->controller->output));
+               $this->assertFalse(is_null($this->controller->output));
                break;
             case 301:
             case 302:
