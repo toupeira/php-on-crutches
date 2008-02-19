@@ -9,7 +9,7 @@
 #
 
    require_once dirname(__FILE__).'/../../config/environment.php';
-   require_once LIB.'testing.php';
+   require_once LIB.'test/runner.php';
 
    $logger->level = LOG_DISABLED;
 

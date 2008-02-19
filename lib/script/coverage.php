@@ -16,8 +16,8 @@
    }
 
    require_once dirname(__FILE__).'/../../config/environment.php';
-   require_once LIB.'testing.php';
-   require LIB.'coverage.php';
+   require_once LIB.'test/runner.php';
+   require_once LIB.'test/coverage.php';
 
    $logger->level = LOG_DISABLED;
 
@@ -28,7 +28,7 @@
    $args = array_slice($argv, 1);
    while ($arg = array_shift($args)) {
       switch($arg) {
-         case '-d': $target = array_shift($args); break;
+         case '-d': $target = realpath(array_shift($args)); break;
          case '-i': $include[] = realpath(array_shift($args)); break;
          case '-e': $exclude[] = realpath(array_shift($args)); break;
          case '-f': $force = true; break;
@@ -36,7 +36,7 @@
       }
    }
 
-   $target = realpath(any($target, WEBROOT.'coverage'));
+   $target = any($target, WEBROOT.'coverage');
    if (file_exists($target) and !$force) {
       print "Target path $target already exists.\n";
       exit(1);

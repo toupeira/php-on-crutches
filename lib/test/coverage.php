@@ -37,7 +37,7 @@
          $this->exclude = (array) $exclude;
 
          $this->view = new View();
-         $this->view_path = LIB.'views/coverage/';
+         $this->view_path = LIB.'test/coverage/';
       }
 
       function generate() {
@@ -138,8 +138,12 @@
             'file' => $file,
             'size' => $size,
             'code' => $code,
-            'coverage_total' => sprintf('%.1f', $covered_size / $size * 100),
-            'coverage_code'   => sprintf('%.1f', $covered_code / $code * 100),
+            'coverage_total' => (($size > 0)
+               ? sprintf('%.1f', $covered_size / $size * 100)
+               : 0),
+            'coverage_code' => ($code > 0)
+               ? sprintf('%.1f', $covered_code / $code * 100)
+               : 0,
          );
 
          $this->view->set('title', $name);
@@ -165,10 +169,10 @@
                'size' => $this->total_size,
                'code' => $this->total_code,
                'coverage_total' => ($this->total_size > 0)
-                  ?   sprintf('%.1f', $this->covered_size / $this->total_size * 100)
+                  ? sprintf('%.1f', $this->covered_size / $this->total_size * 100)
                   : "0.0",
                'coverage_code'   => ($this->total_code > 0)
-                  ?   sprintf('%.1f', $this->covered_code / $this->total_code * 100)
+                  ? sprintf('%.1f', $this->covered_code / $this->total_code * 100)
                   : "0.0")),
             $this->reports
          );
