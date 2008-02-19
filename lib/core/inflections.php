@@ -17,7 +17,7 @@
    }
 
    function camelize($text) {
-      $text = str_replace('_', ' ', basename(strtolower(trim($text))));
+      $text = str_replace('_', ' ', basename(trim($text)));
       for ($i = 0; $i < strlen($text); $i++) {
          if ($text[$i] == ' ') {
             $text[$i+1] = strtoupper($text[$i+1]);

@@ -7,8 +7,8 @@
 # $Id$
 #
 
-   function h($text) {
-      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
+   function h($text, $double_encode=true) {
+      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
    }
 
    function pluralize($count, $singular, $plural) {
@@ -23,6 +23,19 @@
       }
    }
 
+   function simple_format($text) {
+      return str_replace("\n", "<br />", h($text, false));
+   }
+
+   function auto_link($text) {
+      return preg_replace_callback('#\b(\w+://[^\s]+)#',
+         proc('link_to(h($a[1], false), h($a[1], false))'), $text);
+   }
+
+   function br2nl($text) {
+      return str_replace("<br />", "\n", $text);
+   }
+
    function cycle($values) {
       global $_cycle;
       $values = func_get_args();
@@ -31,10 +44,6 @@
          $_cycle = 0;
       }
       return $value;
-   }
-
-   function br2nl($text) {
-      return str_replace("<br />", "\n", $text);
    }
 
 ?>

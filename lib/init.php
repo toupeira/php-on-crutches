@@ -13,7 +13,6 @@
    }
 
    # Load framework libraries
-   require LIB.'base.php';
    require LIB.'config.php';
    require LIB.'dispatcher.php';
    require LIB.'controller.php';
