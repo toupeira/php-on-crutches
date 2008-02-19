@@ -13,6 +13,21 @@
          $this->assertEqual("0 months", pluralize(0, 'month', 'months'));
       }
 
+      function test_humanize() {
+         $this->assertEqual("Human error", humanize('human_error'));
+         $this->assertEqual("Human error", humanize('HumanError'));
+      }
+
+      function test_camelize() {
+         $this->assertEqual("FooBar", camelize('foo bar'));
+         $this->assertEqual("FooBar", camelize('foo_bar'));
+         $this->assertEqual("FooBar", camelize('fooBar'));
+      }
+
+      function test_underscore() {
+         $this->assertEqual("under_score", underscore('UnderScore'));
+      }
+
       function test_truncate() {
          $this->assertEqual("trunc...", truncate("truncate me", 5));
          $this->assertEqual("leave me", truncate("leave me"));
