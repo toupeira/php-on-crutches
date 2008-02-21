@@ -11,6 +11,10 @@
       $keys = func_get_args();
       $array = array_shift($keys);
 
+      if (is_array($keys[0])) {
+         $keys = $keys[0];
+      }
+
       if (count($keys) > 1) {
          $filter = array();
          foreach ($keys as $key) {

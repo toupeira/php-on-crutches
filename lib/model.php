@@ -42,14 +42,6 @@
          raise("Model doesn't implement 'save'");
       }
 
-      function create($name) {
-         raise("Model doesn't implement 'create'");
-      }
-
-      function update($name) {
-         raise("Model doesn't implement 'update'");
-      }
-
       function destroy($name) {
          raise("Model doesn't implement 'destroy'");
       }
@@ -117,7 +109,7 @@
       }
 
       # Update attributes and save
-      function update_attributes($attributes) {
+      function update($attributes) {
          if ($this->set_attributes($attributes) and $this->is_valid()) {
             return $this->save();
          } else {

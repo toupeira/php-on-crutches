@@ -10,6 +10,10 @@
 
    require_once dirname(__FILE__).'/../../config/environment.php';
 
+   if (!is_resource(STDIN)) {
+      die("Can't read standard input!\n");
+   }
+
    if (in_array('-d', $argv)) {
       config_set('debug', true);
       $logger->level = LOG_DEBUG;
