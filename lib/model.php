@@ -39,11 +39,11 @@
       }
 
       function save() {
-         raise("Model doesn't implement 'save'");
+         raise(get_class()." doesn't implement 'save'");
       }
 
       function destroy($name) {
-         raise("Model doesn't implement 'destroy'");
+         raise(get_class()." doesn't implement 'destroy'");
       }
 
       function validate() {}

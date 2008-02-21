@@ -36,8 +36,14 @@
 
          if (is_array($options)) {
             $driver = substr($options['dsn'], 0, strpos($options['dsn'], ':'));
-            require_once LIB."database/adapters/{$driver}_adapter.php";
-            $adapter = ucfirst($driver).'Adapter';
+            $file = LIB."database/adapters/{$driver}_adapter.php";
+            if (is_file($file)) {
+               require_once $file;
+               $adapter = ucfirst($driver).'Adapter';
+            } else {
+               $adapter = get_class();
+            }
+
             return self::$connections[$name] = new $adapter($name, $options);
          } else {
             raise("Unconfigured database '$name'");
@@ -82,11 +88,11 @@
       }
 
       function fetch_tables() {
-         raise("Database adapter doesn't implement 'fetch_tables'");
+         raise(get_class()." doesn't implement 'fetch_tables'");
       }
 
       function fetch_attributes($table) {
-         raise("Database adapter doesn't implement 'fetch_attributes'");
+         raise(get_class()." doesn't implement 'fetch_attributes'");
       }
 
       function get_tables() {
