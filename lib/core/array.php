@@ -7,9 +7,8 @@
 # $Id$
 #
 
-   function array_get() {
-      $keys = func_get_args();
-      $array = array_shift($keys);
+   function array_get(&$array) {
+      $keys = array_slice(func_get_args(), 1);
 
       if (is_array($keys[0])) {
          $keys = $keys[0];
@@ -28,7 +27,7 @@
       }
    }
 
-   function array_find($array, $key, $value) {
+   function array_find(&$array, $key, $value) {
       foreach ((array) $array as $object) {
          if ($object->$key == $value) {
             return $object;
@@ -36,7 +35,7 @@
       }
    }
 
-   function array_pluck($array, $key, $hash=false) {
+   function array_pluck(&$array, $key, $hash=false) {
       $values = array();
       foreach ((array) $array as $object) {
          if ($value = (is_object($object) ? $object->$key : $object[$key])) {
@@ -51,7 +50,7 @@
       return $values;
    }
 
-   function array_map_method($method, $objects) {
+   function array_map_method($method, &$objects) {
       foreach ($objects as $object) {
          $object->$method();
       }
@@ -91,6 +90,14 @@
                return $value;
             }
          }
+      }
+   }
+
+   function array_shift_arg(&$array) {
+      if (empty($array)) {
+         raise("Too few arguments");
+      } else {
+         return array_shift($array);
       }
    }
 

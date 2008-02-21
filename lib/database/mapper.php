@@ -49,6 +49,15 @@
          return $this->connection;
       }
 
+      function get_attributes() {
+         return $this->get_connection()->get_attributes($this->table);
+      }
+
+      function query() {
+         $args = func_get_args();
+         return call_user_func_array(array($this->get_connection(), query), $args);
+      }
+
       function create($attributes) {
          $model = new $this->model($attributes);
          return $model->save();
@@ -132,15 +141,6 @@
          )->fetch_column());
       }
 
-      function get_attributes() {
-         return $this->get_connection()->get_attributes($this->table);
-      }
-
-      function query() {
-         $args = func_get_args();
-         return call_user_func_array(array($this->get_connection(), query), $args);
-      }
-
       protected function build_select($options) {
       }
 
@@ -174,20 +174,12 @@
             } elseif ($count = substr_count($value, '?')) {
                $condition .= " $value";
                for ($i = 0; $i < $count; $i++) {
-                  if (empty($values)) {
-                     raise("Too few arguments for '$value'");
-                  }
-
-                  $params[] = array_shift($values);
+                  $params[] = array_shift_arg($values);
                   array_shift($keys);
                }
             } else {
                $condition .= " `$value` = ?";
-               if (empty($values)) {
-                  raise("Too few arguments for '$value'");
-               }
-
-               $params[] = array_shift($values);
+               $params[] = array_shift_arg($values);
                array_shift($keys);
             }
          }
