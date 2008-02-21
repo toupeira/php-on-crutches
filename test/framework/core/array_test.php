@@ -26,7 +26,15 @@
       }
 
       function test_array_get() {
-         $this->assertEqual(2, array_get($this->a, 'b'));
+         $this->assertEqual(2,
+            array_get($this->a, 'b'));
+         $this->assertEqual(array('b' => 2),
+            array_get($this->a, array('b')));
+         $this->assertEqual(array('a' => 1, 'c' => 3),
+            array_get($this->a, 'a', 'c'));
+         $this->assertEqual(array('a' => 1, 'c' => 3),
+            array_get($this->a, array('a', 'c')));
+
          $this->assertNull(array_get($this->a, 'd'));
          $this->assertNull(array_get($this->c, 'b'));
       }
