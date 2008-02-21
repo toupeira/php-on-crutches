@@ -9,43 +9,84 @@
 
    class ActiveRecordMapper extends Object
    {
+      static protected $mappers;
+
+      static function load($model) {
+         $class = is_object($model) ? get_class($model) : $model;
+         if ($mapper = self::$mappers[$class]) {
+            return $mapper;
+         } else {
+            return self::$mappers[$class] = new ActiveRecordMapper($model);
+         }
+      }
+
+      protected $model;
       protected $connection;
       protected $database;
       protected $table;
 
       function __construct($model) {
+         if (is_object($model)) {
+            $this->model = get_class($model);
+         } else {
+            $model = new $model();
+            $this->model = $model;
+         }
+
+         if (! $model instanceof ActiveRecord) {
+            raise("Invalid model '".get_class($this)."'");
+         }
+
          $this->database = $model->database;
          $this->table = $model->table;
       }
 
-      function create($attributes) {
-         foreach ($this->attributes as $key => $value) {
-            $fields[] = '?';
-            $params[] = $value;
+      function get_connection() {
+         if (!$this->connection) {
+            $this->connection = DatabaseConnection::load($this->database);
          }
 
-         $action = 'create';
-         $query = "INSERT INTO `%s` VALUES (%s)";
-         $this->query(
-            sprintf($query, $this->table, implode(", ", $fields)),
-            $params
-         );
+         return $this->connection;
+      }
+
+      function create($attributes) {
+         $model = new $this->model($attributes);
+         return $model->save();
+      }
+
+      function insert($attributes) {
+         $keys = array();
+         $values = array();
+
+         foreach ($attributes as $key => $value) {
+            $keys[] = '?';
+            $values[] = $value;
+         }
+
+         $query = sprintf("INSERT INTO `%s` VALUES (%s)",
+                          $this->table, implode(", ", $keys));
+         $this->query($query, $values);
 
          return $this->connection->insert_id();
       }
 
       function update($id, $attributes) {
+         if (empty($attributes)) {
+            return true;
+         }
+
+         $keys = array();
+         $values = array();
+
          foreach ($attributes as $key => $value) {
-            if ($key != 'id') {
-               $fields[] = "`$key` = ?";
-               $params[] = $value;
-            }
+            $keys[] = "`$key` = ?";
+            $values[] = $value;
          }
 
          $query = sprintf("UPDATE `%s` SET %s WHERE `id` = ?",
-                          $this->table, implode(", ", $fields));
-         $params[] = $this->attributes['id'];
-         $this->query($query, $params);
+                          $this->table, implode(", ", $keys));
+         $values[] = $id;
+         $this->query($query, $values);
 
          return $id;
       }
@@ -58,28 +99,41 @@
          return $id;
       }
 
-      function find_first() {
+      function find($id, $value=null) {
+         if ($value) {
+            $key = $id;
+         } else {
+            $key = 'id';
+            $value = $id;
+         }
+
+         return $this->query(
+            "SELECT * FROM `{$this->table}` WHERE `$key` = ? LIMIT 1", $value
+         )->fetch_load($this->model);
       }
 
       function find_all() {
+         list($conditions, $values) = $this->build_conditions(func_get_args());
+         return $this->query(
+            "SELECT * FROM `{$this->table}`$conditions", (array) $values
+         )->fetch_all_load($this->model);
       }
 
-      function __call() {
+      function find_first() {
+      }
+
+      function __call($method, $args) {
+         print "__call\n";
       }
 
       function count() {
-      }
-
-      function get_connection() {
-         if (!$this->connection) {
-            $this->connection = DatabaseConnection::load($this->database);
-         }
-
-         return $this->connection;
+         return intval($this->query(
+            "SELECT count(*) FROM `{$this->table}`"
+         )->fetch_column());
       }
 
       function get_attributes() {
-         return $this->get_connection()->get_table_attributes($this->table);
+         return $this->get_connection()->get_attributes($this->table);
       }
 
       function query() {
@@ -90,7 +144,55 @@
       protected function build_select($options) {
       }
 
-      protected function build_where($options) {
+      protected function build_conditions($conditions) {
+         if (!is_array($conditions)) {
+            print "WTF???\n";
+            $conditions = func_get_args();
+         } elseif (count($conditions) == 1 and is_array($conditions[0])) {
+            $conditions = $conditions[0];
+         } elseif (empty($conditions)) {
+            return null;
+         }
+
+         $condition = ' WHERE';
+         $params = array();
+
+         $keys = array_keys($conditions);
+         $values = array_values($conditions);
+
+         while (!empty($keys)) {
+            $key = array_shift($keys);
+            $value = array_shift($values);
+
+            if (is_string($key)) {
+               if (strstr($key, '?') !== false) {
+                  $condition .= " $key";
+               } else {
+                  $condition .= " `$key` = ?";
+               }
+               $params[] = $value;
+            } elseif ($count = substr_count($value, '?')) {
+               $condition .= " $value";
+               for ($i = 0; $i < $count; $i++) {
+                  if (empty($values)) {
+                     raise("Too few arguments for '$value'");
+                  }
+
+                  $params[] = array_shift($values);
+                  array_shift($keys);
+               }
+            } else {
+               $condition .= " `$value` = ?";
+               if (empty($values)) {
+                  raise("Too few arguments for '$value'");
+               }
+
+               $params[] = array_shift($values);
+               array_shift($keys);
+            }
+         }
+
+         return array($condition, $params);
       }
    }
 

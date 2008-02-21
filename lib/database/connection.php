@@ -103,7 +103,7 @@
          }
       }
 
-      function get_table_attributes($table) {
+      function get_attributes($table) {
          if ($attributes = $this->cached_attributes[$table]) {
             return $attributes;
          } else {

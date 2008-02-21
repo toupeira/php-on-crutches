@@ -9,7 +9,7 @@
 
    abstract class ActiveRecord extends Model
    {
-      protected $connection;
+      protected $mapper;
       protected $database = 'default';
       protected $table;
 
@@ -30,15 +30,14 @@
          }
 
          if ($this->load_attributes and empty($this->attributes)) {
-            $columns = $this->get_connection()->get_table_attributes($this->table);
-            foreach ($columns as $column) {
-               $this->attributes[$column] = null;
+            foreach ($this->get_mapper()->attributes as $key) {
+               $this->attributes[$key] = null;
             }
          }
 
          $this->protected[] = 'id';
          $this->set_attributes($attributes);
-         $this->add_associations();
+         $this->call_if_defined('associations');
       }
 
       function __get($key) {
@@ -59,12 +58,12 @@
          return $this;
       }
 
-      function get_connection() {
-         if (!$this->connection) {
-            $this->connection = DatabaseConnection::load($this->database);
+      function get_mapper() {
+         if (is_null($this->mapper)) {
+            $this->mapper = ActiveRecordMapper::load($this);
          }
 
-         return $this->connection;
+         return $this->mapper;
       }
 
       function get_database() {
@@ -83,31 +82,6 @@
          return true;
       }
 
-      # Called from DB::find
-      function _find($id, $value=null) {
-         if ($value) {
-            $key = $id;
-         } else {
-            $key = 'id';
-            $value = $id;
-         }
-
-         return $this->query(
-            "SELECT * FROM `{$this->table}` WHERE `$key` = ? LIMIT 1", $value
-         )->fetch_load($this);
-      }
-
-      # Called from DB::find_all
-      function _find_all($key=null, $value=null) {
-         if ($key and $value) {
-            $condition = " WHERE `$key` = ?";
-         }
-
-         return $this->query(
-            "SELECT * FROM `{$this->table}`$condition", (array) $value
-         )->fetch_all_load($this);
-      }
-
       function exists() {
          return !$this->new_record;
       }
@@ -118,41 +92,27 @@
          }
 
          if ($this->exists()) {
-            if (empty($this->changed_attributes)) {
+            $attributes = array_get($this->attributes, $this->changed_attributes);
+
+            if (empty($attributes)) {
                return true;
             }
 
-            foreach ($this->attributes as $key => $value) {
-               if ($key != 'id' and in_array($key, (array) $this->changed_attributes)) {
-                  $fields[] = "`$key` = ?";
-                  $params[] = $value;
-               }
-            }
-
             $action = 'update';
-            $query = "UPDATE `%s` SET %s WHERE `id` = ?";
-            $params[] = $this->attributes['id'];
+            $args = array($this->id, $attributes);
          } else {
-            foreach ($this->attributes as $key => $value) {
-               $fields[] = '?';
-               $params[] = $value;
-            }
-
-            $action = 'create';
-            $query = "INSERT INTO `%s` VALUES (%s)";
+            $action = 'insert';
+            $args = array($this->attributes);
          }
 
          $this->call_if_defined(before_save);
          $this->call_if_defined("before_$action");
 
-         $this->query(
-            sprintf($query, $this->table, implode(", ", $fields)),
-            $params
-         );
+         $id = call_user_func_array(array($this->get_mapper(), $action), $args);
 
          if ($action == 'create') {
             $this->new_record = false;
-            $this->attributes['id'] = $this->connection->insert_id();
+            $this->attributes['id'] = $id;
          }
 
          $this->changed_attributes = null;
@@ -176,19 +136,13 @@
 
       function delete() {
          if ($this->exists()) {
-            $this->query(
-               "DELETE FROM `{$this->table}` WHERE `id` = ?",
-               $this->attributes['id']
-            );
+            $this->get_mapper()->delete($this->id);
+            $this->new_record = true;
+            $this->readonly = array_keys($this->attributes);
             return true;
          } else {
             return false;
          }
-      }
-
-      protected function query() {
-         $args = func_get_args();
-         return call_user_func_array(array($this->get_connection(), query), $args);
       }
 
       protected function add_associations() {

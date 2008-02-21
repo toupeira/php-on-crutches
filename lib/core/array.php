@@ -13,16 +13,18 @@
 
       if (is_array($keys[0])) {
          $keys = $keys[0];
+      } elseif (count($keys) == 1) {
+         $keys = $keys[0];
       }
 
-      if (count($keys) > 1) {
+      if (is_array($keys)) {
          $filter = array();
          foreach ($keys as $key) {
             $filter[$key] = $array[$key];
          }
          return $filter;
       } else {
-         return $array[$keys[0]];
+         return $array[$keys];
       }
    }
 

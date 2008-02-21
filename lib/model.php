@@ -64,7 +64,7 @@
 
       function __set($key, $value) {
          if (in_array($key, $this->readonly)) {
-            raise("Can't update read-only attribute '$key'");
+            raise("Can't change read-only attribute '$key'");
          } else {
             $setter = "set_$key";
             if (method_exists($this, $setter)) {
