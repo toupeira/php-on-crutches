@@ -10,7 +10,7 @@
    class HasManyAssociation extends Association
    {
       function load() {
-         return DB::find_all($this->class, $this->key, $this->model->id);
+         return DB($this->class)->find_all($this->key, $this->model->id);
       }
    }
 

@@ -11,7 +11,7 @@
    {
       function load() {
          $key = underscore($this->class).'_id';
-         return DB::find_all($this->class, 'id', $this->model->$key);
+         return DB($this->class)->find_all('id', $this->model->$key);
       }
    }
 
