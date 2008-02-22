@@ -50,7 +50,7 @@
          }
       }
 
-      function __construct($name, $options) {
+      protected function __construct($name, $options) {
          $this->name = $name;
 
          $this->connection = new PDO(

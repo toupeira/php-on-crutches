@@ -60,7 +60,7 @@
 
       function get_mapper() {
          if (is_null($this->mapper)) {
-            $this->mapper = ActiveRecordMapper::load($this);
+            $this->mapper = DatabaseMapper::load($this);
          }
 
          return $this->mapper;

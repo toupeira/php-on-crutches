@@ -13,7 +13,7 @@
    require LIB.'database/association.php';
 
    function DB($model) {
-      return ActiveRecordMapper::load($model);
+      return DatabaseMapper::load($model);
    }
 
 ?>

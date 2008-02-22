@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   class ActiveRecordMapper extends Object
+   class DatabaseMapper extends Object
    {
       static protected $mappers;
 
@@ -16,7 +16,7 @@
          if ($mapper = self::$mappers[$class]) {
             return $mapper;
          } else {
-            return self::$mappers[$class] = new ActiveRecordMapper($model);
+            return self::$mappers[$class] = new DatabaseMapper($model);
          }
       }
 
@@ -25,7 +25,7 @@
       protected $database;
       protected $table;
 
-      function __construct($model) {
+      protected function __construct($model) {
          if (is_object($model)) {
             $this->model = get_class($model);
          } else {
