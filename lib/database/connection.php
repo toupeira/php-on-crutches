@@ -15,9 +15,6 @@
       private $connection;
       private $driver;
 
-      private $cached_tables;
-      private $cached_attributes;
-
       static function load($name) {
          if ($connection = self::$connections[$name]) {
             return $connection;
@@ -96,18 +93,20 @@
       }
 
       function get_tables() {
-         if ($tables = $this->cached_tables) {
+         $key = "db-{$this->name}-tables";
+         if ($tables = cache_get($key)) {
             return $tables;
          } else {
-            return $this->cached_tables = $this->fetch_tables();
+            return cache_set($key, $this->fetch_tables());
          }
       }
 
       function get_attributes($table) {
-         if ($attributes = $this->cached_attributes[$table]) {
+         $key = "db-{$this->name}-attributes-$table";
+         if ($attributes = cache_get($key)) {
             return $attributes;
          } else {
-            return $this->cached_attributes[$table] = $this->fetch_attributes($table);
+            return cache_set($key, $this->fetch_attributes($table));
          }
       }
    }
