@@ -10,6 +10,7 @@
    define('CONFIG',       ROOT.'config/');
    define('LOG',          ROOT.'log/');
    define('TEST',         ROOT.'test/');
+   define('TMP',          ROOT.'tmp/');
    define('SCRIPT',       LIB.'script/');
    define('FIXTURES',     TEST.'fixtures/');
 
