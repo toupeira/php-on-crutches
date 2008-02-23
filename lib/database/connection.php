@@ -32,11 +32,14 @@
          }
 
          if (is_array($options)) {
-            $driver = substr($options['dsn'], 0, strpos($options['dsn'], ':'));
-            $file = LIB."database/adapters/{$driver}_adapter.php";
+            if (!isset($options['adapter'])) {
+               raise("No adapter set for database '$name'");
+            }
+
+            $file = LIB."database/adapters/{$options['adapter']}_adapter.php";
             if (is_file($file)) {
                require_once $file;
-               $adapter = ucfirst($driver).'Adapter';
+               $adapter = ucfirst($options['adapter']).'Adapter';
             } else {
                $adapter = get_class();
             }
@@ -51,7 +54,7 @@
          $this->name = $name;
 
          $this->connection = new PDO(
-            $options['dsn'], $options['username'], $options['password']
+            $this->get_dsn($options), $options['username'], $options['password']
          );
          $this->connection->setAttribute(
             PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION

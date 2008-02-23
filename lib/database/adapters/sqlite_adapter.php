@@ -9,6 +9,10 @@
 
    class SqliteAdapter extends DatabaseConnection
    {
+      function get_dsn($options) {
+         return "sqlite:{$options['filename']}";
+      }
+
       function fetch_tables() {
          $tables = array();
          $rows = $this->query(

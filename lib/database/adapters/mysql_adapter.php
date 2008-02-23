@@ -9,6 +9,10 @@
 
    class MysqlAdapter extends DatabaseConnection
    {
+      function get_dsn($options) {
+         return "mysql:host={$options['hostname']};dbname={$options['database']}";
+      }
+
       function fetch_tables() {
          $tables = array();
          $rows = $this->query("SHOW TABLES")->fetch_all();

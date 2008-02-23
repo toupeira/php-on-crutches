@@ -11,8 +11,8 @@
       if ($cache = $GLOBALS['_CACHE']) {
          return $cache;
       } else {
-         if ($store = config('cache_store')) {
-            $store = ucfirst($store).'Store';
+         if ($type = config('cache_store')) {
+            $store = ucfirst($type).'Store';
          } else {
             $store = 'MemoryStore';
          }
@@ -21,10 +21,12 @@
             $store = new $store();
             if (!$store->setup() and get_class() != 'MemoryStore') {
                $store = new MemoryStore();
+            } elseif (! $store instanceof CacheStore) {
+               raise("Invalid cache store '$type'");
             }
             return $GLOBALS['_CACHE'] = $store;
          } else {
-            raise("Invalid cache store '$store'");
+            raise("Invalid cache store '$type'");
          }
       }
    }

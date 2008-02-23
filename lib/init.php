@@ -13,8 +13,8 @@
    }
 
    # Load framework libraries
-   require LIB.'cache.php';
    require LIB.'config.php';
+   require LIB.'cache.php';
    require LIB.'dispatcher.php';
    require LIB.'controller.php';
    require LIB.'model.php';
