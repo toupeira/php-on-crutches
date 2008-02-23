@@ -109,20 +109,22 @@
       }
 
       function find($id) {
-         list($conditions, $values) = $this->build_conditions(func_get_args());
-         return $this->query(
-            "SELECT * FROM `{$this->table}`$conditions LIMIT 1", $values
-         )->fetch_load($this->model);
+         if (is_null($id)) {
+            raise("No ID given");
+         }
+
+         list($select, $values) = $this->build_select(func_get_args(), array('limit' => 1));
+         return $this->query($select, (array) $values)->fetch_load($this->model);
       }
 
       function find_all() {
-         list($conditions, $values) = $this->build_conditions(func_get_args());
-         return $this->query(
-            "SELECT * FROM `{$this->table}`$conditions", (array) $values
-         )->fetch_all_load($this->model);
+         list($select, $values) = $this->build_select(func_get_args());
+         return $this->query($select, (array) $values)->fetch_all_load($this->model);
       }
 
-      function find_first() {
+      function find_by_sql($sql) {
+         $params = array_slice(func_get_args(), 1);
+         return $this->query($sql, $params)->fetch_all_load($this->model);
       }
 
       # Implement find(_all)_by_* calls
@@ -134,15 +136,15 @@
                array_unshift($keys, $key);
                assert_args($args, count($keys));
 
-               $condition = '';
+               $where = '';
                $op = '';
                foreach ($keys as $i => $key) {
-                  $condition .= "$op`$key` = ?";
+                  $where .= "$op`$key` = ?";
                   $params[] = $args[$i];
                   $op = ' '.strtoupper($operator).' ';
                }
 
-               array_unshift($params, $condition);
+               array_unshift($params, $where);
                return call_user_func_array(array($this, $finder), $params);
             } else {
                assert_args($args, 1);
@@ -157,12 +159,43 @@
          )->fetch_column());
       }
 
-      protected function build_select($options) {
+      protected function build_select($args, $defaults=array()) {
+         $options = array();
+         $where_options = array();
+         foreach ($args as $i => $arg) {
+            if (is_array($arg) and $i == count($args) - 1) {
+               $options = $arg;
+            } else {
+               $where_options[] = $arg;
+            }
+         }
+
+         $options = array_merge(
+            array('select' => '*'), $defaults, $options
+         );
+
+         if ($where_options) {
+            $options['conditions'] = $where_options;
+         }
+
+         $params = array();
+         $select = "SELECT {$options['select']} FROM `{$this->table}` {$options['joins']}";
+
+         if ($conditions = $options['conditions']) {
+            list($where, $params) = $this->build_where($conditions);
+            $select .= $where;
+         }
+
+         if ($order = $options['order']) { $select .= " ORDER BY $order"; }
+         if ($group = $options['group']) { $select .= " GROUP BY $group"; }
+         if ($limit = $options['limit']) { $select .= " LIMIT $limit"; }
+         if ($offset = $options['offset']) { $select .= " OFFSET $offset"; }
+
+         return array($select, $params);
       }
 
-      protected function build_conditions($conditions) {
+      protected function build_where($conditions) {
          if (!is_array($conditions)) {
-            print "WTF???\n";
             $conditions = func_get_args();
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
             $conditions = $conditions[0];
@@ -170,7 +203,7 @@
             return null;
          }
 
-         $condition = ' WHERE';
+         $where = ' WHERE';
          $operator = '';
          $params = array();
 
@@ -181,23 +214,23 @@
             $key = array_shift($keys);
             $value = array_shift($values);
 
-            $condition .= $operator;
+            $where .= $operator;
 
             if (is_string($key)) {
                if (strstr($key, '?') !== false) {
-                  $condition .= " $key";
+                  $where .= " $key";
                } else {
-                  $condition .= " `$key` = ?";
+                  $where .= " `$key` = ?";
                }
                $params[] = $value;
             } elseif ($count = substr_count($value, '?')) {
-               $condition .= " $value";
+               $where .= " $value";
                for ($i = 0; $i < $count; $i++) {
                   $params[] = array_shift_arg($values);
                   array_shift($keys);
                }
             } else {
-               $condition .= " `$value` = ?";
+               $where .= " `$value` = ?";
                $params[] = array_shift_arg($values);
                array_shift($keys);
             }
@@ -205,7 +238,7 @@
             $operator = ' AND';
          }
 
-         return array($condition, $params);
+         return array($where, $params);
       }
    }
 
