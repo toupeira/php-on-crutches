@@ -86,11 +86,11 @@
    print "\n\n".`php -v`."\n";
    while (!feof(STDIN)) {
       print "php[".config('application')."] >>> ";
-      $command = trim(fgets(STDIN));
+      $_command = trim(fgets(STDIN));
 
-      if ($command == 'quit') {
+      if ($_command == 'quit') {
          exit;
-      } elseif (in_array($command, array('?', 'help'))) {
+      } elseif (in_array($_command, array('?', 'help'))) {
          print "\n";
          print "  Special commands:\n";
          print "    help, ?          Show this help\n";
@@ -105,59 +105,59 @@
          print "    post(\$path, \$params)\n";
          print "\n";
          continue;
-      } elseif (substr($command, 0, 5) == 'help ') {
-         dump_function(substr($command, 5));
+      } elseif (substr($_command, 0, 5) == 'help ') {
+         dump_function(substr($_command, 5));
          continue;
-      } elseif (substr($command, 0, 5) == 'time ') {
-         $command = 'print ""; $__start = microtime(true); '.substr($command, 5)
+      } elseif (substr($_command, 0, 5) == 'time ') {
+         $_command = 'print ""; $__start = microtime(true); '.substr($_command, 5)
                   . '; printf("\n%.5f seconds\n", microtime(true) - $__start)';
-      } elseif ($command == 'ls' or substr($command, 0, 3) == 'ls ') {
-         print `$command -x --color`;
+      } elseif ($_command == 'ls' or substr($_command, 0, 3) == 'ls ') {
+         print `$_command -x --color`;
          continue;
-      } elseif (substr($command, 0, 3) == 'cd ') {
-         chdir(substr($command, 3));
+      } elseif (substr($_command, 0, 3) == 'cd ') {
+         chdir(substr($_command, 3));
          print getcwd()."\n";
          continue;
-      } elseif ($command == '..') {
+      } elseif ($_command == '..') {
          chdir('..');
          print getcwd()."\n";
          continue;
-      } elseif (preg_match('/^\$\w+\?$/', $command)) {
-         $command = "var_export(".rtrim($command, '?').")";
+      } elseif (preg_match('/^\$\w+\?$/', $_command)) {
+         $_command = "var_export(".rtrim($_command, '?').")";
       } else {
-         $command = rtrim($command, ';');
+         $_command = rtrim($_command, ';');
       }
 
-      $result = null;
+      $_result = null;
 
-      if ($command) {
-         if (preg_match('/^([a-z]+) /', $command, $m) and !in_array($m[1], array('new', 'null'))) {
-            $result = true;
+      if ($_command) {
+         if (preg_match('/^([a-z]+) /', $_command, $_m) and !in_array($_m[1], array('new', 'null'))) {
+            $_result = true;
          } else {
-            $command = "\$result = ($command)";
+            $_command = "\$_result = ($_command)";
          }
 
          ob_start();
 
          try {
-            eval("$command;");
-         } catch (Exception $e) {
-            print "[1;31m".get_class($e)."[0m: [1m".$e->getMessage()."[0m\n";
-            foreach (explode("\n", $e->getTraceAsString()) as $line) {
-               list($line, $text) = explode(' ', $line, 2);
-               print "   [1m{$line}[0m {$text}\n";
+            eval("$_command;");
+         } catch (Exception $_e) {
+            print "[1;31m".get_class($_e)."[0m: [1m".$_e->getMessage()."[0m\n";
+            foreach (explode("\n", $_e->getTraceAsString()) as $_line) {
+               list($_line, $_text) = explode(' ', $_line, 2);
+               print "   [1m{$_line}[0m {$_text}\n";
             }
-            $result = $e;
+            $_result = $_e;
          }
 
-         if ($output = ob_get_clean()) {
-            print rtrim($output)."\n";
+         if ($_output = ob_get_clean()) {
+            print rtrim($_output)."\n";
          }
 
-         print " :: [0;36m".to_string($result)."[0m\n";
+         print " :: [0;36m".to_string($_result)."[0m\n";
       }
 
-      $_ = $result;
+      $_ = $_result;
    }
    print "\n";
 

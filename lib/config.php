@@ -7,11 +7,9 @@
 # $Id$
 #
 
-   if (!is_array($_CONFIG = cache_get('config'))) {
-      require CONFIG.'framework.php';
-      @include CONFIG.'application.php';
-      $_CONFIG = cache_set('config', array_merge($_FRAMEWORK, (array) $_APPLICATION));
-   }
+   require CONFIG.'framework.php';
+   @include CONFIG.'application.php';
+   $_CONFIG = array_merge($_FRAMEWORK, (array) $_APPLICATION);
 
    function config($key) {
       return $GLOBALS['_CONFIG'][$key];

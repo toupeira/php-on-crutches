@@ -103,10 +103,10 @@
 
       function get_attributes($table) {
          $key = "db-{$this->name}-attributes-$table";
-         if ($attributes = cache_get($key)) {
+         if ($attributes = cache()->get($key)) {
             return $attributes;
          } else {
-            return cache_set($key, $this->fetch_attributes($table));
+            return cache()->set($key, $this->fetch_attributes($table));
          }
       }
    }

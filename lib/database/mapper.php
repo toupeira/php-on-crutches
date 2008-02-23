@@ -108,16 +108,10 @@
          return $id;
       }
 
-      function find($id, $value=null) {
-         if ($value) {
-            $key = $id;
-         } else {
-            $key = 'id';
-            $value = $id;
-         }
-
+      function find($id) {
+         list($conditions, $values) = $this->build_conditions(func_get_args());
          return $this->query(
-            "SELECT * FROM `{$this->table}` WHERE `$key` = ? LIMIT 1", $value
+            "SELECT * FROM `{$this->table}`$conditions LIMIT 1", $values
          )->fetch_load($this->model);
       }
 
@@ -131,8 +125,30 @@
       function find_first() {
       }
 
+      # Implement find(_all)_by_* calls
       function __call($method, $args) {
-         print "__call\n";
+         if (preg_match('/^(find(?:_all)?)_by_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
+            list($method, $finder, $key, $operator, $keys) = $match;
+            if ($operator) {
+               $keys = explode("_{$operator}_", $keys);
+               array_unshift($keys, $key);
+               assert_args($args, count($keys));
+
+               $condition = '';
+               $op = '';
+               foreach ($keys as $i => $key) {
+                  $condition .= "$op`$key` = ?";
+                  $params[] = $args[$i];
+                  $op = ' '.strtoupper($operator).' ';
+               }
+
+               array_unshift($params, $condition);
+               return call_user_func_array(array($this, $finder), $params);
+            } else {
+               assert_args($args, 1);
+               return $this->$finder($key, $args[0]);
+            }
+         }
       }
 
       function count() {
@@ -155,6 +171,7 @@
          }
 
          $condition = ' WHERE';
+         $operator = '';
          $params = array();
 
          $keys = array_keys($conditions);
@@ -163,6 +180,8 @@
          while (!empty($keys)) {
             $key = array_shift($keys);
             $value = array_shift($values);
+
+            $condition .= $operator;
 
             if (is_string($key)) {
                if (strstr($key, '?') !== false) {
@@ -182,6 +201,8 @@
                $params[] = array_shift_arg($values);
                array_shift($keys);
             }
+
+            $operator = ' AND';
          }
 
          return array($condition, $params);

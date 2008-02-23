@@ -19,15 +19,14 @@
          # Start sessions if enabled and not running in a console
          if (config('use_sessions') and PHP_SAPI != 'cli') {
             session_start();
+            header('Cache-Control: private');
+            header('Pragma: cache');
          }
 
          # Work around magic quotes...
          if (get_magic_quotes_gpc()) {
-            foreach ($_POST as $key => $value) {
-               if (is_string($value)) {
-                  $_POST[$key] = stripslashes($value);
-               }
-            }
+            log_warn("You've got magic quotes! Yuckk!!");
+            fix_magic_quotes();
          }
       }
 
