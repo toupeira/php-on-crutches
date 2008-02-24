@@ -24,8 +24,8 @@
       # List of error messages
       protected $messages = array();
 
-      function __construct($attributes=null) {
-         $this->set_attributes($attributes);
+      function __construct($attributes=null, $defaults=null) {
+         $this->set_attributes($attributes, $defaults);
       }
 
       # Stubs for implementation-specific actions
@@ -96,7 +96,11 @@
       }
 
       # Set attributes
-      function set_attributes($attributes) {
+      function set_attributes($attributes, $defaults=null) {
+         if (is_array($defaults)) {
+            $attributes = array_merge($defaults, (array) $attributes);
+         }
+
          if (is_array($attributes) and !empty($attributes)) {
             array_delete($attributes, $this->protected);
             foreach ($attributes as $key => $value) {
@@ -105,6 +109,13 @@
             return true;
          } else {
             return false;
+         }
+      }
+
+      # Set an attribute only if it isn't set yet
+      function set_default($key, $value) {
+         if ($this->read_attribute($key) === null) {
+            return $this->write_attribute($key, $value);
          }
       }
 
@@ -162,7 +173,7 @@
       protected function is_present($key) {
          return $this->validate_attribute($key,
             "can't be blank",
-            !empty($this->attributes[$key])
+            !blank($this->attributes[$key])
          );
       }
 

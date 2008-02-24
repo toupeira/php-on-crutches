@@ -126,7 +126,21 @@
       }
 
       function fetch_column($column=0) {
-         return parent::fetchColumn($column);
+         if (is_numeric($column)) {
+            return parent::fetchColumn($column);
+         } else {
+            $record = $this->fetch();
+            return $record[$column];
+         }
+      }
+
+      function fetch_list($column=0) {
+         $list = array();
+         while (($value = $this->fetch_column($column))) {
+            $list[] = $value;
+         }
+
+         return $list;
       }
 
       function fetch_load($class) {

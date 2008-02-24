@@ -42,6 +42,13 @@
             return $this->$method();
          }
       }
+
+      # Call a function if it is defined, and raise an exception if it returns false
+      function call_filter($filter) {
+         if ($this->call_if_defined($filter) === false) {
+            raise("Filter '$filter' returned false");
+         }
+      }
    }
 
    # Raise an exception.
@@ -105,6 +112,12 @@
       }
       $args = implode(',', $args);
       return create_function($args, "return $code;");
+   }
+
+   # Check if a string is empty or only contains whitespace.
+   function blank($text) {
+      $text = trim($text);
+      return empty($text);
    }
 
 ?>

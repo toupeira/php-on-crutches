@@ -369,13 +369,6 @@
             $this->msg['error'] = $messages[0];
          }
       }
-
-      # Call a filter if it is defined
-      function call_filter($filter) {
-         if ($this->call_if_defined($filter) === false) {
-            raise("Filter '$filter' returned false");
-         }
-      }
    }
 
 ?>

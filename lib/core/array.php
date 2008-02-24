@@ -35,6 +35,17 @@
       }
    }
 
+   function array_grep(&$array, $key, $pattern) {
+      $values = array();
+      foreach ((array) $array as $value) {
+         if (preg_match("/$pattern/", $value)) {
+            $values[] = $value;
+         }
+      }
+
+      return $values;
+   }
+
    function array_pluck(&$array, $key, $hash=false) {
       $values = array();
       foreach ((array) $array as $object) {

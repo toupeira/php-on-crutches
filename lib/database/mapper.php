@@ -101,15 +101,17 @@
       }
 
       function delete($id) {
-         $this->query(
-            "DELETE FROM `{$this->table}` WHERE `id` = ?", $id
-         );
+         list($where, $values) = $this->build_where(func_get_args());
+         if (empty($where)) {
+            raise("No conditions given");
+         }
 
+         $this->query("DELETE FROM `{$this->table}`$where", (array) $values);
          return $id;
       }
 
       function find($id) {
-         if (is_null($id)) {
+         if (empty($id)) {
             raise("No ID given");
          }
 
@@ -127,15 +129,18 @@
          return $this->query($sql, $params)->fetch_all_load($this->model);
       }
 
-      # Implement find(_all)_by_* calls
+      # Handle find(_all)_by_* calls
       function __call($method, $args) {
-         if (preg_match('/^(find(?:_all)?)_by_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
-            list($method, $finder, $key, $operator, $keys) = $match;
+         if (preg_match('/^(find(?:_all)?)_(by|like)_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
+            list($method, $finder, $equality, $key, $operator, $keys) = $match;
+            $argc = count($args);
+
+            $equality = ($equality == 'by') ? '=' : 'LIKE';
 
             if ($operator) {
                $keys = explode("_{$operator}_", $keys);
                array_unshift($keys, $key);
-               if (count($args) < count($keys) or count($args) > count($keys) + 1) {
+               if ($argc < count($keys) or $argc > count($keys) + 1) {
                   $keys = implode("', '", $keys);
                   raise("Wrong number of arguments for keys '$keys'");
                }
@@ -143,7 +148,7 @@
                $where = '';
                $op = '';
                foreach ($keys as $key) {
-                  $where .= "$op`$key` = ?";
+                  $where .= "$op`$key` $equality ?";
                   $params[] = array_shift($args);
                   $op = ' '.strtoupper($operator).' ';
                }
@@ -155,11 +160,13 @@
 
                return call_user_func_array(array($this, $finder), $params);
             } else {
-               if ($args < 1 or $args > 2) {
+               if ($argc < 1 or $argc > 2) {
                   raise("Wrong number of arguments for key '$key'");
                }
-               return $this->$finder($key, $args[0]);
+               return $this->$finder("`$key` $equality ?", $args[0]);
             }
+         } else {
+            raise("Invalid method '$method'");
          }
       }
 
@@ -206,15 +213,17 @@
 
       protected function build_where($conditions) {
          if (!is_array($conditions)) {
+            # Conditions are passed directly as arguments
             $conditions = func_get_args();
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
+            # Conditions are passed as array
             $conditions = $conditions[0];
          } elseif (empty($conditions)) {
             return null;
          }
 
-         $where = ' WHERE';
-         $operator = '';
+         $where = '';
+         $operator = ' WHERE';
          $params = array();
 
          $keys = array_keys($conditions);
@@ -224,34 +233,64 @@
             $key = array_shift($keys);
             $value = array_shift($values);
 
-            $where .= $operator;
+            if ($where and $operator == ' WHERE') {
+               $operator = ' AND';
+            }
 
             if (is_string($key)) {
+               $where .= $operator;
+
                if ($count = substr_count($key, '?')) {
+                  # Use array key as WHERE clause
+                  #   e.g.: array('key LIKE ?' => $value)
+                  #
                   $where .= " $key";
                } else {
+                  # Use array key as column name
+                  #   e.g.: array('key' => $value)
+                  #
                   $where .= " `$key` = ?";
+                  $count = 1;
                }
 
+               # Add array value as parameter for each placeholder
                for ($i = 0; $i < $count; $i++) {
                   $params[] = $value;
                }
+
+            } elseif (is_numeric($value)) {
+               # Use array value as ID
+               #   e.g.: array($id)
+               #
+               $where .= "$operator `id` = ?";
+               $params[] = $value;
+
+               # Allow passing multiple IDs
+               $operator = ' OR';
+
             } elseif ($count = substr_count($value, '?')) {
-               $where .= " $value";
+               # Use array value as WHERE clause
+               #   e.g.: array('key LIKE ?', $value)
+               #
+               $where .= "$operator $value";
                for ($i = 0; $i < $count; $i++) {
                   $params[] = array_shift_arg($values);
                   array_shift($keys);
                }
-            } elseif (is_numeric($value)) {
-               $where .= " `id` = ?";
-               $params[] = $value;
-            } elseif (is_string($value)) {
-               $where .= " `$value` = ?";
+
+            } elseif ($value == 'and' or $value == 'or') {
+               # Change the operator
+               $operator = ' '.strtoupper($value);
+            } elseif (is_string($value) and !blank($value)) {
+               # Use array value as column name
+               #   e.g.: array('key', $value)
+               $where .= "$operator `$value` = ?";
                $params[] = array_shift_arg($values);
                array_shift($keys);
-            }
 
-            $operator = ' AND';
+            } else {
+               raise("Invalid argument '$value'");
+            }
          }
 
          return array($where, $params);

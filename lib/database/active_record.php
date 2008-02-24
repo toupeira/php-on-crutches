@@ -22,7 +22,7 @@
       protected $has_many;
       protected $belongs_to;
 
-      function __construct($attributes=null) {
+      function __construct($attributes=null, $defaults=null) {
          if (empty($this->database)) {
             raise("No database set for model '".get_class($this)."'");
          } elseif (empty($this->table)) {
@@ -36,7 +36,7 @@
          }
 
          $this->protected[] = 'id';
-         $this->set_attributes($attributes);
+         $this->set_attributes($attributes, $defaults);
          $this->call_if_defined('associations');
       }
 
@@ -105,8 +105,8 @@
             $args = array($this->attributes);
          }
 
-         $this->call_if_defined(before_save);
-         $this->call_if_defined("before_$action");
+         $this->call_filter(before_save);
+         $this->call_filter("before_$action");
 
          $id = call_user_func_array(array($this->get_mapper(), $action), $args);
 
@@ -117,17 +117,17 @@
 
          $this->changed_attributes = null;
 
-         $this->call_if_defined("after_$action");
-         $this->call_if_defined(after_save);
+         $this->call_filter("after_$action");
+         $this->call_filter(after_save);
 
          return true;
       }
 
       function destroy() {
          if ($this->exists()) {
-            $this->call_if_defined(before_destroy);
+            $this->call_filter(before_destroy);
             $this->delete();
-            $this->call_if_defined(after_destroy);
+            $this->call_filter(after_destroy);
             return true;
          } else {
             return false;
