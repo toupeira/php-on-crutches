@@ -114,9 +114,14 @@
          return (array) $this->msg;
       }
 
-      # Set a value for the template
+      # Get and set template values
+      function get($key) {
+         return $this->view->data[$key];
+      }
+
       function set($key, $value) {
          $this->view->data[$key] = &$value;
+         return $this;
       }
 
       # Check if this is a POST request
