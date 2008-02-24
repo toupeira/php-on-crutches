@@ -12,23 +12,15 @@
    }
 
    function titleize($text) {
-      return preg_replace_callback('/ ([a-z])/',
-         proc('strtoupper(" ".$a[1])'), humanize($text));
+      return ucwords(humanize($text));
    }
 
    function camelize($text) {
-      $text = str_replace('_', ' ', basename(trim($text)));
-      for ($i = 0; $i < strlen($text); $i++) {
-         if ($text[$i] == ' ') {
-            $text[$i+1] = strtoupper($text[$i+1]);
-         }
-      }
-      return str_replace(' ', '', ucfirst($text));
+      return str_replace(' ', '', ucwords(str_replace('_', ' ', $text)));
    }
 
    function underscore($text) {
-      return strtolower(preg_replace('/([a-z]) ?([A-Z])/', '\1_\2',
-         basename(trim($text))));
+      return strtolower(preg_replace('/([a-z]) ?([A-Z])/', '\1_\2', $text));
    }
 
 ?>
