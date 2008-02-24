@@ -16,9 +16,9 @@
 
    if (in_array('-d', $argv)) {
       config_set('debug', true);
-      $logger->level = LOG_DEBUG;
+      $_LOGGER->level = LOG_DEBUG;
    } else {
-      $logger->level = LOG_DISABLED;
+      $_LOGGER->level = LOG_DISABLED;
    }
 
    # Fake request information

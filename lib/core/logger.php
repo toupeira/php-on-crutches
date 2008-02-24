@@ -13,14 +13,18 @@
    define('LOG_WARN',       LOG_WARNING);
 
    # A few wrappers
-   function log_error($msg) { return $GLOBALS['logger']->log($msg, LOG_ERROR); }
-   function log_warn($msg)  { return $GLOBALS['logger']->log($msg, LOG_WARN); }
-   function log_info($msg)  { return $GLOBALS['logger']->log($msg, LOG_INFO); }
-   function log_debug($msg) { return $GLOBALS['logger']->log($msg, LOG_DEBUG); }
+   function log_error($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_ERROR); }
+   function log_warn($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_WARN); }
+   function log_info($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_INFO); }
+   function log_debug($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_DEBUG); }
    function log_dump($data) { return log_debug(var_export($data, true)); }
 
+   function log_init($file=STDERR, $level=LOG_INFO) {
+      $GLOBALS['_LOGGER'] = new Logger($file, $level);
+   }
+
    function log_running() {
-      $logger = $GLOBALS['logger'];
+      $logger = $GLOBALS['_LOGGER'];
       return $logger instanceof Logger and $logger->running();
    }
 
@@ -29,28 +33,6 @@
       private $file;
       private $level;
       private $buffer;
-
-      static function init() {
-         # Configure error reporting
-         if (config('debug') or PHP_SAPI == 'cli') {
-            error_reporting(E_ALL ^ E_NOTICE);
-            ini_set('display_errors', 1);
-         } else {
-            error_reporting(0);
-            ini_set('display_errors', 0);
-         }
-
-         # Create the global logger instance
-         if (PHP_SAPI == 'cli') {
-            $log_file = STDERR;
-         } else {
-            $log_file = any(config('log_file'), LOG.'application.log');
-         }
-
-         $GLOBALS['logger'] = new Logger(
-            $log_file, any(config('log_level'), LOG_INFO)
-         );
-      }
 
       function __construct($file=STDERR, $level=LOG_INFO) {
          if (is_resource($file)) {

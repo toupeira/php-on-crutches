@@ -19,7 +19,7 @@
    require_once LIB.'test/runner.php';
    require_once LIB.'test/coverage.php';
 
-   $logger->level = LOG_DISABLED;
+   $_LOGGER->level = LOG_DISABLED;
 
    $tests = array();
    $include = array(APP);

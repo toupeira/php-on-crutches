@@ -20,24 +20,19 @@
    require LIB.'model.php';
    require LIB.'view.php';
 
-   # Load helpers
-   foreach (glob(LIB.'helpers/*.php') as $helper) {
-      require $helper;
-   }
-   @include_once HELPERS.'application_helper.php';
-
-   # Load application configuration
-   @include CONFIG.'routes.php';
-   @include CONFIG.'database.php';
-
    # Load database support if necessary
    if (!empty($_DATABASE)) {
       require LIB.'database/base.php';
    }
 
+   # Load helpers
+   @include_once HELPERS.'application_helper.php';
+   foreach (glob(LIB.'helpers/*.php') as $helper) {
+      require $helper;
+   }
+
    # Initialize the framework
-   Logger::init();
-   Dispatcher::init();
+   config_init();
 
    # Auto-load models and controllers
    function __autoload($class) {

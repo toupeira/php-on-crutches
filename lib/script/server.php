@@ -10,7 +10,7 @@
 
    require_once dirname(__FILE__).'/../../config/environment.php';
 
-   $logger->level = LOG_DISABLED;
+   $_LOGGER->level = LOG_DISABLED;
 
    if (!run('lighttpd -v')) {
       print "You need lighttpd to run the server.\n";

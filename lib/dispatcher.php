@@ -15,21 +15,6 @@
       static public $controller;
       static public $action;
 
-      static function init() {
-         # Start sessions if enabled and not running in a console
-         if (config('use_sessions') and PHP_SAPI != 'cli') {
-            session_start();
-            header('Cache-Control: private');
-            header('Pragma: cache');
-         }
-
-         # Work around magic quotes...
-         if (get_magic_quotes_gpc()) {
-            log_warn("You've got magic quotes! Yuckk!!");
-            fix_magic_quotes();
-         }
-      }
-
       # Run a request for the given path.
       #
       # If $path is empty, the path in the query string, the default path

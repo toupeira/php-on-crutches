@@ -11,7 +11,7 @@
    require_once dirname(__FILE__).'/../../config/environment.php';
    require_once LIB.'test/runner.php';
 
-   $logger->level = LOG_DISABLED;
+   $_LOGGER->level = LOG_DISABLED;
 
    $tests = glob(TEST.'*');
    $tests = array_map(basename, array_filter($tests, is_dir));
