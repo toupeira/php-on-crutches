@@ -26,6 +26,16 @@
    function config_init() {
       $config = &$GLOBALS['_CONFIG'];
 
+      # Load routes
+      if (!empty($GLOBALS['_ROUTES'])) {
+         Route::add($GLOBALS['_ROUTES']);
+      }
+
+      # Load databases
+      if (!empty($GLOBALS['_DATABASE'])) {
+         require LIB.'database/base.php';
+      }
+
       # Configure error reporting
       if ($config['debug'] or PHP_SAPI == 'cli') {
          error_reporting(E_ALL ^ E_NOTICE);

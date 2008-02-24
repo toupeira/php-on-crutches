@@ -15,15 +15,13 @@
    # Load framework libraries
    require LIB.'config.php';
    require LIB.'cache.php';
+
+   require LIB.'routing.php';
    require LIB.'dispatcher.php';
    require LIB.'controller.php';
+
    require LIB.'model.php';
    require LIB.'view.php';
-
-   # Load database support if necessary
-   if (!empty($_DATABASE)) {
-      require LIB.'database/base.php';
-   }
 
    # Load helpers
    @include_once HELPERS.'application_helper.php';

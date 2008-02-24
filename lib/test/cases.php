@@ -64,6 +64,28 @@
          return $this->assertInArray(
             $key, $object->errors, $message);
       }
+
+      function assertRecognizes($expected_values, $path) {
+         $values = Route::recognize($path);
+         $dumper = &new SimpleDumper();
+         $message = "Route '$path' wasn't recognized as "
+                  . var_export($expected_values, true)
+                  . ", got " . var_export($values, true);
+         return $this->assertEqual($expected_values, $values, $message);
+      }
+
+      function assertGenerates($expected_path, $values) {
+         $path = Route::generate($values);
+         $dumper = &new SimpleDumper();
+         $message = "Expected " . var_export($values, true)
+                  . " to generate '$expected_path', got '$path'";
+         return $this->assertEqual($expected_path, $path, $message);
+      }
+
+      function assertRouting($path, $values) {
+         $this->assertRecognizes($values, $path);
+         $this->assertGenerates($path, $values);
+      }
    }
 
    class ModelTestCase extends TestCase
