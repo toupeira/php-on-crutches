@@ -45,6 +45,16 @@
          $this->assertTrue('a' < 'aa');
       }
 
+      function test_emptiness() {
+         foreach (array('', 0, '0', array(), null) as $value) {
+            $this->assertTrue(empty($value));
+         }
+
+         foreach (array(' ', 1, '1', array(1)) as $value) {
+            $this->assertFalse(empty($value));
+         }
+      }
+
       function test_strict_binding() {
          $this->assertEqual('PhpBreakageParent', PhpBreakageParent::get_class());
          $this->assertEqual('PhpBreakageParent', PhpBreakageChild::get_class());

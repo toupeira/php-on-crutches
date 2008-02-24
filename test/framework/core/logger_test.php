@@ -5,7 +5,7 @@
    {
       function setup() {
          $this->file = mktemp();
-         $this->logger = $GLOBALS['logger'];
+         $this->logger = $GLOBALS['_LOGGER'];
          $this->logger->file = $this->file;
          $this->logger->level = LOG_INFO;
       }
