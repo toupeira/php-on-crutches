@@ -50,7 +50,7 @@
       }
 
       function get_attributes() {
-         return $this->get_connection()->get_attributes($this->table);
+         return $this->get_connection()->table_attributes($this->table);
       }
 
       function query() {
@@ -131,23 +131,33 @@
       function __call($method, $args) {
          if (preg_match('/^(find(?:_all)?)_by_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
             list($method, $finder, $key, $operator, $keys) = $match;
+
             if ($operator) {
                $keys = explode("_{$operator}_", $keys);
                array_unshift($keys, $key);
-               assert_args($args, count($keys));
+               if (count($args) < count($keys) or count($args) > count($keys) + 1) {
+                  $keys = implode("', '", $keys);
+                  raise("Wrong number of arguments for keys '$keys'");
+               }
 
                $where = '';
                $op = '';
-               foreach ($keys as $i => $key) {
+               foreach ($keys as $key) {
                   $where .= "$op`$key` = ?";
-                  $params[] = $args[$i];
+                  $params[] = array_shift($args);
                   $op = ' '.strtoupper($operator).' ';
                }
 
                array_unshift($params, $where);
+               if (is_array($options = array_shift($args))) {
+                  $params[] = $options;
+               }
+
                return call_user_func_array(array($this, $finder), $params);
             } else {
-               assert_args($args, 1);
+               if ($args < 1 or $args > 2) {
+                  raise("Wrong number of arguments for key '$key'");
+               }
                return $this->$finder($key, $args[0]);
             }
          }
@@ -217,19 +227,25 @@
             $where .= $operator;
 
             if (is_string($key)) {
-               if (strstr($key, '?') !== false) {
+               if ($count = substr_count($key, '?')) {
                   $where .= " $key";
                } else {
                   $where .= " `$key` = ?";
                }
-               $params[] = $value;
+
+               for ($i = 0; $i < $count; $i++) {
+                  $params[] = $value;
+               }
             } elseif ($count = substr_count($value, '?')) {
                $where .= " $value";
                for ($i = 0; $i < $count; $i++) {
                   $params[] = array_shift_arg($values);
                   array_shift($keys);
                }
-            } else {
+            } elseif (is_numeric($value)) {
+               $where .= " `id` = ?";
+               $params[] = $value;
+            } elseif (is_string($value)) {
                $where .= " `$value` = ?";
                $params[] = array_shift_arg($values);
                array_shift($keys);

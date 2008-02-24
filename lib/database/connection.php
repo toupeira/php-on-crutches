@@ -97,14 +97,14 @@
 
       function get_tables() {
          $key = "db-{$this->name}-tables";
-         if ($tables = cache_get($key)) {
+         if ($tables = cache()->get($key)) {
             return $tables;
          } else {
-            return cache_set($key, $this->fetch_tables());
+            return cache()->set($key, $this->fetch_tables());
          }
       }
 
-      function get_attributes($table) {
+      function table_attributes($table) {
          $key = "db-{$this->name}-attributes-$table";
          if ($attributes = cache()->get($key)) {
             return $attributes;

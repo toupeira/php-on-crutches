@@ -107,21 +107,4 @@
       return create_function($args, "return $code;");
    }
 
-   # Assert the number or types of the given arguments array.
-   function assert_args($args, $rule) {
-      if (is_numeric($rule)) {
-         if (count($args) != $rule) {
-            raise("Expected $rule arguments, got ".count($args));
-         }
-      } elseif (is_array($rule)) {
-         foreach ($rule as $i => $type) {
-            if (gettype($args[$i]) != $type) {
-               raise("Expected $type for argument ".($i + 1).", got ".gettype($args[$i]));
-            }
-         }
-      } else {
-         raise("Invalid rules given");
-      }
-   }
-
 ?>

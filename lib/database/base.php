@@ -12,8 +12,12 @@
    require LIB.'database/active_record.php';
    require LIB.'database/association.php';
 
-   function DB($model) {
-      return DatabaseMapper::load($model);
+   function DB($name='default') {
+      if (ctype_upper($name[0]) or is_object($name)) {
+         return DatabaseMapper::load($name);
+      } else {
+         return DatabaseConnection::load($name);
+      }
    }
 
 ?>
