@@ -7,26 +7,32 @@
 # $Id$
 #
 
+   function R($route) {
+      if (is_string($route)) {
+         return Route::recognize($route);
+      } elseif (is_array($route)) {
+         return Route::generate($route);
+      } else {
+         $type = gettype($route);
+         raise("Invalid argument of type '$type'");
+      }
+   }
+
    class Route
    {
       static protected $routes = array();
 
       protected $pattern = '';
       protected $params = array();
-      protected $values = array();
 
       # Add a new route
-      static function add($route, $values=null) {
+      static function add($route, $defaults=null) {
          if (is_array($route)) {
-            foreach ($route as $route => $values) {
-               if (is_numeric($route)) {
-                  $route = $values;
-                  $values = null;
-               }
-               self::add($route, $values);
+            foreach ($route as $route => $defaults) {
+               self::add($route, $defaults);
             }
          } else {
-            self::$routes[] = new Route($route, (array) $values);
+            self::$routes[] = new Route($route, (array) $defaults);
          }
       }
 
@@ -53,13 +59,8 @@
          }
       }
 
-      function __construct($route, $values) {
+      function __construct($route, $defaults=null) {
          $this->route = $route;
-         foreach (array('controller', 'action', 'id') as $i => $key) {
-            if (isset($values[$i])) {
-               $this->values[$key] = $values[$i];
-            }
-         }
 
          $parts = explode('/', trim($route, '/'));
          foreach ($parts as $i => $part) {
@@ -78,12 +79,20 @@
                } else{
                   raise("Invalid parameter '$key'");
                }
+
             } elseif ($part[0] == '*') {
                $this->params[] = substr($part, 1);
                $this->pattern .= '(.*)';
                break;
+
             } else {
                $this->pattern .= "$part/?";
+            }
+         }
+
+         foreach ((array) $defaults as $key => $value) {
+            if (is_null($this->params[$key])) {
+               $this->params[$key] = $value;
             }
          }
       }
@@ -94,13 +103,14 @@
 
       # Check if the path matches this route
       function recognize_route($path) {
-         $values = $this->values;
+         $values = $this->defaults;
          if (preg_match("#^{$this->pattern}$#", $path, $match)) {
             foreach ($this->params as $i => $key) {
                if ($value = $match[$i + 1]) {
                   $values[$key] = $value;
                }
             }
+
             return $values;
          }
       }
@@ -110,7 +120,7 @@
          $route = $this->route;
 
          foreach ($values as $key => $value) {
-            if (!blank($default = $this->values[$key]) and $value != $default) {
+            if (!is_null($default = $this->defaults[$key]) and $value != $default) {
                return null;
             } else {
                $route = preg_replace("#[:*]$key!?#", $value, $route);

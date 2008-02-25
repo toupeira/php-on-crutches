@@ -38,14 +38,15 @@
          return null;
       }
 
-      function __construct() {
+      function __construct($params=null) {
          $this->name = underscore(substr(get_class($this), 0, -10));
 
          # Load controller helper, ignore errors
          @include_once HELPERS.$this->name.'_helper.php';
 
          # Shortcuts
-         $this->params = array_merge($_GET, $_POST);
+         $this->params = array_merge($_GET, $_POST, (array) $params);
+         $this->session = &$_SESSION;
          $this->cookies = &$_COOKIES;
          $this->files = &$_FILES;
 
@@ -302,9 +303,15 @@
       # Send the configured headers
       function send_headers() {
          foreach ((array) $this->headers as $header => $value) {
-            @header("$header: $value");
+            if ($value !== null) {
+               @header("$header: $value");
+            }
          }
          return true;
+      }
+
+      # Send a cookie
+      function send_cookie($key, $value, $expires=null) {
       }
 
       # Send a file with the appropriate headers
@@ -322,17 +329,13 @@
             }
          }
 
-         if ($size = $options['size']) {
-            $this->headers['Content-Length'] = $size;
-         } else {
-            $this->headers['Content-Length'] = filesize($file);
-         }
+         $this->headers['Content-Length'] = ($size = $options['size'])
+            ? $size
+            : filesize($file);
 
-         if ($type = $options['type']) {
-            $this->headers['Content-Type'] = $type;
-         } elseif ($type = @mime_content_type($file)) {
-            $this->headers['Content-Type'] = $type;
-         }
+         $this->headers['Content-Type'] = ($type = $options['type'])
+            ? $type
+            : ($type = @mime_content_type($file)) ? $type : null;
 
          $this->send_headers();
          $this->render_text('');
