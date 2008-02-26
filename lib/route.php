@@ -9,21 +9,18 @@
 
    function R($route) {
       if (is_string($route)) {
-         return Route::recognize($route);
+         return Router::recognize($route);
       } elseif (is_array($route)) {
-         return Route::generate($route);
+         return Router::generate($route);
       } else {
          $type = gettype($route);
          raise("Invalid argument of type '$type'");
       }
    }
 
-   class Route
+   abstract class Router
    {
       static protected $routes = array();
-
-      protected $pattern = '';
-      protected $params = array();
 
       # Add a new route
       static function add($route, $defaults=null) {
@@ -44,20 +41,39 @@
       # Extract route values from a path
       static function recognize($path) {
          foreach (self::$routes as $route) {
-            if (!is_null($values = $route->recognize_route($path))) {
+            #print "testing route {$route->route} with '$path'\n";
+            if (!is_null($values = $route->recognize($path))) {
+               #print "matched!\n";
                return $values;
             }
          }
+
+         raise("Can't recognize route '$path'");
       }
 
       # Generate a URL from the given values
       static function generate($values) {
          foreach (self::$routes as $route) {
-            if (!is_null($path = $route->generate_route($values))) {
+            #print "testing route {$route->route} with '".array_to_str($values)."'\n";
+            if (!is_null($path = $route->generate($values))) {
+               #print "matched!\n";
                return $path;
             }
          }
+
+         $values = array_to_str($values);
+         raise("Failed to generate route from '$values'");
       }
+   }
+
+   class Route
+   {
+      protected $pattern = '';
+
+      protected $params = array();
+      protected $defaults = array();
+      protected $fixed = array();
+      protected $required = array();
 
       function __construct($route, $defaults=null) {
          $this->route = $route;
@@ -68,22 +84,36 @@
                $key = substr($part, 1);
                if (substr($key, -1) == '!') {
                   $key = substr($key, 0, -1);
+                  $this->required[] = $key;
                   $pattern = '([^/]+)/?';
                } else {
                   $pattern = '(?:([^/]+)/?)?';
                }
 
                if (ctype_alpha($key)) {
-                  $this->params[] = $key;
+                  $this->params[$key] = $part;
                   $this->pattern .= $pattern;
                } else{
                   raise("Invalid parameter '$key'");
                }
 
             } elseif ($part[0] == '*') {
-               $this->params[] = substr($part, 1);
-               $this->pattern .= '(.*)';
-               break;
+               $key = substr($part, 1);
+               if (substr($key, -1) == '!') {
+                  $key = substr($key, 0, -1);
+                  $this->required[] = $key;
+                  $pattern .= '(.+)';
+               } else {
+                  $pattern .= '(.*)';
+               }
+
+               if (ctype_alpha($key)) {
+                  $this->params[$key] = $part;
+                  $this->pattern .= $pattern;
+                  break;
+               } else{
+                  raise("Invalid parameter '$key'");
+               }
 
             } else {
                $this->pattern .= "$part/?";
@@ -91,8 +121,9 @@
          }
 
          foreach ((array) $defaults as $key => $value) {
-            if (is_null($this->params[$key])) {
-               $this->params[$key] = $value;
+            $this->defaults[$key] = $value;
+            if (!isset($this->params[$key])) {
+               $this->fixed[$key] = $value;
             }
          }
       }
@@ -102,13 +133,15 @@
       }
 
       # Check if the path matches this route
-      function recognize_route($path) {
+      function recognize($path) {
          $values = $this->defaults;
          if (preg_match("#^{$this->pattern}$#", $path, $match)) {
-            foreach ($this->params as $i => $key) {
-               if ($value = $match[$i + 1]) {
+            $i = 1;
+            foreach ($this->params as $key => $symbol) {
+               if ($value = $match[$i]) {
                   $values[$key] = $value;
                }
+               $i++;
             }
 
             return $values;
@@ -116,15 +149,51 @@
       }
 
       # Generate a path from the given values
-      function generate_route($values) {
+      function generate($values) {
          $route = $this->route;
 
-         foreach ($values as $key => $value) {
-            if (!is_null($default = $this->defaults[$key]) and $value != $default) {
-               return null;
-            } else {
-               $route = preg_replace("#[:*]$key!?#", $value, $route);
+         # Remove fixed values, abort if they don't match this route
+         foreach ($this->fixed as $key => $value) {
+            if (array_delete($values, $key) != $value) {
+               return;
             }
+         }
+
+         # Check for required values
+         foreach ($this->required as $key) {
+            if (!isset($values[$key])) {
+               return;
+            }
+         }
+
+         # Set default values
+         foreach ($this->defaults as $key => $value) {
+            if (isset($values[$key])) {
+               if ($values[$key] == $value) {
+                  unset($values[$key]);
+               }
+            } elseif (isset($this->params[$key])) {
+               $values[$key] = $value;
+            }
+         }
+
+         # Build the route
+         $additional = array();
+         foreach ($values as $key => $value) {
+            if ($symbol = $this->params[$key]) {
+               $route = str_replace($symbol, $value, $route);
+            } else {
+               $additional[$key] = $value;
+            }
+         }
+
+         # Add remaining parameters to query string
+         if ($additional) {
+            $values = array();
+            foreach ($additional as $key => $value) {
+               $values[] = "$key=".urlencode($value);
+            }
+            $route .= '?'.implode('&', $values);
          }
 
          return preg_replace('#/?[:*][a-z_]+!?#', '', $route);

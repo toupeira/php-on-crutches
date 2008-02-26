@@ -66,19 +66,19 @@
       }
 
       function assertRecognizes($expected_values, $path) {
-         $values = Route::recognize($path);
-         $dumper = &new SimpleDumper();
+         $values = Router::recognize($path);
+         #print "$path => "; print_r($values);
          $message = "Route '$path' wasn't recognized as "
-                  . var_export($expected_values, true)
-                  . ", got " . var_export($values, true);
+                  . array_to_str($expected_values) . ", got "
+                  . array_to_str($values);
          return $this->assertEqual($expected_values, $values, $message);
       }
 
       function assertGenerates($expected_path, $values) {
-         $path = Route::generate($values);
-         $dumper = &new SimpleDumper();
-         $message = "Expected " . var_export($values, true)
-                  . " to generate '$expected_path', got '$path'";
+         $path = Router::generate($values);
+         #print_r($values); print " => $path\n";
+         $message = "Expected " . array_to_str($values) . " to "
+                  . "generate '$expected_path', got '$path'";
          return $this->assertEqual($expected_path, $path, $message);
       }
 

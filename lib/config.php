@@ -28,7 +28,7 @@
 
       # Load routes
       if (!empty($GLOBALS['_ROUTES'])) {
-         Route::add($GLOBALS['_ROUTES']);
+         Router::add($GLOBALS['_ROUTES']);
       }
 
       # Load databases

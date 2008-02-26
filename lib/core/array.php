@@ -7,6 +7,7 @@
 # $Id$
 #
 
+   # Get values from an array by one or more keys
    function array_get(&$array) {
       $keys = array_slice(func_get_args(), 1);
 
@@ -27,6 +28,7 @@
       }
    }
 
+   # Find an object by property value
    function array_find(&$array, $key, $value) {
       foreach ((array) $array as $object) {
          if ($object->$key == $value) {
@@ -35,6 +37,7 @@
       }
    }
 
+   # Filter all values from an array which match the pattern
    function array_grep(&$array, $key, $pattern) {
       $values = array();
       foreach ((array) $array as $value) {
@@ -46,6 +49,7 @@
       return $values;
    }
 
+   # Collect the given array keys or object properties from each value
    function array_pluck(&$array, $key, $hash=false) {
       $values = array();
       foreach ((array) $array as $object) {
@@ -61,12 +65,14 @@
       return $values;
    }
 
+   # Execute a method on each object
    function array_map_method($method, &$objects) {
       foreach ($objects as $object) {
          $object->$method();
       }
    }
 
+   # Delete one or more keys from an array
    function array_delete(&$array, $keys) {
       if (is_array($keys)) {
          foreach ($keys as $key) {
@@ -87,6 +93,7 @@
       }
    }
 
+   # Delete one or more values from an array
    function array_remove(&$array, $values) {
       if (is_array($values)) {
          foreach ($array as $key => $value) {
@@ -104,12 +111,18 @@
       }
    }
 
-   function array_shift_arg(&$array) {
+   # Shift a value from the array and complain if it's empty
+   function array_shift_arg(&$array, $message="Too few arguments") {
       if (empty($array)) {
-         raise("Too few arguments");
+         raise($message);
       } else {
          return array_shift($array);
       }
+   }
+
+   # Convert an array into a string
+   function array_to_str($array) {
+      return str_replace("\n", "", var_export($array, true));
    }
 
 ?>
