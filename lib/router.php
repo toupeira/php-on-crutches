@@ -135,6 +135,18 @@
       # Check if the path matches this route
       function recognize($path) {
          $values = $this->defaults;
+
+         # Get query string parameters
+         if (preg_match('/^([^?]+)\?(.*)$/', $path, $match)) {
+            $path = $match[1];
+            if ($data = $match[2]) {
+               foreach (explode('&', $data) as $data) {
+                  list($key, $value) = explode('=', $data, 2);
+                  $values[$key] = urldecode($value);
+               }
+            }
+         }
+
          if (preg_match("#^{$this->pattern}$#", $path, $match)) {
             $i = 1;
             foreach ($this->params as $key => $symbol) {
@@ -167,12 +179,16 @@
          }
 
          # Set default values
+         $last = false;
          foreach ($this->defaults as $key => $value) {
             if (isset($values[$key])) {
                if ($values[$key] == $value) {
                   unset($values[$key]);
+                  $last = true;
+               } else {
+                  $last = false;
                }
-            } elseif (isset($this->params[$key])) {
+            } elseif (!$last and isset($this->params[$key])) {
                $values[$key] = $value;
             }
          }
