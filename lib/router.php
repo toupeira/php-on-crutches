@@ -182,54 +182,22 @@
             }
          }
 
-         /*
-         # Set default values
-         $last = false;
+         # Apply default values
          foreach ($this->defaults as $key => $value) {
-            if (isset($values[$key])) {
-               if ($values[$key] == $value) {
-                  unset($values[$key]);
-                  $last = true;
-               } else {
-                  $last = false;
-               }
-            } elseif (!$last and isset($this->params[$key])) {
+            if (!isset($values[$key]) and isset($this->params[$key])) {
                $values[$key] = $value;
             }
          }
-         */
 
          # Build the route
-         #$additional = array();
-         $last = false;
+         $add = false;
          foreach (array_reverse($this->params) as $key => $symbol) {
-            print " :$key => ";
-            $default = $this->defaults[$key];
-            if ($value = array_delete($values, $key)) {
-               if (!$last and $value == $default) {
-                  print "skipping default value: $value";
-                  $last = true;
-               } elseif ($value or $value = $default) {
-                  print "replacing value: $value";
-                  $route = str_replace($symbol, $value, $route);
-                  $last = false;
-               }
-            } elseif ($last and $default) {
-               print "using default value";
-               $route = str_replace($symbol, $default, $route);
-               $last = false;
-            }
-            print "\n";
-         }
-         /*
-         foreach ($values as $key => $value) {
-            if ($symbol = $this->params[$key]) {
+            $value = array_delete($values, $key);
+            if ($add or ($value and $value != $this->defaults[$key])) {
                $route = str_replace($symbol, $value, $route);
-            } else {
-               $additional[$key] = $value;
+               $add = true;
             }
          }
-         */
 
          # Add remaining parameters to query string
          if ($values) {
