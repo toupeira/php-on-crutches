@@ -13,12 +13,10 @@
             'user/:action!/:id' => array('controller' => 'users'),
 
             # Wildcard route
-            'browse/*path'      => array('controller' => 'pages',
-                                         'action'     => 'browse'),
+            'browse/*path'      => array('controller' => 'pages', 'action'     => 'browse'),
 
             # Generic controller route with defaults
-            ':controller/:action/:id' => array('controller' => 'home',
-                                               'action'     => 'index'),
+            ':controller/:action/:id' => array('controller' => 'home', 'action'     => 'index'),
          ));
       }
 
@@ -53,6 +51,10 @@
          $this->assertRouting('browse', array('controller' => 'pages', 'action' => 'browse'));
          $this->assertRouting('browse/foo', array('controller' => 'pages', 'action' => 'browse', 'path' => 'foo'));
          $this->assertRouting('browse/foo/bar', array('controller' => 'pages', 'action' => 'browse', 'path' => 'foo/bar'));
+      }
+
+      function test_route_with_query_string() {
+         $this->assertRouting('browse?foo%3Dbar=foo+bar', array('controller' => 'pages', 'action' => 'browse', 'foo=bar' => 'foo bar'));
       }
    }
 
