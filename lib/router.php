@@ -182,6 +182,7 @@
             }
          }
 
+         /*
          # Set default values
          $last = false;
          foreach ($this->defaults as $key => $value) {
@@ -196,9 +197,31 @@
                $values[$key] = $value;
             }
          }
+         */
 
          # Build the route
-         $additional = array();
+         #$additional = array();
+         $last = false;
+         foreach (array_reverse($this->params) as $key => $symbol) {
+            print " :$key => ";
+            $default = $this->defaults[$key];
+            if ($value = array_delete($values, $key)) {
+               if (!$last and $value == $default) {
+                  print "skipping default value: $value";
+                  $last = true;
+               } elseif ($value or $value = $default) {
+                  print "replacing value: $value";
+                  $route = str_replace($symbol, $value, $route);
+                  $last = false;
+               }
+            } elseif ($last and $default) {
+               print "using default value";
+               $route = str_replace($symbol, $default, $route);
+               $last = false;
+            }
+            print "\n";
+         }
+         /*
          foreach ($values as $key => $value) {
             if ($symbol = $this->params[$key]) {
                $route = str_replace($symbol, $value, $route);
@@ -206,14 +229,15 @@
                $additional[$key] = $value;
             }
          }
+         */
 
          # Add remaining parameters to query string
-         if ($additional) {
-            $values = array();
-            foreach ($additional as $key => $value) {
-               $values[] = urlencode($key).'='.urlencode($value);
+         if ($values) {
+            $query = array();
+            foreach ($values as $key => $value) {
+               $query[] = urlencode($key).'='.urlencode($value);
             }
-            $route .= '?'.implode('&', $values);
+            $route .= '?'.implode('&', $query);
          }
 
          return preg_replace('#/?[:*][a-z_]+!?#', '', $route);
