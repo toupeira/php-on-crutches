@@ -16,7 +16,7 @@
    require LIB.'config.php';
    require LIB.'cache.php';
 
-   require LIB.'route.php';
+   require LIB.'router.php';
    require LIB.'dispatcher.php';
    require LIB.'controller.php';
 
