@@ -1,16 +1,27 @@
 <?# $Id$ ?>
 <?
 
-   class RouteTest extends TestCase
+   class RouterTest extends TestCase
    {
       function setup() {
-         Route::clear();
-         Route::add(array(
-            ''                  => array('index'),
-            'pages/:action/:id' => array('pages'),
-            'user/:action!/:id' => array('users'),
-            'browse/*path'      => array('files', 'browse'),
-            ':controller/:action/:id',
+         Router::clear();
+         Router::add(array(
+            # Default route
+            ''                  => array('controller' => 'index'),
+
+            # Fixed controller route
+            'files/:action/:id' => array('controller' => 'files'),
+
+            # Route with required parameters
+            'user/:action!/:id' => array('controller' => 'users'),
+
+            # Wildcard route
+            'browse/*path'      => array('controller' => 'files',
+                                         'action'     => 'browse'),
+
+            # Generic controller route with defaults
+            ':controller/:action/:id' => array('controller' => 'pages',
+                                               'action'     => 'index'),
          ));
       }
 
@@ -19,19 +30,19 @@
       }
 
       function test_standard_route() {
-         $this->assertRouting('foo', array('controller' => 'foo'));
+         $this->assertRouting('foo', array('controller' => 'foo', 'action' => 'index'));
          $this->assertRouting('foo/create', array('controller' => 'foo', 'action' => 'create'));
          $this->assertRouting('foo/edit/3', array('controller' => 'foo', 'action' => 'edit', 'id' => 3));
       }
 
       function test_route_with_static_controller() {
-         $this->assertRouting('pages', array('controller' => 'pages'));
-         $this->assertRouting('pages/create', array('controller' => 'pages', 'action' => 'create'));
-         $this->assertRouting('pages/edit/3', array('controller' => 'pages', 'action' => 'edit', 'id' => 3));
+         $this->assertRouting('files', array('controller' => 'files'));
+         $this->assertRouting('files/create', array('controller' => 'files', 'action' => 'create'));
+         $this->assertRouting('files/edit/3', array('controller' => 'files', 'action' => 'edit', 'id' => 3));
       }
 
       function test_route_with_required_parameter() {
-         $this->assertRouting('user', array('controller' => 'user'));
+         $this->assertRouting('user', array('controller' => 'user', 'action' => 'index'));
          $this->assertRouting('user/signup', array('controller' => 'users', 'action' => 'signup'));
          $this->assertRouting('user/edit/3', array('controller' => 'users', 'action' => 'edit', 'id' => 3));
       }
