@@ -54,6 +54,8 @@
       }
 
       function test_route_with_query_string() {
+         $this->assertRouting('files?foo%3Dbar=foo+bar', array('controller' => 'files', 'foo=bar' => 'foo bar'));
+         $this->assertRouting('foo/bar/23?foo%3Dbar=foo+bar', array('controller' => 'foo', 'action' => 'bar', 'id' => 23, 'foo=bar' => 'foo bar'));
          $this->assertRouting('browse?foo%3Dbar=foo+bar', array('controller' => 'pages', 'action' => 'browse', 'foo=bar' => 'foo bar'));
       }
    }
