@@ -13,7 +13,6 @@
 
       private $name;
       private $connection;
-      private $driver;
 
       static function load($name) {
          if ($connection = self::$connections[$name]) {

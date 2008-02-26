@@ -100,12 +100,12 @@
       } elseif (in_array($_command, array('?', 'help'))) {
          print "\n";
          print "  Special commands:\n";
-         print "    help, ?          Show this help\n";
-         print "    help FUNCTION    Show function signature\n";
-         print "    exit, quit       Exit the console\n";
-         print "    time CODE        Show execution time\n";
-         print "    ls, cd           Shell aliases\n";
-         print "    \$var?            Dump variable\n";
+         print "    help, ?            Show this help\n";
+         print "    help FUNCTION      Show function signature\n";
+         print "    exit, quit         Exit the console\n";
+         print "    time [COUNT] CODE  Show execution time\n";
+         print "    ls, cd             Shell aliases\n";
+         print "    \$var?              Dump variable\n";
          print "\n";
          print "  Helpers:\n";
          print "    get(\$path, \$params)\n";
@@ -120,8 +120,17 @@
 
       # Show execution time
       } elseif (substr($_command, 0, 5) == 'time ') {
-         $_command = 'print ""; $__start = microtime(true); '.substr($_command, 5)
-                  . '; printf("\n%.5f seconds\n", microtime(true) - $__start)';
+         $_command = substr($_command, 5);
+         if (($_count = (int) $_command) > 0) {
+            if ($_command = substr($_command, strlen($_count))) {
+               $_command = "for (\$_i = 0; \$_i < $_count; \$_i++) { $_command; }";
+            }
+         }
+
+         if ($_command) {
+            $_command = 'print ""; $_start = microtime(true); '.$_command
+                     . '; printf("\n%.5f seconds\n", microtime(true) - $_start)';
+         }
 
       # 'ls' wrapper
       } elseif ($_command == 'ls' or substr($_command, 0, 3) == 'ls ') {

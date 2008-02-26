@@ -71,7 +71,7 @@
          $message = "Route '$path' wasn't recognized as "
                   . array_to_str($expected_values) . ", got "
                   . array_to_str($values);
-         return $this->assertEqual($expected_values, $values, $message);
+         return $this->assertEqual($expected_values, $values, str_replace('%', '%%', $message));
       }
 
       function assertGenerates($expected_path, $values) {
@@ -79,7 +79,7 @@
          #print_r($values); print " => $path\n";
          $message = "Expected " . array_to_str($values) . " to "
                   . "generate '$expected_path', got '$path'";
-         return $this->assertEqual($expected_path, $path, $message);
+         return $this->assertEqual($expected_path, $path, str_replace('%', '%%', $message));
       }
 
       function assertRouting($path, $values) {

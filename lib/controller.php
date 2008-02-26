@@ -18,6 +18,7 @@
       protected $output;
 
       protected $params;
+      protected $session;
       protected $headers;
       protected $cookies;
       protected $files;

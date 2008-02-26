@@ -81,6 +81,7 @@
          $parts = explode('/', trim($route, '/'));
          foreach ($parts as $i => $part) {
             if ($part[0] == ':') {
+               # Add substitution parameter
                $key = substr($part, 1);
                if (substr($key, -1) == '!') {
                   $key = substr($key, 0, -1);
@@ -98,6 +99,7 @@
                }
 
             } elseif ($part[0] == '*') {
+               # Add wildcard parameter
                $key = substr($part, 1);
                if (substr($key, -1) == '!') {
                   $key = substr($key, 0, -1);
@@ -120,6 +122,7 @@
             }
          }
 
+         # Get default and fixed arguments
          foreach ((array) $defaults as $key => $value) {
             $this->defaults[$key] = $value;
             if (!isset($this->params[$key])) {
@@ -142,11 +145,12 @@
             if ($data = $match[2]) {
                foreach (explode('&', $data) as $data) {
                   list($key, $value) = explode('=', $data, 2);
-                  $values[$key] = urldecode($value);
+                  $values[urldecode($key)] = urldecode($value);
                }
             }
          }
 
+         # Get parameter values
          if (preg_match("#^{$this->pattern}$#", $path, $match)) {
             $i = 1;
             foreach ($this->params as $key => $symbol) {
@@ -207,7 +211,7 @@
          if ($additional) {
             $values = array();
             foreach ($additional as $key => $value) {
-               $values[] = "$key=".urlencode($value);
+               $values[] = urlencode($key).'='.urlencode($value);
             }
             $route .= '?'.implode('&', $values);
          }
