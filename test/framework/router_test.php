@@ -6,9 +6,6 @@
       function setup() {
          Router::clear();
          Router::add(array(
-            # Default route
-            ''                  => array('controller' => 'index'),
-
             # Fixed controller route
             'files/:action/:id' => array('controller' => 'files'),
 
@@ -16,17 +13,22 @@
             'user/:action!/:id' => array('controller' => 'users'),
 
             # Wildcard route
-            'browse/*path'      => array('controller' => 'files',
+            'browse/*path'      => array('controller' => 'pages',
                                          'action'     => 'browse'),
 
             # Generic controller route with defaults
-            ':controller/:action/:id' => array('controller' => 'pages',
+            ':controller/:action/:id' => array('controller' => 'home',
                                                'action'     => 'index'),
          ));
       }
 
-      function test_default_route() {
-         $this->assertRouting('', array('controller' => 'index'));
+      function test_generic_route() {
+         $this->assertGenerates('', array('controller' => 'home'));
+         $this->assertRouting('', array('controller' => 'home', 'action' => 'index'));
+
+         $this->assertGenerates('home/edit', array('action' => 'edit'));
+         $this->assertRouting('home/edit', array('controller' => 'home', 'action' => 'edit'));
+         $this->assertRouting('foo/bar/3', array('controller' => 'foo', 'action' => 'bar', 'id' => 3));
       }
 
       function test_standard_route() {
@@ -48,9 +50,9 @@
       }
 
       function test_route_with_wildcard_parameter() {
-         $this->assertRouting('browse', array('controller' => 'files', 'action' => 'browse'));
-         $this->assertRouting('browse/foo', array('controller' => 'files', 'action' => 'browse', 'path' => 'foo'));
-         $this->assertRouting('browse/foo/bar', array('controller' => 'files', 'action' => 'browse', 'path' => 'foo/bar'));
+         $this->assertRouting('browse', array('controller' => 'pages', 'action' => 'browse'));
+         $this->assertRouting('browse/foo', array('controller' => 'pages', 'action' => 'browse', 'path' => 'foo'));
+         $this->assertRouting('browse/foo/bar', array('controller' => 'pages', 'action' => 'browse', 'path' => 'foo/bar'));
       }
    }
 
