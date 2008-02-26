@@ -12,7 +12,6 @@
    define('LOG_ERROR',      LOG_ERR);
    define('LOG_WARN',       LOG_WARNING);
 
-   # A few wrappers
    function log_error($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_ERROR); }
    function log_warn($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_WARN); }
    function log_info($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_INFO); }

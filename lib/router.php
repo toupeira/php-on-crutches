@@ -46,7 +46,7 @@
             }
          }
 
-         raise("Can't recognize route '$path'");
+         raise(new RoutingError("Can't recognize route '$path'"));
       }
 
       # Generate a URL from the given values
@@ -58,7 +58,7 @@
          }
 
          $values = array_to_str($values);
-         raise("Failed to generate route from '$values'");
+         raise(new RoutingError("Failed to generate route from '$values'"));
       }
    }
 
@@ -76,8 +76,8 @@
 
          $parts = explode('/', trim($route, '/'));
          foreach ($parts as $i => $part) {
+            # Check for substitution parameters
             if ($part[0] == ':') {
-               # Add substitution parameter
                $key = substr($part, 1);
                if (substr($key, -1) == '!') {
                   $key = substr($key, 0, -1);
@@ -94,8 +94,8 @@
                   raise("Invalid parameter '$key'");
                }
 
+            # Check for wildcard parameters
             } elseif ($part[0] == '*') {
-               # Add wildcard parameter
                $key = substr($part, 1);
                if (substr($key, -1) == '!') {
                   $key = substr($key, 0, -1);
@@ -199,9 +199,14 @@
          if ($values) {
             $query = array();
             foreach ($values as $key => $value) {
-               $query[] = urlencode($key).'='.urlencode($value);
+               if (!blank($value)) {
+                  $query[] = urlencode($key).'='.urlencode($value);
+               }
             }
-            $route .= '?'.implode('&', $query);
+
+            if ($query) {
+               $route .= '?'.implode('&', $query);
+            }
          }
 
          return preg_replace('#/?[:*][a-z_]+!?#', '', $route);

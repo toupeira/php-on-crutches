@@ -39,14 +39,14 @@
          return null;
       }
 
-      function __construct($params=null) {
+      function __construct(&$params=null) {
          $this->name = underscore(substr(get_class($this), 0, -10));
 
          # Load controller helper, ignore errors
          @include_once HELPERS.$this->name.'_helper.php';
 
          # Shortcuts
-         $this->params = array_merge($_GET, $_POST, (array) $params);
+         $this->params = &$params;
          $this->session = &$_SESSION;
          $this->cookies = &$_COOKIES;
          $this->files = &$_FILES;
@@ -209,7 +209,7 @@
                   $this->render($action);
                }
             }
-         } catch (MissingTemplate $e) {
+         } catch (NotFound $e) {
             # Catch 404 errors
             if (config('debug')) {
                $this->headers['Status'] = 404;
@@ -233,7 +233,7 @@
 
       # Catches all errors, default behaviour is to render VIEWS/errors/404.thtml or 500.thtml
       function rescue_error_in_public($exception, $layout='') {
-         if ($exception instanceof MissingTemplate) {
+         if ($exception instanceof NotFound) {
             $code = "404";
             $text = "Not Found";
          } else {
@@ -283,7 +283,7 @@
 
       # Redirect to a path
       function redirect_to($path, $code=302) {
-         $url = url_for($path);
+         $url = url_for($path, array('full_path' => true));
 
          # Save messages so they can be displayed in the next request
          $this->set_error_messages();

@@ -29,9 +29,9 @@
    $_SERVER['HTTPS'] = 'on';
 
    # Perform a request for the given path, with the given HTTP method
-   function request($path, $method) {
-      $_SERVER['REQUEST_URI'] = "/$path";
+   function request($method, $path) {
       $_SERVER['REQUEST_METHOD'] = $method;
+      $_SERVER['REQUEST_URI'] = "/$path";
       print Dispatcher::run($path);
    }
 
@@ -40,13 +40,13 @@
       if (is_array($params)) {
          $_GET = $_POST = $params;
       }
-      request($path, 'GET');
+      request('GET', $path);
    }
 
    # Wrapper for POST requests
    function post($path, $params=null) {
       $_GET = $_POST = (array) $params;
-      request($path, 'POST');
+      request('POST', $path);
    }
 
    function to_string($value) {

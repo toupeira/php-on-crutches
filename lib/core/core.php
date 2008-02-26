@@ -77,7 +77,9 @@
 
    # Standard errors
    class ApplicationError extends Exception {};
-   class MissingTemplate extends ApplicationError {};
+   class NotFound extends ApplicationError {};
+   class MissingTemplate extends NotFound {};
+   class RoutingError extends NotFound {};
 
    # Return the first non-empty value. Basically a workaround for
    # PHP's broken || operator, which only returns booleans.

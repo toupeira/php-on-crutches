@@ -13,18 +13,15 @@
       static public $prefix;
 
       static public $controller;
-      static public $action;
+      static public $params;
 
       # Run a request for the given path.
       #
       # If $path is empty, the path in the query string, the default path
       # in the configuration, and the path 'index' will be tried, in that order.
       #
-      static function run($path=null) {
-         self::$path = $path = any(
-            $path, $_GET['path'], config('default_path'), 'index'
-         );
-         unset($_GET['path']);
+      static function run($path) {
+         self::$path = $path;
 
          # Detect the relative path used to reach the website
          if (!self::$prefix) {
@@ -34,61 +31,7 @@
             );
          }
 
-         # Detect routes and rewrite path if necessary
-         $path == self::$path;
-         foreach ($GLOBALS['_ROUTES'] as $from => $to) {
-            $len = strlen($from);
-            if ($from == substr(self::$path, 0, $len)) {
-               $path = $to.substr(self::$path, $len);
-               log_debug("Routing to $path...");
-               break;
-            }
-         }
-
-         # Detect controller, action and arguments
-         self::log_header();
-         list($controller, $action, $args) = self::recognize($path);
-         self::log_request($controller, $action, $args);
-
-         # Perform the action
-         $controller->perform($action, $args);
-
-         # Return the output as string
-         return $controller->output;
-      }
-
-      # Extract controller, action and arguments from a path
-      static function recognize($path) {
-         $args = explode('/', $path);
-
-         $controller = array_shift($args);
-         $action = array_shift($args);
-
-         $class = camelize($controller).'Controller';
-
-         if (!class_exists($class)) {
-            $class = 'PagesController';
-            $action = 'show';
-            $args = rtrim($path, '/');
-         }
-
-         if (!ctype_print($action)) {
-            $action = 'index';
-         }
-
-         $controller = new $class();
-         if (is_object($controller)) {
-            self::$controller = $controller;
-            self::$action = $action;
-            return array($controller, $action, $args);
-         }
-
-         # Controller not found or invalid
-         raise("Invalid controller '$class'");
-      }
-
-      # Log request header
-      static function log_header() {
+         # Log request header
          log_debug(
             "\nProcessing {$_SERVER['REQUEST_URI']} "
             . "(for {$_SERVER['REMOTE_ADDR']} at ".strftime("%F %T").") "
@@ -98,19 +41,26 @@
          if (config('use_sessions')) {
             log_debug("  Session ID: ".session_id());
          }
-      }
 
-      # Log request details
-      static function log_request($controller, $action, $args) {
-         log_info("  Controller: {$controller->name}");
-         log_info("  Action: $action");
-         if (config('debug')) {
-            if ($args) {
-               log_debug("  Arguments: ".str_replace("\n", "\n  ", var_export($args, true)));
-            }
-            if ($_REQUEST) {
-               log_debug("  Parameters: ".str_replace("\n", "\n  ", var_export($_REQUEST, true)));
-            }
+         $params = Router::recognize($path);
+         $params = self::$params = array_merge($_GET, $_POST, $params);
+
+         # Log request parameters
+         log_info("  Parameters: ".str_replace("\n", "\n  ",
+            var_export(self::$params, true)));
+
+         if ($controller = $params['controller']) {
+            $class = camelize($controller).'Controller';
+            $action = $params['action'] = any($params['action'], 'index');
+
+            self::$controller = new $class($params);
+            self::$params = &$params;
+            self::$controller->perform($action, explode('/', $params['id']));
+
+            print self::$controller->output;
+            return self::$controller;;
+         } else {
+            raise(new RoutingError("Invalid path '$path'"));
          }
       }
    }

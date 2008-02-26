@@ -74,6 +74,10 @@
 
    # Delete one or more keys from an array
    function array_delete(&$array, $keys) {
+      if (func_num_args() > 2) {
+         $keys = array_slice(func_get_args(), 1);
+      }
+
       if (is_array($keys)) {
          foreach ($keys as $key) {
             if ($value = $array[$key]) {
