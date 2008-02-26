@@ -41,9 +41,7 @@
       # Extract route values from a path
       static function recognize($path) {
          foreach (self::$routes as $route) {
-            #print "testing route {$route->route} with '$path'\n";
             if (!is_null($values = $route->recognize($path))) {
-               #print "matched!\n";
                return $values;
             }
          }
@@ -54,9 +52,7 @@
       # Generate a URL from the given values
       static function generate($values) {
          foreach (self::$routes as $route) {
-            #print "testing route {$route->route} with '".array_to_str($values)."'\n";
             if (!is_null($path = $route->generate($values))) {
-               #print "matched!\n";
                return $path;
             }
          }
