@@ -40,8 +40,25 @@
 
       # Extract route values from a path
       static function recognize($path) {
+         $path = trim($path, '/');
+
+         # Get query string parameters
+         $defaults = array();
+         if (preg_match('/^([^?]+)\?(.*)$/', $path, $match)) {
+            $path = $match[1];
+            if ($data = $match[2]) {
+               foreach (explode('&', $data) as $data) {
+                  list($key, $value) = explode('=', $data, 2);
+                  if ($key and $value !== null) {
+                     $defaults[urldecode($key)] = urldecode($value);
+                  }
+               }
+            }
+         }
+
+         # Find matching route
          foreach (self::$routes as $route) {
-            if (!is_null($values = $route->recognize($path))) {
+            if (!is_null($values = $route->recognize($path, $defaults))) {
                return $values;
             }
          }
@@ -76,45 +93,36 @@
 
          $parts = explode('/', trim($route, '/'));
          foreach ($parts as $i => $part) {
-            # Check for substitution parameters
+            $key = $pattern = null;
+
             if ($part[0] == ':') {
+               # Add substitution parameter
                $key = substr($part, 1);
-               if (substr($key, -1) == '!') {
-                  $key = substr($key, 0, -1);
-                  $this->required[] = $key;
-                  $pattern = '([^/]+)/?';
-               } else {
-                  $pattern = '(?:([^/]+)/?)?';
-               }
-
-               if (ctype_alpha($key)) {
-                  $this->params[$key] = $part;
-                  $this->pattern .= $pattern;
-               } else{
-                  raise("Invalid parameter '$key'");
-               }
-
-            # Check for wildcard parameters
+               $pattern = '(?:/?([^/]+))?';
             } elseif ($part[0] == '*') {
+               # Add wildcard parameter
                $key = substr($part, 1);
+               $pattern = '(?:/?(.+))?';
+            } else {
+               # Add literal text
+               $this->pattern .= $part;
+            }
+
+            # Add keys and pattern
+            if ($key and $pattern) {
+               # Check if parameter is required
                if (substr($key, -1) == '!') {
                   $key = substr($key, 0, -1);
                   $this->required[] = $key;
-                  $pattern .= '(.+)';
-               } else {
-                  $pattern .= '(.*)';
+                  $pattern = rtrim($pattern, '?');
                }
 
                if (ctype_alpha($key)) {
                   $this->params[$key] = $part;
                   $this->pattern .= $pattern;
-                  break;
                } else{
                   raise("Invalid parameter '$key'");
                }
-
-            } else {
-               $this->pattern .= "$part/?";
             }
          }
 
@@ -132,19 +140,8 @@
       }
 
       # Check if the path matches this route
-      function recognize($path) {
-         $values = $this->defaults;
-
-         # Get query string parameters
-         if (preg_match('/^([^?]+)\?(.*)$/', $path, $match)) {
-            $path = $match[1];
-            if ($data = $match[2]) {
-               foreach (explode('&', $data) as $data) {
-                  list($key, $value) = explode('=', $data, 2);
-                  $values[urldecode($key)] = urldecode($value);
-               }
-            }
-         }
+      function recognize($path, $defaults=null) {
+         $values = array_merge($this->defaults, (array) $defaults);
 
          # Get parameter values
          if (preg_match("#^{$this->pattern}$#", $path, $match)) {
@@ -193,13 +190,14 @@
                $route = str_replace($symbol, $value, $route);
                $add = true;
             }
+
          }
 
          # Add remaining parameters to query string
          if ($values) {
             $query = array();
             foreach ($values as $key => $value) {
-               if (!blank($value)) {
+               if (!is_null($value)) {
                   $query[] = urlencode($key).'='.urlencode($value);
                }
             }
