@@ -1,4 +1,4 @@
 <?
    require '../config/environment.php';
-   print Dispatcher::run();
+   Dispatcher::run($_GET['path']);
 ?>

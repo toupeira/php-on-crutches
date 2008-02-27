@@ -5,8 +5,6 @@
       # Application name
       'application'     => ROOT_NAME,
 
-      # Default site
-      'default_path'    => '',
       # Use URL rewriting (needs to be configured on the webserver)
       'rewrite_urls'    => true,
       # Start sessions
