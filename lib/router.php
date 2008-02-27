@@ -22,6 +22,15 @@
    {
       static protected $routes = array();
 
+      # List the configured routes
+      static function routes() {
+         $routes = array();
+         foreach (self::$routes as $route) {
+            $routes[$route->route] = $route->pattern;
+         }
+         return $routes;
+      }
+
       # Add a new route
       static function add($route, $defaults=null) {
          if (is_array($route)) {
@@ -81,7 +90,8 @@
 
    class Route
    {
-      protected $pattern = '';
+      public $route = '';
+      public $pattern = '';
 
       protected $params = array();
       protected $defaults = array();
@@ -102,7 +112,7 @@
             } elseif ($part[0] == '*') {
                # Add wildcard parameter
                $key = substr($part, 1);
-               $pattern = '/?(.+)?';
+               $pattern = '/?(.*)';
             } else {
                # Add literal text
                $this->pattern .= "/?$part";

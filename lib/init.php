@@ -14,6 +14,7 @@
 
    # Load framework libraries
    require LIB.'config.php';
+   require LIB.'session.php';
    require LIB.'cache.php';
 
    require LIB.'router.php';

@@ -48,20 +48,59 @@
       # Configure the logger
       $log_file = (PHP_SAPI == 'cli')
          ? STDERR
-         : $log_file = any($config['log_file'], LOG.'application.log');
+         : any($config['log_file'], LOG.'application.log');
       log_init($log_file, any($config['log_level'], LOG_INFO));
 
-      # Start sessions if enabled and not running in a console
-      if ($config['use_sessions'] and PHP_SAPI != 'cli') {
+      # Setup session store if enabled and not running in a console
+      if ($store = $config['session_store'] and PHP_SAPI != 'cli') {
+         if ($store != 'php' and $store = load_store('session', $store, 'cookie')) {
+            session_set_save_handler(
+               array($store, 'open'),
+               array($store, 'close'),
+               array($store, 'read'),
+               array($store, 'write'),
+               array($store, 'delete'),
+               array($store, 'expire')
+            );
+         }
+
          session_start();
          header('Cache-Control: private');
          header('Pragma: cache');
       }
 
+      # Setup cache store
+      load_store('cache', $config['cache_store'], 'memory');
+
       # Work around magic quotes...
       if (get_magic_quotes_gpc()) {
          log_info("Reverting magic quotes... (DISABLE IT ALREADY!!)");
          fix_magic_quotes();
+      }
+   }
+
+   function load_store($type, $store, $default=null) {
+      if (!$store) {
+         if ($default) {
+            $store = $default;
+         } else {
+            return;
+         }
+      }
+
+      $base = ucfirst($type).'Store';
+      $class = $base.ucfirst($store);
+      $default = $base.ucfirst($default);
+
+      if (class_exists($class) and $store = new $class() and $store instanceof $base) {
+         if (!$store->setup() and $class != $default) {
+            log_warn("Couldn't load $type store '$class', using '$default'");
+            $store = new $default();
+         }
+
+         return $GLOBALS['_'.strtoupper($type).'_STORE'] = $store;
+      } else {
+         raise("Invalid $type store '$class'");
       }
    }
 
