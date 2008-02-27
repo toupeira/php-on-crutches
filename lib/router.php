@@ -98,14 +98,14 @@
             if ($part[0] == ':') {
                # Add substitution parameter
                $key = substr($part, 1);
-               $pattern = '(?:/?([^/]+))?';
+               $pattern = '/?([^/]+)?';
             } elseif ($part[0] == '*') {
                # Add wildcard parameter
                $key = substr($part, 1);
-               $pattern = '(?:/?(.+))?';
+               $pattern = '/?(.+)?';
             } else {
                # Add literal text
-               $this->pattern .= $part;
+               $this->pattern .= "/?$part";
             }
 
             # Add keys and pattern
@@ -127,6 +127,10 @@
          }
 
          # Get default and fixed arguments
+         if (!in_array('action', $this->required)) {
+            $this->defaults['action'] = 'index';
+         }
+
          foreach ((array) $defaults as $key => $value) {
             $this->defaults[$key] = $value;
             if (!isset($this->params[$key])) {

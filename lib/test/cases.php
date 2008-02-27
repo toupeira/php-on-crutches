@@ -67,7 +67,6 @@
 
       function assertRecognizes($expected_values, $path) {
          $values = Router::recognize($path);
-         #print "$path => "; print_r($values);
          $message = "Route '$path' wasn't recognized as "
                   . array_to_str($expected_values) . ", got "
                   . array_to_str($values);
@@ -76,7 +75,6 @@
 
       function assertGenerates($expected_path, $values) {
          $path = Router::generate($values);
-         #print_r($values); print " => $path\n";
          $message = "Expected " . array_to_str($values) . " to "
                   . "generate '$expected_path', got '$path'";
          return $this->assertEqual($expected_path, $path, str_replace('%', '%%', $message));

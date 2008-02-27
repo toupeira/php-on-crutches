@@ -16,10 +16,6 @@
       static public $params;
 
       # Run a request for the given path.
-      #
-      # If $path is empty, the path in the query string, the default path
-      # in the configuration, and the path 'index' will be tried, in that order.
-      #
       static function run($path) {
          self::$path = $path;
 
@@ -42,20 +38,24 @@
             log_debug("  Session ID: ".session_id());
          }
 
-         $params = Router::recognize($path);
-         $params = self::$params = array_merge($_GET, $_POST, $params);
+         $args = Router::recognize($path);
+         self::$params = array_merge($_GET, $_POST, $args);
 
          # Log request parameters
          log_info("  Parameters: ".str_replace("\n", "\n  ",
             var_export(self::$params, true)));
 
-         if ($controller = $params['controller']) {
-            $class = camelize($controller).'Controller';
-            $action = $params['action'] = any($params['action'], 'index');
+         if ($controller = $args['controller'] and $action = $args['action']) {
+            unset($args['controller']);
+            unset($args['action']);
+            if (count($args) == 1) {
+               $args = explode('/', array_shift($args));
+            }
 
-            self::$controller = new $class($params);
-            self::$params = &$params;
-            self::$controller->perform($action, explode('/', $params['id']));
+            $class = camelize($controller).'Controller';
+
+            self::$controller = new $class(self::$params);
+            self::$controller->perform($action, $args);
 
             print self::$controller->output;
             return self::$controller;;
