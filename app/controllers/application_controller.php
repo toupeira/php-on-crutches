@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-   class ApplicationController extends Controller
+   abstract class ApplicationController extends Controller
    {
    }
 
