@@ -18,8 +18,8 @@
             # Wildcard route
             'browse/*path'      => array('controller' => 'pages', 'action'     => 'browse'),
 
-            # Generic controller route with defaults
-            ':controller/:action/*id' => array('controller' => 'home', 'action'     => 'index'),
+            # Generic route with default controller
+            ':controller/:action/*id' => array('controller' => 'home'),
          ));
       }
 
