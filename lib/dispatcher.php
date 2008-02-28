@@ -81,7 +81,7 @@
             print dump_error($exception);
          } elseif (function_exists('rescue_error_in_public')) {
             rescue_error_in_public($exception);
-         } elseif ($template = View::find_template("errors/$code")) {
+         } elseif ($template = View::find_template("errors/$status")) {
             $view = new View($template);
             print $view->render();
          } else {

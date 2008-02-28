@@ -11,8 +11,8 @@
    {
       # Find a template for the given path
       static function find_template($path) {
-         foreach (array(VIEWS, LIB.'views') as $base) {
-            if (is_file($template = "$base/$path.thtml")) {
+         foreach (array(VIEWS, LIB.'views/') as $base) {
+            if (is_file($template = "$base$path.thtml")) {
                return $template;
             }
          }
@@ -63,17 +63,7 @@
             }
          }
 
-         if ($layout or !is_null($layout = $this->layout)
-             and !is_file($layout) and $layout) {
-            if (is_file($file = View::find_template("layouts/$layout"))) {
-               $layout = $file;
-            } else {
-               raise("Layout '{$layout}' not found");
-            }
-         }
-
          $this->template = $template;
-         $this->layout = $layout;
 
          # Reset cycler (from text_helper.php)
          $GLOBALS['_cycle'] = null;
@@ -86,6 +76,17 @@
          require $template;
          $content_for_layout = ob_get_clean();
          log_debug("Rendered template {$template}");
+
+         if ($layout or !is_null($layout = $this->layout)
+             and !is_file($layout) and $layout) {
+            if (is_file($file = View::find_template("layouts/$layout"))) {
+               $layout = $file;
+            } else {
+               raise("Layout '{$layout}' not found");
+            }
+         }
+
+         $this->layout = $layout;
 
          if (is_file($layout)) {
             # Render the layout
