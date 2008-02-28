@@ -3,41 +3,58 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><?= $exception ?></title>
+  <title>Error: <?= $exception ?></title>
   <style type="text/css">
+
     body {
+      font-size: 9pt;
       font-family: sans-serif;
       color: #bbb;
       background: #333;
     }
 
     h1 {
-      font-size: 23px;
+      font-size: 17pt;
       margin: 0;
     }
 
     p {
-      margin: 0.5em 0;
+      margin: 1em 0;
       padding: 1em;
       background: #666;
+      color: white;
+      -moz-border-radius: 0.5em;
+    }
+
+    h3 {
+      font-size: 9pt;
+      margin: 1.5em 0 0.6em;
+    }
+
+    h3 strong {
       color: white;
     }
 
     pre {
-      background: #444;
+      margin-top: 0;
       padding: 0.6em;
+      background: #444;
       color: #ddd;
+      -moz-border-radius: 0.5em;
     }
+
   </style>
 </head>
 <body>
-<h1><?= $exception ?></h1>
+<h1>Error: <?= $exception ?></h1>
 <p><?= $message ?></p>
-<h3>Backtrace</h3>
-<?= dump($trace) ?>
-<h3>Request Parameters</h3>
+<h3>Extracted source from <strong><?= $file ?></strong> (around line <strong>#<?= $line ?></strong>):</h3>
+<pre><?= $code ?></pre>
+<h3>Stack Trace:</h3>
+<pre><?= $trace ?></pre>
+<h3>Request Parameters:</h3>
 <?= dump($params) ?>
-<h3>Session Variables</h3>
+<h3>Session Variables:</h3>
 <?= dump($_SESSION) ?>
 </body>
 </html>

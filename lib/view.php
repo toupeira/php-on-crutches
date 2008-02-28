@@ -58,6 +58,7 @@
          } elseif (!is_file($template)) {
             if (is_file($file = View::find_template($template))) {
                $template = $file;
+               unset($file);
             } else {
                raise(new MissingTemplate("Template '{$template}' not found"));
             }
@@ -81,6 +82,7 @@
              and !is_file($layout) and $layout) {
             if (is_file($file = View::find_template("layouts/$layout"))) {
                $layout = $file;
+               unset($file);
             } else {
                raise("Layout '{$layout}' not found");
             }

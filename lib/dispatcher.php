@@ -87,6 +87,8 @@
          } else {
             print "<h1>$status $text</h1>";
          }
+
+         return $status;
       }
    }
 

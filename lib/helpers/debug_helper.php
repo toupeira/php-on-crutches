@@ -23,6 +23,8 @@
    # Returns the formatted string.
    function dump_error($exception) {
       $class = titleize(get_class($exception));
+      $file = $exception->getFile();
+      $line = $exception->getLine();
       $message = preg_replace("/('[^']+')/", '<code>$1</code>', $exception->getMessage());
       $trace = $exception->getTraceAsString();
 
@@ -31,7 +33,16 @@
          $view->set('exception', $class);
          $view->set('message', $message);
          $view->set('trace', $trace);
+
+         $view->set('file', str_replace(ROOT, '', $file));
+         $view->set('line', $line);
          $view->set('params', Dispatcher::$params);
+
+         $code = explode("\n", htmlspecialchars(file_get_contents($exception->getFile())));
+         $lines = array_slice($code, max(0, $line - 4), 7);
+         $lines[3] = "<strong>{$lines[3]}</strong>";
+         $view->set('code', implode("\n", $lines));
+
          return $view->render();
       } catch (Exception $e) {
          return "<h1>".titleize($class)."</h1>\n<p>$message</p>\n<pre>$trace</pre>";
