@@ -20,6 +20,7 @@
    $port = 3000;
    $ip = "0.0.0.0";
    $php = "/usr/bin/php-cgi";
+   $verbose = true;
 
    function usage() {
       print "Usage: {$GLOBALS['argv'][0]} [OPTIONS]\n"
@@ -27,6 +28,7 @@
           . "  -p PORT       Run the server on the specified port (Default: {$GLOBALS['port']})\n"
           . "  -b BINDING    Bind the server to the specified IP (Default: {$GLOBALS['ip']})\n"
           . "  -e PATH       Path to the PHP executable (Default: {$GLOBALS['php']})\n"
+          . "  -q            Print as little as possible\n"
           . "\n";
       exit(255);
    }
@@ -49,6 +51,9 @@
                usage();
             }
             break;
+         case '-q':
+            $verbose = false;
+            break;
          default:
             usage();
       }
@@ -67,8 +72,6 @@ server.modules = ( "mod_accesslog", "mod_rewrite", "mod_fastcgi" )
 
 index-file.names = ( "index.php" )
 static-file.exclude-extensions = ( ".php", ".fcgi" )
-accesslog.filename = "/proc/" + var.PID + "/fd/2"
-accesslog.format = "%h %V %t \"%r\" %>s %b \"%{Referer}i\""
 
 fastcgi.server = ( ".php" => ( "localhost" => (
    "socket" => "$socket",
@@ -83,9 +86,22 @@ url.rewrite-once = (
 CONF
    );
 
+   if ($verbose) {
+      print "\n\nStarting lighttpd on $ip:$port...\n\n";
+      file_put_contents($config, <<<CONF
+accesslog.filename = "/proc/" + var.PID + "/fd/2"
+accesslog.format = "%h %V %t \"%r\" %>s %b \"%{Referer}i\""
+CONF
+      , FILE_APPEND);
+   }
+
+   # Ignore interrupt signal
    pcntl_signal(2, proc(''));
-   print "\n\nStarting lighttpd on $ip:$port...\n\n";
+
    system("lighttpd -D -f $config");
-   print "\n";
+
+   if ($verbose) {
+      print "\n\n\n";
+   }
 
 ?>

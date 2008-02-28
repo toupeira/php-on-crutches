@@ -172,13 +172,15 @@
             ob_start();
             eval("$_command;");
 
-         # Dump formatted exception with backtrace
+         # Dump exceptions with colored backtrace
          } catch (Exception $_e) {
             print "[1;31m".get_class($_e)."[0m: [1m".$_e->getMessage()."[0m\n";
+
             foreach (explode("\n", $_e->getTraceAsString()) as $_line) {
                list($_line, $_text) = explode(' ', $_line, 2);
                print "   [1m{$_line}[0m {$_text}\n";
             }
+
             $_result = $_e;
          }
 
