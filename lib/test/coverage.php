@@ -96,7 +96,7 @@
          $file = str_replace('/', '-', str_replace('.', '_', $name)).'.html';
          print "   creating $file\n";
          $lines = file($path) or
-            raise("Could not open file $path.");
+            raise("Could not open file $path");
 
          $size = count($lines);
          $code = 0;
@@ -185,11 +185,13 @@
 
       protected function render($template, $file) {
          $this->view->set('time', strftime('%a, %d %b %Y %H:%M:%S %z'));
-         $this->view->layout = $this->view_path."layout.thtml";
-         $output = $this->view->render($this->view_path."$template.thtml");
+         $output = $this->view->render(
+            $this->view_path."$template.thtml",
+            $this->view_path."layout.thtml"
+         );
 
          file_put_contents("{$this->target}/$file", $output) or
-            raise("Could not write file $file.");
+            raise("Could not write file $file");
       }
 
       protected function infer($line) {

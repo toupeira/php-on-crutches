@@ -72,7 +72,7 @@
             }
          }
 
-         raise(new RoutingError("Can't recognize route '$path'"));
+         raise(new RoutingError("Recognition failed for '$path'"));
       }
 
       # Generate a URL from the given values
@@ -138,6 +138,7 @@
 
          # Get default and fixed arguments
          if (!in_array('action', $this->required)) {
+            $this->defaults['controller'] = '';
             $this->defaults['action'] = 'index';
          }
 

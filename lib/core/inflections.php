@@ -12,7 +12,7 @@
    }
 
    function titleize($text) {
-      return ucwords(humanize($text));
+      return ucwords(str_replace('_', ' ', underscore($text)));
    }
 
    function camelize($text) {

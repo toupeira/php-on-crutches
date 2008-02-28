@@ -38,29 +38,54 @@
             log_debug("  Session ID: ".session_id());
          }
 
-         $args = Router::recognize($path);
-         self::$params = array_merge($_GET, $_POST, $args);
+         try {
+            $args = Router::recognize($path);
+            $controller = $args['controller'];
+            $action = $args['action'];
+            self::$params = array_merge($_GET, $_POST, $args);
 
-         # Log request parameters
-         log_info("  Parameters: ".str_replace("\n", "\n  ",
-            var_export(self::$params, true)));
+            # Log request parameters
+            log_info("  Parameters: ".str_replace("\n", "\n  ",
+               var_export(self::$params, true)));
 
-         if ($controller = $args['controller'] and $action = $args['action']) {
-            unset($args['controller']);
-            unset($args['action']);
-            if (count($args) == 1) {
-               $args = explode('/', array_shift($args));
+            if ($controller and $action and $controller != 'application') {
+               unset($args['controller']);
+               unset($args['action']);
+               if (count($args) == 1) {
+                  $args = explode('/', array_shift($args));
+               }
+
+               $class = camelize($controller).'Controller';
+
+               if (class_exists($class)) {
+                  self::$controller = new $class(self::$params);
+                  self::$controller->perform($action, $args);
+
+                  print self::$controller->output;
+                  return self::$controller;;
+               }
             }
 
-            $class = camelize($controller).'Controller';
-
-            self::$controller = new $class(self::$params);
-            self::$controller->perform($action, $args);
-
-            print self::$controller->output;
-            return self::$controller;;
-         } else {
             raise(new RoutingError("Invalid path '$path'"));
+
+         } catch (NotFound $exception) {
+            $status = 404;
+            $text = "Not Found";
+         } catch (Exception $exception) {
+            $status = 500;
+            $text = "Server Error";
+         }
+
+         header("Status: $status");
+         if (config('debug')) {
+            print dump_error($exception);
+         } elseif (function_exists('rescue_error_in_public')) {
+            rescue_error_in_public($exception);
+         } elseif ($template = View::find_template("errors/$code")) {
+            $view = new View($template);
+            print $view->render();
+         } else {
+            print "<h1>$status $text</h1>";
          }
       }
    }

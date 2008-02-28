@@ -32,7 +32,7 @@
    function request($method, $path) {
       $_SERVER['REQUEST_METHOD'] = $method;
       $_SERVER['REQUEST_URI'] = "/$path";
-      print Dispatcher::run($path);
+      return Dispatcher::run($path);
    }
 
    # Wrapper for GET requests
@@ -40,13 +40,13 @@
       if (is_array($params)) {
          $_GET = $_POST = $params;
       }
-      request('GET', $path);
+      return request('GET', $path);
    }
 
    # Wrapper for POST requests
    function post($path, $params=null) {
       $_GET = $_POST = (array) $params;
-      request('POST', $path);
+      return request('POST', $path);
    }
 
    function to_string($value) {

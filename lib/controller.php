@@ -14,6 +14,7 @@
       public $require_ssl;
 
       protected $name;
+      protected $layout;
       protected $view;
       protected $output;
 
@@ -27,17 +28,6 @@
       protected $actions;
       protected $errors;
       protected $msg;
-
-      # Find a template path for the given action
-      static function find_template($action) {
-         foreach (array(VIEWS, LIB.'views') as $dir) {
-            if (is_file($template = "$dir/$action.thtml")) {
-               return $template;
-            }
-         }
-
-         return null;
-      }
 
       function __construct(&$params=null) {
          $this->name = underscore(substr(get_class($this), 0, -10));
@@ -69,7 +59,8 @@
          # Collect all public methods defined in this controller
          $this->actions = array_diff(
             get_class_methods($this),
-            get_class_methods(Controller)
+            get_class_methods(Controller),
+            get_class_methods(ApplicationController)
          );
 
          # Call custom initializer
@@ -175,78 +166,42 @@
 
       # Perform an action
       function perform($action, $args=null) {
-         try {
-            # Catch invalid action names
-            if (!preg_match('/^[a-z][a-z_]*$/', $action) or $action == 'init'
-               or substr($action, 0, 6) == 'before'
-               or substr($action, 0, 5) == 'after') {
-               raise("Invalid action '$action'");
+         # Catch invalid action names
+         if (!preg_match('/^[a-z][a-z_]*$/', $action) or $action == 'init'
+            or substr($action, 0, 6) == 'before'
+            or substr($action, 0, 5) == 'after') {
+            raise("Invalid action '$action'");
+         }
+
+         if ($this->is_valid_request($action)) {
+            $this->set('action', $action);
+
+            # Set the layout, don't use one for Ajax requests
+            $this->view->layout = ($this->is_ajax() ? null : any($this->layout, 'application'));
+
+            # Call before filters
+            $this->call_filter("global_before");
+            $this->call_filter("before");
+            $this->call_filter("before_$action");
+
+            # Call the action itself if it's defined
+            if (in_array($action, $this->actions)) {
+               call_user_func_array(array($this, $action), (array) $args);
             }
 
-            if ($this->is_valid_request($action)) {
-               $this->set('action', $action);
+            # Call after filters
+            $this->call_filter("after_$action");
+            $this->call_filter("after");
+            $this->call_filter("global_after");
 
-               # Set the layout, don't use one for Ajax requests
-               $this->view->layout = ($this->is_ajax() ? null : 'application');
-
-               # Call before filters
-               $this->call_filter("global_before");
-               $this->call_filter("before");
-               $this->call_filter("before_$action");
-
-               # Call the action itself if it's defined
-               if (in_array($action, $this->actions)) {
-                  call_user_func_array(array($this, $action), (array) $args);
-               }
-
-               # Call after filters
-               $this->call_filter("after_$action");
-               $this->call_filter("after");
-               $this->call_filter("global_after");
-
-               # Render the action template if the action didn't generate any output
-               if ($this->output === null) {
-                  $this->render($action);
-               }
-            }
-         } catch (NotFound $e) {
-            # Catch 404 errors
-            if (config('debug')) {
-               $this->headers['Status'] = 404;
-               $this->render_text(dump_error($e));
-            } else {
-               $this->rescue_error_in_public($e);
-            }
-         } catch (ApplicationError $e) {
-            # Catch other errors
-            if (config('debug')) {
-               $this->headers['Status'] = 500;
-               $this->render_text(dump_error($e));
-            } else {
-               $this->rescue_error_in_public($e);
+            # Render the action template if the action didn't generate any output
+            if ($this->output === null) {
+               $this->render($action);
             }
          }
 
          $this->send_headers();
          return $this->output;
-      }
-
-      # Catches all errors, default behaviour is to render VIEWS/errors/404.thtml or 500.thtml
-      function rescue_error_in_public($exception, $layout='') {
-         if ($exception instanceof NotFound) {
-            $code = "404";
-            $text = "Not Found";
-         } else {
-            $code = "500";
-            $text = "Server Error";
-         }
-
-         $this->headers['Status'] = $code;
-         if ($template = self::find_template("errors/$code")) {
-            $this->render($template, $layout);
-         } else {
-            $this->render_text("<h1>$text</h1>");
-         }
       }
 
       # Render an action
@@ -255,7 +210,7 @@
             if (is_file($action)) {
                $template = $action;
             } else {
-               $template = self::find_template("{$this->name}/$action");
+               $template = $this->name.'/'.$action;
             }
 
             if ($template) {

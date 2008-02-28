@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title><?= $exception ?></title>
+  <style type="text/css">
+    body {
+      font-family: sans-serif;
+      color: #bbb;
+      background: #333;
+    }
+
+    h1 {
+      font-size: 23px;
+      margin: 0;
+    }
+
+    p {
+      margin: 0.5em 0;
+      padding: 1em;
+      background: #666;
+      color: white;
+    }
+
+    pre {
+      background: #444;
+      padding: 0.6em;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+<h1><?= $exception ?></h1>
+<p><?= $message ?></p>
+<h3>Backtrace</h3>
+<?= dump($trace) ?>
+<h3>Request Parameters</h3>
+<?= dump($params) ?>
+<h3>Session Variables</h3>
+<?= dump($_SESSION) ?>
+</body>
+</html>
