@@ -11,7 +11,7 @@
    function dump($value) {
       ob_start();
       print_r($value);
-      $output = ob_get_clean();
+      $output = htmlspecialchars(ob_get_clean());
       if (is_array($value)) {
          $output = implode("\n", array_slice(explode("\n", $output), 1));
       }
@@ -22,7 +22,7 @@
    # Dump an exception with backtrace.
    # Returns the formatted string.
    function dump_error($exception) {
-      $class = titleize(get_class($exception));
+      $class = get_class($exception);
       $file = $exception->getFile();
       $line = $exception->getLine();
       $message = preg_replace("/('[^']+')/", '<code>$1</code>', $exception->getMessage());
@@ -38,10 +38,17 @@
          $view->set('line', $line);
          $view->set('params', Dispatcher::$params);
 
-         $code = explode("\n", htmlspecialchars(file_get_contents($exception->getFile())));
-         $lines = array_slice($code, max(0, $line - 4), 7);
-         $lines[3] = "<strong>{$lines[3]}</strong>";
-         $view->set('code', implode("\n", $lines));
+         $code = '';
+         $lines = array_slice(file($file), max(0, $line - 12), 23);
+         $width = strlen($line + 12);
+         foreach ($lines as $i => $text) {
+            $text = sprintf("%{$width}d %s", $i + $line - 11, htmlspecialchars($text));
+            if ($i == 11) {
+               $text = "<strong>$text</strong>";
+            }
+            $code .= $text;
+         }
+         $view->set('code', $code);
 
          return $view->render();
       } catch (Exception $e) {

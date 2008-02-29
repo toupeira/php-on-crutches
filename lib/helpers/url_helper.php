@@ -18,12 +18,14 @@
          $url .= '://'.$_SERVER['HTTP_HOST'];
       }
 
-      $url .= Dispatcher::$prefix;
+      if ($path[0] != '#') {
+         $url .= Dispatcher::$prefix;
+      }
 
       if (is_array($path)) {
          # Generate path from route parameters
          $path = Router::generate($path);
-      } elseif (preg_match('#^(/|\w+://)#', $path)) {
+      } elseif (preg_match('#^\w+://.#', $path)) {
          # Return absolute paths and fully-qualified URIs unchanged
          return $path;
       } elseif ($path[0] == ':') {

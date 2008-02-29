@@ -10,7 +10,7 @@
    abstract class Dispatcher
    {
       static public $path;
-      static public $prefix;
+      static public $prefix = '/';
 
       static public $controller;
       static public $params;
