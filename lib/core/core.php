@@ -76,7 +76,15 @@
    }
 
    # Standard errors
-   class ApplicationError extends Exception {};
+   class StandardError extends Exception {
+      function __construct($message=null, $code=0, $file=null, $line=null) {
+         parent::__construct($message, $code);
+         ($file and $this->file = $file);
+         ($line and $this->line = $line);
+      }
+   }
+
+   class ApplicationError extends StandardError {};
    class NotFound extends ApplicationError {};
    class MissingTemplate extends NotFound {};
    class RoutingError extends NotFound {};

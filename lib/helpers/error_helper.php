@@ -7,6 +7,32 @@
 # $Id$
 #
 
+   # Handler for PHP errors
+   function error_handler($errno, $errstr, $errfile, $errline) {
+      throw new StandardError($errstr, $errno, $errfile, $errline);
+   }
+
+   # Handler for uncaught exceptions
+   function exception_handler($exception) {
+      if ($exception instanceof NotFound) {
+         $status = 404;
+         $text = "Not Found";
+      } else {
+         $status = 500;
+         $text = "Server Error";
+      }
+
+      header("Status: $status");
+      if (config('debug')) {
+         print render_exception($exception);
+      } elseif ($template = View::find_template("errors/$status")) {
+         $view = new View($template);
+         print $view->render();
+      } else {
+         print "<h1>$status $text</h1>";
+      }
+   }
+
    # Dump a value
    function dump($value) {
       ob_start();
@@ -19,13 +45,12 @@
       return "<pre>$output</pre>";
    }
 
-   # Dump an exception with backtrace.
-   # Returns the formatted string.
-   function dump_error($exception) {
+   # Render an exception with stack trace
+   function render_exception($exception) {
       $class = get_class($exception);
       $file = $exception->getFile();
       $line = $exception->getLine();
-      $message = preg_replace("/('[^']+')/", '<code>$1</code>', $exception->getMessage());
+      $message = preg_replace("/('[^']+'|[^ ]+\(\))/", '<code>$1</code>', $exception->getMessage());
       $trace = $exception->getTraceAsString();
 
       try {
@@ -39,11 +64,14 @@
          $view->set('params', Dispatcher::$params);
 
          $code = '';
-         $lines = array_slice(file($file), max(0, $line - 12), 23);
-         $width = strlen($line + 12);
+         $start = max(0, $line - 12);
+         $lines = array_slice(file($file), $start, 23);
+         $width = strlen($line + 23);
+
          foreach ($lines as $i => $text) {
-            $text = sprintf("%{$width}d %s", $i + $line - 11, htmlspecialchars($text));
-            if ($i == 11) {
+            $i += $start + 1;
+            $text = sprintf("%{$width}d %s", $i, htmlspecialchars($text));
+            if ($i == $line) {
                $text = "<strong>$text</strong>";
             }
             $code .= $text;

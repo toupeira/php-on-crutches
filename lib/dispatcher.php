@@ -38,57 +38,37 @@
             log_debug("  Session ID: ".session_id());
          }
 
-         try {
-            $args = Router::recognize($path);
-            $controller = $args['controller'];
-            $action = $args['action'];
-            self::$params = array_merge($_GET, $_POST, $args);
+         $args = Router::recognize($path);
+         $controller = $args['controller'];
+         $action = $args['action'];
+         self::$params = array_merge($_GET, $_POST, $args);
 
-            # Log request parameters
-            log_info("  Parameters: ".str_replace("\n", "\n  ",
-               var_export(self::$params, true)));
+         # Log request parameters
+         log_info("  Parameters: ".str_replace("\n", "\n  ",
+            var_export(self::$params, true)));
 
-            if ($controller and $action and $controller != 'application') {
-               unset($args['controller']);
-               unset($args['action']);
-               if (count($args) == 1) {
-                  $args = explode('/', array_shift($args));
-               }
+         if ($controller and $action and $controller != 'application') {
+            unset($args['controller']);
+            unset($args['action']);
 
-               $class = camelize($controller).'Controller';
-
-               if (class_exists($class)) {
-                  self::$controller = new $class(self::$params);
-                  self::$controller->perform($action, $args);
-
-                  print self::$controller->output;
-                  return self::$controller;;
-               }
+            # Collect the arguments for the controller
+            if (count($args) == 1) {
+               $args = explode('/', array_shift($args));
             }
 
-            raise(new RoutingError("Recognition failed for '$path'"));
+            if ($class = classify($controller.'Controller')) {
+               # Load the controller and perform the action
+               self::$controller = new $class(self::$params);
+               self::$controller->perform($action, $args);
 
-         } catch (NotFound $exception) {
-            $status = 404;
-            $text = "Not Found";
-         } catch (Exception $exception) {
-            $status = 500;
-            $text = "Server Error";
+               # Print the output
+               print self::$controller->output;
+
+               return self::$controller;;
+            }
          }
 
-         header("Status: $status");
-         if (config('debug')) {
-            print dump_error($exception);
-         } elseif (function_exists('rescue_error_in_public')) {
-            rescue_error_in_public($exception);
-         } elseif ($template = View::find_template("errors/$status")) {
-            $view = new View($template);
-            print $view->render();
-         } else {
-            print "<h1>$status $text</h1>";
-         }
-
-         return $status;
+         raise(new RoutingError("Recognition failed for '$path'"));
       }
    }
 

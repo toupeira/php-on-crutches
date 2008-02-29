@@ -24,8 +24,10 @@
    require LIB.'model.php';
    require LIB.'view.php';
 
+   @require CONTROLLERS.'application_controller.php';
+
    # Load helpers
-   @include_once HELPERS.'application_helper.php';
+   @include HELPERS.'application_helper.php';
    foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;
    }
@@ -35,16 +37,18 @@
 
    # Auto-load models and controllers
    function __autoload($class) {
-      $class = underscore($class);
-      if (is_file($file = MODELS."$class.php")) {
-         require $file;
-      } elseif (substr($class, -10) == 'controller') {
-         if (is_file($file = CONTROLLERS."$class.php")) {
-            require $file;
-         } elseif (is_file($file = LIB."controllers/$class.php")) {
-            require $file;
+      $name = underscore($class);
+      if (is_file($file = MODELS."$name.php")) {
+         return require $file;
+      } elseif (substr($name, -10) == 'controller') {
+         if (is_file($file = CONTROLLERS."$name.php")) {
+            return require $file;
+         } elseif (is_file($file = LIB."controllers/$name.php")) {
+            return require $file;
          }
       }
+
+      throw new StandardError("Class '$class' not found");
    }
 
    # Initialize the application

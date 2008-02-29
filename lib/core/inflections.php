@@ -23,4 +23,13 @@
       return strtolower(preg_replace('/([a-z]) ?([A-Z])/', '\1_\2', $text));
    }
 
+   function classify($class) {
+      $class = camelize($class);
+      try {
+         if (class_exists($class = camelize($class))) {
+            return $class;
+         }
+      } catch (Exception $e) {}
+   }
+
 ?>
