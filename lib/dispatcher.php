@@ -66,7 +66,7 @@
                }
             }
 
-            raise(new RoutingError("Invalid path '$path'"));
+            raise(new RoutingError("Recognition failed for '$path'"));
 
          } catch (NotFound $exception) {
             $status = 404;
