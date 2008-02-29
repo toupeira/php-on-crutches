@@ -26,6 +26,12 @@
    function config_init() {
       $config = &$GLOBALS['_CONFIG'];
 
+      # Configure error reporting
+      ini_set('display_errors', ($config['debug'] or PHP_SAPI == 'cli'));
+      error_reporting(E_ALL ^ E_NOTICE);
+      set_error_handler(error_handler, error_reporting());
+      set_exception_handler(exception_handler);
+
       # Load routes
       if (!empty($GLOBALS['_ROUTES'])) {
          Router::add($GLOBALS['_ROUTES']);
@@ -34,15 +40,6 @@
       # Load databases
       if (!empty($GLOBALS['_DATABASE'])) {
          require LIB.'database/base.php';
-      }
-
-      # Configure error reporting
-      if ($config['debug'] or PHP_SAPI == 'cli') {
-         error_reporting(E_ALL ^ E_NOTICE);
-         ini_set('display_errors', 1);
-      } else {
-         error_reporting(0);
-         ini_set('display_errors', 0);
       }
 
       # Configure the logger
