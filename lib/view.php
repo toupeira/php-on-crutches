@@ -53,8 +53,6 @@
       function render($template=null, $layout=null) {
          if (!$template and !$template = $this->template) {
             raise("No template set");
-         } elseif (substr(basename($template), 0, 1) == '_') {
-            raise("Template '$template' is a partial");
          } elseif (!is_file($template)) {
             if (is_file($file = View::find_template($template))) {
                $template = $file;
