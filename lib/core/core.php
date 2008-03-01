@@ -10,6 +10,21 @@
    # Shorthand for newlines
    define(N, "\n");
 
+   # Return the first non-empty value.
+   function any() {
+      foreach (func_get_args() as $arg) {
+         if ($arg) {
+            return $arg;
+         }
+      }
+   }
+
+   # Check if a string is empty or only contains whitespace.
+   function blank($text) {
+      $text = trim($text);
+      return empty($text);
+   }
+
    # Base class for all objects
    class Object
    {
@@ -51,8 +66,8 @@
       }
    }
 
-   # Standard errors
    class StandardError extends Exception {
+      # Allow passing filename and line number
       function __construct($message=null, $code=0, $file=null, $line=null) {
          parent::__construct($message, $code);
          ($file and $this->file = $file);
@@ -60,23 +75,14 @@
       }
    }
 
+   # Standard exceptions
    class ApplicationError extends StandardError {};
    class ConfigurationError extends ApplicationError {};
    class NotFound extends ApplicationError {};
    class RoutingError extends NotFound {};
    class MissingTemplate extends NotFound {};
 
-   # Return the first non-empty value. Basically a workaround for
-   # PHP's broken || operator, which only returns booleans.
-   function any() {
-      foreach (func_get_args() as $arg) {
-         if ($arg) {
-            return $arg;
-         }
-      }
-   }
-
-   # Create something almost, but not quite, entirely unlike a real closure.
+   # A wrapper around create_function()'s horrible syntax.
    #
    # $code is a string with the function body, and $argc is the number of
    # arguments the function receives. The arguments are named alphabetically,
@@ -86,8 +92,10 @@
    #
    #   $square = proc('$a * $a')
    #   $square(2) # -> 4
+   #   $square(3) # -> 9
+   #   $square(4) # -> 16
    #
-   # Or in the real-world, to sort an array of people by age:
+   # Or to sort an array of people by age:
    #
    #   usort($people, proc('$a->age > $b->age', 2))
    #
@@ -99,12 +107,6 @@
       }
       $args = implode(',', $args);
       return create_function($args, "return $code;");
-   }
-
-   # Check if a string is empty or only contains whitespace.
-   function blank($text) {
-      $text = trim($text);
-      return empty($text);
    }
 
 ?>
