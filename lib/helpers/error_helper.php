@@ -9,7 +9,9 @@
 
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
-      throw new StandardError($errstr, $errno, $errfile, $errline);
+      if (error_reporting()) {
+         throw new StandardError($errstr, $errno, $errfile, $errline);
+      }
    }
 
    # Handler for uncaught exceptions

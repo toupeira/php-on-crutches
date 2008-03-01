@@ -20,12 +20,10 @@
          self::$path = $path;
 
          # Detect the relative path used to reach the website
-         if (!self::$prefix) {
-            self::$prefix = preg_replace(
-               '#(index\.(php|fcgi))?(\?[^/]*)?('.self::$path.')?(\?.*)?$#', '',
-               $_SERVER['REQUEST_URI']
-            );
-         }
+         self::$prefix = preg_replace(
+            '#(index\.(php|fcgi))?(\?[^/]*)?('.self::$path.')?(\?.*)?$#', '',
+            $_SERVER['REQUEST_URI']
+         );
 
          # Log request header
          log_debug(

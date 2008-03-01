@@ -30,7 +30,7 @@
       ini_set('display_errors', ($config['debug'] or PHP_SAPI == 'cli'));
       error_reporting(E_ALL ^ E_NOTICE);
       set_error_handler('error_handler', error_reporting());
-      set_exception_handler('exception_handler');
+      (PHP_SAPI != 'cli') and set_exception_handler('exception_handler');
 
       # Load routes
       if (!empty($GLOBALS['_ROUTES'])) {
