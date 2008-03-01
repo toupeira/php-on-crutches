@@ -149,7 +149,7 @@
                $this->redirect_to(config('default_path'));
             } else {
                # Or else try the default action
-               $this->redirect_to(':');
+               $this->redirect_to('.');
             }
             return false;
          }
@@ -300,8 +300,7 @@
          $this->render_text('');
 
          if ($command) {
-            log_debug("Sending output of '$command'");
-            passthru("$command 2>/dev/null");
+            passthru($command);
             return true;
          } elseif (@readfile($file)) {
             return true;
