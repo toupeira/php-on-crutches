@@ -8,6 +8,7 @@
          $this->data = &$this->controller->view->data;
          $this->views = LIB.'views/sample/';
          $this->send_file_output = null;
+         register_shutdown_function(rm_rf, $this->views);
 
          mkdir($this->views);
          file_put_contents($this->views.'index.thtml', 'Index Template');
