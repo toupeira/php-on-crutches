@@ -47,8 +47,6 @@
             return require $file;
          }
       }
-
-      throw new ApplicationError("Class '$class' not found");
    }
 
    # Initialize the application

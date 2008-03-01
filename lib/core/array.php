@@ -100,13 +100,13 @@
    # Delete one or more values from an array
    function array_remove(&$array, $values) {
       if (is_array($values)) {
-         foreach ($array as $key => $value) {
+         foreach ((array) $array as $key => $value) {
             if (in_array($value, $values)) {
                unset($array[$key]);
             }
          }
       } else {
-         foreach ($array as $key => $value) {
+         foreach ((array) $array as $key => $value) {
             if ($value == $values) {
                unset($array[$key]);
                return $value;

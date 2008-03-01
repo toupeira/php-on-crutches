@@ -9,9 +9,57 @@
 
    require 'simpletest/unit_tester.php';
    require 'simpletest/reporter.php';
-   require LIB.'test/cases.php';
 
+   require LIB.'test/cases.php';
    @include TEST.'test_helper.php';
+
+   global $_TESTS;
+   $_TESTS = array_map(basename, array_filter(glob(TEST.'*'), is_dir));
+   array_remove($_TESTS, array('coverage', 'fixtures', 'framework'));
+
+   function find_tests($args) {
+      global $_TESTS;
+
+      $args = (array) $args;
+      $paths = (empty($args) ? $_TESTS : array());
+      $framework = (is_dir($framework = TEST.'framework') ? $framework : null);
+
+      while ($arg = array_shift($args)) {
+         switch ($arg) {
+            case 'all':
+               $paths = array_merge($paths, $_TESTS);
+               if ($framework) {
+                  array_unshift($paths, $framework);
+               }
+               break;
+            case 'app':
+               $paths = array_merge($paths, $_TESTS);
+               break;
+            case 'framework':
+               if ($framework) {
+                  $paths[] = $framework;
+               }
+               break;
+            case 'recent':
+               $paths = array_merge($paths, find_related_tests(
+                  find(ROOT, '-name .svn -prune -o -type f -name "*.php" -mmin -10 -print')));
+               break;
+            case 'uncommitted':
+               $paths = array_merge($paths, find_related_tests(
+                  "svn stat ".ROOT." | grep '^M ' | cut -dM -f2-"));
+               break;
+            default:
+               if (in_array($arg, $_TESTS) or file_exists($arg)) {
+                  $paths[] = $arg;
+               } else {
+                  return false;
+               }
+               break;
+         }
+      }
+
+      return array_unique($paths);
+   }
 
    function run_tests($path, $message=null, $reporter=null) {
       $group = new GroupTest($message);
@@ -23,16 +71,16 @@
       } else {
          $message = "Testing $name: ";
          $dir = TEST.$name;
-         foreach (explode("\n", `find "$dir" -type f -name '*_test.php'`) as $file) {
-            if (is_file($file)) {
-               $group->addTestFile($file);
-            }
+         foreach (find($dir, '-type f -name "*_test.php"') as $file) {
+            $group->addTestFile($file);
          }
       }
 
       print $message.pluralize($group->getSize(), 'test', 'tests');
       if ($group->getSize() > 0) {
-         $reporter = any($reporter, new Reporter());
+         if (!$reporter) {
+            $reporter = new ConsoleReporter();
+         }
 
          try {
             $group->run($reporter);
@@ -48,24 +96,20 @@
       }
    }
 
-   function find_tests($command) {
+   function find_related_tests($files) {
       $tests = array();
-      $files = explode("\n", shell_exec($command));
-      if ($files == array('')) {
-         return $tests;
-      }
 
       foreach ($files as $file) {
          $name = str_replace('.php', '', basename($file));
-         $test = shell_exec("find ".TEST." -type f -name '{$name}_test.php' | head -1");
-         if ($test) {
-            $tests[] = trim($test);
+         if ($test = find(TEST, "-type f -name '{$name}_test.php' | head -1")) {
+            $tests[] = trim($test[0]);
          }
       }
+
       return $tests;
    }
 
-   class Reporter extends TextReporter
+   class ConsoleReporter extends TextReporter
    {
       function paintPass($message) {
          print ".";

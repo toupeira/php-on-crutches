@@ -35,6 +35,13 @@
       return run("$command &>/dev/null &", $args);
    }
 
+   # Wrapper for find, returns an array of paths
+   function find($path, $options=null) {
+      $command = sprintf('find %s %s 2>/dev/null | sort', escapeshellarg($path), $options);
+      $paths = explode("\n", trim(`$command`));
+      return ($paths == array('') ? array() : $paths);
+   }
+
    # Create a temporary file or directory which will be removed when
    # the request is finished.
    function mktemp($dir=false) {

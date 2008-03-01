@@ -24,12 +24,15 @@
    }
 
    function classify($class) {
-      $class = camelize($class);
-      try {
-         if (class_exists($class = camelize($class))) {
-            return $class;
-         }
-      } catch (Exception $e) {}
+      if (class_exists($class = camelize($class))) {
+         return $class;
+      }
+   }
+
+   function constantize($key) {
+      if (defined($key)) {
+         return constant($key);
+      }
    }
 
 ?>

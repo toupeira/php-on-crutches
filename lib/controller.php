@@ -207,10 +207,10 @@
       # Render an action
       function render($action, $layout=null) {
          if ($this->output === null) {
-            if (is_file($action)) {
-               $template = $action;
-            } else {
+            if (strstr($action, '/') === false) {
                $template = $this->name.'/'.$action;
+            } else {
+               $template = $action;
             }
 
             $this->view->template = $template;
