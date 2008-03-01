@@ -25,7 +25,6 @@
    if (empty($args)) {
       $paths = $tests;
    }
-
    while ($arg = array_shift($args)) {
       switch ($arg) {
          case 'all':

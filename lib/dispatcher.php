@@ -10,7 +10,7 @@
    abstract class Dispatcher
    {
       static public $path;
-      static public $prefix = '/';
+      static public $prefix;
 
       static public $controller;
       static public $params;
@@ -63,6 +63,8 @@
                print self::$controller->output;
 
                return self::$controller;;
+            } else {
+               throw new RoutingError("Invalid controller '$path'");
             }
          }
 

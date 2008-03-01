@@ -213,18 +213,13 @@
                $template = $this->name.'/'.$action;
             }
 
-            if ($template) {
-               # Render the template with the stored data and layout
-               $this->set_error_messages();
-               if (!is_null($layout)) {
-                  $this->view->layout = $layout;
-               }
-               $this->view->template = $template;
-               $this->output = $this->view->render();
-               return true;
-            } else {
-               throw new MissingTemplate();
+            $this->view->template = $template;
+            if (!is_null($layout)) {
+               $this->view->layout = $layout;
             }
+            $this->set_error_messages();
+            $this->output = $this->view->render();
+            return true;
          } else {
             throw new ApplicationError("Can only render once per request");
          }

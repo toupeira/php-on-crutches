@@ -33,7 +33,13 @@
       print $message.pluralize($group->getSize(), 'test', 'tests');
       if ($group->getSize() > 0) {
          $reporter = any($reporter, new Reporter());
-         $group->run($reporter);
+
+         try {
+            $group->run($reporter);
+         } catch (Exception $e) {
+            print "\nCaught $e\n";
+         }
+
          print "\n";
          return $reporter->getStatus();
       } else {

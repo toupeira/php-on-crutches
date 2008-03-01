@@ -11,7 +11,7 @@
    {
       # Find a template for the given path
       static function find_template($path) {
-         foreach (array(VIEWS, LIB.'views/') as $base) {
+         foreach (array(VIEWS, LIB.'base/views/') as $base) {
             if (is_file($template = "$base$path.thtml")) {
                return $template;
             }
@@ -58,14 +58,11 @@
                $template = $file;
                unset($file);
             } else {
-               throw new MissingTemplate("Template '{$template}' not found");
+               throw new MissingTemplate("Template '{$template}.thtml' not found");
             }
          }
 
          $this->template = $template;
-
-         # Reset cycler (from text_helper.php)
-         $GLOBALS['_cycle'] = null;
 
          # Extract assigned values as local variables
          extract($this->data, EXTR_SKIP);
