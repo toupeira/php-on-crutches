@@ -11,7 +11,7 @@
    {
       # Find a template for the given path
       static function find_template($path) {
-         foreach (array(VIEWS, LIB.'base/views/') as $base) {
+         foreach (array(VIEWS, LIB.'views/') as $base) {
             if (is_file($template = "$base$path.thtml")) {
                return $template;
             }

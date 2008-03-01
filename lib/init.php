@@ -28,7 +28,7 @@
 
    # Load helpers
    @include HELPERS.'application_helper.php';
-   foreach (glob(LIB.'base/helpers/*.php') as $helper) {
+   foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;
    }
 
@@ -43,7 +43,7 @@
       } elseif (substr($name, -10) == 'controller') {
          if (is_file($file = CONTROLLERS."$name.php")) {
             return require $file;
-         } elseif (is_file($file = LIB."base/controllers/$name.php")) {
+         } elseif (is_file($file = LIB."controllers/$name.php")) {
             return require $file;
          }
       }
