@@ -76,8 +76,7 @@
          $content_for_layout = ob_get_clean();
          log_debug("Rendered template {$template}");
 
-         if ($layout or !is_null($layout = $this->layout)
-             and !is_file($layout) and $layout) {
+         if (($layout or !is_null($layout = $this->layout)) and !is_file($layout)) {
             if (is_file($file = View::find_template("layouts/$layout"))) {
                $layout = $file;
                unset($file);
