@@ -26,25 +26,12 @@
       }
 
       function test_exceptions() {
+         $this->assertTrue(class_exists(StandardError));
          $this->assertTrue(class_exists(ApplicationError));
+         $this->assertTrue(class_exists(ConfigurationError));
+         $this->assertTrue(class_exists(NotFound));
+         $this->assertTrue(class_exists(RoutingError));
          $this->assertTrue(class_exists(MissingTemplate));
-      }
-
-      function test_raise_with_message() {
-         $e = $this->assertRaise('raise("foo")');
-         $this->assertEqual('foo', $e->getMessage());
-      }
-
-      function test_raise_with_exception() {
-         $e = $this->assertRaise('raise(new MissingTemplate("bar"))');
-         $this->assertIsA($e, MissingTemplate);
-         $this->assertEqual('bar', $e->getMessage());
-      }
-
-      function test_raise_with_class() {
-         $e = $this->assertRaise('raise(MissingTemplate)');
-         $this->assertIsA($e, MissingTemplate);
-         $this->assertEqual('', $e->getMessage());
       }
    }
 
