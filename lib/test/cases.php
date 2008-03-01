@@ -103,15 +103,17 @@
 
       function request($action, $get=null, $post=null) {
          $path = "{$this->controller->name}/$action";
+         $_SERVER['HTTP_HOST'] = 'www.example.com';
          $_SERVER['REQUEST_URI'] = "/$path";
          $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
          $_SERVER['REQUEST_METHOD'] = (is_array($post) ? 'POST' : 'GET');
          $_GET = (array) $get;
          $_POST = (array) $post;
 
-         list($this->controller, $this->action, $this->args) =
-            Dispatcher::recognize($path);
-         $this->controller->perform($this->action, $this->args);
+         ob_start();
+         $this->controller = Dispatcher::run($path);
+         $this->output = ob_get_clean();
+         $this->action = Dispatcher::$params['action'];
          $this->data = &$this->controller->view->data;
       }
 
@@ -137,7 +139,7 @@
             case 'success':
                $this->assertInArray($status, array(200, null),
                   "Expected a successful response, got '$status'");
-               $this->assertFalse(is_null($this->controller->output));
+               $this->assertFalse(is_null($this->output));
                break;
             case 301:
             case 302:
@@ -197,18 +199,19 @@
       }
 
       function assertOutput($text) {
-         $this->assertEqual($text, $this->controller->output);
+         $this->assertEqual($text, $this->output);
       }
 
       function assertOutputMatch($pattern) {
-         $this->assertMatch($pattern, $this->controller->output);
+         $this->assertMatch($pattern, $this->output);
       }
 
       function assertRedirect($path) {
          $this->assertResponse('redirect');
 
-         $url = url_for($path);
+         $url = url_for($path, array('full_path' => true));
          $real_url = $this->controller->headers['Location'];
+
          $this->assertEqual($url, $real_url,
             "Expected redirect to '$url', got '$real_url'");
       }

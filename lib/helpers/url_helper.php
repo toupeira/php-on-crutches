@@ -10,7 +10,8 @@
    # Build a URL for the given options
    function url_for($path, $options=null) {
       if (array_delete($options, 'full_path') or $options['ssl']) {
-         if (array_delete($options, 'ssl') or Dispatcher::$controller->is_ssl()) {
+         if (array_delete($options, 'ssl')
+            or Dispatcher::$controller and Dispatcher::$controller->is_ssl()) {
             $url = 'https';
          } else {
             $url = 'http';
