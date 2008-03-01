@@ -272,7 +272,10 @@
 
       # Send a file with the appropriate headers
       function send_file($file, $options=null) {
-         if (!is_file($file)) {
+         if ($file[0] = '!') {
+            $command = substr($file, 1);
+            $file = null;
+         } elseif (!is_file($file)) {
             raise("File $file not found");
          }
 
@@ -285,18 +288,21 @@
             }
          }
 
-         $this->headers['Content-Length'] = ($size = $options['size'])
-            ? $size
-            : filesize($file);
+         if ($size = $options['size'] or $file and $size = filesize($file)) {
+            $this->headers['Content-Length'] = $size;
+         }
 
-         $this->headers['Content-Type'] = ($type = $options['type'])
-            ? $type
-            : ($type = @mime_content_type($file)) ? $type : null;
+         if ($type = $options['type'] or $file and $type = @mime_content_type($file)) {
+            $this->headers['Content-Type'] = $type;
+         }
 
          $this->send_headers();
          $this->render_text('');
 
-         if (@readfile($file)) {
+         if ($command) {
+            passthru($command);
+            return true;
+         } elseif (@readfile($file)) {
             return true;
          } else {
             raise("Can't read file $file");

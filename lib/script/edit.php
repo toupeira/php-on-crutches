@@ -20,7 +20,7 @@
    if ($args = array_slice($argv, 1)) {
       $files = 
       print "editing [1m{$args[0]}[0m\n";
-      $files = explode("\n", trim(`find app/controllers app/models app/helpers app/views public test/controllers test/models test/helpers -type f | grep -v '\.\(svn|swp|bak\)' | grep '{$args[0]}'`));
+      $files = explode("\n", trim(`find app/controllers app/models app/helpers app/views public test/controllers test/models test/helpers -type f | egrep -v '\.(svn|swp|bak)' | grep '{$args[0]}'`));
       $files == array('') and $files = null;
    } else {
       print "editing [1mapplication[0m\n";
