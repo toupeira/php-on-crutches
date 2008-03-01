@@ -102,10 +102,15 @@
       }
 
       private function render_partial($partial, $locals=null) {
-         $partial = dirname($partial).'/_'.basename($partial).'.thtml';
+         if (strstr($partial, '/') !== false) {
+            $partial = dirname($partial).'/_'.basename($partial);
+         } else {
+            $partial = $this->data['controller'].'/_'.$partial;
+         }
+
          if (!$template = View::find_template($partial) and
              !$template = View::find_template(VIEWS.basename($partial))) {
-            throw new MissingTemplate("Partial '$partial' not found");
+            throw new ApplicationError("Partial '$partial' not found");
          }
 
          # Extract assigned and passed values as local variables
