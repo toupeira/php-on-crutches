@@ -8,6 +8,8 @@
          $this->assertTrue('1');
          $this->assertTrue(' ');
          $this->assertTrue(array(0));
+         $this->assertTrue(array(''));
+         $this->assertTrue(array(' '));
 
          $this->assertFalse(0);
          $this->assertFalse('0');
@@ -50,7 +52,7 @@
             $this->assertTrue(empty($value));
          }
 
-         foreach (array(' ', 1, '1', array(1)) as $value) {
+         foreach (array(' ', 1, '1', array(''), array(1)) as $value) {
             $this->assertFalse(empty($value));
          }
       }
