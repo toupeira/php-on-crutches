@@ -118,7 +118,7 @@
    # Shift a value from the array and complain if it's empty
    function array_shift_arg(&$array, $message="Too few arguments") {
       if (empty($array)) {
-         raise($message);
+         throw new ApplicationError($message);
       } else {
          return array_shift($array);
       }

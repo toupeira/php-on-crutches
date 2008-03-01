@@ -83,10 +83,10 @@
             }
 
             if (fwrite($this->buffer, "$msg\n") === false) {
-               raise("Couldn't write to logfile {$this->file}", false);
+               throw new ApplicationError("Couldn't write to logfile {$this->file}", false);
             }
             if (fflush($this->buffer) === false) {
-               raise("Couldn't flush logfile {$this->file}", false);
+               throw new ApplicationError("Couldn't flush logfile {$this->file}", false);
             }
 
             return true;

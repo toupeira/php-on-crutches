@@ -20,7 +20,7 @@
          return null;
       }
 
-      public $data;
+      public $data = array();
 
       private $template;
       private $layout;
@@ -52,13 +52,13 @@
 
       function render($template=null, $layout=null) {
          if (!$template and !$template = $this->template) {
-            raise("No template set");
+            throw new ApplicationError("No template set");
          } elseif (!is_file($template)) {
             if (is_file($file = View::find_template($template))) {
                $template = $file;
                unset($file);
             } else {
-               raise(new MissingTemplate("Template '{$template}' not found"));
+               throw new MissingTemplate("Template '{$template}' not found");
             }
          }
 
@@ -82,7 +82,7 @@
                $layout = $file;
                unset($file);
             } else {
-               raise("Layout '{$layout}' not found");
+               throw new MissingTemplate("Layout '{$layout}' not found");
             }
          }
 
@@ -105,7 +105,7 @@
          $partial = dirname($partial).'/_'.basename($partial).'.thtml';
          if (!$template = View::find_template($partial) and
              !$template = View::find_template(VIEWS.basename($partial))) {
-            raise("Partial not found: $partial");
+            throw new MissingTemplate("Partial '$partial' not found");
          }
 
          # Extract assigned and passed values as local variables

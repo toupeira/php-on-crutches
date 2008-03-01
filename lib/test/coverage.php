@@ -96,7 +96,7 @@
          $file = str_replace('/', '-', str_replace('.', '_', $name)).'.html';
          print "   creating $file\n";
          $lines = file($path) or
-            raise("Could not open file $path");
+            throw new ApplicationError("Could not open file $path");
 
          $size = count($lines);
          $code = 0;
@@ -191,7 +191,7 @@
          );
 
          file_put_contents("{$this->target}/$file", $output) or
-            raise("Could not write file $file");
+            throw new ApplicationError("Could not write file $file");
       }
 
       protected function infer($line) {

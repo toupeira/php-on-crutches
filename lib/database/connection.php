@@ -32,7 +32,7 @@
 
          if (is_array($options)) {
             if (!isset($options['adapter'])) {
-               raise("No adapter set for database '$name'");
+               throw new ConfigurationError("No adapter set for database '$name'");
             }
 
             $file = LIB."database/adapters/{$options['adapter']}_adapter.php";
@@ -45,7 +45,7 @@
 
             return self::$connections[$name] = new $adapter($name, $options);
          } else {
-            raise("Unconfigured database '$name'");
+            throw new ConfigurationError("Unconfigured database '$name'");
          }
       }
 
@@ -87,11 +87,11 @@
       }
 
       function fetch_tables() {
-         raise(get_class()." doesn't implement 'fetch_tables'");
+         throw new ApplicationError(get_class()." doesn't implement 'fetch_tables'");
       }
 
       function fetch_attributes($table) {
-         raise(get_class()." doesn't implement 'fetch_attributes'");
+         throw new ApplicationError(get_class()." doesn't implement 'fetch_attributes'");
       }
 
       function get_tables() {

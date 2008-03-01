@@ -48,7 +48,7 @@
          }
       }
 
-      throw new StandardError("Class '$class' not found");
+      throw new ApplicationError("Class '$class' not found");
    }
 
    # Initialize the application

@@ -16,6 +16,11 @@
 
    # Handler for uncaught exceptions
    function exception_handler($exception) {
+      if (log_running()) {
+         log_error("\n".get_class($exception).': '.$exception->getMessage());
+         log_debug("  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
+      }
+
       if ($exception instanceof NotFound) {
          $status = 404;
          $text = "Not Found";
@@ -25,6 +30,7 @@
       }
 
       header("Status: $status");
+
       if (config('debug')) {
          print render_exception($exception);
       } elseif ($template = View::find_template("errors/$status")) {

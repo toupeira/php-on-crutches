@@ -55,7 +55,7 @@
 
       } elseif (!is_string($path)) {
          $type = gettype($path);
-         raise("Invalid argument of type '$path'");
+         throw new ApplicationError("Invalid argument of type '$path'");
       }
 
       if ($anchor = $options['anchor']) {

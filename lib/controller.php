@@ -170,7 +170,7 @@
          if (!preg_match('/^[a-z][a-z_]*$/', $action) or $action == 'init'
             or substr($action, 0, 6) == 'before'
             or substr($action, 0, 5) == 'after') {
-            raise("Invalid action '$action'");
+            throw new RoutingError("Invalid action '$action'");
          }
 
          if ($this->is_valid_request($action)) {
@@ -223,10 +223,10 @@
                $this->output = $this->view->render();
                return true;
             } else {
-               raise(MissingTemplate);
+               throw new MissingTemplate();
             }
          } else {
-            raise("Can only render once per request");
+            throw new ApplicationError("Can only render once per request");
          }
       }
 
@@ -276,7 +276,7 @@
             $command = substr($file, 1);
             $file = null;
          } elseif (!is_file($file)) {
-            raise("File $file not found");
+            throw new NotFound("File $file not found");
          }
 
          if (!$options['inline']) {
@@ -305,7 +305,7 @@
          } elseif (@readfile($file)) {
             return true;
          } else {
-            raise("Can't read file $file");
+            throw new ApplicationError("Can't read file $file");
          }
       }
 

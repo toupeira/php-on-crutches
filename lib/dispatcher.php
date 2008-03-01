@@ -66,7 +66,7 @@
             }
          }
 
-         raise(new RoutingError("Recognition failed for '$path'"));
+         throw new RoutingError("Recognition failed for '$path'");
       }
    }
 

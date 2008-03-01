@@ -14,7 +14,7 @@
          return Router::generate($route);
       } else {
          $type = gettype($route);
-         raise("Invalid argument of type '$type'");
+         throw new ApplicationError("Invalid argument of type '$type'");
       }
    }
 
@@ -72,7 +72,7 @@
             }
          }
 
-         raise(new RoutingError("Recognition failed for '$path'"));
+         throw new RoutingError("Recognition failed for '$path'");
       }
 
       # Generate a URL from the given values
@@ -84,7 +84,7 @@
          }
 
          $values = array_to_str($values);
-         raise(new RoutingError("Failed to generate route from '$values'"));
+         throw new RoutingError("Failed to generate route from '$values'");
       }
    }
 
@@ -131,7 +131,7 @@
                   $this->params[$key] = $part;
                   $this->pattern .= $pattern;
                } else{
-                  raise("Invalid parameter '$key'");
+                  throw new ApplicationError("Invalid parameter '$key'");
                }
             }
          }

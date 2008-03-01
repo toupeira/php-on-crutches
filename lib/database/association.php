@@ -23,7 +23,7 @@
       }
 
       function load() {
-         raise("Association doesn't implement 'load'");
+         throw new ApplicationError("Association doesn't implement 'load'");
       }
 
       function get_data() {

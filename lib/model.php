@@ -31,19 +31,19 @@
       # Stubs for implementation-specific actions
 
       static function find($name) {
-         raise("Model doesn't implement 'find'");
+         throw new ApplicationError("Model doesn't implement 'find'");
       }
 
       static function find_all() {
-         raise("Model doesn't implement 'find_all'");
+         throw new ApplicationError("Model doesn't implement 'find_all'");
       }
 
       function save() {
-         raise(get_class()." doesn't implement 'save'");
+         throw new ApplicationError(get_class()." doesn't implement 'save'");
       }
 
       function destroy($name) {
-         raise(get_class()." doesn't implement 'destroy'");
+         throw new ApplicationError(get_class()." doesn't implement 'destroy'");
       }
 
       function validate() {}
@@ -58,13 +58,13 @@
             return $this->attributes[$key];
          } else {
             $class = get_class($this);
-            raise("Call to undefined method $class::$getter()");
+            throw new ApplicationError("Call to undefined method $class::$getter()");
          }
       }
 
       function __set($key, $value) {
          if (in_array($key, $this->readonly)) {
-            raise("Can't change read-only attribute '$key'");
+            throw new ApplicationError("Can't change read-only attribute '$key'");
          } else {
             $setter = "set_$key";
             if (method_exists($this, $setter)) {
@@ -73,7 +73,7 @@
                $this->attributes[$key] = &$value;
             } else {
                $class = get_class($this);
-               raise("Call to undefined method $class::$setter()");
+               throw new ApplicationError("Call to undefined method $class::$setter()");
             }
             unset($this->cache[$key]);
          }

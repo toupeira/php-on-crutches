@@ -20,7 +20,7 @@
             return $this->$getter();
          } else {
             $class = get_class($this);
-            raise("Call to undefined method $class::$getter()");
+            throw new ApplicationError("Call to undefined method $class::$getter()");
          }
       }
 
@@ -32,7 +32,7 @@
             return $this;
          } else {
             $class = get_class($this);
-            raise("Call to undefined method $class::$setter()");
+            throw new ApplicationError("Call to undefined method $class::$setter()");
          }
       }
 
@@ -46,33 +46,9 @@
       # Call a function if it is defined, and raise an exception if it returns false
       function call_filter($filter) {
          if ($this->call_if_defined($filter) === false) {
-            raise("Filter '$filter' returned false");
+            throw new ApplicationError("Filter '$filter' returned false");
          }
       }
-   }
-
-   # Raise an exception.
-   #
-   # $exception can be an instantiated exception, an exception class,
-   # or a string with an error message.
-   #
-   function raise($exception, $log=true) {
-      if ($exception instanceof Exception) {
-         $message = get_class($exception);
-      } elseif (class_exists($exception)) {
-         $exception = new $exception();
-         $message = get_class($exception);
-      } else {
-         $message = $exception;
-         $exception = new ApplicationError($message);
-      }
-
-      if ($log and log_running()) {
-         log_error("\n".get_class($exception).": $message");
-         log_debug("  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
-      }
-
-      throw $exception;
    }
 
    # Standard errors
@@ -85,9 +61,10 @@
    }
 
    class ApplicationError extends StandardError {};
+   class ConfigurationError extends ApplicationError {};
    class NotFound extends ApplicationError {};
-   class MissingTemplate extends NotFound {};
    class RoutingError extends NotFound {};
+   class MissingTemplate extends NotFound {};
 
    # Return the first non-empty value. Basically a workaround for
    # PHP's broken || operator, which only returns booleans.

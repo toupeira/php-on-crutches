@@ -18,7 +18,7 @@
             $this->set('title', str_replace('/', ' - ', $path));
             $this->render($template);
          } else {
-            raise(MissingTemplate);
+            throw new MissingTemplate();
          }
       }
    }

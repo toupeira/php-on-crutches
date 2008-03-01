@@ -20,7 +20,7 @@
 
             $this->send_file($css, array('inline' => true));
          } else {
-            raise(MissingTemplate);
+            throw new MissingTemplate();
          }
       }
    }

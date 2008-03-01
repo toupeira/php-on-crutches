@@ -24,9 +24,9 @@
 
       function __construct($attributes=null, $defaults=null) {
          if (empty($this->database)) {
-            raise("No database set for model '".get_class($this)."'");
+            throw new ConfigurationError("No database set for model '".get_class($this)."'");
          } elseif (empty($this->table)) {
-            raise("No table set for model '".get_class($this)."'");
+            throw new ConfigurationError("No table set for model '".get_class($this)."'");
          }
 
          if ($this->load_attributes and empty($this->attributes)) {

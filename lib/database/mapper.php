@@ -34,7 +34,7 @@
          }
 
          if (! $model instanceof ActiveRecord) {
-            raise("Invalid model '".get_class($this)."'");
+            throw new ApplicationError("Invalid model '".get_class($this)."'");
          }
 
          $this->database = $model->database;
@@ -103,7 +103,7 @@
       function delete($id) {
          list($where, $values) = $this->build_where(func_get_args());
          if (empty($where)) {
-            raise("No conditions given");
+            throw new ApplicationError("No conditions given");
          }
 
          $this->query("DELETE FROM `{$this->table}`$where", (array) $values);
@@ -112,7 +112,7 @@
 
       function find($id) {
          if (empty($id)) {
-            raise("No ID given");
+            throw new ApplicationError("No ID given");
          }
 
          list($select, $values) = $this->build_select(func_get_args(), array('limit' => 1));
@@ -142,7 +142,7 @@
                array_unshift($keys, $key);
                if ($argc < count($keys) or $argc > count($keys) + 1) {
                   $keys = implode("', '", $keys);
-                  raise("Wrong number of arguments for keys '$keys'");
+                  throw new ApplicationError("Wrong number of arguments for keys '$keys'");
                }
 
                $where = '';
@@ -161,12 +161,12 @@
                return call_user_func_array(array($this, $finder), $params);
             } else {
                if ($argc < 1 or $argc > 2) {
-                  raise("Wrong number of arguments for key '$key'");
+                  throw new ApplicationError("Wrong number of arguments for key '$key'");
                }
                return $this->$finder("`$key` $equality ?", $args[0]);
             }
          } else {
-            raise("Invalid method '$method'");
+            throw new ApplicationError("Invalid method '$method'");
          }
       }
 
@@ -289,7 +289,7 @@
                array_shift($keys);
 
             } else {
-               raise("Invalid argument '$value'");
+               throw new ApplicationError("Invalid argument '$value'");
             }
          }
 

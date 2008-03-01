@@ -97,7 +97,7 @@
 
          return $GLOBALS['_'.strtoupper($type).'_STORE'] = $store;
       } else {
-         raise("Invalid $type store '$class'");
+         throw new ConfigurationError("Invalid $type store '$class'");
       }
    }
 
