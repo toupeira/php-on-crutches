@@ -11,14 +11,13 @@
    define('LOG',          ROOT.'log/');
    define('TEST',         ROOT.'test/');
    define('TMP',          ROOT.'tmp/');
-   define('SCRIPT',       LIB.'script/');
-   define('FIXTURES',     TEST.'fixtures/');
 
    # Application paths
    define('CONTROLLERS',  APP.'controllers/');
    define('MODELS',       APP.'models/');
    define('VIEWS',        APP.'views/');
    define('HELPERS',      APP.'helpers/');
+   define('FIXTURES',     TEST.'fixtures/');
 
    # The website root
    define('WEBROOT',      ROOT.'public/');
