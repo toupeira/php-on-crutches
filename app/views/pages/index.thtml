@@ -23,16 +23,8 @@
          font-size: 18pt;
       }
 
-      h2 {
-         margin-top: -4px;
-         padding-left: 0.5em;
-         color: #aaa;
-         font-size: 12pt;
-         font-weight: normal;
-      }
-
       h3 {
-         margin-top: 2em;
+         margin-top: 1.5em;
          border-bottom: 1px solid #ddd;
          font-size: 10pt;
       }
@@ -79,8 +71,7 @@
 <body>
 <div id="content">
 <?= image_tag('php_on_crutches.png', array('width' => 147, 'height' => 200)) ?>
-<h1>Congratulations!</h1>
-<h2>you're limping...</h2>
+<h1>Woah... it actually works!</h1>
 <h3>About your environment:</h3>
 <table id="info">
 <tr>
