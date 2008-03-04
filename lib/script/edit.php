@@ -41,7 +41,7 @@
    if (empty($files)) {
       print "No files found.\n";
    } else {
-      run($_ENV['EDITOR'].' '.implode(' ', $files));
+      spawn($_ENV['EDITOR'].' '.implode(' ', $files));
    }
 
 ?>
