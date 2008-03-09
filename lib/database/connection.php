@@ -71,7 +71,8 @@
 
          if (config('log_level') >= LOG_DEBUG) {
             $args = array_map(proc('var_export($a, true)'), $params);
-            array_unshift($args, str_replace('?', '%s', $sql));
+            array_unshift($args, str_replace('?', '%s',
+               str_replace('%', '%%', $sql)));
             log_debug("Database query: [{$this->name}] '".call_user_func_array(sprintf, $args)."'");
          }
 

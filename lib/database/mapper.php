@@ -111,11 +111,8 @@
       }
 
       function find($id) {
-         if (empty($id)) {
-            throw new ApplicationError("No ID given");
-         }
-
-         list($select, $values) = $this->build_select(func_get_args(), array('limit' => 1));
+         list($select, $values) = $this->build_select(func_get_args(),
+            array('limit' => 1));
          return $this->query($select, (array) $values)->fetch_load($this->model);
       }
 
@@ -171,9 +168,8 @@
       }
 
       function count() {
-         return intval($this->query(
-            "SELECT count(*) FROM `{$this->table}`"
-         )->fetch_column());
+         list($select, $values) = $this->build_select(func_get_args(), array('select' => 'count(*)'));
+         return intval($this->query($select, (array) $values)->fetch_column());
       }
 
       protected function build_select($args, $defaults=array()) {
@@ -217,7 +213,7 @@
             $conditions = func_get_args();
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
             # Conditions are passed as array
-            $conditions = $conditions[0];
+            #$conditions = $conditions[0];
          } elseif (empty($conditions)) {
             return null;
          }
@@ -242,12 +238,12 @@
 
                if ($count = substr_count($key, '?')) {
                   # Use array key as WHERE clause
-                  #   e.g.: array('key LIKE ?' => $value)
+                  #   e.g.: find(array('key LIKE ?' => $value))
                   #
                   $where .= " $key";
                } else {
                   # Use array key as column name
-                  #   e.g.: array('key' => $value)
+                  #   e.g.: find(array('key' => $value))
                   #
                   $where .= " `$key` = ?";
                   $count = 1;
@@ -260,7 +256,7 @@
 
             } elseif (is_numeric($value)) {
                # Use array value as ID
-               #   e.g.: array($id)
+               #   e.g.: find($id)
                #
                $where .= "$operator `id` = ?";
                $params[] = $value;
@@ -270,7 +266,7 @@
 
             } elseif ($count = substr_count($value, '?')) {
                # Use array value as WHERE clause
-               #   e.g.: array('key LIKE ?', $value)
+               #   e.g.: find('key LIKE ?', $value)
                #
                $where .= "$operator $value";
                for ($i = 0; $i < $count; $i++) {
@@ -281,9 +277,17 @@
             } elseif ($value == 'and' or $value == 'or') {
                # Change the operator
                $operator = ' '.strtoupper($value);
+
+            } elseif (strstr($value, ' ') !== false) {
+               # Use array value as literal WHERE clause,
+               # without placeholders
+               #   e.g.: find('key LIKE "%value%"')
+               $where .= "$operator $value";
+               array_shift($keys);
+
             } elseif (is_string($value) and !blank($value)) {
                # Use array value as column name
-               #   e.g.: array('key', $value)
+               #   e.g.: find('key', $value)
                $where .= "$operator `$value` = ?";
                $params[] = array_shift_arg($values);
                array_shift($keys);
