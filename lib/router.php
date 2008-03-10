@@ -178,7 +178,7 @@
 
          # Remove fixed values, abort if they don't match this route
          foreach ($this->fixed as $key => $value) {
-            if (array_delete($values, $key) != $value) {
+            if (hash::delete($values, $key) != $value) {
                return;
             }
          }
@@ -200,7 +200,7 @@
          # Build the route
          $add = false;
          foreach (array_reverse($this->params) as $key => $symbol) {
-            $value = array_delete($values, $key);
+            $value = hash::delete($values, $key);
             if ($add or ($value and $value != $this->defaults[$key])) {
                $route = str_replace($symbol, $value, $route);
                $add = true;

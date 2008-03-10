@@ -102,7 +102,7 @@
          }
 
          if (is_array($attributes) and !empty($attributes)) {
-            array_delete($attributes, $this->protected);
+            hash::delete($attributes, $this->protected);
             foreach ($attributes as $key => $value) {
                $this->__set($key, $value);
             }
@@ -249,7 +249,7 @@
             case 'check_box':
                return check_box($key, 'on', $value, $options);
             case 'select_tag':
-               return select_tag($key, array_delete($options, 'values'), $value, $options);
+               return select_tag($key, hash::delete($options, 'values'), $value, $options);
             default:
                return $tag($key, $value, $options);
          }

@@ -45,8 +45,8 @@
 
    function content_tag($name, $content=null, $options=null, $defaults=null) {
       $open = any(
-         array_delete($options, 'open'),
-         array_delete($defaults, 'open')
+         hash::delete($options, 'open'),
+         hash::delete($defaults, 'open')
       );
 
       $html = build_tag($name, $options, $defaults).">$content";

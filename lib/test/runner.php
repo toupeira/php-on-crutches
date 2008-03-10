@@ -15,7 +15,7 @@
 
    global $_TESTS;
    $_TESTS = array_map(basename, array_filter(glob(TEST.'*'), is_dir));
-   array_remove($_TESTS, array('coverage', 'fixtures', 'framework'));
+   set::remove($_TESTS, array('coverage', 'fixtures', 'framework'));
 
    function find_tests($args) {
       global $_TESTS;

@@ -13,7 +13,7 @@
          'method' => 'post', 'open' => true,
       );
 
-      if (array_delete($options, 'multipart')) {
+      if (hash::delete($options, 'multipart')) {
          $defaults['enctype'] = 'multipart/form-data';
       }
 
@@ -46,7 +46,7 @@
       }
 
       # Check if an error is set for this field
-      if (array_delete($options, 'errors')
+      if (hash::delete($options, 'errors')
           or (Dispatcher::$controller->has_errors($key)
               and !in_array($options['type'], array('checkbox', 'radio')))
       ) {
