@@ -92,7 +92,7 @@
          }
 
          if ($this->exists()) {
-            $attributes = hash::get($this->attributes, $this->changed_attributes);
+            $attributes = array_get($this->attributes, $this->changed_attributes);
 
             if (empty($attributes)) {
                return true;
