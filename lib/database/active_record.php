@@ -98,17 +98,18 @@
                return true;
             }
 
-            $action = 'update';
+            $action = $query = 'update';
             $args = array($this->id, $attributes);
          } else {
-            $action = 'insert';
+            $action = 'create';
+            $query = 'insert';
             $args = array($this->attributes);
          }
 
          $this->call_filter(before_save);
          $this->call_filter("before_$action");
 
-         $id = call_user_func_array(array($this->get_mapper(), $action), $args);
+         $id = call_user_func_array(array($this->get_mapper(), $query), $args);
 
          if ($action == 'create') {
             $this->new_record = false;
@@ -155,6 +156,20 @@
                }
             }
          }
+      }
+
+      # Database specific validation checks
+
+      protected function is_unique($key) {
+         $conditions = array($key => $this->attributes[$key]);
+         if ($this->exists()) {
+            $conditions['`id` != ?'] = $this->attributes['id'];
+         }
+
+         return $this->validate_attribute($key,
+            "already exists",
+            $this->mapper->count(array('conditions' => $conditions)) == 0
+         );
       }
    }
 

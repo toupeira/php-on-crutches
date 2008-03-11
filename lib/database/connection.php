@@ -31,19 +31,19 @@
          }
 
          if (is_array($options)) {
-            if (!isset($options['adapter'])) {
-               throw new ConfigurationError("No adapter set for database '$name'");
-            }
+            if ($driver = array_delete($options, 'driver')) {
+               $file = LIB."database/adapters/{$driver}_adapter.php";
+               if (is_file($file)) {
+                  require_once $file;
+                  $adapter = ucfirst($driver).'Adapter';
+               } else {
+                  $adapter = get_class();
+               }
 
-            $file = LIB."database/adapters/{$options['adapter']}_adapter.php";
-            if (is_file($file)) {
-               require_once $file;
-               $adapter = ucfirst($options['adapter']).'Adapter';
+               return self::$connections[$name] = new $adapter($name, $options);
             } else {
-               $adapter = get_class();
+               throw new ConfigurationError("No driver set for database '$name'");
             }
-
-            return self::$connections[$name] = new $adapter($name, $options);
          } else {
             throw new ConfigurationError("Unconfigured database '$name'");
          }
@@ -52,16 +52,17 @@
       protected function __construct($name, $options) {
          $this->name = $name;
 
-         $this->connection = new PDO(
-            $this->get_dsn($options), $options['username'], $options['password']
-         );
-         $this->connection->setAttribute(
-            PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION
-         );
+         list($user, $pass) = array_delete($options, 'username', 'password');
+         $this->connection = new PDO($this->get_dsn($options), $user, $pass);
+         $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       }
 
       function get_name() {
          return $this->name;
+      }
+
+      function get_dsn($options) {
+         throw new NotImplemented("Database adapter doesn't implement 'get_dsn'");
       }
 
       function query($sql, $params=null) {

@@ -7,14 +7,19 @@
 # $Id$
 #
 
-   function messages($msg, $keys=null) {
+   function messages($keys=null) {
+      $keys = func_get_args();
       $messages = '';
 
-      if (is_array($msg)) {
+      if (is_array($msg = Dispatcher::$controller->msg)) {
          foreach ($msg as $key => $message) {
-            if (is_array($keys) and !in_array($key, $keys)) {
+            if (!empty($keys) and !in_array($key, $keys)) {
                continue;
             } else {
+               if (is_array($message)) {
+                  $message = list_tag($message);
+               }
+
                $message = preg_replace('/\[\[([^]]+)\]\]/', '<code>$1</code>', $message);
                $messages .= content_tag('div', $message, array(
                   'class' => "message $key"

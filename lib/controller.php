@@ -325,15 +325,13 @@
          $messages = array();
          foreach ((array) $this->view->data as $key => $value) {
             if ($value instanceof Model) {
-               $messages = array_merge($messages, $value->messages);
+               foreach ($value->errors as $key => $value) {
+                  $messages = array_merge($messages, $value);
+               }
             }
          }
 
-         if (count($messages) > 1) {
-            $this->msg['error'] = "<ul><li>".implode("</li><li>", $messages)."</li></ul>";
-         } elseif (count($messages) > 0) {
-            $this->msg['error'] = $messages[0];
-         }
+         $this->msg['error'] = $messages;
       }
    }
 

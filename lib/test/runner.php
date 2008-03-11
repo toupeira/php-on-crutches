@@ -42,7 +42,7 @@
                break;
             case 'recent':
                $paths = array_merge($paths, find_related_tests(
-                  find(ROOT, '-name .svn -prune -o -type f -name "*.php" -mmin -10 -print')));
+                  find_files(ROOT, '-name .svn -prune -o -type f -name "*.php" -mmin -10 -print')));
                break;
             case 'uncommitted':
                $paths = array_merge($paths, find_related_tests(
@@ -71,7 +71,7 @@
       } else {
          $message = "Testing $name: ";
          $dir = TEST.$name;
-         foreach (find($dir, '-type f -name "*_test.php"') as $file) {
+         foreach (find_files($dir, '-type f -name "*_test.php"') as $file) {
             $group->addTestFile($file);
          }
       }
@@ -101,7 +101,7 @@
 
       foreach ($files as $file) {
          $name = str_replace('.php', '', basename($file));
-         if ($test = find(TEST, "-type f -name '{$name}_test.php' | head -1")) {
+         if ($test = find_files(TEST, "-type f -name '{$name}_test.php' | head -1")) {
             $tests[] = trim($test[0]);
          }
       }

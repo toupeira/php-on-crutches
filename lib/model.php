@@ -19,10 +19,8 @@
       # Protected attributes can only be set explicitly
       public $protected = array();
 
-      # List of attributes with errors
-      protected $errors = array();
       # List of error messages
-      protected $messages = array();
+      protected $errors = array();
 
       function __construct($attributes=null, $defaults=null) {
          $this->set_attributes($attributes, $defaults);
@@ -31,19 +29,19 @@
       # Stubs for implementation-specific actions
 
       static function find($name) {
-         throw new ApplicationError("Model doesn't implement 'find'");
+         throw new NotImplemented("Model doesn't implement 'find'");
       }
 
       static function find_all() {
-         throw new ApplicationError("Model doesn't implement 'find_all'");
+         throw new NotImplemented("Model doesn't implement 'find_all'");
       }
 
       function save() {
-         throw new ApplicationError(get_class()." doesn't implement 'save'");
+         throw new NotImplemented(get_class()." doesn't implement 'save'");
       }
 
       function destroy($name) {
-         throw new ApplicationError(get_class()." doesn't implement 'destroy'");
+         throw new NotImplemented(get_class()." doesn't implement 'destroy'");
       }
 
       function validate() {}
@@ -75,6 +73,7 @@
                $class = get_class($this);
                throw new ApplicationError("Call to undefined method $class::$setter()");
             }
+
             unset($this->cache[$key]);
          }
          return $this;
@@ -139,22 +138,18 @@
 
       # Error handling and validation
 
-      function add_error($keys, $message) {
-         $this->errors = array_unique(array_merge($this->errors, (array) $keys));
-         $this->messages[] = $message;
+      function add_error($key, $message) {
+         $this->errors[$key][] = $message;
       }
 
       function get_errors() {
          return $this->errors;
       }
 
-      function get_messages() {
-         return $this->messages;
-      }
-
       function is_valid() {
+         $this->errors = array();
          $this->validate();
-         return empty($this->errors) && empty($this->messages);
+         return empty($this->errors);
       }
 
       protected function validate_attribute($key, $message, $value) {
@@ -238,7 +233,7 @@
       # Wrappers for form helpers
 
       function form_element($tag, $key, $options=null) {
-         if (in_array($key, $this->errors)) {
+         if (isset($this->errors[$key])) {
             $options['errors'] = true;
          }
 
