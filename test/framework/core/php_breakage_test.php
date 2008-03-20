@@ -23,6 +23,7 @@
          $this->assertTrue(0 == false);
          $this->assertTrue(1 == '1');
          $this->assertTrue(0 == '0');
+         $this->assertTrue(0 == 'foo');
          $this->assertTrue(null == 0);
          $this->assertTrue(null == '');
          $this->assertTrue(null == array());
@@ -30,7 +31,7 @@
          $this->assertFalse(1 === true);
          $this->assertFalse(0 === false);
          $this->assertFalse(1 === '1');
-         $this->assertFalse(0 === '0');
+         $this->assertFalse(0 === 'foo');
          $this->assertFalse(null === 0);
          $this->assertFalse(null === '');
          $this->assertFalse(null === array());
