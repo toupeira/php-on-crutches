@@ -101,7 +101,7 @@
          if ($tables = cache($key)) {
             return $tables;
          } else {
-            return cache($key, $this->fetch_tables());
+            return cache_set($key, $this->fetch_tables());
          }
       }
 
@@ -110,7 +110,7 @@
          if ($attributes = cache($key)) {
             return $attributes;
          } else {
-            return cache($key, $this->fetch_attributes($table));
+            return cache_set($key, $this->fetch_attributes($table));
          }
       }
    }

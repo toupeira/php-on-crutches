@@ -8,16 +8,19 @@
 #
 
    function cache($key=null, $value=null) {
-      if ($cache = $GLOBALS['_CACHE_STORE']) {
-         if ($value) {
-            log_debug("Caching '$key'");
-            return $cache->set($key, $value);
-         } elseif ($key) {
-            return $cache->get($key);
-         } else {
-            return $cache;
-         }
-      }
+      return $GLOBALS['_CACHE_STORE']->get($key);
+   }
+
+   function cache_set($key, $value) {
+      return $GLOBALS['_CACHE_STORE']->set($key, $value);
+   }
+
+   function cache_expire($key) {
+      return $GLOBALS['_CACHE_STORE']->expire($key);
+   }
+
+   function cache_clear() {
+      return $GLOBALS['_CACHE_STORE']->clear();
    }
 
    abstract class CacheStore
@@ -25,7 +28,7 @@
       function setup() { return true; }
       abstract function get($key);
       abstract function set($key, $value);
-      abstract function delete($key);
+      abstract function expire($key);
       abstract function clear();
    }
 
@@ -35,7 +38,7 @@
 
       function get($key)          { return $this->data[$key]; }
       function set($key, $value)  { return $this->data[$key] = $value; }
-      function delete($key)       { unset($this->data[$key]); return true; }
+      function expire($key)       { unset($this->data[$key]); return true; }
       function clear()            { $this->data = array(); return true; }
    }
 
@@ -47,7 +50,7 @@
 
       function get($key)          { return apc_fetch($key); }
       function set($key, $value)  { apc_store($key, $value); return $value; }
-      function delete($key)       { return apc_delete($key); }
+      function expire($key)       { return apc_delete($key); }
       function clear()            { return apc_clear_cache(); }
    }
 
@@ -66,7 +69,7 @@
 
       function get($key)          { return xcache_get($key); }
       function set($key, $value)  { xcache_set($key, $value); return $value; }
-      function delete($key)       { return xcache_unset($key); }
+      function expire($key)       { return xcache_unset($key); }
       function clear()            { return xcache_clear_cache(); }
    }
 
@@ -97,7 +100,7 @@
          return $value;
       }
 
-      function delete($key) {
+      function expire($key) {
          return unlink($this->build_path($key));
       }
 

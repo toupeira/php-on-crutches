@@ -8,11 +8,11 @@
 #
 
    function session($key, $value=null) {
-      if ($value) {
-         return $_SESSION[$key] = $value;
-      } else {
-         return $_SESSION[$key];
-      }
+      return $_SESSION[$key];
+   }
+
+   function session_set($key, $value) {
+      return $_SESSION[$key] = $value;
    }
 
    abstract class SessionStore
@@ -24,25 +24,22 @@
 
       abstract function read($id);
       abstract function write($id, $data);
-      abstract function delete($id);
+      abstract function destroy($id);
    }
 
    class SessionStoreCache extends SessionStore
    {
       function read($id) {
-         #log_info("READING SESSION: $id\n");
          return (string) cache("session_$id");
       }
 
       function write($id, $data) {
-         #log_info("WRITING SESSION: $id\n");
-         cache("session_$id", $data);
+         cache_set("session_$id", $data);
          return true;
       }
 
-      function delete($id) {
-         #log_info("DESTROYING SESSION: $id\n");
-         return cache()->delete("session_$id");
+      function destroy($id) {
+         return cache_expire("session_$id");
       }
    }
 

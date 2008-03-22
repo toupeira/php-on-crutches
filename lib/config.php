@@ -20,7 +20,7 @@
    }
 
    function config_set($key, $value) {
-      $GLOBALS['_CONFIG'][$key] = $value;
+      return $GLOBALS['_CONFIG'][$key] = $value;
    }
 
    function config_init() {
@@ -48,6 +48,9 @@
          : any($config['log_file'], LOG.'application.log');
       log_init($log_file, any($config['log_level'], LOG_INFO));
 
+      # Setup cache store
+      load_store('cache', $config['cache_store'], 'memory');
+
       # Setup session store if enabled and not running in a console
       if ($store = $config['session_store'] and PHP_SAPI != 'cli') {
          if ($store != 'php' and $store = load_store('session', $store, 'cookie')) {
@@ -56,7 +59,7 @@
                array($store, 'close'),
                array($store, 'read'),
                array($store, 'write'),
-               array($store, 'delete'),
+               array($store, 'destroy'),
                array($store, 'expire')
             );
          }
@@ -64,14 +67,12 @@
          session_start();
          header('Cache-Control: private');
          header('Pragma: cache');
-      }
 
-      # Setup cache store
-      load_store('cache', $config['cache_store'], 'memory');
+         register_shutdown_function(session_write_close);
+      }
 
       # Work around magic quotes...
       if (get_magic_quotes_gpc()) {
-         log_info("Reverting magic quotes... (DISABLE IT ALREADY!!)");
          fix_magic_quotes();
       }
    }
