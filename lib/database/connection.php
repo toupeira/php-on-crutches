@@ -145,7 +145,6 @@
       }
 
       function fetch_load($class) {
-         $class = get_class($class);
          if ($data = $this->fetch()) {
             $object = new $class();
             $object->load($data);
@@ -154,7 +153,6 @@
       }
 
       function fetch_all_load($class) {
-         $class = get_class($class);
          $objects = array();
          while ($data = $this->fetch()) {
             $object = new $class();

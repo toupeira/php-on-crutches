@@ -29,8 +29,8 @@
          if (is_object($model)) {
             $this->model = get_class($model);
          } else {
-            $model = new $model();
             $this->model = $model;
+            $model = new $model();
          }
 
          if (! $model instanceof ActiveRecord) {
