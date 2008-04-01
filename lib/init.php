@@ -15,8 +15,8 @@
    # Load framework libraries
    require LIB.'config.php';
    require LIB.'errors.php';
-   require LIB.'session.php';
    require LIB.'cache.php';
+   require LIB.'session.php';
 
    require LIB.'router.php';
    require LIB.'dispatcher.php';
@@ -25,10 +25,6 @@
    require LIB.'model.php';
    require LIB.'view.php';
 
-   @require CONTROLLERS.'application_controller.php';
-
-   # Load helpers
-   @include HELPERS.'application_helper.php';
    foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;
    }
@@ -54,5 +50,8 @@
    foreach (glob(CONFIG.'initializers/*.php') as $initializer) {
       require $initializer;
    }
+
+   @require CONTROLLERS.'application_controller.php';
+   @include HELPERS.'application_helper.php';
 
 ?>

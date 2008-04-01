@@ -18,10 +18,6 @@
    function log_debug($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_DEBUG); }
    function log_dump($data) { return log_debug(var_export($data, true)); }
 
-   function log_init($file=STDERR, $level=LOG_INFO) {
-      $GLOBALS['_LOGGER'] = new Logger($file, $level);
-   }
-
    function log_running() {
       $logger = $GLOBALS['_LOGGER'];
       return $logger instanceof Logger and $logger->running();
@@ -85,6 +81,7 @@
             if (fwrite($this->buffer, "$msg\n") === false) {
                throw new ApplicationError("Couldn't write to logfile {$this->file}", false);
             }
+
             if (fflush($this->buffer) === false) {
                throw new ApplicationError("Couldn't flush logfile {$this->file}", false);
             }

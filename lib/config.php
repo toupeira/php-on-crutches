@@ -37,7 +37,7 @@
          Router::add($GLOBALS['_ROUTES']);
       }
 
-      # Load databases
+      # Load database support if necessary
       if (!empty($GLOBALS['_DATABASE'])) {
          require LIB.'database/base.php';
       }
@@ -46,7 +46,7 @@
       $log_file = (PHP_SAPI == 'cli')
          ? STDERR
          : any($config['log_file'], LOG.'application.log');
-      log_init($log_file, any($config['log_level'], LOG_INFO));
+      $GLOBALS['_LOGGER'] = new Logger($log_file, any($config['log_level'], LOG_INFO));
 
       # Setup cache store
       load_store('cache', $config['cache_store'], 'memory');
