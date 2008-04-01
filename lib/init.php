@@ -7,9 +7,9 @@
 # $Id$
 #
 
-   # Load core extensions
-   foreach (glob(LIB.'core/*.php') as $core) {
-      require $core;
+   # Load utility libraries
+   foreach (glob(LIB.'util/*.php') as $util) {
+      require $util;
    }
 
    # Load framework libraries

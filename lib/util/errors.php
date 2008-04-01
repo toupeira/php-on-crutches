@@ -7,6 +7,24 @@
 # $Id$
 #
 
+   # Base class for custom exceptions
+   class StandardError extends Exception {
+      # Allow passing filename and line number
+      function __construct($message=null, $code=0, $file=null, $line=null) {
+         parent::__construct($message, $code);
+         ($file and $this->file = $file);
+         ($line and $this->line = $line);
+      }
+   }
+
+   # Standard exceptions
+   class ApplicationError extends StandardError {};
+   class NotImplemented extends ApplicationError {};
+   class ConfigurationError extends ApplicationError {};
+   class NotFound extends ApplicationError {};
+   class RoutingError extends NotFound {};
+   class MissingTemplate extends NotFound {};
+
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
       if (error_reporting()) {
