@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-   class ViewTest extends TestCase
+   class ErrorsTest extends TestCase
    {
    }
 
