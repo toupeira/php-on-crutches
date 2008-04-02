@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-   class ArrayTest extends TestCase
+   class ArraysTest extends TestCase
    {
       function setup() {
          $this->a = array(
@@ -11,9 +11,9 @@
          );
 
          $this->b = array(
-            new ArrayTestObject('a'),
-            new ArrayTestObject('b'),
-            new ArrayTestObject('c'),
+            new ArraysTestObject('a'),
+            new ArraysTestObject('b'),
+            new ArraysTestObject('c'),
          );
       }
 
@@ -53,7 +53,7 @@
       }
    }
 
-   class ArrayTestObject {
+   class ArraysTestObject {
       function __construct($name) {
          $this->name = $name;
       }

@@ -20,7 +20,7 @@
       }
    }
 
-   class CoreTestObject extends Object
+   class ObjectsTestObject extends Object
    {
       private $private = 'private';
       private $readonly = 'readonly';
