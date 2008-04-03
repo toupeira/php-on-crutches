@@ -34,25 +34,18 @@
       }
    }
 
-   # Get values from an array by one or more keys
+   # Get one or more key/value pairs from an array
    function array_get(&$array, $keys=null) {
       if (!is_array($keys)) {
          $keys = array_slice(func_get_args(), 1);
       }
 
-      if (count($keys) == 1) {
-         $keys = $keys[0];
+      $filter = array();
+      foreach ($keys as $key) {
+         $filter[$key] = $array[$key];
       }
 
-      if (is_array($keys)) {
-         $filter = array();
-         foreach ($keys as $key) {
-            $filter[$key] = $array[$key];
-         }
-         return $filter;
-      } else {
-         return $array[$keys];
-      }
+      return $filter;
    }
 
    # Find an object by property value

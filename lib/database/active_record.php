@@ -98,18 +98,18 @@
                return true;
             }
 
-            $action = $query = 'update';
+            $action = $sql_action = 'update';
             $args = array($this->id, $attributes);
          } else {
             $action = 'create';
-            $query = 'insert';
+            $sql_action = 'insert';
             $args = array($this->attributes);
          }
 
          $this->call_filter(before_save);
          $this->call_filter("before_$action");
 
-         $id = call_user_func_array(array($this->get_mapper(), $query), $args);
+         $id = call_user_func_array(array($this->get_mapper(), $sql_action), $args);
 
          if ($action == 'create') {
             $this->new_record = false;

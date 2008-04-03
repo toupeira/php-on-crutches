@@ -15,7 +15,7 @@
 
       function fetch_tables() {
          $tables = array();
-         $rows = $this->query(
+         $rows = $this->execute(
             "SELECT name FROM sqlite_master WHERE type='table'"
          )->fetch_all();
          foreach ($rows as $row) {
@@ -26,7 +26,7 @@
 
       function fetch_attributes($table) {
          $attributes = array();
-         $columns = $this->query("PRAGMA table_info(`$table`)")->fetch_all();
+         $columns = $this->execute("PRAGMA table_info(`$table`)")->fetch_all();
          foreach ($columns as $column) {
             $attributes[] = $column['name'];
          }

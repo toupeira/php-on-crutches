@@ -53,9 +53,9 @@
          return $this->get_connection()->table_attributes($this->table);
       }
 
-      function query() {
+      function execute() {
          $args = func_get_args();
-         return call_user_func_array(array($this->get_connection(), query), $args);
+         return call_user_func_array(array($this->get_connection(), execute), $args);
       }
 
       function create($attributes) {
@@ -74,7 +74,7 @@
 
          $query = sprintf("INSERT INTO `%s` VALUES (%s)",
                           $this->table, implode(", ", $keys));
-         $this->query($query, $values);
+         $this->execute($query, $values);
 
          return $this->connection->insert_id();
       }
@@ -95,7 +95,7 @@
          $query = sprintf("UPDATE `%s` SET %s WHERE `id` = ?",
                           $this->table, implode(", ", $keys));
          $values[] = $id;
-         $this->query($query, $values);
+         $this->execute($query, $values);
 
          return $id;
       }
@@ -106,24 +106,28 @@
             throw new ApplicationError("No conditions given");
          }
 
-         $this->query("DELETE FROM `{$this->table}`$where", (array) $values);
+         $this->execute("DELETE FROM `{$this->table}`$where", (array) $values);
          return $id;
+      }
+
+      function delete_all() {
+         $this->execute("DELETE FROM `{$this->table}`");
       }
 
       function find($id) {
          list($select, $values) = $this->build_select(func_get_args(),
             array('limit' => 1));
-         return $this->query($select, (array) $values)->fetch_load($this->model);
+         return $this->execute($select, (array) $values)->fetch_load($this->model);
       }
 
       function find_all() {
          list($select, $values) = $this->build_select(func_get_args());
-         return $this->query($select, (array) $values)->fetch_all_load($this->model);
+         return $this->execute($select, (array) $values)->fetch_all_load($this->model);
       }
 
       function find_by_sql($sql) {
          $params = array_slice(func_get_args(), 1);
-         return $this->query($sql, $params)->fetch_all_load($this->model);
+         return $this->execute($sql, $params)->fetch_all_load($this->model);
       }
 
       # Handle find(_all)_by_* calls
@@ -169,7 +173,7 @@
 
       function count() {
          list($select, $values) = $this->build_select(func_get_args(), array('select' => 'count(*)'));
-         return intval($this->query($select, (array) $values)->fetch_column());
+         return intval($this->execute($select, (array) $values)->fetch_column());
       }
 
       protected function build_select($args, $defaults=array()) {

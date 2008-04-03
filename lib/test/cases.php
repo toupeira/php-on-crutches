@@ -9,6 +9,10 @@
 
    class TestCase extends UnitTestCase
    {
+      function &createInvoker() {
+         return new SimpleErrorTrappingInvoker(new CustomInvoker($this));
+      }
+
       function assertMatch($pattern, $subject, $message="%s") {
          return $this->assertWantedPattern($pattern, $subject, $message);
       }
@@ -22,6 +26,17 @@
          }
          return $this->assertTrue(
             in_array($member, $array), $message);
+      }
+
+      function assertKey($key, $array, $message=null) {
+         if (!$message) {
+            $dumper = &new SimpleDumper();
+            $message = "[" . $dumper->describeValue($array)
+                     . "] should have a key ["
+                     . $dumper->describeValue($key) . "]";
+         }
+         return $this->assertTrue(
+            isset($array[$key]), $message);
       }
 
       function assertCount($count, $value, $message=null) {
@@ -61,7 +76,7 @@
          $message = "[" . $dumper->describeValue($object)
                   . "] should have an error on ["
                   . $dumper->describeValue($key) . "]";
-         return $this->assertInArray(
+         return $this->assertKey(
             $key, $object->errors, $message);
       }
 

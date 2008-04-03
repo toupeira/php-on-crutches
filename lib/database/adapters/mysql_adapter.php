@@ -15,7 +15,7 @@
 
       function fetch_tables() {
          $tables = array();
-         $rows = $this->query("SHOW TABLES")->fetch_all();
+         $rows = $this->execute("SHOW TABLES")->fetch_all();
          foreach ($rows as $row) {
             $tables[] = array_shift($row);
          }
@@ -24,7 +24,7 @@
 
       function fetch_attributes($table) {
          $attributes = array();
-         $columns = $this->query("DESCRIBE `$table`")->fetch_all();
+         $columns = $this->execute("DESCRIBE `$table`")->fetch_all();
          foreach ($columns as $column) {
             $attributes[] = $column['Field'];
          }

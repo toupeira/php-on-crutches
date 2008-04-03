@@ -38,7 +38,7 @@
             . "  uncommitted   Test uncommitted files\n"
             . "\n"
             . "Available tests:\n";
-      foreach ($_TESTS as $test) {
+      foreach ($_TEST_DIRS as $test) {
          printf("  %-13s Run %s tests\n", $test, rtrim($test, 's'));
       }
       print "\n";

@@ -20,17 +20,19 @@
          }
 
          $config = $GLOBALS['_DATABASE'];
+         $names = array_keys($config);
+
          if ($name == 'default' and !isset($config[$name])) {
-            $options = array_shift($config);
+            $real_name = array_shift($names);
          } else {
-            $options = $config[$name];
+            $real_name = $name;
          }
 
-         while (is_string($options)) {
-            $options = $config[$options];
+         if (defined('TESTING')) {
+            $real_name .= '_test';
          }
 
-         if (is_array($options)) {
+         if (is_array($options = $config[$real_name])) {
             if ($driver = array_delete($options, 'driver')) {
                $file = LIB."database/adapters/{$driver}_adapter.php";
                if (is_file($file)) {
@@ -40,12 +42,12 @@
                   $adapter = get_class();
                }
 
-               return self::$connections[$name] = new $adapter($name, $options);
+               return self::$connections[$name] = new $adapter($real_name, $options);
             } else {
-               throw new ConfigurationError("No driver set for database '$name'");
+               throw new ConfigurationError("No driver set for database '$real_name'");
             }
          } else {
-            throw new ConfigurationError("Unconfigured database '$name'");
+            throw new ConfigurationError("Unconfigured database '$real_name'");
          }
       }
 
@@ -65,7 +67,7 @@
          throw new NotImplemented("Database adapter doesn't implement 'get_dsn'");
       }
 
-      function query($sql, $params=null) {
+      function execute($sql, $params=null) {
          if (!is_array($params)) {
             $params = array_slice(func_get_args(), 1);
          }

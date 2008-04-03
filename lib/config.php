@@ -48,8 +48,9 @@
          : any($config['log_file'], LOG.'application.log');
       $GLOBALS['_LOGGER'] = new Logger($log_file, any($config['log_level'], LOG_INFO));
 
-      # Setup cache store
-      load_store('cache', $config['cache_store'], 'memory');
+      # Setup cache store, always use memory store for testing
+      $store = defined('TESTING') ? 'memory' : $config['cache_store'];
+      load_store('cache', $store, 'memory');
 
       # Setup session store if enabled and not running in a console
       if ($store = $config['session_store'] and PHP_SAPI != 'cli') {
@@ -70,6 +71,10 @@
 
          register_shutdown_function(session_write_close);
       }
+
+      # Configure gettext
+      bindtextdomain($config['application'], ROOT.'lang');
+      textdomain($config['application']);
 
       # Work around magic quotes...
       if (get_magic_quotes_gpc()) {
