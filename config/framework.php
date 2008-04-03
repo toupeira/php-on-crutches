@@ -7,13 +7,19 @@
 
       # Use URL rewriting (needs to be configured on the webserver)
       'rewrite_urls'    => true,
-      # Start sessions
-      'use_sessions'    => true,
 
       # Log file
       'log_file'        => LOG.ROOT_NAME.'.log',
       # Log level
       'log_level'       => LOG_DEBUG,
+
+      # Session store (php, cookie, cache, database) (Default: cookie)
+      'session_store'   => 'php',
+
+      # Cache store (memory, file, apc, or xcache) (Default: memory)
+      'cache_store'     => 'file',
+      # Cache path for file store (Default: ROOT/tmp/cache)
+      #'cache_path'      => '',
 
       # Show debug information
       'debug'           => true,
