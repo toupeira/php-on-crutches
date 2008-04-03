@@ -22,12 +22,7 @@
       $_LOGGER->level = LOG_DISABLED;
    }
 
-   # Set fake request information
-   $_SERVER['HTTP_HOST'] = 'www.example.com';
-   $_SERVER['REQUEST_URI'] = "/";
-   $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-   $_SERVER['REQUEST_METHOD'] = 'GET';
-   $_SERVER['HTTPS'] = 'on';
+   fake_request('', 'GET', true);
 
    # Perform a request for the given path, with the given HTTP method
    function request($method, $path) {

@@ -7,14 +7,6 @@
 # $Id$
 #
 
-   function session($key, $value=null) {
-      return $_SESSION[$key];
-   }
-
-   function session_set($key, $value) {
-      return $_SESSION[$key] = $value;
-   }
-
    abstract class SessionStore
    {
       function setup() { return true; }

@@ -10,7 +10,7 @@
    abstract class Dispatcher
    {
       static public $path;
-      static public $prefix;
+      static public $prefix = '/';
 
       static public $controller;
       static public $params;
@@ -21,7 +21,7 @@
 
          # Detect the relative path used to reach the website
          self::$prefix = preg_replace(
-            '#(index\.(php|fcgi))?(\?[^/]*)?('.self::$path.')?(\?.*)?$#', '',
+            '#(index\.(php|fcgi))?(\?[^/]*)?('.ltrim(self::$path, '/').')?(\?.*)?$#', '',
             $_SERVER['REQUEST_URI']
          );
 

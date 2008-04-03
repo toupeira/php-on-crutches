@@ -205,7 +205,6 @@
                $route = str_replace($symbol, $value, $route);
                $add = true;
             }
-
          }
 
          # Add remaining parameters to query string

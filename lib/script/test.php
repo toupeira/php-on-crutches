@@ -13,6 +13,8 @@
 
    $_LOGGER->level = LOG_DISABLED;
 
+   fake_request();
+
    $paths = find_tests(array_slice($argv, 1));
 
    if ($paths === false) {

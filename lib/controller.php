@@ -35,7 +35,7 @@
          # Load controller helper, ignore errors
          @include_once HELPERS.$this->name.'_helper.php';
 
-         # Shortcuts
+         # Shortcuts for request data
          $this->params = &$params;
          $this->session = &$_SESSION;
          $this->cookies = &$_COOKIES;
@@ -71,16 +71,24 @@
          return (string) $this->name;
       }
 
-      function get_view() {
-         return $this->view;
+      function get_layout() {
+         return (string) $this->layout;
       }
 
       function get_output() {
          return (string) $this->output;
       }
 
+      function get_view() {
+         return $this->view;
+      }
+
       function get_params() {
          return (array) $this->params;
+      }
+
+      function get_session() {
+         return (array) $this->session;
       }
 
       function get_headers() {
@@ -146,11 +154,12 @@
             log_debug("Invalid request for this action");
             if ($action == 'index') {
                # Redirect to default path if the default action was requested
-               $this->redirect_to(config('default_path'));
+               $this->redirect_to('/');
             } else {
                # Or else try the default action
                $this->redirect_to(':');
             }
+
             return false;
          }
 
@@ -233,7 +242,7 @@
 
       # Redirect to a path
       function redirect_to($path, $code=302) {
-         $url = url_for($path, array('full_path' => true));
+         $url = url_for($path, array('full' => true));
 
          # Save messages so they can be displayed in the next request
          $this->set_error_messages();
@@ -267,7 +276,7 @@
 
       # Send a file with the appropriate headers
       function send_file($file, $options=null) {
-         if ($file[0] = '!') {
+         if ($file[0] == '!') {
             $command = substr($file, 1);
             $file = null;
          } elseif (!is_file($file)) {
@@ -283,11 +292,11 @@
             }
          }
 
-         if ($size = $options['size'] or $file and $size = filesize($file)) {
+         if ($size = $options['size'] or ($file and $size = filesize($file))) {
             $this->headers['Content-Length'] = $size;
          }
 
-         if ($type = $options['type'] or $file and $type = @mime_content_type($file)) {
+         if ($type = $options['type'] or ($file and $type = @mime_content_type($file))) {
             $this->headers['Content-Type'] = $type;
          }
 
@@ -331,7 +340,9 @@
             }
          }
 
-         $this->msg['error'] = $messages;
+         if (!empty($messages)) {
+            $this->msg['error'] = $messages;
+         }
       }
    }
 

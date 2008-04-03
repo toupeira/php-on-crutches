@@ -80,7 +80,7 @@ fastcgi.server = ( ".php" => ( "localhost" => (
 
 url.rewrite-once = (
    "^/(index\.(php|fcgi)|images|stylesheets|javascripts).*$" => "$0",
-   "^/(.*)$" => "/index.php?path=$1",
+   "^(.*)$" => "/index.php?path=$1",
 )
 
 CONF

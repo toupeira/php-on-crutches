@@ -118,16 +118,13 @@
 
       function request($action, $get=null, $post=null) {
          $path = "{$this->controller->name}/$action";
-         $_SERVER['HTTP_HOST'] = 'www.example.com';
-         $_SERVER['REQUEST_URI'] = "/$path";
-         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-         $_SERVER['REQUEST_METHOD'] = (is_array($post) ? 'POST' : 'GET');
          $_GET = (array) $get;
          $_POST = (array) $post;
+         fake_request($path, is_array($post) ? 'POST' : 'GET');
 
          ob_start();
          $this->controller = Dispatcher::run($path);
-         $this->output = ob_get_clean();
+         ob_end_clean();
          $this->action = Dispatcher::$params['action'];
          $this->data = &$this->controller->view->data;
       }
@@ -154,7 +151,7 @@
             case 'success':
                $this->assertInArray($status, array(200, null),
                   "Expected a successful response, got '$status'");
-               $this->assertFalse(is_null($this->output));
+               $this->assertFalse(is_null($this->controller->output));
                break;
             case 301:
             case 302:
@@ -209,22 +206,23 @@
       }
 
       function assertLayout($layout) {
-         $this->assertEqual($layout, $this->controller->view->layout,
-           "Expected layout '$layout', got {$this->controller->view->layout}");
+         $real_layout = substr(basename($this->controller->view->layout), 0, -6);
+         $this->assertEqual($layout, $real_layout,
+           "Expected layout '$layout', got '$real_layout'");
       }
 
       function assertOutput($text) {
-         $this->assertEqual($text, $this->output);
+         $this->assertEqual($text, $this->controller->output);
       }
 
       function assertOutputMatch($pattern) {
-         $this->assertMatch($pattern, $this->output);
+         $this->assertMatch($pattern, $this->controller->output);
       }
 
       function assertRedirect($path) {
          $this->assertResponse('redirect');
 
-         $url = url_for($path, array('full_path' => true));
+         $url = url_for($path, array('full' => true));
          $real_url = $this->controller->headers['Location'];
 
          $this->assertEqual($url, $real_url,

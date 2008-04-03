@@ -9,28 +9,14 @@
 
    # Build a URL for the given options
    function url_for($path, $options=null) {
-      if (array_delete($options, 'full_path') or $options['ssl']) {
-         if (array_delete($options, 'ssl')
-            or Dispatcher::$controller and Dispatcher::$controller->is_ssl()) {
-            $url = 'https';
-         } else {
-            $url = 'http';
-         }
-         $url .= '://'.$_SERVER['HTTP_HOST'];
-      }
-
-      if ($path[0] != '#') {
-         $url .= Dispatcher::$prefix;
-      }
-
       if (is_array($path)) {
          # Generate path from route parameters
          $path = Router::generate($path);
-      } elseif (preg_match('#^\w+://.#', $path)) {
-         # Return absolute paths and fully-qualified URIs unchanged
-         return $path;
+      } elseif (!is_string($path)) {
+         $type = gettype($path);
+         throw new ApplicationError("Invalid argument of type '$path'");
       } elseif ($path[0] == ':') {
-         # Generate path from route template
+         # Generate path from route string
          list($controller, $action, $id) = explode('/', $path, 3);
          $params = array();
 
@@ -54,10 +40,32 @@
 
          $path = Router::generate($params);
 
-      } elseif (!is_string($path)) {
-         $type = gettype($path);
-         throw new ApplicationError("Invalid argument of type '$path'");
+      } elseif ($path[0] == '/') {
+         # Strip first slash from absolute paths
+         $path = substr($path, 1);
+
+      } else {
+         if (($options['full'] or $options['ssl']) and !preg_match('#^\w+://.#', $path)) {
+            # If a full URI for a relative path needs to be generated, use the directory name
+            # from the currently requested URI
+            $path = substr(dirname($_SERVER['REQUEST_URI']), 1)."/$path";
+         } else {
+            # Return normal paths and fully-qualified URLs unchanged
+            return $path;
+         }
       }
+
+      if (array_delete($options, 'full') or $options['ssl']) {
+         if (array_delete($options, 'ssl')
+            or (Dispatcher::$controller and Dispatcher::$controller->is_ssl())) {
+            $url = 'https';
+         } else {
+            $url = 'http';
+         }
+         $url .= '://'.$_SERVER['HTTP_HOST'];
+      }
+
+      $url .= Dispatcher::$prefix;
 
       if ($anchor = $options['anchor']) {
          $path .= "#$anchor";
