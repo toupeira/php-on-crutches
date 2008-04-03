@@ -42,9 +42,9 @@
          $this->files = &$_FILES;
 
          # Load messages stored in the session
-         if (is_array($_SESSION['msg'])) {
-            $this->msg = $_SESSION['msg'];
-            unset($_SESSION['msg']);
+         if (is_array($this->session['msg'])) {
+            $this->msg = $this->session['msg'];
+            unset($this->session['msg']);
          }
 
          # Create the view
@@ -246,7 +246,7 @@
 
          # Save messages so they can be displayed in the next request
          $this->set_error_messages();
-         $_SESSION['msg'] = $this->msg;
+         $this->session['msg'] = $this->msg;
 
          log_debug("Redirecting to $url...");
 
@@ -317,7 +317,7 @@
       # Add invalid fields and an error message
       function add_error($keys, $message) {
          $this->errors = array_unique(array_merge((array) $this->errors, (array) $keys));
-         $this->msg['error'] = $message;
+         $this->msg['error'] = array_merge((array) $this->msg['error'], (array) $message);
       }
 
       # Check if a form value has errors
@@ -335,7 +335,7 @@
          foreach ((array) $this->view->data as $key => $value) {
             if ($value instanceof Model) {
                foreach ($value->errors as $key => $value) {
-                  $messages = array_merge($messages, $value);
+                  $messages = array_merge($messages, (array) $value);
                }
             }
          }
