@@ -17,11 +17,12 @@
 
       # Run a request for the given path.
       static function run($path) {
-         self::$path = $path;
+         $path = ltrim($path, '/');
+         self::$path = "/$path";
 
          # Detect the relative path used to reach the website
          self::$prefix = preg_replace(
-            '#(index\.(php|fcgi))?(\?[^/]*)?('.ltrim(self::$path, '/').')?(\?.*)?$#', '',
+            "#(index\.(php|fcgi))?(\?[^/]*)?($path)?(\?.*)?$#", '',
             $_SERVER['REQUEST_URI']
          );
 
