@@ -13,10 +13,6 @@
          mkdir($this->views);
          file_put_contents($this->views.'index.thtml', 'Index Template');
          file_put_contents($this->views.'blank.thtml', 'Blank Template');
-
-         config_set('default_path', 'foo');
-         config_set('debug', true);
-         config_set('debug_redirects', false);
       }
 
       function teardown() {
@@ -34,17 +30,15 @@
          $this->assertEqual(func_get_args(), $this->controller->calls);
       }
 
-      function test_find_template() {
-      }
-
       function test_construct() {
          $this->assertEqual('sample', $this->controller->name);
          $this->assertEqual('', $this->controller->output);
-         $this->assertIsA($this->controller->view, View);
 
-         foreach (array('params', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $key) {
+         foreach (array('params', 'session', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $key) {
             $this->assertTrue(is_array($this->controller->$key));
          }
+
+         $this->assertIsA($this->controller->view, View);
 
          $this->assertEqual($this->controller->name, $this->data['controller']);
          $this->assertEqual($this->controller->params, $this->data['params']);
@@ -67,15 +61,19 @@
       }
 
       function test_getters() {
-         foreach (array('name', 'output') as $attr) {
+         foreach (array('name', 'layout', 'output') as $attr) {
             $this->assertTrue(is_string($this->controller->$attr));
          }
 
-         foreach (array('params', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $attr) {
+         $this->assertIsA($this->controller->view, View);
+
+         foreach (array('params', 'session', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $attr) {
             $this->assertTrue(is_array($this->controller->$attr));
          }
+      }
 
-         $this->assertIsA($this->controller->view, View);
+      function test_get() {
+         $this->assertEqual($this->data['controller'], $this->controller->get('controller'));
       }
 
       function test_set() {
@@ -138,13 +136,13 @@
          foreach (array(true, 'index') as $require) {
             $this->controller->require_post = $require;
             $this->assertFalse($this->controller->is_valid_request('index'));
-            $this->assertRedirect('foo');
+            $this->assertRedirect('/');
          }
 
          foreach (array(true, 'edit') as $require) {
             $this->controller->require_post = $require;
             $this->assertFalse($this->controller->is_valid_request('edit'));
-            $this->assertRedirect('.');
+            $this->assertRedirect(':');
          }
       }
 
@@ -154,13 +152,13 @@
          foreach (array(true, 'index') as $require) {
             $this->controller->require_ajax = $require;
             $this->assertFalse($this->controller->is_valid_request('index'));
-            $this->assertRedirect('foo');
+            $this->assertRedirect('/');
          }
 
          foreach (array(true, 'edit') as $require) {
             $this->controller->require_ajax = $require;
             $this->assertFalse($this->controller->is_valid_request('edit'));
-            $this->assertRedirect('.');
+            $this->assertRedirect(':');
          }
       }
 
@@ -200,39 +198,18 @@
 
       function test_perform_with_invalid_action() {
          foreach (array('init', 'before', 'after', 'before_foo', 'after_foo', 'in-valid', '_invalid', '!@#$%') as $action) {
-            $this->controller->perform($action);
-            $this->assertResponse('error');
+            $this->assertRaise("\$this->controller->perform('$action')", RoutingError);
          }
       }
 
       function test_perform_with_invalid_request() {
          $this->controller->require_post[] = 'index';
          $this->controller->perform('index');
-         $this->assertRedirect('foo');
+         $this->assertRedirect('/');
       }
 
       function test_perform_with_missing_template() {
-         $this->controller->perform('edit');
-         $this->assertResponse('notfound');
-      }
-
-      function test_perform_with_missing_template_in_public() {
-         config_set('debug', false);
-         $this->controller->perform('edit');
-         $this->assertResponse('notfound');
-         $this->assertOutput('<h1>Not Found</h1>');
-      }
-
-      function test_perform_with_application_error() {
-         $this->controller->perform('fail');
-         $this->assertResponse('error');
-      }
-
-      function test_perform_with_application_error_in_public() {
-         config_set('debug', false);
-         $this->controller->perform('fail');
-         $this->assertResponse('error');
-         $this->assertOutput('<h1>Server Error</h1>');
+         $this->assertRaise("\$this->controller->perform('edit')", MissingTemplate);
       }
 
       function test_perform_with_ajax_request() {
@@ -243,40 +220,6 @@
          $this->assertLayout('');
 
          unset($_SERVER['HTTP_X_REQUESTED_WITH']);
-      }
-
-      function test_rescue_error_in_public_404() {
-         $this->controller->rescue_error_in_public(new MissingTemplate());
-         $this->assertResponse('notfound');
-         $this->assertOutput('<h1>Not Found</h1>');
-      }
-
-      function test_rescue_error_in_public_404_with_template() {
-         $errors = LIB.'views/errors/';
-         mkdir($errors); file_put_contents($errors.'404.thtml', '404 Testing');
-
-         $this->controller->rescue_error_in_public(new MissingTemplate());
-         $this->assertResponse('notfound');
-         $this->assertOutput('404 Testing');
-
-         rm_rf($errors);
-      }
-
-      function test_rescue_error_in_public_500() {
-         $this->controller->rescue_error_in_public(new ApplicationError());
-         $this->assertResponse('error');
-         $this->assertOutput('<h1>Server Error</h1>');
-      }
-
-      function test_rescue_error_in_public_500_with_template() {
-         $errors = LIB.'views/errors/';
-         mkdir($errors); file_put_contents($errors.'500.thtml', '500 Testing');
-
-         $this->controller->rescue_error_in_public(new ApplicationError());
-         $this->assertResponse('error');
-         $this->assertOutput('500 Testing');
-
-         rm_rf($errors);
       }
 
       function test_render_with_action() {
@@ -321,15 +264,15 @@
       }
 
       function test_redirect_to() {
-         $this->controller->redirect_to('foo');
-         $this->assertHeader('Location', 'foo');
+         $this->controller->redirect_to('/foo');
+         $this->assertHeader('Location', 'http://www.example.com/foo');
          $this->assertHeader('Status', 302);
          $this->assertEqual(' ', $this->controller->output);
       }
 
       function test_redirect_to_with_status() {
-         $this->controller->redirect_to('foo', 404);
-         $this->assertHeader('Location', 'foo');
+         $this->controller->redirect_to('/foo', 404);
+         $this->assertHeader('Location', 'http://www.example.com/foo');
          $this->assertHeader('Status', 404);
          $this->assertEqual(' ', $this->controller->output);
       }
@@ -337,10 +280,12 @@
       function test_redirect_to_with_debug() {
          config_set('debug_redirects', true);
 
-         $this->controller->redirect_to('foo', 404);
+         $this->controller->redirect_to('/foo', 404);
          $this->assertHeader('Location', null);
          $this->assertHeader('Status', null);
-         $this->assertOutput('Redirect to <a href="foo">foo</a>', $this->controller->output);
+         $this->assertOutput('Redirect to <a href="http://www.example.com/foo">http://www.example.com/foo</a>', $this->controller->output);
+
+         config_set('debug_redirects', false);
       }
 
       function test_send_headers() {
@@ -400,6 +345,12 @@
          $this->assertHeader('Content-Disposition', null);
       }
 
+      function test_send_file_with_command() {
+         $this->assertTrue($this->send_file('!echo -n "foo   bar"'));
+         $this->assertOutput('');
+         $this->assertEqual('foo   bar', $this->send_file_output);
+      }
+
       function test_add_error() {
          $this->controller->add_error('foo', "foo is invalid");
          $this->assertEqual(array('foo'), $this->controller->errors);
@@ -421,26 +372,7 @@
          $this->assertFalse($this->controller->has_errors('bar[]'));
       }
 
-      function test_set_error_messages_without_messages() {
-         $foo = new ControllerTestModel();
-
-         $this->controller->set('foo', $foo);
-         $this->controller->set_error_messages();
-         $this->assertNull($this->controller->msg['error']);
-      }
-
-      function test_set_error_messages_with_one_message() {
-         $foo = new ControllerTestModel();
-         $foo->add_error('foo', "foo is invalid");
-
-         $this->controller->set('foo', $foo);
-         $this->controller->set_error_messages();
-         $this->assertEqual(
-            "foo is invalid",
-            $this->controller->msg['error']);
-      }
-
-      function test_set_error_messages_with_multiple_messages() {
+      function test_set_error_messages() {
          $foo = new ControllerTestModel();
          $foo->add_error('foo', "foo is invalid");
          $foo->add_error('bar', "bar is invalid");
@@ -448,19 +380,16 @@
          $this->controller->set('foo', $foo);
          $this->controller->set_error_messages();
          $this->assertEqual(
-            "<ul><li>foo is invalid</li><li>bar is invalid</li></ul>",
+            array('foo is invalid', 'bar is invalid'),
             $this->controller->msg['error']);
       }
 
-      function test_call_filter() {
-         $this->controller->call_filter('before');
-         $this->assertCalls('init', 'before');
-         $this->controller->call_filter('after');
-         $this->assertCalls('init', 'before', 'after');
-         $this->controller->call_filter('foo');
-         $this->assertCalls('init', 'before', 'after');
+      function test_set_error_messages_without_messages() {
+         $foo = new ControllerTestModel();
 
-         $this->assertRaise('$this->controller->call_filter("before_fail")');
+         $this->controller->set('foo', $foo);
+         $this->controller->set_error_messages();
+         $this->assertNull($this->controller->msg['error']);
       }
    }
 
@@ -527,9 +456,6 @@
 
    class ControllerTestModel extends Model
    {
-      function __construct() {
-         $this->messages = func_get_args();
-      }
    }
 
 ?>

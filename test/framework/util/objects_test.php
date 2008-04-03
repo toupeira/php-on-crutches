@@ -3,20 +3,35 @@
 
    class ObjectsTest extends TestCase
    {
+      function setup() {
+         $this->object = new ObjectsTestObject();
+      }
+
       function test_properties() {
-         $test = $this->test = new CoreTestObject();
-         $this->assertEqual('readonly', $test->readonly);
-         $this->assertEqual('readwrite', $test->readwrite);
-         $this->assertEqual('shadowed', $test->shadowed);
+         $this->assertEqual('readonly', $this->object->readonly);
+         $this->assertEqual('readwrite', $this->object->readwrite);
+         $this->assertEqual('shadowed', $this->object->shadowed);
 
-         $this->assertRaise('$this->test->private');
-         $this->assertRaise('$this->test->readonly = "foo"');
+         $this->assertRaise('$this->object->private');
+         $this->assertRaise('$this->object->readonly = "foo"');
 
-         $test->readwrite = 'foo';
-         $this->assertEqual('foo', $test->readwrite);
+         $this->object->readwrite = 'foo';
+         $this->assertEqual('foo', $this->object->readwrite);
 
-         $test->shadowed = 'foo';
-         $this->assertEqual('foo', $test->shadowed);
+         $this->object->shadowed = 'foo';
+         $this->assertEqual('foo', $this->object->shadowed);
+      }
+
+      function test_call_if_defined() {
+         $this->assertNull($this->object->call_if_defined('foo'));
+         $this->assertEqual('bar', $this->object->call_if_defined('bar'));
+      }
+
+      function test_call_filter() {
+         $this->object->call_filter('good_filter');
+         $this->assertEqual('good_filter', $this->object->readonly);
+
+         $this->assertRaise('$this->object->call_filter("bad_filter")');
       }
    }
 
@@ -45,6 +60,18 @@
 
       function set_shadowed($value) {
          $this->shadowed = 'fail';
+      }
+
+      function bar() {
+         return 'bar';
+      }
+
+      function good_filter() {
+         $this->readonly = 'good_filter';
+      }
+
+      function bad_filter() {
+         return false;
       }
    }
 
