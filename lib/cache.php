@@ -80,7 +80,7 @@
          if (is_dir($this->path) and is_writable($this->path)) {
             return true;
          } else {
-            if (mkdir($this->path, 0750, true)) {
+            if (@mkdir($this->path, 0750, true)) {
                return true;
             } else {
                log_warn("Can't create cache directory '{$this->path}'");
