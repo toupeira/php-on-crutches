@@ -84,6 +84,10 @@
 
    # Build a link tag
    function link_to($title, $path, $options=null, $link_options=null) {
+      if (array_delete($options, 'confirm')) {
+         $options['onclick'] = "return confirm('"._("Are you sure?")."')";
+      }
+
       return content_tag('a', $title, $options, array('href' => url_for($path, $link_options)));
    }
 
@@ -92,9 +96,8 @@
       $method = $options['method'];
       unset($options['method']);
 
-      if ($options['confirm']) {
-         unset($options['confirm']);
-         $options['onclick'] = "return confirm('Are you sure?')";
+      if (array_delete($options, 'confirm')) {
+         $options['onclick'] = "return confirm('"._("Are you sure?")."')";
       }
 
       return form_tag($path, array('method' => any($method, 'get')))

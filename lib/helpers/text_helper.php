@@ -7,8 +7,8 @@
 # $Id$
 #
 
-   function h($text, $double_encode=true) {
-      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
+   function h($text) {
+      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
    }
 
    function pluralize($count, $singular, $plural) {

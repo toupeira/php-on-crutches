@@ -15,7 +15,7 @@
 
       protected $new_record = true;
       protected $load_attributes = true;
-      protected $changed_attributes;
+      protected $virtual_attributes;
 
       protected $associations;
       protected $has_one;
@@ -35,6 +35,10 @@
             }
          }
 
+         foreach ($this->virtual_attributes as $key) {
+            $this->attributes[$key] = null;
+         }
+
          $this->protected[] = 'id';
          $this->set_attributes($attributes, $defaults);
          $this->call_if_defined('associations');
@@ -49,12 +53,7 @@
       }
 
       function __set($key, $value) {
-         $old_value = $this->__get($key);
          parent::__set($key, $value);
-
-         if ($this->__get($key) != $old_value) {
-            $this->changed_attributes[] = $key;
-         }
          return $this;
       }
 
@@ -76,7 +75,9 @@
 
       # Wrapper for database finders
       function load($attributes) {
-         $this->attributes = $attributes;
+         foreach ($attributes as $key => $value) {
+            $this->attributes[$key] = $value;
+         }
          $this->new_record = false;
          $this->changed_attributes = null;
          return true;
@@ -91,9 +92,13 @@
             return false;
          }
 
-         if ($this->exists()) {
-            $attributes = array_get($this->attributes, (array) $this->changed_attributes);
+         $this->call_filter(before_save);
+         $this->call_filter("before_$action");
 
+         $attributes = array_get($this->attributes, (array) $this->changed_attributes);
+         array_delete($attributes, $this->virtual_attributes);
+
+         if ($this->exists()) {
             if (empty($attributes)) {
                return true;
             }
@@ -103,11 +108,8 @@
          } else {
             $action = 'create';
             $sql_action = 'insert';
-            $args = array($this->attributes);
+            $args = array($attributes);
          }
-
-         $this->call_filter(before_save);
-         $this->call_filter("before_$action");
 
          $id = call_user_func_array(array($this->get_mapper(), $sql_action), $args);
 

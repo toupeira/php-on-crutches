@@ -66,7 +66,9 @@
 
    function generate_controller($name) {
       if (preg_match('/^\w+$/i', $name)) {
+         $name = strtolower($name);
          $class = camelize($name);
+
          create_file(CONTROLLERS.underscore($name).'_controller.php', array(
             "class {$class}Controller extends ApplicationController",
             "{",

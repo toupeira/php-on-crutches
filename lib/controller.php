@@ -17,6 +17,7 @@
       protected $layout;
       protected $view;
       protected $output;
+      protected $action;
 
       protected $params;
       protected $session;
@@ -40,6 +41,11 @@
          $this->session = &$_SESSION;
          $this->cookies = &$_COOKIES;
          $this->files = &$_FILES;
+
+         # Set default headers
+         $this->headers = array(
+            'Content-Type' => 'text/html; charset=utf-8',
+         );
 
          # Load messages stored in the session
          if (is_array($this->session['msg'])) {
@@ -183,6 +189,7 @@
          }
 
          if ($this->is_valid_request($action)) {
+            $this->action = $action;
             $this->set('action', $action);
 
             # Set the layout, don't use one for Ajax requests

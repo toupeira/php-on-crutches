@@ -64,20 +64,23 @@
       }
 
       function insert($attributes) {
+         $columns = array();
          $keys = array();
          $values = array();
 
          foreach ($attributes as $key => $value) {
             if ($key == 'created_at' and empty($value)) {
+               $columns[] = '`created_at`';
                $keys[] = $this->get_connection()->get_timestamp();
             } else {
+               $columns[] = "`$key`";
                $keys[] = '?';
                $values[] = $value;
             }
          }
 
-         $query = sprintf("INSERT INTO `%s` VALUES (%s)",
-                          $this->table, implode(", ", $keys));
+         $query = sprintf("INSERT INTO `%s` (%s) VALUES (%s)",
+                          $this->table, implode(", ", $columns), implode(", ", $keys));
          $this->execute($query, $values);
 
          return $this->connection->insert_id();

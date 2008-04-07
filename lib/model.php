@@ -11,6 +11,8 @@
    {
       # Model attributes
       protected $attributes = array();
+      # Changed attributes
+      protected $changed_attributes;
       # Cached attributes
       protected $cache = array();
 
@@ -53,10 +55,10 @@
          if (method_exists($this, $getter)) {
             return $this->$getter();
          } elseif (array_key_exists($key, $this->attributes)) {
-            return $this->attributes[$key];
+            return $this->read_attribute($key);
          } else {
             $class = get_class($this);
-            throw new ApplicationError("Call to undefined method $class::$getter()");
+            throw new ApplicationError("Call to undefined method $class#$getter()");
          }
       }
 
@@ -68,10 +70,10 @@
             if (method_exists($this, $setter)) {
                $this->$setter(&$value);
             } elseif (array_key_exists($key, $this->attributes)) {
-               $this->attributes[$key] = &$value;
+               $this->write_attribute($key, $value);
             } else {
                $class = get_class($this);
-               throw new ApplicationError("Call to undefined method $class::$setter()");
+               throw new ApplicationError("Call to undefined method $class#$setter()");
             }
 
             unset($this->cache[$key]);
@@ -86,7 +88,12 @@
       }
 
       function write_attribute($key, $value) {
+         $old_value = $this->read_attribute($key);
          $this->attributes[$key] = &$value;
+
+         if ($this->read_attribute($key) != $old_value) {
+            $this->changed_attributes[] = $key;
+         }
          return $this;
       }
 
@@ -105,6 +112,7 @@
             foreach ($attributes as $key => $value) {
                $this->__set($key, $value);
             }
+
             return true;
          } else {
             return false;
