@@ -58,11 +58,11 @@
       try {
          $reflect = new ReflectionFunction($function);
       } catch (Exception $e) {
-         print "Function [1m{$function}()[0m does not exist\n\n";
+         print "Function [1m".$function."()[0m does not exist\n\n";
          return;
       }
 
-      print "[1m{$function} ([0m ";
+      print "[1m".$function." ([0m ";
       $signatures = array();
       foreach ($reflect->getParameters() as $param) {
          $signature = '$'.$param->getName();
@@ -73,9 +73,9 @@
             $signature .= "=".to_string($param->getDefaultValue());
          }
          if ($param->isOptional()) {
-            $signature = "[0;32m[ $signature ][0m";
+            $signature = "[0;32m[ ".$signature." ][0m";
          } else {
-            $signature = "[0;36m{$signature}[0m";
+            $signature = "[0;36m".$signature."[0m";
          }
          $signatures[] = $signature;
       }
@@ -174,7 +174,7 @@
 
             foreach (explode("\n", $_e->getTraceAsString()) as $_line) {
                list($_line, $_text) = explode(' ', $_line, 2);
-               print "   [1m{$_line}[0m {$_text}\n";
+               print "   [1m".$_line."[0m ".$_text."\n";
             }
 
             $_result = $_e;
