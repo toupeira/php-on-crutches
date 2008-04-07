@@ -19,11 +19,7 @@
          $html .= content_tag('li', $content, $item_options).N;
       }
 
-      $type = any(
-         array_delete($options, 'type'),
-         'ul'
-      );
-
+      $type = any(array_delete($options, 'type'), 'ul');
       return content_tag($type, $html, $options);
    }
 

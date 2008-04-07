@@ -93,14 +93,11 @@
 
    # Build a link button
    function button_to($title, $path, $options=null) {
-      $method = $options['method'];
-      unset($options['method']);
-
       if (array_delete($options, 'confirm')) {
          $options['onclick'] = "return confirm('"._("Are you sure?")."')";
       }
 
-      return form_tag($path, array('method' => any($method, 'get')))
+      return form_tag($path, array('method' => any(array_delete($options, 'method'), 'get')))
            . submit_button($title, $options) . "</form>\n";
    }
 
