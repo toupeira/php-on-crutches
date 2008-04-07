@@ -95,7 +95,7 @@
       ));
    }
 
-   function check_box($key, $value='on', $checked=null, $options=null) {
+   function check_box($key, $value='1', $checked=null, $options=null) {
       return form_element('input', $key, $value, $options, array(
          'type' => 'checkbox', 'checked' => $checked ? 'checked' : null
       ));
@@ -104,6 +104,12 @@
    function radio_button($key, $value, $checked=null, $options=null) {
       return form_element('input', $key, $value, $options, array(
          'type' => 'radio', 'checked' => $checked ? 'checked' : null
+      ));
+   }
+
+   function hidden_field($key, $value, $options=null) {
+      return form_element('input', $key, $value, $options, array(
+         'type' => 'hidden'
       ));
    }
 

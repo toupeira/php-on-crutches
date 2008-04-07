@@ -250,7 +250,8 @@
 
          switch ($tag) {
             case 'check_box':
-               return check_box($key, 'on', $value, $options);
+               return check_box($key, '1', $value, $options)
+                    . hidden_field($key, '0');
             case 'select_tag':
                return select_tag($key, array_delete($options, 'values'), $value, $options);
             default:
