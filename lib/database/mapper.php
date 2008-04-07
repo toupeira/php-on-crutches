@@ -68,8 +68,12 @@
          $values = array();
 
          foreach ($attributes as $key => $value) {
-            $keys[] = '?';
-            $values[] = $value;
+            if ($key == 'created_at' and empty($value)) {
+               $keys[] = $this->get_connection()->get_timestamp();
+            } else {
+               $keys[] = '?';
+               $values[] = $value;
+            }
          }
 
          $query = sprintf("INSERT INTO `%s` VALUES (%s)",
@@ -90,6 +94,10 @@
          foreach ($attributes as $key => $value) {
             $keys[] = "`$key` = ?";
             $values[] = $value;
+         }
+
+         if (in_array('updated_at', $this->get_attributes()) and !isset($attributes['updated_at'])) {
+            $keys[] = "`updated_at` = ".$this->get_connection()->get_timestamp();
          }
 
          $query = sprintf("UPDATE `%s` SET %s WHERE `id` = ?",

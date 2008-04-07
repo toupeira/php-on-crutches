@@ -36,12 +36,12 @@
 
    # Get one or more key/value pairs from an array
    function array_get(&$array, $keys=null) {
-      if (!is_array($keys)) {
+      if (!is_array($keys) and !is_null($keys)) {
          $keys = array_slice(func_get_args(), 1);
       }
 
       $filter = array();
-      foreach ($keys as $key) {
+      foreach ((array) $keys as $key) {
          $filter[$key] = $array[$key];
       }
 

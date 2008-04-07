@@ -13,6 +13,10 @@
          return "mysql:host={$options['hostname']};dbname={$options['database']}";
       }
 
+      function get_timestamp() {
+         return "now()";
+      }
+
       function fetch_tables() {
          $tables = array();
          $rows = $this->execute("SHOW TABLES")->fetch_all();

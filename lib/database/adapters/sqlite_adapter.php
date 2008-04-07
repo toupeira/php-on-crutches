@@ -13,6 +13,10 @@
          return "sqlite:{$options['filename']}";
       }
 
+      function get_timestamp() {
+         return "current_timestamp";
+      }
+
       function fetch_tables() {
          $tables = array();
          $rows = $this->execute(

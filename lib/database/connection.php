@@ -63,10 +63,6 @@
          return $this->name;
       }
 
-      function get_dsn($options) {
-         throw new NotImplemented("Database adapter doesn't implement 'get_dsn'");
-      }
-
       function execute($sql, $params=null) {
          if (!is_array($params)) {
             $params = array_slice(func_get_args(), 1);
@@ -90,12 +86,20 @@
          return $this->connection->lastInsertId();
       }
 
+      function get_dsn($options) {
+         throw new NotImplemented(get_class()." doesn't implement 'get_dsn'");
+      }
+
+      function get_timestamp() {
+         throw new NotImplemented(get_class()." doesn't implement 'get_timestamp'");
+      }
+
       function fetch_tables() {
-         throw new ApplicationError(get_class()." doesn't implement 'fetch_tables'");
+         throw new NotImplemented(get_class()." doesn't implement 'fetch_tables'");
       }
 
       function fetch_attributes($table) {
-         throw new ApplicationError(get_class()." doesn't implement 'fetch_attributes'");
+         throw new NotImplemented(get_class()." doesn't implement 'fetch_attributes'");
       }
 
       function get_tables() {
