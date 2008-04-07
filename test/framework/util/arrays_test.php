@@ -35,6 +35,8 @@
          $this->assertEqual(array('a' => 1, 'c' => 3),
             array_get($this->a, array('a', 'c')));
 
+         $this->assertEqual(array(), array_get($this->a, null));
+         $this->assertEqual(array(), array_get($this->a, array()));
          $this->assertEqual(array('d' => null), array_get($this->a, 'd'));
          $this->assertEqual(array('b' => null), array_get($this->c, 'b'));
       }
