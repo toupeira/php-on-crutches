@@ -21,7 +21,7 @@
             $options['class'] .= ' text';
          }
       } elseif ($name == 'textarea') {
-         $options['class'] .- ' text';
+         $options['class'] .= ' text';
       }
 
       if ($options['class'] !== null) {
