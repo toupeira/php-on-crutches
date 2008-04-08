@@ -35,13 +35,13 @@
             }
          }
 
-         foreach ($this->virtual_attributes as $key) {
+         foreach ((array) $this->virtual_attributes as $key) {
             $this->attributes[$key] = null;
          }
 
          $this->protected[] = 'id';
          $this->set_attributes($attributes, $defaults);
-         $this->call_if_defined('associations');
+         $this->add_associations();
       }
 
       function __get($key) {
