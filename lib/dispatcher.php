@@ -46,6 +46,12 @@
          log_info("  Parameters: ".str_replace("\n", "\n  ",
             var_export(self::$params, true)));
 
+         # Log uploaded files, if any
+         if ($_FILES) {
+            log_info("  Files: ".str_replace("\n", "\n  ",
+               var_export($_FILES, true)));
+         }
+
          if ($controller and $action and $controller != 'application') {
             unset($args['controller']);
             unset($args['action']);
