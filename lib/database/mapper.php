@@ -70,8 +70,12 @@
 
          foreach ($attributes as $key => $value) {
             $columns[] = "`$key`";
-            $keys[] = '?';
-            $values[] = $value;
+            if (empty($value)) {
+               $keys[] = 'NULL';
+            } else {
+               $keys[] = '?';
+               $values[] = $value;
+            }
          }
 
          if (in_array('created_at', $this->get_attributes()) and !isset($attributes['created_at'])) {
@@ -95,8 +99,12 @@
          $values = array();
 
          foreach ($attributes as $key => $value) {
-            $keys[] = "`$key` = ?";
-            $values[] = $value;
+            if (empty($value)) {
+               $keys[] = "`$key` = NULL";
+            } else {
+               $keys[] = "`$key` = ?";
+               $values[] = $value;
+            }
          }
 
          if (in_array('updated_at', $this->get_attributes()) and !isset($attributes['updated_at'])) {
