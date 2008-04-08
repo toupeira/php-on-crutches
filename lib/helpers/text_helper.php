@@ -24,12 +24,12 @@
    }
 
    function simple_format($text) {
-      return str_replace("\n", "<br />", h($text, false));
+      return str_replace("\n", "<br />", h($text));
    }
 
    function auto_link($text) {
       return preg_replace_callback('#\b(\w+://[^\s]+)#',
-         proc('link_to(h($a[1], false), h($a[1], false))'), $text);
+         proc('link_to(h($a[1]), h($a[1]))'), $text);
    }
 
    function br2nl($text) {

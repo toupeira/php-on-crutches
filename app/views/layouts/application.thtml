@@ -9,7 +9,7 @@
   <?= javascript_tag(config('application')).N ?>
 </head>
 <body>
-<?= messages($msg) ?>
+<?= messages() ?>
 <?= $content_for_layout ?>
 </body>
 </html>
