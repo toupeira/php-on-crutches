@@ -11,7 +11,9 @@
    {
       function load() {
          $key = underscore($this->class).'_id';
-         return DB($this->class)->find($this->model->$key);
+         if ($id = $this->model->$key) {
+            return DB($this->class)->find($id);
+         }
       }
    }
 
