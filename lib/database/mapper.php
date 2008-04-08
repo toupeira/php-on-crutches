@@ -69,14 +69,14 @@
          $values = array();
 
          foreach ($attributes as $key => $value) {
-            if ($key == 'created_at' and empty($value)) {
-               $columns[] = '`created_at`';
-               $keys[] = $this->get_connection()->get_timestamp();
-            } else {
-               $columns[] = "`$key`";
-               $keys[] = '?';
-               $values[] = $value;
-            }
+            $columns[] = "`$key`";
+            $keys[] = '?';
+            $values[] = $value;
+         }
+
+         if (in_array('created_at', $this->get_attributes()) and !isset($attributes['created_at'])) {
+            $columns[] = "`created_at`";
+            $keys[] = $this->get_connection()->get_timestamp();
          }
 
          $query = sprintf("INSERT INTO `%s` (%s) VALUES (%s)",
