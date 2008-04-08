@@ -165,7 +165,7 @@
             return true;
          } else {
             if (!in_array($key, $this->errors)) {
-               $this->add_error($key, humanize($key)." $message");
+               $this->add_error($key, _(humanize($key))." $message");
             }
             return false;
          }
@@ -175,49 +175,49 @@
 
       protected function is_present($key) {
          return $this->validate_attribute($key,
-            "can't be blank",
+            _("can't be blank"),
             !blank($this->attributes[$key])
          );
       }
 
       protected function is_numeric($key) {
          return $this->validate_attribute($key,
-            "is not numeric",
+            _("is not numeric"),
             is_numeric($this->attributes[$key])
          );
       }
 
       protected function is_alpha($key) {
          return $this->validate_attribute($key,
-            "can only contain letters",
+            _("can only contain letters"),
             ctype_alpha($this->attributes[$key])
          );
       }
 
       protected function is_alnum($key) {
          return $this->validate_attribute($key,
-            "can only contain alphanumeric characters",
+            _("can only contain alphanumeric characters"),
             preg_match('/^[\w\.-]*$/', $this->attributes[$key])
          );
       }
 
       protected function is_email($key) {
          return $this->validate_attribute($key,
-            "is not a valid email address",
+            _("is not a valid email address"),
             preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $this->attributes[$key])
          );
       }
 
       protected function is_confirmed($key) {
          return $this->validate_attribute("{$key}_confirmation",
-            "doesn't match",
+            _("doesn't match"),
             $this->attributes[$key] == $this->attributes["{$key}_confirmation"]
          );
       }
 
       protected function in_array($key, $array) {
          return $this->validate_attribute($key,
-            "is invalid",
+            _("is invalid"),
             in_array($this->attributes[$key], $array)
          );
       }
@@ -225,7 +225,7 @@
       protected function has_length($key, $min, $max, $empty=false) {
          $length = strlen($this->attributes[$key]);
          return $this->validate_attribute($key,
-            "must be between $min and $max characters",
+            sprintf(_("must be between %d and %d characters"), $min, $max),
             ($empty and empty($this->attributes[$key])) or ($length >= $min and $length <= $max)
          );
       }
@@ -233,7 +233,7 @@
       protected function has_format($key, $format) {
          $length = count($this->attributes[$key]);
          return $this->validate_attribute($key,
-            "is invalid",
+            _("is invalid"),
             preg_match($format, $this->attributes[$key])
          );
       }
