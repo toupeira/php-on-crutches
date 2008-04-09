@@ -73,8 +73,13 @@
       }
 
       # Configure gettext
-      bindtextdomain($config['application'], ROOT.'lang');
-      textdomain($config['application']);
+      if ($lang = $config['languages'][0]) {
+         bindtextdomain($config['application'], LANG);
+         textdomain($config['application']);
+         if (!setlocale(LC_MESSAGES, $lang)) {
+            log_warn("Couldn't set locale '$lang'");
+         }
+      }
 
       # Work around magic quotes...
       if (get_magic_quotes_gpc()) {

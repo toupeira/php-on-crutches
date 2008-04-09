@@ -36,8 +36,9 @@
    }
 
    # Wrapper for find, returns an array of paths
-   function find_files($path, $options=null) {
-      $command = sprintf('find %s %s 2>/dev/null | sort', escapeshellarg($path), $options);
+   function find_files($paths, $options=null) {
+      $paths = implode(' ', array_map(escapeshellarg, (array) $paths));
+      $command = sprintf('find %s %s 2>/dev/null | sort', $paths, $options);
       $paths = explode("\n", trim(`$command`));
       return ($paths == array('') ? array() : $paths);
    }
