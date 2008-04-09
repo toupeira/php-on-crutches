@@ -21,6 +21,9 @@
       # Cache path for file store (Default: ROOT/tmp/cache)
       #'cache_path'      => '',
 
+      # Available languages, the first one will be used as default
+      #'languages'       => array(),
+
       # Show debug information
       'debug'           => true,
       # Show redirects with link

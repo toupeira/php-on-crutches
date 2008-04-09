@@ -7,8 +7,9 @@
 
    define('APP',          ROOT.'app/');
    define('LIB',          ROOT.'lib/');
-   define('DB',           ROOT.'db/');
    define('CONFIG',       ROOT.'config/');
+   define('DB',           ROOT.'db/');
+   define('LANG',         ROOT.'lang/');
    define('LOG',          ROOT.'log/');
    define('TEST',         ROOT.'test/');
    define('TMP',          ROOT.'tmp/');
