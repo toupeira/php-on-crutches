@@ -55,9 +55,12 @@
          }
       }
 
-      if (array_delete($options, 'full') or $options['ssl']) {
-         if (array_delete($options, 'ssl')
+      if ($options['full'] or $options['ssl']) {
+         unset($options['full']);
+
+         if ($options['ssl']
             or (Dispatcher::$controller and Dispatcher::$controller->is_ssl())) {
+            unset($options['ssl']);
             $url = 'https';
          } else {
             $url = 'http';
@@ -87,7 +90,8 @@
       $confirm = add_confirm_options($options);
 
       # Send a POST request by dyamically building a form element
-      if (array_delete($options, 'post')) {
+      if ($options['post']) {
+         unset($options['post']);
          $options['onclick'] = "var f = document.createElement('form');"
                              . "f.style.display = 'none'; this.parentNode.appendChild(f);"
                              . "f.method = 'POST'; f.action = this.href; f.submit()";
@@ -106,13 +110,20 @@
    # Build a link button
    function button_to($title, $path, $options=null) {
       add_confirm_options(&$options);
-      return form_tag($path, array('method' => any(array_delete($options, 'method'), 'get')))
+
+      $method = any($options['method'], 'get');
+      unset($options['method']);
+
+      return form_tag($path, array('method' => $method))
            . submit_button($title, $options) . "</form>\n";
    }
 
    # Add necessary options for confirmation, used in link_to() and button_to()
    function add_confirm_options(&$options) {
-      if ($confirm = array_delete($options, 'confirm')) {
+      $confirm = $options['confirm'];
+      unset($options['confirm']);
+
+      if ($confirm) {
          $message = ($confirm === true ? _("Are you sure?") : $confirm);
          $options['onclick'] = "return confirm('$message')";
          return $message;

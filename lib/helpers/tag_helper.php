@@ -44,10 +44,13 @@
    }
 
    function content_tag($name, $content=null, $options=null, $defaults=null) {
-      $open = any(
-         array_delete($options, 'open'),
-         array_delete($defaults, 'open')
-      );
+      if ($options['open']) {
+         $open = true;
+         unset($options['open']);
+      } elseif ($defaults['open']) {
+         $open = true;
+         unset($defaults['open']);
+      }
 
       $html = build_tag($name, $options, $defaults).">$content";
       if (!$open) {
