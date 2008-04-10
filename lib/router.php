@@ -32,13 +32,13 @@
       }
 
       # Add a new route
-      static function add($route, $defaults=null) {
+      static function add($route, $options=null) {
          if (is_array($route)) {
-            foreach ($route as $route => $defaults) {
-               self::add($route, $defaults);
+            foreach ($route as $route => $options) {
+               self::add($route, $options);
             }
          } else {
-            self::$routes[] = new Route($route, (array) $defaults);
+            self::$routes[] = new Route($route, (array) $options);
          }
       }
 
@@ -97,6 +97,7 @@
       protected $defaults = array();
       protected $fixed = array();
       protected $required = array();
+      protected $formats = array();
 
       function __construct($route, $defaults=null) {
          $this->route = $route;
@@ -136,16 +137,23 @@
             }
          }
 
-         # Get default and fixed arguments
+         # Set default values
          if (!in_array('action', $this->required)) {
             $this->defaults['controller'] = '';
             $this->defaults['action'] = 'index';
          }
 
+         # Get default/fixed arguments and format specifications
          foreach ((array) $defaults as $key => $value) {
-            $this->defaults[$key] = $value;
-            if (!isset($this->params[$key])) {
-               $this->fixed[$key] = $value;
+            if ($value[0] == '/' and substr($value, -1) == '/') {
+               # Use as format specification
+               $this->formats[$key] = '/^'.substr($value, 1, -1).'$/';
+            } else {
+               # Use as default value
+               $this->defaults[$key] = $value;
+               if (!isset($this->params[$key])) {
+                  $this->fixed[$key] = $value;
+               }
             }
          }
       }
@@ -163,6 +171,11 @@
             $i = 1;
             foreach ($this->params as $key => $symbol) {
                if ($value = $match[$i]) {
+                  # Check for format specification
+                  if ($format = $this->formats[$key] and !preg_match($format, $value)) {
+                     return;
+                  }
+
                   $values[$key] = $value;
                }
                $i++;
@@ -186,6 +199,13 @@
          # Check for required values
          foreach ($this->required as $key) {
             if (!isset($values[$key])) {
+               return;
+            }
+         }
+
+         # Check for format specifications
+         foreach ($this->formats as $key => $format) {
+            if ($value = $values[$key] and !preg_match($format, $value)) {
                return;
             }
          }
