@@ -18,7 +18,7 @@
             $this->set('title', str_replace('/', ' - ', $path));
             $this->render($template);
          } else {
-            throw new MissingTemplate();
+            throw new MissingTemplate("Template 'pages/{$path}.thtml' not found");
          }
       }
    }
