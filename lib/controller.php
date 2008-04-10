@@ -271,7 +271,11 @@
       function send_headers() {
          foreach ((array) $this->headers as $header => $value) {
             if ($value !== null) {
-               @header("$header: $value");
+               if ($header == 'Status') {
+                  header("HTTP/1.x $value");
+               } else {
+                  header("$header: $value");
+               }
             }
          }
          return true;

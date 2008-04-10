@@ -51,7 +51,7 @@
          ob_end_clean();
       }
 
-      header("Status: $status");
+      header("HTTP/1.x $status");
 
       if (config('debug')) {
          print render_exception($exception);

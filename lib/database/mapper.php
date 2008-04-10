@@ -70,7 +70,7 @@
 
          foreach ($attributes as $key => $value) {
             $columns[] = "`$key`";
-            if (empty($value)) {
+            if ($value == '') {
                $keys[] = 'NULL';
             } else {
                $keys[] = '?';
@@ -99,7 +99,7 @@
          $values = array();
 
          foreach ($attributes as $key => $value) {
-            if (empty($value)) {
+            if ($value == '') {
                $keys[] = "`$key` = NULL";
             } else {
                $keys[] = "`$key` = ?";
@@ -142,6 +142,22 @@
       function find_all() {
          list($select, $values) = $this->build_select(func_get_args());
          return $this->execute($select, (array) $values)->fetch_all_load($this->model);
+      }
+
+      function find_pairs($key='id', $value='name', $blank=true) {
+         if ($blank === true) {
+            $pairs = array(null => '');
+         } elseif ($blank !== false) {
+            $pairs = array(null => $blank);
+         } else {
+            $pairs = array();
+         }
+
+         foreach ($this->find_all() as $model) {
+            $pairs[$model->$key] = $model->$value;
+         }
+
+         return $pairs;
       }
 
       function find_by_sql($sql) {

@@ -44,22 +44,32 @@
       }
    }
 
-   function generate_model($name, $table) {
-      if (preg_match('/^\w+$/', $name) and preg_match('/^\w+$/', $table)) {
+   function generate_model($name, $table=null) {
+      if (preg_match('/^\w+$/', $name)) {
          $class = camelize($name);
-         create_file(MODELS.underscore($name).'.php', array(
-            "class {$class} extends Model",
-            "{",
-            "   protected \$table = '$table';",
-            "}",
-         ));
+
+         if (preg_match('/^\w+$/', $table)) {
+            create_file(MODELS.underscore($name).'.php', array(
+               "class {$class} extends ActiveRecord",
+               "{",
+               "   protected \$table = '$table';",
+               "}",
+            ));
+         } else {
+            create_file(MODELS.underscore($name).'.php', array(
+               "class {$class} extends Model",
+               "{",
+               "}",
+            ));
+         }
+
          create_file(TEST.'models/'.underscore($name).'_test.php', array(
             "class {$class}Test extends ModelTestCase",
             "{",
             "}",
          ));
       } else {
-         print "Usage: {$argv[0]} model NAME TABLE\n";
+         print "Usage: {$argv[0]} model NAME [TABLE]\n";
          exit(1);
       }
    }

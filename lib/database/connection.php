@@ -68,12 +68,7 @@
             $params = array_slice(func_get_args(), 1);
          }
 
-         if (config('log_level') >= LOG_DEBUG) {
-            $args = array_map(proc('var_export($a, true)'), $params);
-            array_unshift($args, str_replace('?', '%s',
-               str_replace('%', '%%', $sql)));
-            log_debug("Database query: [{$this->name}] '".call_user_func_array(sprintf, $args)."'");
-         }
+         log_debug("Database query: [{$this->name}] $sql");
 
          $stmt = $this->connection->prepare(
             $sql, array(PDO::ATTR_STATEMENT_CLASS => array(DatabaseStatement))

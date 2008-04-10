@@ -26,6 +26,9 @@
    function config_init() {
       $config = &$GLOBALS['_CONFIG'];
 
+      # Start output buffering
+      ob_start();
+
       # Configure error reporting
       ini_set('display_errors', ($config['debug'] or PHP_SAPI == 'cli'));
       error_reporting(E_ALL ^ E_NOTICE);
