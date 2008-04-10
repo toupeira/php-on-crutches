@@ -84,8 +84,20 @@
 
    # Build a link tag
    function link_to($title, $path, $options=null, $link_options=null) {
-      if (array_delete($options, 'confirm')) {
-         $options['onclick'] = "return confirm('"._("Are you sure?")."')";
+      $confirm = add_confirm_options($options);
+
+      # Send a POST request by dyamically building a form element
+      if (array_delete($options, 'post')) {
+         $options['onclick'] = "var f = document.createElement('form');"
+                             . "f.style.display = 'none'; this.parentNode.appendChild(f);"
+                             . "f.method = 'POST'; f.action = this.href; f.submit()";
+
+         if ($confirm) {
+            # Wrap in confirmation if requested
+            $options['onclick'] = "if (confirm('$confirm')) { {$options['onclick']}; }";
+         }
+
+         $options['onclick'] .= "; return false";
       }
 
       return content_tag('a', $title, $options, array('href' => url_for($path, $link_options)));
@@ -93,12 +105,18 @@
 
    # Build a link button
    function button_to($title, $path, $options=null) {
-      if (array_delete($options, 'confirm')) {
-         $options['onclick'] = "return confirm('"._("Are you sure?")."')";
-      }
-
+      add_confirm_options(&$options);
       return form_tag($path, array('method' => any(array_delete($options, 'method'), 'get')))
            . submit_button($title, $options) . "</form>\n";
+   }
+
+   # Add necessary options for confirmation, used in link_to() and button_to()
+   function add_confirm_options(&$options) {
+      if ($confirm = array_delete($options, 'confirm')) {
+         $message = ($confirm === true ? _("Are you sure?") : $confirm);
+         $options['onclick'] = "return confirm('$message')";
+         return $message;
+      }
    }
 
 ?>
