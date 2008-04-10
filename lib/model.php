@@ -180,24 +180,27 @@
          );
       }
 
-      protected function is_numeric($key) {
+      protected function is_numeric($key, $allow_empty=false) {
+         $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("is not numeric"),
-            is_numeric($this->attributes[$key])
+            ($allow_empty and empty($value)) or is_numeric($value)
          );
       }
 
-      protected function is_alpha($key) {
+      protected function is_alpha($key, $allow_empty=false) {
+         $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("can only contain letters"),
-            ctype_alpha($this->attributes[$key])
+            ($allow_empty and empty($value)) or ctype_alpha($value)
          );
       }
 
-      protected function is_alnum($key) {
+      protected function is_alnum($key, $allow_empty=false) {
+         $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("can only contain alphanumeric characters"),
-            preg_match('/^[\w\.-]*$/', $this->attributes[$key])
+            ($allow_empty and empty($value)) or preg_match('/^[\w\.-]*$/', $value)
          );
       }
 
