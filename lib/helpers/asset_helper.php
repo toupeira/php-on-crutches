@@ -8,37 +8,45 @@
 #
 
    # Build the path for an asset.
-   function asset_path($file) {
-      $path = Dispatcher::$prefix.$file;
-      if (file_exists(WEBROOT.$file)) {
-         $path .= '?'.filemtime(WEBROOT.$file);
+   function asset_path($directory, $file, $ext='') {
+      if ($file[0] == '/' or preg_match('#^\w+://.#', $file)) {
+         # Leave absolute paths and fully-qualified URLs alone
+         return $file;
       } else {
-         log_error("Asset not found: /$file");
-      }
+         $path = $directory.$file.$ext;
+         $web_path = Dispatcher::$prefix.$path;
+         #$path = Dispatcher::$prefix.$directory.$file.$ext;
 
-      return $path;
+         if (file_exists(WEBROOT.$path)) {
+            $web_path .= '?'.filemtime(WEBROOT.$path);
+         } else {
+            log_error("Asset not found: /$path");
+         }
+
+         return $web_path;
+      }
    }
 
    # Build a stylesheet tag
-   function stylesheet_tag($name, $options=null) {
+   function stylesheet_tag($file, $options=null) {
       return tag('link', $options, array(
          'rel' => 'stylesheet', 'type' => 'text/css',
-         'href' => asset_path(STYLESHEETS.$name.'.css')
+         'href' => asset_path(STYLESHEETS, $file, '.css')
       ));
    }
 
    # Build a javascript tag
-   function javascript_tag($name, $options=null) {
+   function javascript_tag($file, $options=null) {
       return content_tag('script', null, $options, array(
          'type' => 'text/javascript',
-         'src' => asset_path(JAVASCRIPTS.$name.'.js')
+         'src' => asset_path(JAVASCRIPTS, $file, '.js')
       ));
    }
 
    # Build an image tag
-   function image_tag($name, $options=null) {
+   function image_tag($file, $options=null) {
       return tag('img', $options, array(
-         'src' => asset_path(IMAGES.$name), 'alt' => ''
+         'src' => asset_path(IMAGES, $file), 'alt' => ''
       ));
    }
 
