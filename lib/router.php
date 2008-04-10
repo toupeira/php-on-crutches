@@ -170,14 +170,16 @@
          if (preg_match("#^{$this->pattern}$#", $path, $match)) {
             $i = 1;
             foreach ($this->params as $key => $symbol) {
-               if ($value = $match[$i]) {
-                  # Check for format specification
-                  if ($format = $this->formats[$key] and !preg_match($format, $value)) {
-                     return;
-                  }
+               $value = $match[$i];
 
+               if ($format = $this->formats[$key] and !preg_match($format, $value)) {
+                  # Check for format specification
+                  return;
+               } elseif ($value) {
+                  # Add value if not empty
                   $values[$key] = $value;
                }
+
                $i++;
             }
 
