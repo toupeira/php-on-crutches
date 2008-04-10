@@ -15,11 +15,11 @@
             # Route with required parameters
             'users/required/:action!/:id' => array('controller' => 'users'),
 
-            # Route with format specification
-            'permalink/*id' => array('controller' => 'posts', 'action' => 'show', 'id' => '/\d+/'),
-
             # Wildcard route
             'browse/*path' => array('controller' => 'pages', 'action' => 'browse'),
+
+            # Route with format specification
+            ':controller/*id' => array('controller' => 'home', 'action' => 'show', 'id' => '/\d+/'),
 
             # Generic route with default controller
             ':controller/:action/*id' => array('controller' => 'home'),
@@ -52,16 +52,16 @@
          $this->assertRouting('users/required/edit/3', array('controller' => 'users', 'action' => 'edit', 'id' => 3));
       }
 
-      function test_route_with_format_specification() {
-         $this->assertRouting('permalink/123', array('controller' => 'posts', 'action' => 'show', 'id' => '123'));
-         $this->assertGenerates('posts/show/abc', array('controller' => 'posts', 'action' => 'show', 'id' => 'abc'));
-         $this->assertRecognizes(array('controller' => 'permalink', 'action' => 'abc'), 'permalink/abc');
-      }
-
       function test_route_with_wildcard_parameter() {
          $this->assertRouting('browse', array('controller' => 'pages', 'action' => 'browse'));
          $this->assertRouting('browse/foo', array('controller' => 'pages', 'action' => 'browse', 'path' => 'foo'));
          $this->assertRouting('browse/foo/bar/baz', array('controller' => 'pages', 'action' => 'browse', 'path' => 'foo/bar/baz'));
+      }
+
+      function test_route_with_format_specification() {
+         $this->assertRouting('posts/123', array('controller' => 'posts', 'action' => 'show', 'id' => '123'));
+         $this->assertGenerates('posts/show/abc', array('controller' => 'posts', 'action' => 'show', 'id' => 'abc'));
+         $this->assertRecognizes(array('controller' => 'posts', 'action' => 'abc'), 'posts/abc');
       }
 
       function test_route_with_query_string() {
