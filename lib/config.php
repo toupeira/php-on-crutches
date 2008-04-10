@@ -26,8 +26,10 @@
    function config_init() {
       $config = &$GLOBALS['_CONFIG'];
 
-      # Start output buffering
-      ob_start();
+      # Start output buffering (unless running in a console)
+      if (PHP_SAPI != 'cli') {
+         ob_start();
+      }
 
       # Configure error reporting
       ini_set('display_errors', ($config['debug'] or PHP_SAPI == 'cli'));
@@ -51,8 +53,12 @@
          : any($config['log_file'], LOG.'application.log');
       $GLOBALS['_LOGGER'] = new Logger($log_file, any($config['log_level'], LOG_INFO));
 
-      # Setup cache store, always use memory store for testing
-      $store = defined('TESTING') ? 'memory' : $config['cache_store'];
+      # Setup cache store, always use memory store for debug mode and testing
+      if ($config['debug'] or defined('TESTING')) {
+         $store = 'memory';
+      } else {
+         $config['cache_store'];
+      }
       load_store('cache', $store, 'memory');
 
       # Setup session store if enabled and not running in a console
