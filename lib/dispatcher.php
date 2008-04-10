@@ -27,15 +27,12 @@
          );
 
          # Log request header
-         log_debug(
+         log_info(
             "\nProcessing {$_SERVER['REQUEST_URI']} "
             . "(for {$_SERVER['REMOTE_ADDR']} at ".strftime("%F %T").") "
             . "[{$_SERVER['REQUEST_METHOD']}]"
          );
          log_debug("  Prefix: ".self::$prefix);
-         if (config('use_sessions')) {
-            log_debug("  Session ID: ".session_id());
-         }
 
          $args = Router::recognize($path);
          $controller = $args['controller'];
