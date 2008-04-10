@@ -15,8 +15,11 @@
             # Route with required parameters
             'users/required/:action!/:id' => array('controller' => 'users'),
 
+            # Route with format specification
+            'permalink/*id' => array('controller' => 'posts', 'action' => 'show', 'id' => '/\d+/'),
+
             # Wildcard route
-            'browse/*path'      => array('controller' => 'pages', 'action'     => 'browse'),
+            'browse/*path' => array('controller' => 'pages', 'action' => 'browse'),
 
             # Generic route with default controller
             ':controller/:action/*id' => array('controller' => 'home'),
@@ -47,6 +50,12 @@
          $this->assertRouting('users/required/index', array('controller' => 'users', 'action' => 'index'));
          $this->assertRouting('users/required/login', array('controller' => 'users', 'action' => 'login'));
          $this->assertRouting('users/required/edit/3', array('controller' => 'users', 'action' => 'edit', 'id' => 3));
+      }
+
+      function test_route_with_format_specification() {
+         $this->assertRouting('permalink/123', array('controller' => 'posts', 'action' => 'show', 'id' => '123'));
+         $this->assertGenerates('posts/show/abc', array('controller' => 'posts', 'action' => 'show', 'id' => 'abc'));
+         $this->assertRecognizes(array('controller' => 'permalink', 'action' => 'abc'), 'permalink/abc');
       }
 
       function test_route_with_wildcard_parameter() {
