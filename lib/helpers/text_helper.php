@@ -36,6 +36,34 @@
       return str_replace("<br />", "\n", $text);
    }
 
+   define('KB', 1024);
+   define('MB', 1024 * KB);
+   define('GB', 1024 * MB);
+
+   function format_size($size) {
+      if ($size < KB) {
+         return "$size Bytes";
+      } elseif ($size < MB) {
+         return sprintf('%d KB', $size / KB);
+      } elseif ($size < GB) {
+         return sprintf('%d MB', $size / MB);
+      } else {
+         return sprintf('%d GB', $size / GB);
+      }
+   }
+
+   function format_date($time, $format='%d.%m.%y') {
+      if ($time) {
+         return strftime($format, strtotime($time));
+      }
+   }
+
+   function format_time($time, $format='%d.%m.%Y %T') {
+      if ($time) {
+         return strftime($format, strtotime($time));
+      }
+   }
+
    function cycle($values) {
       global $_cycle;
       $values = func_get_args();
