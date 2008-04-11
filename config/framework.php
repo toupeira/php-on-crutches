@@ -24,6 +24,11 @@
       # Available languages, the first one will be used as default
       #'languages'       => array(),
 
+      # Mailer settings
+      #'mail_from'       => '',
+      #'mail_from_name'  => '',
+      #'mail_sender'     => '',
+
       # Show debug information
       'debug'           => true,
       # Show redirects with link
