@@ -21,6 +21,7 @@
    class ApplicationError extends StandardError {};
    class NotImplemented extends ApplicationError {};
    class ConfigurationError extends ApplicationError {};
+   class MailerError extends ApplicationError {};
    class NotFound extends ApplicationError {};
    class RoutingError extends NotFound {};
    class MissingTemplate extends NotFound {};

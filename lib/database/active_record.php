@@ -73,6 +73,10 @@
          return $this->table;
       }
 
+      function get_dom_id() {
+         return underscore(get_class($this)).'-'.$this->id;
+      }
+
       # Wrapper for database finders
       function load($attributes) {
          foreach ($attributes as $key => $value) {
@@ -87,7 +91,7 @@
          return !$this->new_record;
       }
 
-      function save() {
+      function save($force_update=false) {
          if (!$this->is_valid()) {
             return false;
          }
@@ -99,12 +103,12 @@
          array_delete($attributes, $this->virtual_attributes);
 
          if ($this->exists()) {
-            if (empty($attributes)) {
+            if (empty($attributes) and !$force_update) {
                return true;
             }
 
             $action = $sql_action = 'update';
-            $args = array($this->id, $attributes);
+            $args = array($this->id, $attributes, $force_update);
          } else {
             $action = 'create';
             $sql_action = 'insert';

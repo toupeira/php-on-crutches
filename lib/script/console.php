@@ -48,6 +48,10 @@
    function to_string($value) {
       if (is_object($value)) {
          return get_class($value);
+      } elseif (is_resource($value)) {
+         ob_start();
+         var_dump($value);
+         return trim(ob_get_clean());
       } else {
          return var_export($value, true);
       }

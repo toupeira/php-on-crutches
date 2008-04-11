@@ -8,7 +8,16 @@
 #
 
    function h($text) {
-      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
+      return strtr(htmlspecialchars($text, ENT_COMPAT, 'UTF-8'), array(
+         '&amp;gt;'   => '&gt;',
+         '&amp;lt;'   => '&lt;',
+         '&amp;amp;'  => '&amp;',
+         '&amp;quot;' => '&quot;',
+      ));
+   }
+
+   function strip_html($text) {
+      return html_entity_decode(strip_tags($text), ENT_COMPAT, 'UTF-8');
    }
 
    function pluralize($count, $singular, $plural) {
@@ -24,11 +33,11 @@
    }
 
    function simple_format($text) {
-      return str_replace("\n", "<br />", h($text));
+      return str_replace("\n", "<br />\n", h($text));
    }
 
    function auto_link($text) {
-      return preg_replace_callback('#\b(\w+://[^\s]+)#',
+      return preg_replace_callback('#\b(\w+://[-\.\w]+(/[^\s]*)?)#',
          proc('link_to(h($a[1]), h($a[1]))'), $text);
    }
 

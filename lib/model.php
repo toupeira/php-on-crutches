@@ -78,6 +78,7 @@
 
             unset($this->cache[$key]);
          }
+
          return $this;
       }
 
@@ -99,6 +100,10 @@
 
       function get_attributes() {
          return $this->attributes;
+      }
+
+      function get_changed() {
+         return !empty($this->changed_attributes);
       }
 
       # Set attributes

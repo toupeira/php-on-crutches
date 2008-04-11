@@ -90,8 +90,8 @@
          return $this->connection->insert_id();
       }
 
-      function update($id, $attributes) {
-         if (empty($attributes)) {
+      function update($id, $attributes, $force=false) {
+         if (empty($attributes) and !$force) {
             return true;
          }
 
@@ -109,6 +109,8 @@
 
          if (in_array('updated_at', $this->get_attributes()) and !isset($attributes['updated_at'])) {
             $keys[] = "`updated_at` = ".$this->get_connection()->get_timestamp();
+         } elseif (empty($attributes)) {
+            return true;
          }
 
          $query = sprintf("UPDATE `%s` SET %s WHERE `id` = ?",

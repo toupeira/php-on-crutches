@@ -20,36 +20,31 @@
          return null;
       }
 
-      public $data = array();
+      public $template;
+      public $layout;
 
-      private $template;
-      private $layout;
+      private $data;
 
       function __construct($template=null, $layout=null) {
          $this->template = $template;
          $this->layout = $layout;
       }
 
+      function get_data() {
+         return (array) $this->data;
+      }
+
+      # Get and set template values
+      function get($key) {
+         return $this->data[$key];
+      }
+
       function set($key, $value) {
          $this->data[$key] = $value;
+         return $this;
       }
 
-      function get_template() {
-         return $this->template;
-      }
-
-      function set_template($template) {
-         $this->template = $template;
-      }
-
-      function get_layout() {
-         return $this->layout;
-      }
-
-      function set_layout($layout) {
-         $this->layout = $layout;
-      }
-
+      # Render a template
       function render($template=null, $layout=null) {
          if (!$template and !$template = $this->template) {
             throw new ApplicationError("No template set");
@@ -65,7 +60,7 @@
          $this->template = $template;
 
          # Extract assigned values as local variables
-         extract($this->data, EXTR_SKIP);
+         extract((array) $this->data, EXTR_SKIP);
 
          # Render the template
          ob_start();
@@ -97,6 +92,7 @@
          return $output;
       }
 
+      # Render a partial template
       private function render_partial($partial, $locals=null) {
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
@@ -110,7 +106,7 @@
          }
 
          # Extract assigned and passed values as local variables
-         extract($this->data, EXTR_SKIP);
+         extract((array) $this->data, EXTR_SKIP);
          if (is_array($locals)) {
             extract($locals, EXTR_SKIP);
          }

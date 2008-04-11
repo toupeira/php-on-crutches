@@ -22,9 +22,9 @@
    require LIB.'router.php';
    require LIB.'dispatcher.php';
    require LIB.'controller.php';
-
    require LIB.'model.php';
    require LIB.'view.php';
+   require LIB.'mail.php';
 
    foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;

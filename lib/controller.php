@@ -123,11 +123,11 @@
 
       # Get and set template values
       function get($key) {
-         return $this->view->data[$key];
+         return $this->view->get($key);
       }
 
       function set($key, $value) {
-         $this->view->data[$key] = &$value;
+         $this->view->set($key, $value);
          return $this;
       }
 
@@ -264,7 +264,21 @@
             $this->headers['Status'] = $code;
             $this->render_text(' ');
          }
+
          return true;
+      }
+
+      # Redirect to the previous page
+      function redirect_back($default=null) {
+         if ($path = $this->session['return_to']) {
+            # Use path stored in session
+            unset($this->session['return_to']);
+         } elseif (!$path = $default and !$path = $_SERVER['HTTP_REFERER']) {
+            # Else try the passed default page, the HTTP referer, or the global default page
+            $path = ':';
+         }
+
+         return $this->redirect_to($path);
       }
 
       # Send the configured headers
@@ -343,7 +357,7 @@
       # Get error messages from template objects
       function set_error_messages() {
          $messages = array();
-         foreach ((array) $this->view->data as $key => $value) {
+         foreach ($this->view->data as $key => $value) {
             if ($value instanceof Model) {
                foreach ($value->errors as $key => $value) {
                   $messages = array_merge($messages, (array) $value);
