@@ -26,9 +26,9 @@
          $this->mailer = new PHPMailer();
          $this->set_language('en', '/usr/share/php/libphp-phpmailer/language/');
          $this->char_set = 'utf-8';
-         $this->from = config('mail_from_address');
+         $this->from = config('mail_from');
          $this->from_name = config('mail_from_name');
-         $this->sender = any(config('mail_sender', 'mail_from_address'));
+         $this->sender = any(config('mail_sender', 'mail_from'));
       }
 
       function __get($key) {
