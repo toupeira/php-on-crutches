@@ -66,11 +66,13 @@
 <small>at line <?= $line ?> in <?= $file ?></small>
 <p><?= $message ?></p>
 
+<? if ($code): ?>
 <?= link_to('Show source', '#', array('onclick' => 'return show_errors(this)')) ?>
 <div id="source" style="display:none">
    <h3>Extracted source from <strong><?= $file ?></strong> (around line <strong>#<?= $line ?></strong>):</h3>
    <pre><?= $code ?></pre>
 </div>
+<? endif ?>
 
 <h3>Stack Trace:</h3>
 <pre><?= $trace ?></pre>
