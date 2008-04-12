@@ -19,7 +19,7 @@
       }
 
       function test_simple_format() {
-         $this->assertEqual("&lt;h1&gt;foo&lt;/h1&gt;<br />bar", simple_format("<h1>foo</h1>\nbar"));
+         $this->assertEqual("&lt;h1&gt;foo&lt;/h1&gt;<br />\nbar", simple_format("<h1>foo</h1>\nbar"));
       }
 
       function test_auto_link() {

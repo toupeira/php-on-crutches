@@ -5,7 +5,6 @@
    {
       function setup() {
          $this->controller = new SampleController();
-         $this->data = &$this->controller->view->data;
          $this->views = LIB.'views/sample/';
          $this->send_file_output = null;
          register_shutdown_function(rm_rf, $this->views);
@@ -40,10 +39,10 @@
 
          $this->assertIsA($this->controller->view, View);
 
-         $this->assertEqual($this->controller->name, $this->data['controller']);
-         $this->assertEqual($this->controller->params, $this->data['params']);
-         $this->assertEqual($this->controller->cookies, $this->data['cookies']);
-         $this->assertEqual($this->controller->msg, $this->data['msg']);
+         $this->assertEqual($this->controller->name, $this->assigns('controller'));
+         $this->assertEqual($this->controller->params, $this->assigns('params'));
+         $this->assertEqual($this->controller->cookies, $this->assigns('cookies'));
+         $this->assertEqual($this->controller->msg, $this->assigns('msg'));
 
          $this->assertEqual(
             array('index', 'edit', 'filter', 'fail', 'set_headers', 'set_errors'),
@@ -73,23 +72,23 @@
       }
 
       function test_get() {
-         $this->assertEqual($this->data['controller'], $this->controller->get('controller'));
+         $this->assertEqual($this->assigns('controller'), $this->controller->get('controller'));
       }
 
       function test_set() {
          $this->controller->set('foo', 'bar');
-         $this->assertEqual('bar', $this->data['foo']);
+         $this->assertEqual('bar', $this->assigns('foo'));
 
          $data = array(1, 2, 3);
          $this->controller->set('data', &$data);
          $this->assertEqual(
             array(1, 2, 3),
-            $this->data['data']);
+            $this->assigns('data'));
 
          $data[] = 4;
          $this->assertEqual(
             array(1, 2, 3, 4),
-            $this->data['data']);
+            $this->assigns('data'));
       }
 
       function test_is_post() {
@@ -177,7 +176,7 @@
       function test_perform_with_valid_action() {
          $this->controller->perform('index');
          $this->assertOutputMatch('/Index Template/');
-         $this->assertEqual('index', $this->data['action']);
+         $this->assertEqual('index', $this->assigns('action'));
          $this->assertLayout('application');
 
          $this->assertAssigns(array(
@@ -189,10 +188,10 @@
       function test_perform_with_empty_action() {
          $this->controller->perform('blank');
          $this->assertOutputMatch('/Blank Template/');
-         $this->assertEqual('blank', $this->data['action']);
+         $this->assertEqual('blank', $this->assigns('action'));
          $this->assertLayout('application');
 
-         $this->assertNull($this->data['blank']);
+         $this->assertNull($this->assigns('blank'));
          $this->assertCalls('init', 'before', 'after');
       }
 
@@ -352,16 +351,22 @@
       }
 
       function test_add_error() {
-         $this->controller->add_error('foo', "foo is invalid");
-         $this->assertEqual(array('foo'), $this->controller->errors);
-         $this->assertEqual("foo is invalid", $this->controller->msg['error']);
-         $this->controller->add_error('foo', "foo is invalid");
-         $this->assertEqual(array('foo'), $this->controller->errors);
-         $this->assertEqual("foo is invalid", $this->controller->msg['error']);
+         $messages = array(
+            "foo is invalid",
+            "foo is really invalid",
+            "bar is invalid",
+         );
 
-         $this->controller->add_error('bar', "bar is invalid");
+         $this->controller->add_error('foo', $messages[0]);
+         $this->assertEqual(array('foo'), $this->controller->errors);
+         $this->assertEqual(array_slice($messages, 0, 1), $this->controller->msg['error']);
+         $this->controller->add_error('foo', $messages[1]);
+         $this->assertEqual(array('foo'), $this->controller->errors);
+         $this->assertEqual(array_slice($messages, 0, 2), $this->controller->msg['error']);
+
+         $this->controller->add_error('bar', $messages[2]);
          $this->assertEqual(array('foo', 'bar'), $this->controller->errors);
-         $this->assertEqual("bar is invalid", $this->controller->msg['error']);
+         $this->assertEqual($messages, $this->controller->msg['error']);
       }
 
       function test_has_errors() {
