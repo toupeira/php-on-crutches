@@ -110,11 +110,18 @@
       function setup() {
          $class = substr(get_class($this), 0, -4);
          $this->controller = Dispatcher::$controller = new $class();
-         $this->data = &$this->controller->view->data;
          $this->setup_controller();
       }
 
       function setup_controller() {}
+
+      function assigns($key=null) {
+         if ($key) {
+            return $this->controller->view->data[$key];
+         } else {
+            return $this->controller->view->data;
+         }
+      }
 
       function request($action, $get=null, $post=null) {
          $path = "{$this->controller->name}/$action";
@@ -126,7 +133,6 @@
          $this->controller = Dispatcher::run($path);
          ob_end_clean();
          $this->action = Dispatcher::$params['action'];
-         $this->data = &$this->controller->view->data;
       }
 
       function get($action, $args=null) {
@@ -197,11 +203,11 @@
       function assertAssigns($assigns) {
          foreach ($assigns as $key => $type) {
             $this->assertTrue(
-               array_key_exists($key, $this->data),
+               array_key_exists($key, $this->assigns()),
                "Expected assigned variable '$key'");
             $this->assertEqual(
-               gettype($this->data[$key]), $type,
-               "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->data[$key])."'");
+               gettype($this->assigns($key)), $type,
+               "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->assigns($key))."'");
          }
       }
 

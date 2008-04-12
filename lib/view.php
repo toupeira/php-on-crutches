@@ -40,7 +40,7 @@
       }
 
       function set($key, $value) {
-         $this->data[$key] = $value;
+         $this->data[$key] = &$value;
          return $this;
       }
 

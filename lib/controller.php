@@ -127,7 +127,7 @@
       }
 
       function set($key, $value) {
-         $this->view->set($key, $value);
+         $this->view->set($key, &$value);
          return $this;
       }
 
@@ -285,13 +285,16 @@
       function send_headers() {
          foreach ((array) $this->headers as $header => $value) {
             if ($value !== null) {
-               if ($header == 'Status') {
-                  header("HTTP/1.x $value");
+               $header = ($header == 'Status' ? "HTTP/1.x $value" : "$header: $value");
+               if (defined('TESTING')) {
+                  # Ignore errors when testing
+                  @header($header);
                } else {
-                  header("$header: $value");
+                  header($header);
                }
             }
          }
+
          return true;
       }
 
@@ -301,6 +304,8 @@
 
       # Send a file with the appropriate headers
       function send_file($file, $options=null) {
+         unset($this->headers['Content-Type']);
+
          if ($file[0] == '!') {
             $command = substr($file, 1);
             $file = null;

@@ -15,6 +15,7 @@
 
    # Used for some custom behaviour when testing:
    # - config_init() always loads memory cache store
+   # - Connection#set_headers() ignores header errors
    # - DatabaseConnection::load() appends '_test' to database configuration names
    define('TESTING', 1);
 
