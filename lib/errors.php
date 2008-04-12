@@ -18,13 +18,13 @@
    }
 
    # Standard exceptions
-   class ApplicationError extends StandardError {};
-   class NotImplemented extends ApplicationError {};
-   class ConfigurationError extends ApplicationError {};
-   class MailerError extends ApplicationError {};
-   class NotFound extends ApplicationError {};
-   class RoutingError extends NotFound {};
-   class MissingTemplate extends NotFound {};
+   class ApplicationError extends StandardError {}
+   class NotImplemented extends ApplicationError {}
+   class ConfigurationError extends ApplicationError {}
+   class MailerError extends ApplicationError {}
+   class NotFound extends ApplicationError {}
+   class RoutingError extends NotFound {}
+   class MissingTemplate extends NotFound {}
 
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
@@ -73,33 +73,39 @@
       $trace = $exception->getTraceAsString();
 
       try {
-         $view = new View('errors/trace');
+         $view = new View('errors/debug');
          $view->set('exception', $class);
          $view->set('message', $message);
          $view->set('trace', $trace);
-
          $view->set('file', str_replace(ROOT, '', $file));
          $view->set('line', $line);
          $view->set('params', Dispatcher::$params);
 
-         $code = '';
-         $start = max(0, $line - 12);
-         $lines = array_slice(file($file), $start, 23);
-         $width = strlen($line + 23);
+         if (is_file($file)) {
+            $code = '';
+            $start = max(0, $line - 12);
+            $lines = array_slice(file($file), $start, 23);
+            $width = strlen($line + 23);
 
-         foreach ($lines as $i => $text) {
-            $i += $start + 1;
-            $text = sprintf("%{$width}d %s", $i, htmlspecialchars($text));
-            if ($i == $line) {
-               $text = "<strong>$text</strong>";
+            foreach ($lines as $i => $text) {
+               $i += $start + 1;
+               $text = sprintf("%{$width}d %s", $i, htmlspecialchars($text));
+               if ($i == $line) {
+                  $text = "<strong>$text</strong>";
+               }
+               $code .= $text;
             }
-            $code .= $text;
+            $view->set('code', $code);
          }
-         $view->set('code', $code);
 
          return $view->render();
+
       } catch (Exception $e) {
-         return "<h1>".titleize($class)."</h1>\n<p>$message</p>\n<pre>$trace</pre>";
+         ob_end_clean();
+         return "<h1>".titleize($class)."</h1>\n"
+              . "<p>$message, at line $line in <code>$file</code></p>\n"
+              . "<pre>$trace</pre>";
+
       }
    }
 
