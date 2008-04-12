@@ -14,15 +14,52 @@
       die("Can't read standard input!\n");
    }
 
-   # Show log messages when -d is given
-   if (in_array('-d', $argv)) {
-      config_set('debug', true);
-      $_LOGGER->level = LOG_DEBUG;
-   } else {
-      $_LOGGER->level = LOG_DISABLED;
+   $_LOGGER->level = LOG_DISABLED;
+
+   function usage() {
+      print "Usage: {$GLOBALS['argv'][0]} [OPTIONS]\n"
+          . "\n"
+          . "  -d       Show log messages\n"
+          . "  -s       Hide prompt\n"
+          . "  -e CODE  Execute code and exit\n"
+          . "\n";
+      exit(255);
+   }
+
+   $args = array_slice($argv, 1);
+   while ($arg = array_shift($args)) {
+      switch ($arg) {
+         case '-d':
+            # Show log messages
+            config_set('debug', true);
+            $_LOGGER->level = LOG_DEBUG;
+            break;
+         case '-s':
+            # Don't show prompts
+            define('SILENT', 1);
+            break;
+         case '-e':
+            # Execute given command and exit
+            if ($command = array_shift($args)) {
+               $debug = ($_LOGGER->level == LOG_DEBUG ? '-d' : '');
+               system("echo '$command' | php5 {$argv[0]} -s $debug");
+               exit;
+            } else {
+               usage();
+            }
+            break;
+         default:
+            usage();
+      }
    }
 
    fake_request('', 'GET', true);
+
+   function prompt($message) {
+      if (!defined('SILENT')) {
+         print $message;
+      }
+   }
 
    # Perform a request for the given path, with the given HTTP method
    function request($method, $path) {
@@ -87,9 +124,10 @@
       print " [1m)[0m\n\n";
    }
 
-   print "\n\n".`php -v`."\n";
+   prompt("\n\n".`php -v`."\n");
+
    while (!feof(STDIN)) {
-      print "php[".config('application')."] >>> ";
+      prompt("php[".config('application')."] >>> ");
       $_command = trim(fgets(STDIN));
 
       # Exit the console
@@ -190,12 +228,13 @@
          }
 
          # Show return value
-         print " :: [0;36m".to_string($_result)."[0m\n";
+         prompt(" :: [0;36m".to_string($_result)."[0m\n");
       }
 
       $_ = $_result;
    }
-   print "\n";
+
+   prompt("\n");
 
 # vim: ft=php
 ?>

@@ -14,7 +14,8 @@
 
    $languages = config('languages');
    $domain = config('application');
-   $master = LANG.$domain.'.po';
+   $master = LANG.$domain.'.pot';
+   $additional = LANG.'additional.pot';
 
    $source_paths = array(APP, CONFIG, LIB);
    $source_files = find_files($source_paths, '-name "*.php" -o -name "*.thtml"');
@@ -23,26 +24,34 @@
    print "\n";
 
    print "Updating strings...\n";
-   if (!run("xgettext -L php --omit-header -o '$master' $source_files")) {
+
+   if (!run("xgettext --omit-header -L php -o '$master' $source_files")) {
       print "Error while running xgettext\n\n";
       exit(1);
    }
 
+   if (is_file($additional) and !run("msgcat -o '$master' '$master' '$additional'")) {
+      print "Error while running msgcat\n\n";
+      exit(1);
+   }
+
    print "Updating language templates...\n";
+
    foreach ($languages as $language) {
       $path = LANG.$language."/LC_MESSAGES/$domain";
       $template = "$path.po";
       $compiled = "$path.mo";
 
-      print "  $language\n";
+      print "  $language: ";
+
       if (file_exists($template)) {
-         run("msgmerge -U '$template' '$master'");
+         run("msgmerge -qU '$template' '$master'");
       } else {
          mkdir(dirname($template), 0750, true);
          copy($master, $template);
       }
 
-      run("msgfmt -o '$compiled' '$template'");
+      run("msgfmt -vo '$compiled' '$template'");
    }
 
    print "\n";

@@ -81,13 +81,22 @@
          register_shutdown_function(session_write_close);
       }
 
-      # Configure gettext
+      # Configure gettext domain
+      textdomain($config['application']);
+      bindtextdomain($config['application'], LANG);
+      bind_textdomain_codeset($config['application'], 'UTF-8');
+
+      # Set a locale, so $LANGUAGE will be respected
+      if (!setlocale(LC_MESSAGES, 'en_US.UTF-8')) {
+         log_warn("Couldn't load UTF-8 locale");
+      }
+
+      # Set C as global locale, to avoid subprocesses inheriting our locale
+      putenv("LANG=C");
+
+      # Set the default language if set
       if ($lang = $config['languages'][0]) {
-         bindtextdomain($config['application'], LANG);
-         textdomain($config['application']);
-         if (!setlocale(LC_MESSAGES, $lang)) {
-            log_warn("Couldn't set locale '$lang'");
-         }
+         set_language($lang);
       }
 
       # Work around magic quotes...
@@ -96,6 +105,18 @@
       }
    }
 
+   # Change the current language used for gettext and templates
+   function set_language($lang) {
+      if (in_array($lang, config('languages'))) {
+         config_set('language', $lang);
+         # Using $LANGUAGE allows arbitrary locale names
+         putenv("LANGUAGE=$lang");
+      } else {
+         log_warn("Invalid language '$lang'");
+      }
+   }
+
+   # Helper for loading the cache and session stores
    function load_store($type, $store, $default=null) {
       if (!$store) {
          if ($default) {

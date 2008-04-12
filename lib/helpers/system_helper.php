@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   # Run a shell command silently.
+   # Run a shell command.
    #
    # $command may contain placeholders which will be replaced
    # by the remaining, shell-escaped arguments.
@@ -26,7 +26,7 @@
       }
 
       log_debug("Running '$command'");
-      exec("$command 2>/dev/null", $output, $status);
+      exec($command, $output, $status);
       return ($status === 0);
    }
 
