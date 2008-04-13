@@ -5,13 +5,18 @@
       # Application name
       'application'     => ROOT_NAME,
 
-      # Use URL rewriting (needs to be configured on the webserver)
-      'rewrite_urls'    => true,
+      # Show debug information
+      'debug'           => true,
+      # Show redirects with link
+      'debug_redirects' => false,
 
       # Log file
       'log_file'        => LOG.ROOT_NAME.'.log',
       # Log level
       'log_level'       => LOG_DEBUG,
+
+      # Use URL rewriting (needs to be configured on the webserver)
+      'rewrite_urls'    => true,
 
       # Session store (php, cookie, cache, database) (Default: cookie)
       'session_store'   => 'php',
@@ -28,11 +33,6 @@
       #'mail_from'       => '',
       #'mail_from_name'  => '',
       #'mail_sender'     => '',
-
-      # Show debug information
-      'debug'           => true,
-      # Show redirects with link
-      'debug_redirects' => false,
    );
 
 ?>

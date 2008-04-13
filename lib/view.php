@@ -11,13 +11,16 @@
    {
       # Find a template for the given path
       static function find_template($path) {
-         foreach (array(VIEWS, LIB.'views/') as $base) {
-            if (is_file($template = "$base$path.thtml")) {
-               return $template;
-            }
+         # Look in /app/views first, then in /lib/views
+         $base = '{'.VIEWS.','.LIB.'views/}';
+
+         # Look for templates with a language suffix first (e.g. index.en.thtml)
+         if ($lang = config('language')) {
+            $lang = '{.'.config('language').',}';
          }
 
-         return null;
+         # Return the first match
+         return array_shift(glob("$base$path$lang.thtml", GLOB_BRACE));
       }
 
       public $template;
