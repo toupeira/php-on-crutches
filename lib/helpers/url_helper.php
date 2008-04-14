@@ -42,7 +42,7 @@
 
          $path = Router::generate($params);
 
-      } elseif (preg_match('#^\w+://.#', $path)) {
+      } elseif (preg_match('#^(\w+://|mailto:).#', $path)) {
          # Return fully-qualified URLs unchanged
          return $path;
       }
