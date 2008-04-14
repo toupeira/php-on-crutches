@@ -12,9 +12,11 @@
       if (is_array($path)) {
          # Generate path from route parameters
          $path = Router::generate($path);
+
       } elseif (!is_string($path)) {
          $type = gettype($path);
-         throw new ApplicationError("Invalid argument of type '$path'");
+         throw new ApplicationError("Invalid argument of type '$type'");
+
       } elseif ($path[0] == ':') {
          # Generate path from route string
          list($controller, $action, $id) = explode('/', $path, 3);
@@ -40,24 +42,21 @@
 
          $path = Router::generate($params);
 
-      } elseif ($path[0] == '/') {
-         # Strip first slash from absolute paths
-         $path = substr($path, 1);
-
-      } else {
-         if (($options['full'] or $options['ssl']) and !preg_match('#^\w+://.#', $path)) {
-            # If a full URI for a relative path needs to be generated, use the directory name
-            # from the currently requested URI
-            $path = substr(dirname($_SERVER['REQUEST_URI']), 1)."/$path";
-         } else {
-            # Return normal paths and fully-qualified URLs unchanged
-            return $path;
-         }
+      } elseif (preg_match('#^\w+://.#', $path)) {
+         # Return fully-qualified URLs unchanged
+         return $path;
       }
 
+      # Build a fully-qualified URL
       if ($options['full'] or $options['ssl']) {
          unset($options['full']);
 
+         #if ($path and $path[0] != '/') {
+            # If the path is relative, use the directory name from the currently requested URI
+            #$path = substr(dirname($_SERVER['REQUEST_URI']), 1)."/$path";
+         #}
+
+         # Use HTTPS if specified or the current site is already HTTPS
          if ($options['ssl']
             or (Dispatcher::$controller and Dispatcher::$controller->is_ssl())) {
             unset($options['ssl']);
@@ -66,9 +65,12 @@
             $url = 'http';
          }
          $url .= '://'.$_SERVER['HTTP_HOST'];
-      }
+      } 
 
-      $url .= Dispatcher::$prefix;
+      # Add the site prefix for relative paths
+      if ($path[0] != '/' and $path[0] != '#') {
+         $url .= Dispatcher::$prefix;
+      }
 
       if ($anchor = $options['anchor']) {
          $path .= "#$anchor";
