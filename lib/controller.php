@@ -270,7 +270,7 @@
 
       # Redirect to the previous page
       function redirect_back($default=null) {
-         if (false and $path = $this->session['return_to']) {
+         if ($path = $this->session['return_to']) {
             # Use path stored in session
             unset($this->session['return_to']);
          } elseif ($url = $_SERVER['HTTP_REFERER']) {
