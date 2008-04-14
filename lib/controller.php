@@ -233,7 +233,7 @@
             if (!is_null($layout)) {
                $this->view->layout = $layout;
             }
-            $this->set_error_messages();
+            $this->set_model_errors();
             $this->output = $this->view->render();
             return true;
          } else {
@@ -252,13 +252,13 @@
          $url = url_for($path, array('full' => true));
 
          # Save messages so they can be displayed in the next request
-         $this->set_error_messages();
+         $this->set_model_errors();
          $this->session['msg'] = $this->msg;
 
-         log_debug("Redirecting to $url...");
+         log_debug("Redirecting to $url");
 
          if (config('debug_redirects')) {
-            $this->render_text("Redirect to ".link_to($url, $url));
+            $this->render_text("Redirecting to ".link_to(h($url), $url));
          } else {
             $this->headers['Location'] = $url;
             $this->headers['Status'] = $code;
@@ -270,12 +270,20 @@
 
       # Redirect to the previous page
       function redirect_back($default=null) {
-         if ($path = $this->session['return_to']) {
+         if (false and $path = $this->session['return_to']) {
             # Use path stored in session
             unset($this->session['return_to']);
-         } elseif (!$path = $default and !$path = $_SERVER['HTTP_REFERER']) {
-            # Else try the passed default page, the HTTP referer, or the global default page
-            $path = ':';
+         } elseif ($url = $_SERVER['HTTP_REFERER']) {
+            # Use the HTTP referer if it points to the current host, and doesn't point to the current path
+            $url = parse_url($url);
+            if ((!$url['host'] or $url['host'] == $_SERVER['HTTP_HOST']) and stristr($url['path'], Dispatcher::$path) === false) {
+               $path = $url['path'];
+            }
+         }
+
+         if (!$path) {
+            # Use the default page if no path was found
+            $path = '';
          }
 
          return $this->redirect_to($path);
@@ -359,8 +367,8 @@
          }
       }
 
-      # Get error messages from template objects
-      function set_error_messages() {
+      # Get error messages from model objects assigned to the template
+      function set_model_errors() {
          $messages = array();
          foreach ($this->view->data as $key => $value) {
             if ($value instanceof Model) {
