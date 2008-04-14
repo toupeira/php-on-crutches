@@ -209,10 +209,10 @@
          );
       }
 
-      protected function is_email($key) {
+      protected function is_email($key, $allow_empty=false) {
          return $this->validate_attribute($key,
             _("is not a valid email address"),
-            preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $this->attributes[$key])
+            ($allow_empty and empty($value)) or preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $this->attributes[$key])
          );
       }
 
@@ -223,18 +223,18 @@
          );
       }
 
-      protected function in_array($key, $array) {
+      protected function in_array($key, $array, $allow_empty=false) {
          return $this->validate_attribute($key,
             _("is invalid"),
-            in_array($this->attributes[$key], $array)
+            ($allow_empty and empty($value)) or in_array($this->attributes[$key], $array)
          );
       }
 
-      protected function has_length($key, $min, $max, $empty=false) {
+      protected function has_length($key, $min, $max, $allow_empty=false) {
          $length = strlen($this->attributes[$key]);
          return $this->validate_attribute($key,
             sprintf(_("must be between %d and %d characters"), $min, $max),
-            ($empty and empty($this->attributes[$key])) or ($length >= $min and $length <= $max)
+            ($allow_empty and empty($this->attributes[$key])) or ($length >= $min and $length <= $max)
          );
       }
 

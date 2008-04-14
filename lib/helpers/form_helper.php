@@ -113,12 +113,6 @@
       ));
    }
 
-   function submit_button($value, $options=null) {
-      return tag('input', $options, array(
-         'type' => 'submit', 'value' => $value
-      ));
-   }
-
    function select_tag($key, $values, $selected=null, $options=null) {
       if (isset($_POST[$key])) {
          $selected = $_POST[$key];
@@ -135,6 +129,18 @@
       }
 
       return form_element('select', $key, $items, $options);
+   }
+
+   function submit_button($title=null, $options=null) {
+      return tag('input', $options, array(
+         'type' => 'submit', 'value' => any($title, _('Save'))
+      ));
+   }
+
+   function cancel_button($title=null, $options=null) {
+      return tag('input', $options, array(
+         'type' => 'button', 'value' => any($title, _('Cancel')), 'onclick' => 'history.back()'
+      ));
    }
 
 ?>

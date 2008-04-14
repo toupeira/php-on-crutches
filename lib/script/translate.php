@@ -12,8 +12,9 @@
 
    $_LOGGER->level = LOG_DISABLED;
 
-   $languages = config('languages');
+   $languages = (array) config('languages');
    $domain = config('application');
+
    $master = LANG.$domain.'.pot';
    $additional = LANG.'additional.pot';
 
@@ -23,14 +24,16 @@
 
    print "\n";
 
-   print "Updating strings...\n";
+   print "Updating messages...\n";
 
-   if (!run("xgettext --omit-header -L php -o '$master' $source_files")) {
+   # Extract messages from code files
+   if (!run("xgettext --from-code=utf-8 -L php -o '$master' $source_files")) {
       print "Error while running xgettext\n\n";
       exit(1);
    }
 
-   if (is_file($additional) and !run("msgcat -o '$master' '$master' '$additional'")) {
+   # Merge additional messages
+   if (is_file($additional) and !run("msgcat --to-code=utf-8 -o '$master' '$master' '$additional'")) {
       print "Error while running msgcat\n\n";
       exit(1);
    }
@@ -45,12 +48,15 @@
       print "  $language: ";
 
       if (file_exists($template)) {
+         # Merge existing translations
          run("msgmerge -qU '$template' '$master'");
       } else {
-         mkdir(dirname($template), 0750, true);
+         # Create empty template
+         @mkdir(dirname($template), 0750, true);
          copy($master, $template);
       }
 
+      # Compile message catalog
       run("msgfmt -vo '$compiled' '$template'");
    }
 
