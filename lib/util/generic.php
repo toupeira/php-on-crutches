@@ -8,7 +8,14 @@
 #
 
    # Shorthand for newlines
-   define(N, "\n");
+   define('N', "\n");
+
+   # Require a file if it exists
+   function safe_require($file) {
+      if (is_file($file)) {
+         require $file;
+      }
+   }
 
    # Return the first non-empty value
    function any() {

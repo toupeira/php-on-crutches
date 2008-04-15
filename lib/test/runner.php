@@ -11,7 +11,8 @@
    require 'simpletest/reporter.php';
 
    require LIB.'test/cases.php';
-   @include TEST.'test_helper.php';
+
+   safe_require(TEST.'test_helper.php');
 
    # Used for some custom behaviour when testing:
    # - config_init() always loads memory cache store

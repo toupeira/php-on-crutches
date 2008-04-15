@@ -8,10 +8,9 @@
 #
 
    require CONFIG.'framework.php';
-
-   @include CONFIG.'application.php';
-   @include CONFIG.'routes.php';
-   @include CONFIG.'database.php';
+   require CONFIG.'application.php';
+   require CONFIG.'routes.php';
+   require CONFIG.'database.php';
 
    $_CONFIG = array_merge($_FRAMEWORK, (array) $_APPLICATION);
 

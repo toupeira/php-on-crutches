@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   @include 'libphp-phpmailer/class.phpmailer.php';
+   safe_require('libphp-phpmailer/class.phpmailer.php');
 
    class Mail extends Object
    {
@@ -18,17 +18,17 @@
       protected $mailer;
 
       function __construct($template=null, $layout=null, $data=null) {
-         $this->view = new View($template, $layout);
-         foreach ((array) $data as $key => $value) {
-            $this->view->set($key, $value);
-         }
-
          $this->mailer = new PHPMailer();
          $this->set_language('en', '/usr/share/php/libphp-phpmailer/language/');
          $this->char_set = 'utf-8';
          $this->from = config('mail_from');
          $this->from_name = config('mail_from_name');
          $this->sender = any(config('mail_sender', 'mail_from'));
+
+         $this->view = new View($template, $layout);
+         foreach ((array) $data as $key => $value) {
+            $this->view->set($key, $value);
+         }
       }
 
       function __get($key) {

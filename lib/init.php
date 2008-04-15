@@ -52,7 +52,7 @@
       require $initializer;
    }
 
-   @require CONTROLLERS.'application_controller.php';
-   @include HELPERS.'application_helper.php';
+   require CONTROLLERS.'application_controller.php';
+   safe_require(HELPERS.'application_helper.php');
 
 ?>
