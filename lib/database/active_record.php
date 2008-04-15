@@ -96,6 +96,13 @@
             return false;
          }
 
+         if ($this->exists()) {
+            $action = $sql_action = 'update';
+         } else {
+            $action = 'create';
+            $sql_action = 'insert';
+         }
+
          $this->call_filter(before_save);
          $this->call_filter("before_$action");
 
@@ -107,11 +114,8 @@
                return true;
             }
 
-            $action = $sql_action = 'update';
             $args = array($this->id, $attributes, $force_update);
          } else {
-            $action = 'create';
-            $sql_action = 'insert';
             $args = array($attributes);
          }
 

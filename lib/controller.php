@@ -157,13 +157,17 @@
                ($this->require_ajax === true or
                   in_array($action, (array) $this->require_ajax)))
          ) {
-            log_debug("Invalid request for this action");
-            if ($action == 'index') {
-               # Redirect to default path if the default action was requested
-               $this->redirect_to('/');
+            if (config('debug')) {
+               throw new ApplicationError('Invalid request for this action');
             } else {
-               # Or else try the default action
-               $this->redirect_to(':');
+               log_warn("Invalid request for this action");
+               if ($action == 'index') {
+                  # Redirect to default path if the default action was requested
+                  $this->redirect_to('/');
+               } else {
+                  # Or else try the default action
+                  $this->redirect_to(':');
+               }
             }
 
             return false;
