@@ -70,6 +70,9 @@
             }
          }
 
+         $recipients = implode("', '", array_pluck($this->mailer->to, 0));
+         log_info("Sending mail to '$recipients'");
+
          if ($this->mailer->send()) {
             return true;
          } else {

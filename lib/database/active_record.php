@@ -83,7 +83,7 @@
             $this->attributes[$key] = $value;
          }
          $this->new_record = false;
-         $this->changed_attributes = null;
+         $this->changed_attributes = array();
          return true;
       }
 
@@ -99,7 +99,7 @@
          $this->call_filter(before_save);
          $this->call_filter("before_$action");
 
-         $attributes = array_get($this->attributes, (array) $this->changed_attributes);
+         $attributes = array_get($this->attributes, $this->changed_attributes);
          array_delete($attributes, $this->virtual_attributes);
 
          if ($this->exists()) {
@@ -122,10 +122,10 @@
             $this->attributes['id'] = $id;
          }
 
-         $this->changed_attributes = null;
-
          $this->call_filter("after_$action");
          $this->call_filter(after_save);
+
+         $this->changed_attributes = array();
 
          return true;
       }

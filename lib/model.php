@@ -12,7 +12,7 @@
       # Model attributes
       protected $attributes = array();
       # Changed attributes
-      protected $changed_attributes;
+      protected $changed_attributes = array();
       # Cached attributes
       protected $cache = array();
 
