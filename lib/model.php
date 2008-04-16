@@ -189,7 +189,7 @@
          $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("is not numeric"),
-            ($allow_empty and empty($value)) or is_numeric($value)
+            ($allow_empty and $value == '') or is_numeric($value)
          );
       }
 
@@ -197,7 +197,7 @@
          $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("can only contain letters"),
-            ($allow_empty and empty($value)) or ctype_alpha($value)
+            ($allow_empty and $value == '') or ctype_alpha($value)
          );
       }
 
@@ -205,14 +205,15 @@
          $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("can only contain alphanumeric characters"),
-            ($allow_empty and empty($value)) or preg_match('/^[\w\.-]*$/', $value)
+            ($allow_empty and $value == '') or preg_match('/^[\w\.-]*$/', $value)
          );
       }
 
       protected function is_email($key, $allow_empty=false) {
+         $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("is not a valid email address"),
-            ($allow_empty and empty($value)) or preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $this->attributes[$key])
+            ($allow_empty and $value == '') or preg_match('/^[\w\.\-\+]+@([\w]+\.)+[\w]+$/', $value)
          );
       }
 
@@ -224,17 +225,19 @@
       }
 
       protected function in_array($key, $array, $allow_empty=false) {
+         $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("is invalid"),
-            ($allow_empty and empty($value)) or in_array($this->attributes[$key], $array)
+            ($allow_empty and $value == '') or in_array($value, $array)
          );
       }
 
       protected function has_length($key, $min, $max, $allow_empty=false) {
-         $length = strlen($this->attributes[$key]);
+         $value = $this->attributes[$key];
+         $length = strlen($value);
          return $this->validate_attribute($key,
             sprintf(_("must be between %d and %d characters"), $min, $max),
-            ($allow_empty and empty($this->attributes[$key])) or ($length >= $min and $length <= $max)
+            ($allow_empty and $value == '') or ($length >= $min and $length <= $max)
          );
       }
 

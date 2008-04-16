@@ -18,6 +18,7 @@
    # - config_init() always loads memory cache store
    # - Connection#set_headers() ignores header errors
    # - DatabaseConnection::load() appends '_test' to database configuration names
+   # - Mail#send doesn't send out mails and stores them in Mail::$sent instead
    define('TESTING', 1);
 
    global $_TEST_DIRS;

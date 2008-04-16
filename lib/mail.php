@@ -11,6 +11,9 @@
 
    class Mail extends Object
    {
+      # Used for testing
+      static public $sent;
+
       public $template;
       public $layout;
 
@@ -70,8 +73,20 @@
             }
          }
 
-         $recipients = implode("', '", array_pluck($this->mailer->to, 0));
-         log_info("Sending mail to '$recipients'");
+         $recipients = array_pluck($this->mailer->to, 0);
+         log_info("Sending mail to '".implode("', '", $recipients)."'");
+
+         # Don't send out mails when testing, store them in Mail::$sent instead
+         if (defined('TESTING')) {
+            self::$sent[] = array(
+               'from'    => array($this->from, $this->from_name),
+               'to'      => $recipients,
+               'subject' => $this->subject,
+               'body'    => $this->body,
+            );
+
+            return true;
+         }
 
          if ($this->mailer->send()) {
             return true;
