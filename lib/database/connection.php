@@ -57,8 +57,12 @@
          list($user, $pass) = array_delete($options, 'username', 'password');
          $this->connection = new PDO(
             $this->get_dsn($options), $user, $pass, array(
-               PDO::ATTR_PERSISTENT => true,
-               PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION,
+               PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
+               PDO::ATTR_PERSISTENT       => true,
+               # emulate prepared statements because MySQL can't
+               # use its query cache with prepared statements
+               # (will be fixed in 5.1)
+               PDO::ATTR_EMULATE_PREPARES => true,
             )
          );
       }
