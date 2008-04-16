@@ -177,7 +177,7 @@
          }
 
          return $this->validate_attribute($key,
-            "already exists",
+            _("already exists"),
             $this->mapper->count(array('conditions' => $conditions)) == 0
          );
       }
