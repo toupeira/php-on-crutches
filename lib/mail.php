@@ -7,16 +7,10 @@
 # $Id$
 #
 
-   safe_require('libphp-phpmailer/class.phpmailer.php');
+   safe_require('/usr/share/php/libphp-phpmailer/class.phpmailer.php');
 
    class Mail extends Object
    {
-      # Used for testing
-      static public $sent;
-
-      public $template;
-      public $layout;
-
       protected $view;
       protected $mailer;
 
@@ -31,6 +25,60 @@
          $this->view = new View($template, $layout);
          foreach ((array) $data as $key => $value) {
             $this->view->set($key, $value);
+         }
+      }
+
+      function get_template() {
+         return $this->view->template;
+      }
+
+      function set_template($template) {
+         return $this->view->template = $template;
+      }
+
+      function get_layout() {
+         return $this->view->layout;
+      }
+
+      function set_layout($layout) {
+         return $this->view->layout = $layout;
+      }
+
+      function set($key, $value) {
+         $this->view->set($key, $value);
+         return $this;
+      }
+
+      function send() {
+         if ($this->body == '') {
+            $this->body = $this->view->render();
+            if ($this->content_type == 'text/html') {
+               $this->alt_body = strip_html($body);
+            }
+         }
+
+         $recipients = array_pluck($this->mailer->to, 0);
+         log_info("Sending mail to '".implode("', '", $recipients)."'");
+
+         # Don't send out mails when testing, store them in $_SENT_MAILS instead
+         if (defined('TESTING')) {
+            $GLOBALS['_SENT_MAILS'][] = array(
+               'from'      => $this->from,
+               'from_name' => $this->from_name,
+               'to'        => $recipients,
+               'subject'   => $this->subject,
+               'template'  => $this->template,
+               'layout'    => $this->layout,
+               'body'      => $this->body,
+            );
+
+            return true;
+         }
+
+         if ($this->mailer->send()) {
+            return true;
+         } else {
+            throw new MailerError($this->error_info);
          }
       }
 
@@ -58,41 +106,6 @@
 
       function __call($method, $args) {
          return call_user_func_array(array($this->mailer, camelize($method)), $args);
-      }
-
-      function set($key, $value) {
-         $this->view->set($key, $value);
-         return $this;
-      }
-
-      function send() {
-         if ($this->body == '') {
-            $this->body = $this->view->render();
-            if ($this->content_type == 'text/html') {
-               $this->alt_body = strip_html($body);
-            }
-         }
-
-         $recipients = array_pluck($this->mailer->to, 0);
-         log_info("Sending mail to '".implode("', '", $recipients)."'");
-
-         # Don't send out mails when testing, store them in Mail::$sent instead
-         if (defined('TESTING')) {
-            self::$sent[] = array(
-               'from'    => array($this->from, $this->from_name),
-               'to'      => $recipients,
-               'subject' => $this->subject,
-               'body'    => $this->body,
-            );
-
-            return true;
-         }
-
-         if ($this->mailer->send()) {
-            return true;
-         } else {
-            throw new MailerError($this->error_info);
-         }
       }
    }
 

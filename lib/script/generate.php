@@ -55,6 +55,10 @@
                "   protected \$table = '$table';",
                "}",
             ));
+            create_file(FIXTURES.'00_'.underscore($name).'.php', array(
+               "\$fixtures = array(",
+               ");",
+            ));
          } else {
             create_file(MODELS.underscore($name).'.php', array(
                "class {$class} extends Model",

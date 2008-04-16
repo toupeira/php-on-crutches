@@ -18,7 +18,7 @@
    # - config_init() always loads memory cache store
    # - Connection#set_headers() ignores header errors
    # - DatabaseConnection::load() appends '_test' to database configuration names
-   # - Mail#send doesn't send out mails and stores them in Mail::$sent instead
+   # - Mail#send doesn't send out mails but stores them in $_SENT_MAILS instead
    define('TESTING', 1);
 
    global $_TEST_DIRS;
@@ -118,6 +118,8 @@
    }
 
    function load_fixtures() {
+      $models = array();
+
       foreach (glob(TEST.'fixtures/*.php') as $fixture) {
          $fixtures = null;
          include $fixture;
@@ -125,16 +127,35 @@
             throw new ConfigurationError("'$fixture' doesn't contain any fixtures");
          }
 
-         $model = classify(substr(basename($fixture), 0, -4));
-         if (!is_subclass_of($model, ActiveRecord)) {
+         # Get the model from the filename, strip extension and leading numbers
+         preg_match('/^(\d+_)?(.+)\.php$/', basename($fixture), $match);
+         $model = classify($match[2]);
+
+         if (is_subclass_of($model, ActiveRecord)) {
+            $models[$model] = $fixtures;
+         } else {
             throw new ConfigurationError("'$model' is not an ActiveRecord model");
          }
+      }
 
+      # Store fixtures globally for access from fixture()
+      $GLOBALS['_FIXTURES'] = &$models;
+
+      # Empty tables in reverse order (to avoid foreign key conflicts)
+      foreach (array_reverse($models) as $model => $fixtures) {
          DB($model)->delete_all();
-         foreach ($fixtures as $fixture) {
-            DB($model)->create($fixture);
+      }
+
+      # Fill tables in order
+      foreach ($models as $model => $fixtures) {
+         foreach ($fixtures as $name => $fixture) {
+            DB($model)->insert($fixture);
          }
       }
+   }
+
+   function fixture($model, $key) {
+      return $GLOBALS['_FIXTURES'][$model][$key];
    }
 
    class ConsoleReporter extends TextReporter
@@ -158,7 +179,12 @@
    class CustomInvoker extends SimpleInvoker
    {
       function invoke($method) {
+         # Load database fixtures
          load_fixtures();
+
+         # Reset sent mails
+         $GLOBALS['_SENT_MAILS'] = null;
+
          return parent::invoke($method);
       }
    }

@@ -99,6 +99,35 @@
          $this->assertRecognizes($values, $path);
          $this->assertGenerates($path, $values);
       }
+
+      function assertMailSent() {
+         $all_options = func_get_args();
+         $count_options = count($all_options);
+         $count_mails = count($GLOBALS['_SENT_MAILS']);
+
+         if (!$this->assertEqual($count_options, $count_mails,
+               "Expected $count_options sent mails, got $count_mails")) {
+            return;
+         }
+
+         $i = 0;
+         foreach ($all_options as $options) {
+            foreach ($options as $key => $value) {
+               if ($key == 'template') {
+                  $value = VIEWS.$value.'.thtml';
+               }
+
+               $mail_value = $GLOBALS['_SENT_MAILS'][$i][$key];
+               if (is_array($mail_value) and !is_array($value)) {
+                  $this->assertInArray($value, $mail_value);
+               } else {
+                  $this->assertEqual($value, $mail_value);
+               }
+            }
+
+            $i++;
+         }
+      }
    }
 
    class ModelTestCase extends TestCase
