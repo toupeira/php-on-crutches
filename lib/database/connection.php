@@ -55,8 +55,12 @@
          $this->name = $name;
 
          list($user, $pass) = array_delete($options, 'username', 'password');
-         $this->connection = new PDO($this->get_dsn($options), $user, $pass);
-         $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+         $this->connection = new PDO(
+            $this->get_dsn($options), $user, $pass, array(
+               PDO::ATTR_PERSISTENT => true,
+               PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION,
+            )
+         );
       }
 
       function get_name() {
