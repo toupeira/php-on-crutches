@@ -197,7 +197,13 @@
             $this->set('action', $action);
 
             # Set the layout, don't use one for Ajax requests
-            $this->view->layout = ($this->is_ajax() ? null : any($this->layout, 'application'));
+            if ($this->is_ajax()) {
+               $this->view->layout = null;
+            } elseif (!is_null($this->layout)) {
+               $this->view->layout = $this->layout;
+            } else {
+               $this->view->layout = 'application';
+            }
 
             # Call before filters
             $this->call_filter("global_before");

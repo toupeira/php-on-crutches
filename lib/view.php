@@ -61,13 +61,9 @@
             }
          }
 
-         if ($layout) {
-            $this->layout = $layout;
-         }
-
          # Discard local variables to avoid conflicts with assigned template variables
+         # (keep $layout to allow overriding inside the template)
          unset($template);
-         unset($layout);
          unset($file);
 
          # Extract assigned values as local variables
@@ -80,6 +76,10 @@
          require $this->template;
          $content_for_layout = ob_get_clean();
          log_debug("Rendered template {$this->template}");
+
+         if ($layout) {
+            $this->layout = $layout;
+         }
 
          if ($this->layout and !is_file($this->layout)) {
             if (is_file($_file = View::find_template("layouts/{$this->layout}"))) {

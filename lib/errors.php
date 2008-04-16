@@ -56,11 +56,9 @@
 
       if (config('debug')) {
          print render_exception($exception);
-      } elseif ($template = View::find_template("errors/$status")) {
-         $view = new View($template);
-         print $view->render();
       } else {
-         print "<h1>$status $text</h1>";
+         $controller = new ErrorsController();
+         print $controller->perform('show', $status);
       }
    }
 
