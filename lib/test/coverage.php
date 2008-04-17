@@ -14,7 +14,6 @@
       private $include;
       private $exclude;
       private $reports;
-      private $view;
       private $view_path;
 
       private $total_size = 0;
@@ -36,7 +35,6 @@
 
          $this->exclude = (array) $exclude;
 
-         $this->view = new View();
          $this->view_path = LIB.'test/coverage/';
       }
 
@@ -91,6 +89,7 @@
       }
 
       protected function render_file($path, $coverage) {
+
          $name = substr($path, strlen(ROOT));
 
          $file = str_replace('/', '-', str_replace('.', '_', $name)).'.html';
@@ -147,13 +146,14 @@
                : 0,
          );
 
-         $this->view->set('title', $name);
-         $this->view->set('report', $report);
-         $this->view->set('lines', $lines);
-         $this->view->set('states', $states);
-         $this->view->set('types', $types);
-         $this->view->set('pad', strlen($size));
-         $this->render('file', $file);
+         $this->render('file', $file, array(
+            'title'  => $name,
+            'report' => $report,
+            'lines'  => $lines,
+            'states' => $states,
+            'types'  => $types,
+            'pad'    => strlen($size),
+         ));
 
          $this->total_size += $size;
          $this->total_code += $code;
@@ -178,18 +178,23 @@
             $this->reports
          );
 
-         $this->view->set('title', "");
-         $this->view->set('reports', $this->reports);
-
-         $this->render('index', 'index.html');
+         $this->render('index', 'index.html', array(
+            'title'   => '',
+            'reports' => $this->reports,
+         ));
       }
 
-      protected function render($template, $file) {
-         $this->view->set('time', strftime('%a, %d %b %Y %H:%M:%S %z'));
-         $output = $this->view->render(
+      protected function render($template, $file, $data) {
+         $view = new View(
             $this->view_path."$template.thtml",
             $this->view_path."layout.thtml"
          );
+
+         foreach ($data as $key => $value) {
+            $view->set($key, $value);
+         }
+         $view->set('time', strftime('%a, %d %b %Y %H:%M:%S %z'));
+         $output = $view->render();
 
          if (!file_put_contents("{$this->target}/$file", $output)) {
             throw new ApplicationError("Could not write file $file");
@@ -210,7 +215,7 @@
             $type = 'start of comment';
          }
 
-         if ($this->last and empty($line)) {
+         if ($this->last and blank($line)) {
             return 'blank';
          } elseif ($this->last and !preg_match('/[^ ;(){}<>\/\*#?]/', $line)) {
             return $type;
@@ -228,8 +233,10 @@
             return 'property';
          } elseif ($this->last and preg_match('/^(\$\w+|[\d\.]+|[\'"].*[\'"]) ?[\.,]?$/', $line)) {
             return 'literals';
-         } elseif ($this->last and preg_match('/^\$\w+ ?= ?array\($/', $line)) {
+         } elseif ($this->last and preg_match('/^(\$\w+ ?= ?array\(|[\'"]?\w+[\'"]? => [\'"]?\w+[\'"]?,?)$/', $line)) {
             return 'array assignment';
+         } elseif ($this->last and preg_match('/^[\w\s\-\+\.\/,;:äöü]*$/u', $line)) {
+            return 'text';
          } elseif (preg_match('/(^<[!\/]?\w+|[^?]>$)/', $line)) {
             return 'html';
          } else {

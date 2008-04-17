@@ -8,7 +8,7 @@
 </tr>
 <? foreach ($reports as $name => $report): ?>
 <tr class="gray<?= cycle(0, 1) ?>">
-  <td><?= $report['file'] ? link_to($name, $report['file']) : $name ?></td>
+  <td><?= $report['file'] ? content_tag('a', $name, array('href' => $report['file'])) : $name ?></td>
   <td class="right"><?= $report['size'] ?></td>
   <td class="right"><?= $report['code'] ?></td>
   <?= coverage_graph($report['coverage_total']) ?>

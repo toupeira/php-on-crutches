@@ -136,9 +136,15 @@
 
    class ControllerTestCase extends TestCase
    {
+      protected $controller;
+      protected $action;
+      protected $session;
+      protected $stdout;
+
       function setup() {
          $class = substr(get_class($this), 0, -4);
          $this->controller = Dispatcher::$controller = new $class();
+         $this->session = &$_SESSION;
          $this->setup_controller();
       }
 
@@ -152,24 +158,23 @@
          }
       }
 
-      function request($action, $get=null, $post=null) {
+      function request($action, $post=null) {
          $path = "{$this->controller->name}/$action";
-         $_GET = (array) $get;
          $_POST = (array) $post;
          fake_request($path, is_array($post) ? 'POST' : 'GET');
 
          ob_start();
          $this->controller = Dispatcher::run($path);
-         ob_end_clean();
+         $this->stdout = ob_end_clean();
          $this->action = Dispatcher::$params['action'];
       }
 
-      function get($action, $args=null) {
-         return $this->request($action, (array) $args);
+      function get($action) {
+         return $this->request($action);
       }
 
       function post($action, $args=null) {
-         return $this->request($action, null, (array) $args);
+         return $this->request($action, (array) $args);
       }
 
       function ajax($method, $action, $args=null) {
@@ -220,13 +225,19 @@
       function assertTemplate($template) {
          $this->assertResponse('success');
 
-         $parts = explode('/', "$template.thtml");
          $view_template = $this->controller->view->template;
-         $view_parts = explode('/', $view_template);
-         $this->assertEqual(
-            $parts,
-            array_slice($view_parts, -count($parts)),
-            "Expected template '$template', got '$view_template'");
+
+         if ($template) {
+            $parts = explode('/', "$template.thtml");
+            $view_parts = explode('/', $view_template);
+            $this->assertEqual(
+               $parts,
+               array_slice($view_parts, -count($parts)),
+               "Expected template '$template', got '$view_template'");
+         } else {
+            $this->assertEqual('', $this->controller->view->template,
+               "Expected template '$template', got '$view_template'");
+         }
       }
 
       function assertAssigns($assigns) {

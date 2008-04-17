@@ -11,7 +11,11 @@
    require_once dirname(__FILE__).'/../../config/environment.php';
    require_once LIB.'test/runner.php';
 
-   $_LOGGER->level = LOG_DISABLED;
+   if (in_array('-v', $argv)) {
+      array_remove($argv, '-v');
+   } else {
+      $_LOGGER->level = LOG_DISABLED;
+   }
 
    fake_request();
 
