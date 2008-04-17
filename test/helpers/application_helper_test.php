@@ -1,0 +1,7 @@
+<?
+
+   class ApplicationHelperTest extends TestCase
+   {
+   }
+
+?>

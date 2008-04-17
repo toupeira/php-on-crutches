@@ -12,6 +12,8 @@
          mkdir($this->views);
          file_put_contents($this->views.'index.thtml', 'Index Template');
          file_put_contents($this->views.'blank.thtml', 'Blank Template');
+
+         config_set('debug', true);
       }
 
       function teardown() {
@@ -124,12 +126,16 @@
       }
 
       function test_is_valid_request_without_requirements() {
+         config_set('debug', false);
+
          $_SERVER['REQUEST_METHOD'] = 'GET';
 
          $this->assertTrue($this->controller->is_valid_request('index'));
       }
 
       function test_is_valid_request_with_post_requirement() {
+         config_set('debug', false);
+
          $_SERVER['REQUEST_METHOD'] = 'GET';
 
          foreach (array(true, 'index') as $require) {
@@ -146,6 +152,8 @@
       }
 
       function test_is_valid_request_with_ajax_requirement() {
+         config_set('debug', false);
+
          unset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
          foreach (array(true, 'index') as $require) {
@@ -162,6 +170,8 @@
       }
 
       function test_is_valid_request_with_ssl_requirement() {
+         config_set('debug', false);
+
          unset($_SERVER['HTTPS']);
          $_SERVER['SERVER_NAME'] = 'example.com';
          $_SERVER['REQUEST_URI'] = '/foo?bar';
@@ -202,6 +212,8 @@
       }
 
       function test_perform_with_invalid_request() {
+         config_set('debug', false);
+
          $this->controller->require_post[] = 'index';
          $this->controller->perform('index');
          $this->assertRedirect('/');
@@ -282,7 +294,7 @@
          $this->controller->redirect_to('/foo', 404);
          $this->assertHeader('Location', null);
          $this->assertHeader('Status', null);
-         $this->assertOutput('Redirect to <a href="http://www.example.com/foo">http://www.example.com/foo</a>', $this->controller->output);
+         $this->assertOutput('Redirecting to <a href="http://www.example.com/foo">http://www.example.com/foo</a>', $this->controller->output);
 
          config_set('debug_redirects', false);
       }
@@ -377,23 +389,23 @@
          $this->assertFalse($this->controller->has_errors('bar[]'));
       }
 
-      function test_set_error_messages() {
+      function test_set_model_errors() {
          $foo = new ControllerTestModel();
          $foo->add_error('foo', "foo is invalid");
          $foo->add_error('bar', "bar is invalid");
 
          $this->controller->set('foo', $foo);
-         $this->controller->set_error_messages();
+         $this->controller->set_model_errors();
          $this->assertEqual(
             array('foo is invalid', 'bar is invalid'),
             $this->controller->msg['error']);
       }
 
-      function test_set_error_messages_without_messages() {
+      function test_set_model_errors_without_messages() {
          $foo = new ControllerTestModel();
 
          $this->controller->set('foo', $foo);
-         $this->controller->set_error_messages();
+         $this->controller->set_model_errors();
          $this->assertNull($this->controller->msg['error']);
       }
    }
