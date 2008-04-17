@@ -30,7 +30,12 @@
 
       $html = "<$name";
       foreach ($options as $option => $value) {
-         if ($value !== null) {
+         if ($value !== null and $value !== false) {
+            if ($value === true) {
+               # Support boolean tags, e.g. 'disabled', 'checked' etc.
+               $value = $option;
+            }
+
             $value = str_replace('"', '\"', $value);
             $html .= " $option=\"$value\"";
          }

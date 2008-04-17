@@ -291,7 +291,7 @@
             }
          }
 
-         if (!$path) {
+         if (!$path and !$path = $default) {
             # Use the default page if no path was found
             $path = '';
          }

@@ -41,8 +41,16 @@
          proc('link_to(h($a[1]), h($a[1]))'), $text);
    }
 
-   function br2nl($text) {
-      return str_replace("<br />", "\n", $text);
+   function format_date($time, $format='%d.%m.%y') {
+      if ($time) {
+         return strftime($format, strtotime($time));
+      }
+   }
+
+   function format_time($time, $format='%d.%m.%Y %H:%M') {
+      if ($time) {
+         return strftime($format, strtotime($time));
+      }
    }
 
    define('KB', 1024);
@@ -61,16 +69,12 @@
       }
    }
 
-   function format_date($time, $format='%d.%m.%y') {
-      if ($time) {
-         return strftime($format, strtotime($time));
-      }
+   function indent($text, $indent=2) {
+      return preg_replace('/^/m', str_repeat(' ', $indent), $text);
    }
 
-   function format_time($time, $format='%d.%m.%Y %T') {
-      if ($time) {
-         return strftime($format, strtotime($time));
-      }
+   function br2nl($text) {
+      return str_replace("<br />", "\n", $text);
    }
 
    function cycle($values) {

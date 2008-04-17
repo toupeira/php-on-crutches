@@ -108,7 +108,7 @@
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
          } else {
-            $partial = $this->data['controller'].'/_'.$partial;
+            $partial = substr(dirname($this->template), strlen(VIEWS)).'/_'.$partial;
          }
 
          if (!$this->partial = View::find_template($partial) and

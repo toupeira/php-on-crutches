@@ -256,7 +256,7 @@
             $options['errors'] = true;
          }
 
-         $value = $this->__get($key);
+         $value = any(array_delete($options, 'value'), $this->__get($key));
          $key = underscore(get_class($this))."[$key]";
 
          switch ($tag) {

@@ -70,7 +70,7 @@
 
          foreach ($attributes as $key => $value) {
             $columns[] = "`$key`";
-            if ($value == '') {
+            if ($value === '') {
                $keys[] = 'NULL';
             } else {
                $keys[] = '?';
@@ -99,7 +99,7 @@
          $values = array();
 
          foreach ($attributes as $key => $value) {
-            if ($value == '') {
+            if ($value === '') {
                $keys[] = "`$key` = NULL";
             } else {
                $keys[] = "`$key` = ?";

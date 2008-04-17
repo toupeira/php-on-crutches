@@ -58,7 +58,7 @@
       if ($tag == 'input' and in_array($options['type'], array('checkbox', 'radio'))) {
          $options['value'] = $default_value;
          if ($post_value) {
-            $options['checked'] = ($value == $default_value ? 'checked' : null);
+            $options['checked'] = ($value == $default_value);
          }
       } elseif ($tag == 'input') {
          $options['value'] = $value;
@@ -97,13 +97,13 @@
 
    function check_box($key, $value='1', $checked=null, $options=null) {
       return form_element('input', $key, $value, $options, array(
-         'type' => 'checkbox', 'checked' => $checked ? 'checked' : null
+         'type' => 'checkbox', 'checked' => (bool) $checked
       ));
    }
 
    function radio_button($key, $value, $checked=null, $options=null) {
       return form_element('input', $key, $value, $options, array(
-         'type' => 'radio', 'checked' => $checked ? 'checked' : null
+         'type' => 'radio', 'checked' => (bool) $checked
       ));
    }
 
