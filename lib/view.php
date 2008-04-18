@@ -77,7 +77,7 @@
          $content_for_layout = ob_get_clean();
          log_debug("Rendered template {$this->template}");
 
-         if ($layout) {
+         if (!is_null($layout)) {
             $this->layout = $layout;
          }
 

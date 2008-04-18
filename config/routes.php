@@ -1,4 +1,3 @@
-<?# $Id$ ?>
 <?
 
    $_ROUTES = array(
