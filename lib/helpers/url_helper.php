@@ -106,7 +106,7 @@
          $options['onclick'] .= "; return false";
       }
 
-      return content_tag('a', $title, $options, array('href' => url_for($path, $link_options)));
+      return content_tag('a', $title, $options, array('href' => h(url_for($path, $link_options))));
    }
 
    # Build a link button
