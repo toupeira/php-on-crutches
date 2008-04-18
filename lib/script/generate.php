@@ -24,7 +24,7 @@
          foreach ((array) $lines as $line) {
             $content .= "   $line\n";
          }
-         $content .= "\n?>";
+         $content .= "\n?>\n";
 
          if (file_put_contents($path, $content) === false) {
             print "  error\n";
