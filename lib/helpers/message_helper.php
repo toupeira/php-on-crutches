@@ -17,7 +17,7 @@
                continue;
             } else {
                if (is_array($message)) {
-                  $message = list_tag($message);
+                  $message = (count($message) == 1 ? $message[0] : list_tag($message));
                }
 
                $message = preg_replace('/\[\[([^]]+)\]\]/', '<code>$1</code>', $message);
