@@ -178,31 +178,30 @@
             if ($operator) {
                $keys = explode("_{$operator}_", $keys);
                array_unshift($keys, $key);
-               if ($argc < count($keys) or $argc > count($keys) + 1) {
-                  $keys = implode("', '", $keys);
-                  throw new ApplicationError("Wrong number of arguments for keys '$keys'");
-               }
+            } else {
+               $keys = (array) $key;
+            }
 
-               $where = '';
-               $op = '';
-               foreach ($keys as $key) {
-                  $where .= "$op`$key` $equality ?";
-                  $params[] = array_shift($args);
-                  $op = ' '.strtoupper($operator).' ';
-               }
+            $where = '';
+            $op = '';
+            foreach ($keys as $key) {
+               $where .= "$op`$key` $equality ?";
+               $params[] = array_shift_arg($args);
+               $op = ' '.strtoupper($operator).' ';
+            }
 
-               array_unshift($params, $where);
+            array_unshift($params, $where);
+
+            if ($args) {
                if (is_array($options = array_shift($args))) {
                   $params[] = $options;
+               } else {
+                  throw new ApplicationError('Too many arguments');
                }
-
-               return call_user_func_array(array($this, $finder), $params);
-            } else {
-               if ($argc < 1 or $argc > 2) {
-                  throw new ApplicationError("Wrong number of arguments for key '$key'");
-               }
-               return $this->$finder("`$key` $equality ?", $args[0]);
             }
+
+            return call_user_func_array(array($this, $finder), $params);
+
          } else {
             throw new ApplicationError("Invalid method '$method'");
          }
