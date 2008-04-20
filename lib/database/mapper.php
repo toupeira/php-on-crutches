@@ -324,7 +324,6 @@
                # without placeholders
                #   e.g.: find('key LIKE "%value%"')
                $where .= "$operator $value";
-               array_shift($keys);
 
             } elseif (is_string($value) and !blank($value)) {
                # Use array value as column name
