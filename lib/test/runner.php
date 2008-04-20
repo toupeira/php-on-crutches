@@ -14,12 +14,17 @@
 
    safe_require(TEST.'test_helper.php');
 
-   # Used for some custom behaviour when testing:
+   # Define TESTING for some custom behaviour when testing:
    # - config_init() always loads memory cache store
    # - Connection#set_headers() ignores header errors
    # - DatabaseConnection::load() appends '_test' to database configuration names
    # - Mail#send doesn't send out mails but stores them in $_SENT_MAILS instead
    define('TESTING', 1);
+
+   # Reset some configuration values
+   config_set('debug', false);
+   config_set('debug_redirects', false);
+   config_set('rewrite_urls', true);
 
    global $_TEST_DIRS;
    $_TEST_DIRS = array_map(basename, array_filter(glob(TEST.'*'), is_dir));

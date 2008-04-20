@@ -13,7 +13,7 @@
    # Require a file if it exists
    function safe_require($file) {
       if (is_file($file)) {
-         require $file;
+         require_once $file;
       }
    }
 
@@ -63,7 +63,7 @@
    function fake_request($path=null, $method='GET', $ssl=false) {
       $_SERVER['HTTP_HOST'] = 'www.example.com';
       $_SERVER['REQUEST_URI'] = "/$path";
-      $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+      $_SERVER['REMOTE_ADDR'] = any($_SERVER['REMOTE_ADDR'], '127.0.0.1');
       $_SERVER['REQUEST_METHOD'] = $method;
       $_SERVER['HTTPS'] = $ssl ? 'on' : null;
    }
