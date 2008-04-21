@@ -235,7 +235,7 @@
             return 'literals';
          } elseif ($this->last and preg_match('/^(\$\w+ ?= ?array\(|[\'"]?\w+[\'"]? => [\'"$]?\w+[\'"]?,?)$/', $line)) {
             return 'array assignment';
-         } elseif ($this->last and preg_match('/^[\w\s\-\+\.\/,;:!?äöü]*$/u', $line)) {
+         } elseif ($this->last and preg_match('/^[\w\s\-\+\.\/,;:!?äöü\'"]*$/u', $line)) {
             return 'text';
          } elseif (preg_match('/(^<[!\/]?\w+|[^?]>$)/', $line)) {
             return 'html';
