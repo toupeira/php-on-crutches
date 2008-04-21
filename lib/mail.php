@@ -20,7 +20,7 @@
          $this->char_set = 'utf-8';
          $this->from = config('mail_from');
          $this->from_name = config('mail_from_name');
-         $this->sender = any(config('mail_sender', 'mail_from'));
+         $this->sender = any(config('mail_sender'), config('mail_from'));
 
          $this->view = new View($template, $layout);
          foreach ((array) $data as $key => $value) {

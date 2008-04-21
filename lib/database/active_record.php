@@ -15,7 +15,9 @@
 
       protected $new_record = true;
       protected $load_attributes = true;
+
       protected $virtual_attributes;
+      protected $defaults;
 
       protected $associations;
       protected $has_one;
@@ -29,18 +31,27 @@
             throw new ConfigurationError("No table set for model '".get_class($this)."'");
          }
 
+         # Use attributes from the database
          if ($this->load_attributes and empty($this->attributes)) {
             foreach ($this->get_mapper()->attributes as $key) {
                $this->attributes[$key] = null;
             }
          }
 
+         # Add virtual attributes
          foreach ((array) $this->virtual_attributes as $key) {
             $this->attributes[$key] = null;
          }
 
+         # Always protect the ID from mass-assignments
          $this->protected[] = 'id';
-         $this->set_attributes($attributes, $defaults);
+
+         # Set the default values
+         $this->set_attributes($attributes, array_merge(
+            (array) $this->defaults, (array) $defaults
+         ));
+
+         # Load association objects
          $this->add_associations();
       }
 
