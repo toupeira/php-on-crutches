@@ -184,6 +184,11 @@
    class CustomInvoker extends SimpleInvoker
    {
       function invoke($method) {
+         # Reset output buffering
+         while (ob_get_level()) {
+            ob_end_clean();
+         }
+
          # Load database fixtures
          load_fixtures();
 
