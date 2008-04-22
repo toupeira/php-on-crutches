@@ -111,8 +111,8 @@
       if (is_array($keys)) {
          $values = array();
          foreach ($keys as $key) {
-            if ($value = $array[$key]) {
-               $values[] = $value;
+            if (array_key_exists($key, $array)) {
+               $values[] = $array[$key];
                unset($array[$key]);
             }
          }
