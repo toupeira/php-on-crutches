@@ -17,9 +17,9 @@
       protected $cache = array();
 
       # Read-only attributes can't be changed
-      public $readonly = array();
+      protected $readonly = array();
       # Protected attributes can only be set explicitly
-      public $protected = array();
+      protected $protected = array();
 
       # List of error messages
       protected $errors = array();

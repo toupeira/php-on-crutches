@@ -25,9 +25,9 @@
 
    class Logger extends Object
    {
-      private $file;
-      private $level;
-      private $buffer;
+      protected $file;
+      protected $level;
+      protected $buffer;
 
       function __construct($file=STDERR, $level=LOG_INFO) {
          if (is_resource($file)) {

@@ -9,10 +9,10 @@
 
    class DatabaseConnection extends Object
    {
-      static private $connections;
+      static protected $connections;
 
-      private $name;
-      private $connection;
+      protected $name;
+      protected $connection;
 
       static function load($name) {
          if ($connection = self::$connections[$name]) {
@@ -173,8 +173,8 @@
    }
 
    class DatabaseTransaction {
-      private $connection;
-      private $finished;
+      protected $connection;
+      protected $finished;
 
       function __construct($connection) {
          $this->connection = $connection;

@@ -9,19 +9,19 @@
 
    class CoverageReport extends Object
    {
-      private $files;
-      private $target;
-      private $include;
-      private $exclude;
-      private $reports;
-      private $view_path;
+      protected $files;
+      protected $target;
+      protected $include;
+      protected $exclude;
+      protected $reports;
+      protected $view_path;
 
-      private $total_size = 0;
-      private $total_code = 0;
-      private $covered_size = 0;
-      private $covered_code = 0;
-      private $comment = false;
-      private $last = true;
+      protected $total_size = 0;
+      protected $total_code = 0;
+      protected $covered_size = 0;
+      protected $covered_code = 0;
+      protected $comment = false;
+      protected $last = true;
 
       function __construct($coverage, $target=null, $include=null, $exclude=null) {
          $this->files = $coverage;

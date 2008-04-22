@@ -26,9 +26,9 @@
       public $template;
       public $layout;
 
-      private $data;
-      private $partial;
-      private $locals;
+      protected $data;
+      protected $partial;
+      protected $locals;
 
       function __construct($template=null, $layout=null) {
          $this->template = $template;
@@ -104,7 +104,7 @@
       }
 
       # Render a partial template
-      private function render_partial($partial, $locals=null) {
+      protected function render_partial($partial, $locals=null) {
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
          } else {
