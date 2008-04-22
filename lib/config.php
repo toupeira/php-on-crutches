@@ -80,6 +80,9 @@
          register_shutdown_function(session_write_close);
       }
 
+      # Setup mbstring
+      mb_internal_encoding('UTF-8');
+
       # Configure gettext domain
       textdomain($config['application']);
       bindtextdomain($config['application'], LANG);
