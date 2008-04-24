@@ -95,7 +95,17 @@
          }
          $this->new_record = false;
          $this->changed_attributes = array();
+
          return true;
+      }
+
+      # Reload attributes from database
+      function reload() {
+         if ($this->exists() and !in_array('id', $this->changed_attributes)) {
+            return $this->load($this->mapper->find($this->id)->attributes);
+         } else {
+            return false;
+         }
       }
 
       function exists() {
