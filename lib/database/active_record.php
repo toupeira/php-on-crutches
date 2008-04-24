@@ -114,8 +114,8 @@
             $sql_action = 'insert';
          }
 
-         $this->call_filter(before_save);
          $this->call_filter("before_$action");
+         $this->call_filter(before_save);
 
          $attributes = array_get($this->attributes, $this->changed_attributes);
          array_delete($attributes, $this->virtual_attributes);
@@ -137,8 +137,8 @@
             $this->attributes['id'] = $id;
          }
 
-         $this->call_filter("after_$action");
          $this->call_filter(after_save);
+         $this->call_filter("after_$action");
 
          $this->changed_attributes = array();
 
