@@ -165,8 +165,8 @@
          return empty($this->errors);
       }
 
-      protected function validate_attribute($key, $message, $value) {
-         if ($value) {
+      protected function validate_attribute($key, $message, $valid) {
+         if ($valid) {
             return true;
          } else {
             if (!in_array($key, $this->errors)) {
@@ -232,13 +232,26 @@
          );
       }
 
-      protected function has_length($key, $min, $max, $allow_empty=false) {
+      protected function has_length($key, $min=null, $max=null, $allow_empty=false) {
          $value = $this->attributes[$key];
-         $length = strlen($value);
-         return $this->validate_attribute($key,
-            sprintf(_("must be between %d and %d characters"), $min, $max),
-            ($allow_empty and $value == '') or ($length >= $min and $length <= $max)
-         );
+         $length = mb_strlen($value);
+
+         if ($allow_empty and $value == '') {
+            return true;
+         }
+
+         if (is_null($max)) {
+            $message = sprintf(_("must be at least %d characters"), $min);
+            $valid = ($length >= $min);
+         } elseif ($min <= 0) {
+            $message = sprintf(_("cannot be longer than %d characters"), $max);
+            $valid = ($length <= $max);
+         } else {
+            $message = sprintf(_("must be between %d and %d characters"), $min, $max);
+            $valid = ($length >= $min and $length <= $max);
+         }
+
+         return $this->validate_attribute($key, $message , $valid);
       }
 
       protected function has_format($key, $format) {
