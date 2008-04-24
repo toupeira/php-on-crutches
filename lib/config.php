@@ -31,7 +31,7 @@
       }
 
       # Configure error reporting
-      ini_set('display_errors', (true or $config['debug'] or PHP_SAPI == 'cli'));
+      ini_set('display_errors', ($config['debug'] or PHP_SAPI == 'cli'));
       error_reporting(E_ALL ^ E_NOTICE);
       set_error_handler('error_handler', error_reporting());
       (PHP_SAPI != 'cli') and set_exception_handler('exception_handler');
@@ -102,9 +102,7 @@
       }
 
       # Work around magic quotes...
-      if (get_magic_quotes_gpc()) {
-         fix_magic_quotes();
-      }
+      fix_magic_quotes();
    }
 
    # Change the current language used for gettext and templates

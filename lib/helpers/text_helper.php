@@ -38,7 +38,7 @@
 
    function auto_link($text) {
       return preg_replace_callback('#\b(\w+://[-\.\w]+(/[^\s]*)?)#',
-         proc('link_to(h($a[1]), h($a[1]))'), $text);
+         proc('link_to(h($a[1]), $a[1])'), $text);
    }
 
    function format_date($time, $format='%d.%m.%y') {

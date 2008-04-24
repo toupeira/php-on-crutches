@@ -36,8 +36,7 @@
                $value = $option;
             }
 
-            $value = str_replace('"', '\"', $value);
-            $html .= " $option=\"$value\"";
+            $html .= " $option=\"".h($value)."\"";
          }
       }
 

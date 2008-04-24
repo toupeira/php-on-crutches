@@ -7,6 +7,9 @@
 # $Id$
 #
 
+   # Display errors until the framework is initialized
+   ini_set('display_errors', true);
+
    # Load utility libraries
    foreach (glob(LIB.'util/*.php') as $util) {
       require $util;
