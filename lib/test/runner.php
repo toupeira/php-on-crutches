@@ -195,7 +195,11 @@
          # Reset sent mails
          $GLOBALS['_SENT_MAILS'] = null;
 
-         return parent::invoke($method);
+         method_exists($this, 'before') and $this->before($method);
+         $result =  parent::invoke($method);
+         method_exists($this, 'after') and $this->after($method);
+
+         return $result;
       }
    }
 
