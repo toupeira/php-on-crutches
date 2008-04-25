@@ -19,7 +19,7 @@
    function usage() {
       print "Usage: {$GLOBALS['argv'][0]} [OPTIONS]\n"
           . "\n"
-          . "  -d       Show log messages\n"
+          . "  -v       Show log messages\n"
           . "  -s       Hide prompt\n"
           . "  -e CODE  Execute code and exit\n"
           . "\n";
@@ -29,7 +29,7 @@
    $args = array_slice($argv, 1);
    while ($arg = array_shift($args)) {
       switch ($arg) {
-         case '-d':
+         case '-v':
             # Show log messages
             config_set('debug', true);
             $_LOGGER->level = LOG_DEBUG;
@@ -41,7 +41,7 @@
          case '-e':
             # Execute given command and exit
             if ($command = array_shift($args)) {
-               $debug = ($_LOGGER->level == LOG_DEBUG ? '-d' : '');
+               $debug = ($_LOGGER->level == LOG_DEBUG ? '-v' : '');
                system("echo '$command' | php5 {$argv[0]} -s $debug");
                exit;
             } else {

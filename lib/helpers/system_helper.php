@@ -46,10 +46,9 @@
    # Create a temporary file or directory which will be removed when
    # the request is finished.
    function mktemp($dir=false) {
-      $prefix = sys_get_temp_dir();
       $template = config('application').'.XXXXXX';
       $dir = $dir ? '-d' : '';
-      $path = trim(`mktemp $dir -p $prefix $template`);
+      $path = trim(`mktemp $dir -p /tmp $template`);
       register_shutdown_function(rm_rf, $path);
       return $path;
    }

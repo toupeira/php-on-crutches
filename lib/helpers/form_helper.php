@@ -91,7 +91,7 @@
 
    function file_field($key, $options=null) {
       return form_element('input', $key, null, $options, array(
-         'type' => 'file'
+         'type' => 'file', 'size' => 30
       ));
    }
 
@@ -106,6 +106,7 @@
          'type' => 'radio', 'checked' => (bool) $checked
       ));
    }
+
 
    function hidden_field($key, $value, $options=null) {
       return form_element('input', $key, $value, $options, array(

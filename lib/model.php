@@ -118,7 +118,7 @@
                $this->__set($key, $value);
             }
 
-            return true;
+            return $this;
          } else {
             return false;
          }

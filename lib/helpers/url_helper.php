@@ -113,8 +113,12 @@
    function button_to($title, $path, $options=null) {
       add_confirm_options(&$options);
 
-      $method = any($options['method'], 'get');
+      $method = any($options['post'] ? 'POST' : null, $options['method'], 'GET');
+      unset($options['post']);
       unset($options['method']);
+
+      if ($options['post']) {
+      }
 
       return form_tag($path, array('method' => $method))
            . submit_button($title, $options) . "</form>\n";

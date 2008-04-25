@@ -42,6 +42,14 @@
          $this->cookies = &$_COOKIE;
          $this->files = &$_FILES;
 
+         # Sanitize uploaded files
+         foreach ($this->files as $i => &$file) {
+            $file['name'] = basename($file['name']);
+            if (!is_uploaded_file($file['tmp_name'])) {
+               unset($this->files[$i]);
+            }
+         }
+
          # Set default headers
          $this->headers = array(
             'Content-Type' => 'text/html; charset=utf-8',

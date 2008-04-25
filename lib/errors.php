@@ -36,8 +36,8 @@
    # Handler for uncaught exceptions
    function exception_handler($exception) {
       if (log_running()) {
-         log_error("\n".get_class($exception).': '.$exception->getMessage());
-         log_debug("  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
+         log_error("\n".get_class($exception).': '.$exception->getMessage()
+                   ."  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
       }
 
       if ($exception instanceof NotFound) {

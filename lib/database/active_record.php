@@ -96,7 +96,7 @@
          $this->new_record = false;
          $this->changed_attributes = array();
 
-         return true;
+         return $this;
       }
 
       # Reload attributes from database
@@ -132,7 +132,7 @@
 
          if ($this->exists()) {
             if (empty($attributes) and !$force_update) {
-               return true;
+               return $this;
             }
 
             $args = array($this->id, $attributes, $force_update);
@@ -152,7 +152,7 @@
 
          $this->changed_attributes = array();
 
-         return true;
+         return $this;
       }
 
       function destroy() {

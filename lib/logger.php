@@ -19,8 +19,7 @@
    function log_dump($data) { return log_debug(var_export($data, true)); }
 
    function log_running() {
-      $logger = $GLOBALS['_LOGGER'];
-      return $logger instanceof Logger and $logger->running();
+      return $GLOBALS['_LOGGER'] instanceof Logger;
    }
 
    class Logger extends Object
