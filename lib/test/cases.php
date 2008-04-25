@@ -138,13 +138,21 @@
    {
       protected $controller;
       protected $action;
-      protected $session;
       protected $stdout;
 
-      function setup() {
-         $class = substr(get_class($this), 0, -4);
+      protected $session;
+      protected $cookies;
+
+      function setup($class=null) {
+         if (!$class) {
+            $class = substr(get_class($this), 0, -4);
+         }
+
          $this->controller = Dispatcher::$controller = new $class();
+
          $this->session = &$_SESSION;
+         $this->cookies = &$_COOKIE;
+
          $this->setup_controller();
       }
 

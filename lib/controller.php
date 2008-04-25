@@ -317,7 +317,20 @@
       }
 
       # Send a cookie
-      function send_cookie($key, $value, $expires=null) {
+      function send_cookie($name, $value, $expire=null, $path='/', $domain=null, $secure=null, $httponly=null) {
+         $args = func_get_args();
+
+         if (defined('TESTING')) {
+            # Ignore errors when testing
+            return @call_user_func_array(setcookie, $args);
+         } else {
+            return call_user_func_array(setcookie, $args);
+         }
+      }
+
+      # Delete a cookie
+      function delete_cookie($name, $path='/', $domain=null, $secure=null, $httponly=null) {
+         return $this->send_cookie($name, '', time() - 3600, $path, $domain, $secure, $httponly);
       }
 
       # Send a file with the appropriate headers
