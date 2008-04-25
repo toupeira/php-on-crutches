@@ -114,7 +114,9 @@
          foreach ($all_options as $options) {
             foreach ($options as $key => $value) {
                if ($key == 'template') {
-                  $value = VIEWS.$value.'.thtml';
+                  $value = VIEWS."$value.thtml";
+               } elseif ($key == 'layout' and $value) {
+                  $value = VIEWS."layouts/$value.thtml";
                }
 
                $mail_value = $GLOBALS['_SENT_MAILS'][$i][$key];
