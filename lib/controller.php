@@ -317,8 +317,11 @@
       }
 
       # Send a cookie
-      function send_cookie($name, $value, $expire=null, $path='/', $domain=null, $secure=null, $httponly=null) {
+      function send_cookie($name, $value, $expire=null, $path=null, $domain=null, $secure=null, $httponly=null) {
          $args = func_get_args();
+         if (is_null($args[3])) {
+            $args[3] = '/';
+         }
 
          if (defined('TESTING')) {
             # Ignore errors when testing
