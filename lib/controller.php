@@ -39,7 +39,7 @@
          # Shortcuts for request data
          $this->params = &$params;
          $this->session = &$_SESSION;
-         $this->cookies = &$_COOKIES;
+         $this->cookies = &$_COOKIE;
          $this->files = &$_FILES;
 
          # Set default headers
