@@ -104,6 +104,10 @@
 
    # Delete one or more keys from an array
    function array_delete(&$array, $keys) {
+      if (!is_array($array)) {
+         return;
+      }
+
       if (func_num_args() > 2) {
          $keys = array_slice(func_get_args(), 1);
       }
@@ -119,7 +123,8 @@
 
          return $values;
       } else {
-         if ($value = $array[$keys]) {
+         if (array_key_exists($keys, $array)) {
+            $value = $array[$keys];
             unset($array[$keys]);
             return $value;
          }

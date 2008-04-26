@@ -12,11 +12,11 @@
       foreach ((array) $items as $key => $value) {
          if (is_array($value)) {
             $content = (is_string($key) ? $key : '');
-            $content .= list_tag($value, $options, $item_options).N;
+            $content .= list_tag($value, $options, $item_options);
          } else {
             $content = $value;
          }
-         $html .= content_tag('li', $content, $item_options).N;
+         $html .= content_tag('li', $content, $item_options);
       }
 
       $type = any(array_delete($options, 'type'), 'ul');

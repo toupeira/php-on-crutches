@@ -312,8 +312,8 @@
          foreach ((array) $this->headers as $header => $value) {
             if ($value !== null) {
                $header = ($header == 'Status' ? "HTTP/1.x $value" : "$header: $value");
-               if (defined('TESTING')) {
-                  # Ignore errors when testing
+               if (defined('TESTING') or PHP_SAPI == 'cli') {
+                  # Ignore errors when testing or in console
                   @header($header);
                } else {
                   header($header);
@@ -336,8 +336,8 @@
             $options['httponly'],
          );
 
-         if (defined('TESTING')) {
-            # Ignore errors when testing
+         if (defined('TESTING') or PHP_SAPI == 'cli') {
+            # Ignore errors when testing or in console
             return @call_user_func_array(setcookie, $args);
          } else {
             return call_user_func_array(setcookie, $args);
