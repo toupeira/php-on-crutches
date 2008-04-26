@@ -7,9 +7,16 @@
 # $Id$
 #
 
+   function current_params($params=null) {
+      return array_merge((array) Dispatcher::$params, (array) $params);
+   }
+
    # Build a URL for the given options
    function url_for($path, $options=null) {
-      if (is_array($path)) {
+      if (is_null($path)) {
+         return;
+
+      } elseif (is_array($path)) {
          # Generate path from route parameters
          $path = Router::generate($path);
 

@@ -236,9 +236,18 @@
          # Add remaining parameters to query string
          if ($values) {
             $query = array();
+
             foreach ($values as $key => $value) {
                if (!is_null($value)) {
-                  $query[] = urlencode($key).'='.urlencode($value);
+                  if (is_numeric($key)) {
+                     $query[] = urlencode($value);
+                  } elseif (is_array($value)) {
+                     $query[] = strtr(http_build_query(array($key => $value)), array(
+                        '%5B' => '[', '%5D' => ']'
+                     ));
+                  } else {
+                     $query[] = urlencode($key).'='.urlencode($value);
+                  }
                }
             }
 

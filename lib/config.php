@@ -52,8 +52,8 @@
          : any($config['log_file'], LOG.'application.log');
       $GLOBALS['_LOGGER'] = new Logger($log_file, any($config['log_level'], LOG_INFO));
 
-      # Setup cache store, always use memory store for debug mode and testing
-      if ($config['debug'] or defined('TESTING')) {
+      # Setup cache store, always use memory store for debug mode and console
+      if ($config['debug'] or PHP_SAPI == 'cli') {
          $store = 'memory';
       } else {
          $store = $config['cache_store'];

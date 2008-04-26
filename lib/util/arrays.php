@@ -134,16 +134,20 @@
    # Delete one or more values from an array
    function array_remove(&$array, $values) {
       $values = (array) $values;
+      $removed = false;
 
       foreach ((array) $array as $key => $value) {
          if (in_array($value, $values)) {
             unset($array[$key]);
             array_shift($values);
             if (empty($values)) {
-               return $value;
+               return true;
             }
+            $removed = true;
          }
       }
+
+      return $removed;
    }
 
    # Call a method on each object

@@ -108,6 +108,10 @@
          return $this->attributes;
       }
 
+      function changed($key) {
+         return in_array($key, $this->changed_attributes);
+      }
+
       function get_changed() {
          return !empty($this->changed_attributes);
       }

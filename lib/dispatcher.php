@@ -19,6 +19,7 @@
       static function run($path) {
          $path = ltrim($path, '/');
          self::$path = "/$path";
+         unset($_GET['path']);
 
          # Detect the relative path used to reach the website
          self::$prefix = preg_replace(

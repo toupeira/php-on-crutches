@@ -14,14 +14,18 @@
       die("Can't read standard input!\n");
    }
 
-   $_LOGGER->level = LOG_DISABLED;
+   config_set('debug', true);
+   $_LOGGER->level = LOG_DEBUG;
 
    function usage() {
       print "Usage: {$GLOBALS['argv'][0]} [OPTIONS]\n"
           . "\n"
-          . "  -v       Show log messages\n"
+          . "  -q       Don't show log messages\n"
           . "  -s       Hide prompt\n"
           . "  -e CODE  Execute code and exit\n"
+          . "\n"
+          . "  -p       Enable production mode\n"
+          . "  -t       Enable testing mode\n"
           . "\n";
       exit(255);
    }
@@ -29,10 +33,9 @@
    $args = array_slice($argv, 1);
    while ($arg = array_shift($args)) {
       switch ($arg) {
-         case '-v':
+         case '-q':
             # Show log messages
-            config_set('debug', true);
-            $_LOGGER->level = LOG_DEBUG;
+            $_LOGGER->level = LOG_DISABLED;
             break;
          case '-s':
             # Don't show prompts
@@ -47,6 +50,13 @@
             } else {
                usage();
             }
+            break;
+         case '-p':
+            config_set('debug', false);
+            load_store('cache', $config['cache_store'], 'memory');
+            break;
+         case '-t':
+            define('TESTING', true);
             break;
          default:
             usage();

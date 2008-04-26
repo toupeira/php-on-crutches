@@ -15,7 +15,7 @@
    }
 
    function create_file($path, $lines=null) {
-      if (is_file($path)) {
+      if (is_file($path) and !$GLOBALS['force']) {
          status('exists', $path);
       } else {
          status('create', $path);
@@ -44,10 +44,17 @@
       }
    }
 
-   function generate_model($name, $table=null) {
-      if (preg_match('/^\w+$/', $name)) {
-         $class = camelize($name);
+   function check_class($class) {
+      if (classify($class) and !$GLOBALS['force']) {
+         print "Class $class already exists, use -f to force.\n";
+         exit(1);
+      } elseif (preg_match('/^\w+$/', $class)) {
+         return true;
+      }
+   }
 
+   function generate_model($name, $table=null) {
+      if (check_class($class = camelize($name))) {
          if (preg_match('/^\w+$/', $table)) {
             create_file(MODELS.underscore($name).'.php', array(
                "class {$class} extends ActiveRecord",
@@ -73,46 +80,54 @@
             "}",
          ));
       } else {
-         print "Usage: {$argv[0]} model NAME [TABLE]\n";
+         print "Usage: {$argv[0]} [-f] model NAME [TABLE]\n";
          exit(1);
       }
    }
 
    function generate_controller($name) {
-      if (preg_match('/^\w+$/i', $name)) {
-         $name = strtolower($name);
-         $class = camelize($name);
-
+      $name = strtolower($name);
+      $class = camelize($name).'Controller';
+      if (check_class($class)) {
          create_file(CONTROLLERS.underscore($name).'_controller.php', array(
-            "class {$class}Controller extends ApplicationController",
+            "class {$class} extends ApplicationController",
             "{",
             "   function index() {",
             "   }",
             "}",
          ));
          create_file(TEST.'controllers/'.underscore($name).'_controller_test.php', array(
-            "class {$class}ControllerTest extends ControllerTestCase",
+            "class {$class}Test extends ControllerTestCase",
             "{",
             "}",
          ));
          create_file(HELPERS.underscore($name).'_helper.php');
          create_file(TEST.'helpers/'.underscore($name).'_helper_test.php', array(
-            "class {$class}HelperTest extends TestCase",
+            "class ".camelize($name)."HelperTest extends TestCase",
             "{",
             "}",
          ));
          create_directory(VIEWS.$name);
       } else {
-         print "Usage: {$argv[0]} controller NAME\n";
+         print "Usage: {$argv[0]} [-f] controller NAME\n";
          exit(1);
       }
    }
 
-   $generator = "generate_{$argv[1]}";
-   if (function_exists($generator)) {
-      $generator($argv[2], $argv[3]);
+   $args = array_slice($argv, 1);
+
+   if ($args[0] == '-f') {
+      $force = true;
+      array_shift($args);
    } else {
-      print "Usage: {$argv[0]} [controller|model] NAME\n";
+      $force = false;
+   }
+
+   $generator = 'generate_'.array_shift($args);
+   if (function_exists($generator)) {
+      call_user_func_array($generator, $args);
+   } else {
+      print "Usage: {$argv[0]} [-f] [controller|model] NAME\n";
       exit(1);
    }
 

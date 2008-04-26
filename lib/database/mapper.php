@@ -214,7 +214,7 @@
          return intval($this->execute($select, (array) $values)->fetch_column());
       }
 
-      protected function build_select($args, $defaults=array()) {
+      protected function build_select($args, $defaults=null) {
          $options = array();
          $where_options = array();
          foreach ($args as $i => $arg) {
@@ -226,7 +226,7 @@
          }
 
          $options = array_merge(
-            array('select' => '*'), $defaults, $options
+            array('select' => '*'), (array) $defaults, $options
          );
 
          if ($where_options) {
@@ -333,7 +333,7 @@
                $params[] = array_shift_arg($values);
                array_shift($keys);
 
-            } else {
+            } elseif (!is_null($value)) {
                throw new ApplicationError("Invalid argument '$value'");
             }
          }
