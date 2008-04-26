@@ -32,7 +32,11 @@
             $real_name .= '_test';
          }
 
-         if (is_array($options = $config[$real_name])) {
+         while (is_string($options = $config[$real_name])) {
+            $real_name = $options;
+         }
+
+         if (is_array($options)) {
             if ($driver = array_delete($options, 'driver')) {
                $file = LIB."database/adapters/{$driver}_adapter.php";
                if (is_file($file)) {
@@ -76,7 +80,12 @@
             $params = array_slice(func_get_args(), 1);
          }
 
-         log_debug("Database query: [{$this->name}] $sql");
+         if (log_level(LOG_DEBUG)) {
+            $args = array_map(proc('var_export($a, true)'), $params);
+            array_unshift($args, str_replace('?', '%s',
+               str_replace('%', '%%', $sql)));
+            log_debug("Database query: [{$this->name}] ".call_user_func_array(sprintf, $args));
+         }
 
          $stmt = $this->connection->prepare(
             $sql, array(PDO::ATTR_STATEMENT_CLASS => array(DatabaseStatement))

@@ -22,6 +22,14 @@
       return $GLOBALS['_LOGGER'] instanceof Logger;
    }
 
+   function log_level($level=null) {
+      if (is_null($level)) {
+         return $GLOBALS['_LOGGER']->level;
+      } else {
+         return $level <= $GLOBALS['_LOGGER']->level;
+      }
+   }
+
    class Logger extends Object
    {
       protected $file;
