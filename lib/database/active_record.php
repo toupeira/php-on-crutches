@@ -84,10 +84,6 @@
          return $this->table;
       }
 
-      function get_dom_id() {
-         return underscore(get_class($this)).'-'.$this->id;
-      }
-
       # Wrapper for database finders
       function load($attributes) {
          foreach ($attributes as $key => $value) {

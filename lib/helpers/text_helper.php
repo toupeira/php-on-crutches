@@ -69,6 +69,16 @@
       }
    }
 
+   define('MINUTE', 60);
+   define('HOUR',   60 * MINUTE);
+   define('DAY',    24 * HOUR);
+   define('WEEK',    7 * DAY);
+   define('MONTH',  30 * DAY);
+   define('YEAR',  365 * DAY);
+
+   #function format_length($seconds) {
+   #}
+
    function indent($text, $indent=2) {
       return preg_replace('/^/m', str_repeat(' ', $indent), $text);
    }

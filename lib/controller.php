@@ -325,11 +325,16 @@
       }
 
       # Send a cookie
-      function send_cookie($name, $value, $expire=null, $path=null, $domain=null, $secure=null, $httponly=null) {
-         $args = func_get_args();
-         if (is_null($args[3])) {
-            $args[3] = '/';
-         }
+      function send_cookie($name, $value, $options=null) {
+         $args = array(
+            $name,
+            $value,
+            $options['expire'],
+            any($options['path'], '/'),
+            $options['domain'],
+            $options['secure'],
+            $options['httponly'],
+         );
 
          if (defined('TESTING')) {
             # Ignore errors when testing
@@ -340,8 +345,10 @@
       }
 
       # Delete a cookie
-      function delete_cookie($name, $path='/', $domain=null, $secure=null, $httponly=null) {
-         return $this->send_cookie($name, '', time() - 3600, $path, $domain, $secure, $httponly);
+      function delete_cookie($name, $options=null) {
+         return $this->send_cookie($name, '', array_merge(
+            (array) $options, array('expire' => time() - 3600)
+         ));
       }
 
       # Send a file with the appropriate headers

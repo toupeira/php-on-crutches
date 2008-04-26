@@ -269,6 +269,7 @@
             $options['errors'] = true;
          }
 
+         $options['id'] = $this->get_dom_id($key);
          $value = any(array_delete($options, 'value'), $this->__get($key));
          $key = underscore(get_class($this))."[$key]";
 
@@ -281,6 +282,10 @@
             default:
                return $tag($key, $value, $options);
          }
+      }
+
+      function label($key, $label=null, $options=null) {
+         return label_tag($this->get_dom_id($key), any($label, humanize($key)));
       }
 
       function text_field($key, $options=null) {
@@ -302,6 +307,14 @@
       function select_tag($key, $values, $options=null) {
          $options['values'] = $values;
          return $this->form_element('select_tag', $key, $options);
+      }
+
+      function get_dom_id($key=null) {
+         if ($key) {
+            return underscore(get_class($this)).($key ? ":$key" : '');
+         } else {
+            return underscore(get_class($this)).'-'.$this->id;
+         }
       }
    }
 

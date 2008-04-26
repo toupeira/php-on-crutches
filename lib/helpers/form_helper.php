@@ -24,6 +24,7 @@
       # Merge tag options
       $options = array_merge(
          array('name' => $key),
+         array('id'   => $key),
          (array) $defaults,
          (array) $options
       );
@@ -69,6 +70,12 @@
       }
 
       return tag($tag, $options);
+   }
+
+   function label_tag($key, $label=null, $options=null) {
+      return content_tag('label', _(any($label, humanize($key))), array_merge(
+         (array) $options, array('for' => $key,)
+      ));
    }
 
    function text_field($key, $value=null, $options=null) {
