@@ -20,6 +20,8 @@
       protected $readonly = array();
       # Protected attributes can only be set explicitly
       protected $protected = array();
+      # Attributes which should not be automatically trimmed
+      protected $skip_trim = array();
 
       # List of error messages
       protected $errors = array();
@@ -67,6 +69,10 @@
             throw new ApplicationError("Can't change read-only attribute '$key'");
          } else {
             $setter = "set_$key";
+            if (is_string($value) and !in_array($key, $this->skip_trim)) {
+               $value = trim($value);
+            }
+
             if (method_exists($this, $setter)) {
                $this->$setter(&$value);
             } elseif (array_key_exists($key, $this->attributes)) {

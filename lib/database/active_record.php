@@ -63,11 +63,6 @@
          }
       }
 
-      function __set($key, $value) {
-         parent::__set($key, $value);
-         return $this;
-      }
-
       function get_mapper() {
          if (is_null($this->mapper)) {
             $this->mapper = DatabaseMapper::load($this);
