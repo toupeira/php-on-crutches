@@ -173,7 +173,7 @@
                throw new ApplicationError('Invalid request for this action');
             } else {
                log_warn("Invalid request for this action");
-               if ($action == 'index') {
+               if ($action == 'index' or !in_array('index', $this->actions)) {
                   # Redirect to default path if the default action was requested
                   $this->redirect_to('/');
                } else {
