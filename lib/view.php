@@ -35,6 +35,10 @@
          $this->layout = $layout;
       }
 
+      function get_template_name() {
+         return substr(basename($this->template), 0, -6);
+      }
+
       function get_data() {
          return (array) $this->data;
       }

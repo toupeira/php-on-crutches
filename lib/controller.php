@@ -89,12 +89,16 @@
          return (string) $this->layout;
       }
 
+      function get_view() {
+         return $this->view;
+      }
+
       function get_output() {
          return (string) $this->output;
       }
 
-      function get_view() {
-         return $this->view;
+      function get_action() {
+         return (string) $this->action;
       }
 
       function get_params() {
