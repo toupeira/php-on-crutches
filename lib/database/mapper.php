@@ -136,7 +136,7 @@
       }
 
       function find($id) {
-         if (!is_null($id)) {
+         if ($id) {
             list($select, $values) = $this->build_select(func_get_args(),
                array('limit' => 1));
             return $this->execute($select, (array) $values)->fetch_load($this->model);
