@@ -216,12 +216,12 @@
 
       protected function build_select($args, $defaults=null) {
          $options = array();
-         $where_options = array();
+         $conditions = array();
          foreach ($args as $i => $arg) {
             if (is_array($arg) and $i == count($args) - 1) {
                $options = $arg;
             } else {
-               $where_options[] = $arg;
+               $conditions[] = $arg;
             }
          }
 
@@ -229,12 +229,18 @@
             array('select' => '*'), (array) $defaults, $options
          );
 
-         if ($where_options) {
-            $options['conditions'] = $where_options;
+         if ($conditions) {
+            $options['conditions'] = $conditions;
          }
 
          $params = array();
-         $select = "SELECT {$options['select']} FROM `{$this->table}` {$options['joins']}";
+         $select = "SELECT {$options['select']} FROM `{$this->table}`";
+
+         if ($joins = $options['joins']) {
+            foreach ((array) $joins as $join) {
+               $select .= " $join";
+            }
+         }
 
          if ($conditions = $options['conditions']) {
             list($where, $params) = $this->build_where($conditions);
@@ -243,6 +249,7 @@
 
          if ($order = $options['order']) { $select .= " ORDER BY $order"; }
          if ($group = $options['group']) { $select .= " GROUP BY $group"; }
+         if ($having = $options['having']) { $select .= " HAVING $having"; }
          if ($limit = $options['limit']) { $select .= " LIMIT $limit"; }
          if ($offset = $options['offset']) { $select .= " OFFSET $offset"; }
 
