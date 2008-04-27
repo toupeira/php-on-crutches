@@ -92,7 +92,7 @@
 
       # Reload attributes from database
       function reload() {
-         if ($this->exists() and !in_array('id', $this->changed_attributes)) {
+         if ($this->exists() and !array_key_exists('id', $this->changed_attributes)) {
             return $this->load($this->mapper->find($this->id)->attributes);
          } else {
             return false;
@@ -118,7 +118,8 @@
          $this->call_filter("before_$action");
          $this->call_filter(before_save);
 
-         $attributes = array_get($this->attributes, $this->changed_attributes);
+         $attributes = array_get($this->attributes,
+            array_keys($this->changed_attributes));
          array_delete($attributes, $this->virtual_attributes);
 
          if ($this->exists()) {

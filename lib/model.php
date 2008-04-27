@@ -11,8 +11,10 @@
    {
       # Model attributes
       protected $attributes = array();
+
       # Changed attributes
       protected $changed_attributes = array();
+
       # Cached attributes
       protected $cache = array();
 
@@ -99,7 +101,7 @@
          $this->attributes[$key] = &$value;
 
          if ($this->read_attribute($key) != $old_value) {
-            $this->changed_attributes[] = $key;
+            $this->changed_attributes[$key] = $old_value;
          }
          return $this;
       }
@@ -109,11 +111,31 @@
       }
 
       function changed($key) {
-         return in_array($key, $this->changed_attributes);
+         return array_key_exists($key, $this->changed_attributes);
       }
 
       function get_changed() {
          return !empty($this->changed_attributes);
+      }
+
+      function get_changes() {
+         $changes = array();
+         foreach ($this->changed_attributes as $key => $old) {
+            if (($new = $this->$key) != $old) {
+               $changes[$key] = array($old, $new);
+            }
+         }
+
+         return $changes;
+      }
+
+      function reset($key) {
+         if (!is_null($old = $this->changed_attributes[$key])) {
+            unset($this->changed_attributes[$key]);
+            return $this->$key = $old;
+         }
+
+         return false;
       }
 
       # Set attributes
