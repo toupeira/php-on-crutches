@@ -132,7 +132,7 @@
       function reset($key) {
          if (!is_null($old = $this->changed_attributes[$key])) {
             unset($this->changed_attributes[$key]);
-            return $this->$key = $old;
+            return $this->attributes[$key] = $old;
          }
 
          return false;
