@@ -82,6 +82,9 @@
       # Wrapper for database finders
       function load($attributes) {
          foreach ($attributes as $key => $value) {
+            if (!array_key_exists($key, $this->attributes)) {
+               $this->virtual_attributes[] = $key;
+            }
             $this->attributes[$key] = $value;
          }
          $this->new_record = false;
