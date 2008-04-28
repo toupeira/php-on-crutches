@@ -259,7 +259,10 @@
             $params = array_merge($params, $having_params);
          }
 
-         if ($order = $options['order']) { $select .= " ORDER BY $order"; }
+         if ($order = $options['order']) {
+            $select .= ' ORDER BY '.implode(', ', (array) $order);
+         }
+
          if ($limit = $options['limit']) { $select .= " LIMIT $limit"; }
          if ($offset = $options['offset']) { $select .= " OFFSET $offset"; }
 
