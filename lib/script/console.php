@@ -14,6 +14,7 @@
       die("Can't read standard input!\n");
    }
 
+   $_environment = 'development';
    config_set('debug', true);
    $_LOGGER->level = LOG_DEBUG;
 
@@ -21,7 +22,7 @@
       print "Usage: {$GLOBALS['argv'][0]} [OPTIONS]\n"
           . "\n"
           . "  -q       Don't show log messages\n"
-          . "  -s       Hide prompt\n"
+          . "  -s       Don't show prompt\n"
           . "  -e CODE  Execute code and exit\n"
           . "\n"
           . "  -p       Enable production mode\n"
@@ -30,9 +31,9 @@
       exit(255);
    }
 
-   $args = array_slice($argv, 1);
-   while ($arg = array_shift($args)) {
-      switch ($arg) {
+   $_args = array_slice($argv, 1);
+   while ($_arg = array_shift($_args)) {
+      switch ($_arg) {
          case '-q':
             # Show log messages
             $_LOGGER->level = LOG_DISABLED;
@@ -43,8 +44,8 @@
             break;
          case '-e':
             # Execute given command and exit
-            if ($command = array_shift($args)) {
-               $debug = ($_LOGGER->level == LOG_DEBUG ? '-v' : '');
+            if ($command = array_shift($_args)) {
+               $_debug = ($_LOGGER->level == LOG_DEBUG ? '-v' : '');
                system("echo '$command' | php5 {$argv[0]} -s $debug");
                exit;
             } else {
@@ -52,10 +53,12 @@
             }
             break;
          case '-p':
+            $_environment = 'production';
             config_set('debug', false);
-            load_store('cache', $config['cache_store'], 'memory');
+            load_store('cache', config('cache_store'), 'memory');
             break;
          case '-t':
+            $_environment = 'test';
             define('TESTING', true);
             break;
          default:
@@ -63,7 +66,7 @@
       }
    }
 
-   fake_request('', 'GET', true);
+   fake_request();
 
    function prompt($message) {
       if (!defined('SILENT')) {
@@ -75,13 +78,14 @@
    function request($method, $path) {
       $_SERVER['REQUEST_METHOD'] = $method;
       $_SERVER['REQUEST_URI'] = "/$path";
-      return Dispatcher::run($path);
+      return $GLOBALS['_controller'] = Dispatcher::run($path);
    }
 
    # Wrapper for GET requests
    function get($path, $params=null) {
       if (is_array($params)) {
-         $_GET = $_POST = $params;
+         $_GET = $params;
+         $_POST = array();
       }
       return request('GET', $path);
    }
@@ -92,9 +96,24 @@
       return request('POST', $path);
    }
 
+   # Follow a redirect
+   function follow() {
+      if ($c = $GLOBALS['_controller'] and
+          $location = $c->headers['Location'] and
+          $c->headers['Status'])
+      {
+         $path = str_replace('http://www.example.com/', '', $location);
+         return get($path);
+      }
+   }
+
    function to_string($value) {
       if (is_object($value)) {
          return get_class($value);
+      } elseif (is_array($value)) {
+         ob_start();
+         print_r($value);
+         return trim(ob_get_clean());
       } elseif (is_resource($value)) {
          ob_start();
          var_dump($value);
@@ -135,6 +154,7 @@
    }
 
    prompt("\n\n".`php -v`."\n");
+   print "Loading [0;36m".$_environment." environment[0m\n";
 
    while (!feof(STDIN)) {
       prompt("php[".config('application')."] >>> ");
@@ -199,7 +219,7 @@
 
       # Dump variable
       } elseif (preg_match('/^\$\w+\?$/', $_command)) {
-         $_command = "var_export(".rtrim($_command, '?').")";
+         $_command = 'to_string('.rtrim($_command, '?').')';
 
       # Execute normal PHP code
       } else {
