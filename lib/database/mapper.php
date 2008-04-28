@@ -122,12 +122,12 @@
       }
 
       function delete($id) {
-         list($where, $values) = $this->build_where(func_get_args());
-         if (empty($where)) {
+         list($conditions, $values) = $this->build_condition(func_get_args());
+         if (blank($conditions)) {
             throw new ApplicationError("No conditions given");
          }
 
-         $this->execute("DELETE FROM `{$this->table}`$where", (array) $values);
+         $this->execute("DELETE FROM `{$this->table}` WHERE $conditions", (array) $values);
          return $id;
       }
 
@@ -165,8 +165,8 @@
       }
 
       function find_by_sql($sql) {
-         $params = array_slice(func_get_args(), 1);
-         return $this->execute($sql, $params)->fetch_all_load($this->model);
+         $values = array_slice(func_get_args(), 1);
+         return $this->execute($sql, $values)->fetch_all_load($this->model);
       }
 
       # Handle find(_all)_by_* calls
@@ -226,7 +226,8 @@
          }
 
          $options = array_merge(
-            array('select' => '*'), (array) $defaults, $options
+            array('select' => '*', 'from' => "`{$this->table}`"),
+            (array) $defaults, $options
          );
 
          if ($conditions) {
@@ -234,29 +235,38 @@
          }
 
          $params = array();
-         $select = "SELECT {$options['select']} FROM `{$this->table}`";
+         $select = 'SELECT '
+                 . implode(', ', (array) $options['select'])
+                 . ' FROM '
+                 . implode(', ', (array) $options['from']);
 
          if ($joins = $options['joins']) {
-            foreach ((array) $joins as $join) {
-               $select .= " $join";
-            }
+            $select .= ' '.implode(' ', (array) $joins);
          }
 
          if ($conditions = $options['conditions']) {
-            list($where, $params) = $this->build_where($conditions);
-            $select .= $where;
+            list($conditions, $params) = $this->build_condition($conditions);
+            if (!blank($conditions)) {
+               $select .= " WHERE $conditions";
+            }
+         }
+
+         if ($group = $options['group']) { $select .= " GROUP BY $group"; }
+
+         if ($conditions = $options['having']) {
+            list($conditions, $having_params) = $this->build_condition($conditions);
+            $select .= " HAVING $conditions";
+            $params = array_merge($params, $having_params);
          }
 
          if ($order = $options['order']) { $select .= " ORDER BY $order"; }
-         if ($group = $options['group']) { $select .= " GROUP BY $group"; }
-         if ($having = $options['having']) { $select .= " HAVING $having"; }
          if ($limit = $options['limit']) { $select .= " LIMIT $limit"; }
          if ($offset = $options['offset']) { $select .= " OFFSET $offset"; }
 
          return array($select, $params);
       }
 
-      protected function build_where($conditions) {
+      protected function build_condition($conditions) {
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
             $conditions = func_get_args();
@@ -267,8 +277,8 @@
             return null;
          }
 
-         $where = '';
-         $operator = ' WHERE';
+         $condition = '';
+         $operator = '';
          $params = array();
 
          $keys = array_keys($conditions);
@@ -278,23 +288,23 @@
             $key = array_shift($keys);
             $value = array_shift($values);
 
-            if ($where and $operator == ' WHERE') {
-               $operator = ' AND';
+            if ($condition and $operator == '') {
+               $operator = ' AND ';
             }
 
             if (is_string($key)) {
-               $where .= $operator;
+               $condition .= $operator;
 
                if ($count = substr_count($key, '?')) {
-                  # Use array key as WHERE clause
+                  # Use array key as condition with placeholders
                   #   e.g.: find(array('key LIKE ?' => $value))
                   #
-                  $where .= " $key";
+                  $condition .= " $key";
                } else {
                   # Use array key as column name
                   #   e.g.: find(array('key' => $value))
                   #
-                  $where .= " `$key` = ?";
+                  $condition .= " `$key` = ?";
                   $count = 1;
                }
 
@@ -307,17 +317,17 @@
                # Use array value as ID
                #   e.g.: find($id)
                #
-               $where .= "$operator `id` = ?";
+               $condition .= "$operator`id` = ?";
                $params[] = $value;
 
                # Allow passing multiple IDs
-               $operator = ' OR';
+               $operator = ' OR ';
 
             } elseif ($count = substr_count($value, '?')) {
-               # Use array value as WHERE clause
+               # Use array value as condition with placeholders
                #   e.g.: find('key LIKE ?', $value)
                #
-               $where .= "$operator $value";
+               $condition .= "$operator$value";
                for ($i = 0; $i < $count; $i++) {
                   $params[] = array_shift_arg($values);
                   array_shift($keys);
@@ -325,18 +335,17 @@
 
             } elseif ($value == 'and' or $value == 'or') {
                # Change the operator
-               $operator = ' '.strtoupper($value);
+               $operator = ' '.strtoupper($value).' ';
 
             } elseif (strstr($value, ' ') !== false) {
-               # Use array value as literal WHERE clause,
-               # without placeholders
+               # Use array value as literal condition, without placeholders
                #   e.g.: find('key LIKE "%value%"')
-               $where .= "$operator $value";
+               $condition .= "$operator$value";
 
             } elseif (is_string($value) and !blank($value)) {
                # Use array value as column name
                #   e.g.: find('key', $value)
-               $where .= "$operator `$value` = ?";
+               $condition .= "$operator`$value` = ?";
                $params[] = array_shift_arg($values);
                array_shift($keys);
 
@@ -345,7 +354,7 @@
             }
          }
 
-         return array($where, $params);
+         return array($condition, $params);
       }
    }
 

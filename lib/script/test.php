@@ -13,6 +13,7 @@
 
    if (in_array('-v', $argv)) {
       array_remove($argv, '-v');
+      $_LOGGER->level = LOG_DEBUG;
    } else {
       $_LOGGER->level = LOG_DISABLED;
    }
