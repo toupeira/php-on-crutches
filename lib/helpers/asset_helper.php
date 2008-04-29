@@ -15,7 +15,6 @@
       } else {
          $path = $directory.$file.$ext;
          $web_path = Dispatcher::$prefix.$path;
-         #$path = Dispatcher::$prefix.$directory.$file.$ext;
 
          if (file_exists(WEBROOT.$path)) {
             $web_path .= '?'.filemtime(WEBROOT.$path);
