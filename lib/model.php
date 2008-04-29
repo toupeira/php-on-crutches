@@ -242,10 +242,10 @@
       }
 
       protected function is_email($key, $allow_empty=false) {
-         $value = trim($this->attributes[$key]);
+         $value = $this->attributes[$key];
          return $this->validate_attribute($key,
             _("is not a valid email address"),
-            ($allow_empty and $value == '') or preg_match('/^[\w\.\-\+]+@([\w\-]+\.)+[\w]+$/', $value)
+            ($allow_empty and $value == '') or preg_match('/^[\w._%+-]+@([\w.-]+\.)+[a-z]{2,6}$/i', $value)
          );
       }
 
