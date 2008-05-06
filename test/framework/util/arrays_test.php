@@ -38,20 +38,17 @@
          $this->assertEqual(array(), array_get($this->a, null));
          $this->assertEqual(array(), array_get($this->a, array()));
          $this->assertEqual(array('d' => null), array_get($this->a, 'd'));
-         $this->assertEqual(array('b' => null), array_get($this->c, 'b'));
       }
 
       function test_array_find() {
          $this->assertEqual($this->b[2], array_find($this->b, 'name', 'c'));
          $this->assertNull(array_find($this->b, 'name', 'd'));
          $this->assertNull(array_find($this->b, 'foo', 'd'));
-         $this->assertNull(array_find($this->c, 'foo', 'd'));
       }
 
       function test_array_pluck() {
          $this->assertEqual(array('a', 'b', 'c'), array_pluck($this->b, 'name'));
          $this->assertEqual(array(), array_pluck($this->b, 'foo'));
-         $this->assertEqual(array(), array_pluck($this->c, 'foo'));
       }
    }
 

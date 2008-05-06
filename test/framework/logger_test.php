@@ -10,6 +10,10 @@
          $this->logger->level = LOG_INFO;
       }
 
+      function teardown() {
+         $this->logger->level = LOG_DISABLED;
+      }
+
       function test_constants() {
          $this->assertTrue(defined('LOG_DISABLED'));
          $this->assertTrue(defined('LOG_ERROR'));
@@ -60,12 +64,6 @@
          log_debug('4');
 
          $this->assertFileContents("1\n2\n3\n4", $this->file);
-      }
-
-      function test_log_dump() {
-         $this->logger->level = LOG_DEBUG;
-         log_dump(array(1,2,3));
-         $this->assertFileContents("array (\n  0 => 1,\n  1 => 2,\n  2 => 3,\n)", $this->file);
       }
    }
 

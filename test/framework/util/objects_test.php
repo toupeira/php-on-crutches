@@ -12,8 +12,8 @@
          $this->assertEqual('readwrite', $this->object->readwrite);
          $this->assertEqual('shadowed', $this->object->shadowed);
 
-         $this->assertRaise('$this->object->private');
-         $this->assertRaise('$this->object->readonly = "foo"');
+         $this->assertRaise('$this->object->private', UndefinedMethod);
+         $this->assertRaise('$this->object->readonly = "foo"', UndefinedMethod);
 
          $this->object->readwrite = 'foo';
          $this->assertEqual('foo', $this->object->readwrite);

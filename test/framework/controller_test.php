@@ -4,7 +4,9 @@
    class ControllerTest extends ControllerTestCase
    {
       function setup() {
-         $this->controller = new SampleController();
+         $_SESSION['msg'] = array();
+
+         $this->controller = new SampleController($params = array());
          $this->views = LIB.'views/sample/';
          $this->send_file_output = null;
          register_shutdown_function(rm_rf, $this->views);
@@ -35,7 +37,7 @@
          $this->assertEqual('sample', $this->controller->name);
          $this->assertEqual('', $this->controller->output);
 
-         foreach (array('params', 'session', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $key) {
+         foreach (array('params', 'session', 'headers', 'cookies', 'files', 'msg', 'actions') as $key) {
             $this->assertTrue(is_array($this->controller->$key));
          }
 
@@ -62,13 +64,13 @@
       }
 
       function test_getters() {
-         foreach (array('name', 'layout', 'output') as $attr) {
+         foreach (array('name', 'layout', 'output', 'action') as $attr) {
             $this->assertTrue(is_string($this->controller->$attr));
          }
 
          $this->assertIsA($this->controller->view, View);
 
-         foreach (array('params', 'session', 'headers', 'cookies', 'files', 'actions', 'errors', 'msg') as $attr) {
+         foreach (array('actions', 'errors') as $attr) {
             $this->assertTrue(is_array($this->controller->$attr));
          }
       }
@@ -139,13 +141,13 @@
          $_SERVER['REQUEST_METHOD'] = 'GET';
 
          foreach (array(true, 'index') as $require) {
-            $this->controller->require_post = $require;
+            $this->controller->_require_post = $require;
             $this->assertFalse($this->controller->is_valid_request('index'));
             $this->assertRedirect('/');
          }
 
          foreach (array(true, 'edit') as $require) {
-            $this->controller->require_post = $require;
+            $this->controller->_require_post = $require;
             $this->assertFalse($this->controller->is_valid_request('edit'));
             $this->assertRedirect(':');
          }
@@ -157,13 +159,13 @@
          unset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
          foreach (array(true, 'index') as $require) {
-            $this->controller->require_ajax = $require;
+            $this->controller->_require_ajax = $require;
             $this->assertFalse($this->controller->is_valid_request('index'));
             $this->assertRedirect('/');
          }
 
          foreach (array(true, 'edit') as $require) {
-            $this->controller->require_ajax = $require;
+            $this->controller->_require_ajax = $require;
             $this->assertFalse($this->controller->is_valid_request('edit'));
             $this->assertRedirect(':');
          }
@@ -177,7 +179,7 @@
          $_SERVER['REQUEST_URI'] = '/foo?bar';
 
          foreach (array(true, 'index') as $require) {
-            $this->controller->require_ssl = $require;
+            $this->controller->_require_ssl = $require;
             $this->assertFalse($this->controller->is_valid_request('index'));
             $this->assertRedirect("https://example.com/foo?bar");
          }
@@ -214,7 +216,7 @@
       function test_perform_with_invalid_request() {
          config_set('debug', false);
 
-         $this->controller->require_post[] = 'index';
+         $this->controller->_require_post[] = 'index';
          $this->controller->perform('index');
          $this->assertRedirect('/');
       }
@@ -327,13 +329,15 @@
       }
 
       function test_send_file_with_invalid_file() {
-         $file = '/etc/shadow';
-         $this->assertRaise("\$this->send_file('$file')");
-         $this->assertHeader('Content-Disposition', 'attachment');
-         $this->assertHeader('Content-Type', null);
-         $this->assertHeader('Content-Length', filesize($file));
-         $this->assertOutput('');
-         $this->assertNull($this->send_file_output);
+         if (!is_readable('/etc/shadow')) {
+            $file = '/etc/shadow';
+            $this->assertRaise("\$this->send_file('$file')");
+            $this->assertHeader('Content-Disposition', 'attachment');
+            $this->assertHeader('Content-Type', null);
+            $this->assertHeader('Content-Length', filesize($file));
+            $this->assertOutput('');
+            $this->assertNull($this->send_file_output);
+         }
       }
 
       function test_send_file_with_name() {
@@ -353,7 +357,7 @@
 
       function test_send_file_inline() {
          $this->assertTrue($this->send_file(__FILE__, array('inline' => true)));
-         $this->assertHeader('Content-Disposition', null);
+         $this->assertHeader('Content-Disposition', 'inline');
       }
 
       function test_send_file_with_command() {
@@ -382,7 +386,7 @@
       }
 
       function test_has_errors() {
-         $this->controller->errors = array('foo');
+         $this->controller->_errors = array('foo');
          $this->assertTrue($this->controller->has_errors('foo'));
          $this->assertFalse($this->controller->has_errors('bar'));
          $this->assertTrue($this->controller->has_errors('foo[]'));
@@ -412,9 +416,11 @@
 
    class SampleController extends Controller
    {
-      public $require_post;
-      public $require_ajax;
-      public $require_ssl;
+      public $_require_post;
+      public $_require_ajax;
+      public $_require_ssl;
+
+      public $_errors;
 
       public $calls;
 
