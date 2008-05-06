@@ -76,7 +76,7 @@
 
       function get_objects() {
          if (is_null($this->_statement) or count($this->_objects) != $this->count) {
-            return $this->_objects = $this->statement->fetch_all_load($this->_mapper->model);
+            $this->_objects = $this->statement->fetch_all_load($this->_mapper->model);
          }
 
          return $this->_objects;
@@ -164,6 +164,7 @@
          if (is_null($this->_sql)) {
             $this->sql;
          }
+
          return $this->_params;
       }
 
