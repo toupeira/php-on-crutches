@@ -8,19 +8,33 @@
 #
 
    function cache($key=null, $value=null) {
-      return $GLOBALS['_CACHE_STORE']->get($key);
+      if ($value = $GLOBALS['_CACHE_STORE']->get($key)) {
+         log_debug("Reading cache fragment '$key'");
+         return $value;
+      }
    }
 
    function cache_set($key, $value) {
+      log_debug("Writing cache fragment '$key'");
       return $GLOBALS['_CACHE_STORE']->set($key, $value);
    }
 
    function cache_expire($key) {
+      log_debug("Expiring cache fragment '$key'");
       return $GLOBALS['_CACHE_STORE']->expire($key);
    }
 
    function cache_clear() {
+      log_debug("Clearing cache");
       return $GLOBALS['_CACHE_STORE']->clear();
+   }
+
+   function cache_code($key, $code) {
+      if ($data = cache($key)) {
+         return $data;
+      } else {
+         return cache_set($key, eval("return $code;"));
+      }
    }
 
    abstract class CacheStore

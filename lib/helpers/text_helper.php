@@ -7,13 +7,8 @@
 # $Id$
 #
 
-   function h($text) {
-      return strtr(htmlspecialchars($text, ENT_COMPAT, 'UTF-8'), array(
-         '&amp;gt;'   => '&gt;',
-         '&amp;lt;'   => '&lt;',
-         '&amp;amp;'  => '&amp;',
-         '&amp;quot;' => '&quot;',
-      ));
+   function h($text, $double_encode=false) {
+      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
    }
 
    function strip_html($text) {
@@ -37,25 +32,22 @@
    }
 
    function auto_link($text) {
-      return preg_replace_callback('#\b(\w+://[-\.\w]+(/[^\s]*)?)#',
+      return preg_replace_callback('#\b(\w+://[-\.\w]+(:\d+)?(/[^\s]*)?)#',
          proc('link_to(h($a[1]), $a[1])'), $text);
    }
 
-   function format_date($time, $format='%d.%m.%y') {
+   define_default('FORMAT_TIME', '%Y-%d-%m %T');
+   define_default('FORMAT_DATE', '%Y-%d-%m');
+
+   function format_time($time, $format=FORMAT_TIME) {
       if ($time) {
          return strftime($format, strtotime($time));
       }
    }
 
-   function format_time($time, $format='%d.%m.%Y %H:%M') {
-      if ($time) {
-         return strftime($format, strtotime($time));
-      }
-   }
-
-   define('KB', 1024);
-   define('MB', 1024 * KB);
-   define('GB', 1024 * MB);
+   define_default('KB', 1024);
+   define_default('MB', 1024 * KB);
+   define_default('GB', 1024 * MB);
 
    function format_size($size) {
       if ($size < KB) {
@@ -69,15 +61,12 @@
       }
    }
 
-   define('MINUTE', 60);
-   define('HOUR',   60 * MINUTE);
-   define('DAY',    24 * HOUR);
-   define('WEEK',    7 * DAY);
-   define('MONTH',  30 * DAY);
-   define('YEAR',  365 * DAY);
-
-   #function format_length($seconds) {
-   #}
+   define_default('MINUTE', 60);
+   define_default('HOUR',   60 * MINUTE);
+   define_default('DAY',    24 * HOUR);
+   define_default('WEEK',    7 * DAY);
+   define_default('MONTH',  30 * DAY);
+   define_default('YEAR',  365 * DAY);
 
    function indent($text, $indent=2) {
       return preg_replace('/^/m', str_repeat(' ', $indent), $text);
@@ -88,7 +77,8 @@
    }
 
    function cycle($values) {
-      global $_cycle;
+      static $_cycle;
+
       $values = func_get_args();
       $value = $values[intval($_cycle)];
       if (++$_cycle >= count($values)) {

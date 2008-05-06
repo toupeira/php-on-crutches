@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   function list_tag($items, $options=null, $item_options=null) {
+   function list_tag(array $items, array $options=null, array $item_options=null) {
       $html = '';
       foreach ((array) $items as $key => $value) {
          if (is_array($value)) {

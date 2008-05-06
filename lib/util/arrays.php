@@ -8,18 +8,18 @@
 #
 
    # Convert an array into a string
-   function array_to_str($array) {
-      return str_replace("\n", "", var_export($array, true));
+   function array_to_str(array $array) {
+      return preg_replace('/\s+/', ' ', var_export($array, true));
    }
 
    # Get object property or array key
    function getf(&$object, $key=null) {
-      if (is_null($key)) {
-         return $object;
-      } elseif (is_object($object)) {
+      if (is_object($object)) {
          return $object->$key;
       } elseif (is_array($object)) {
          return $object[$key];
+      } else {
+         throw new TypeError($object);
       }
    }
 
@@ -27,29 +27,33 @@
    function setf(&$object, $key, $value) {
       if (is_object($object)) {
          return $object->$key = $value;
-      } elseif ($value === null) {
-         unset ($object[$key]);
+      } elseif (is_array($object)) {
+         if ($value === null) {
+            unset($object[$key]);
+         } else {
+            return $object[$key] = $value;
+         }
       } else {
-         return $object[$key] = $value;
+         throw new TypeError($object);
       }
    }
 
    # Get one or more key/value pairs from an array
-   function array_get(&$array, $keys=null) {
+   function array_get(array &$array, $keys=null) {
       if (!is_array($keys) and !is_null($keys)) {
          $keys = array_slice(func_get_args(), 1);
       }
 
       $filter = array();
       foreach ((array) $keys as $key) {
-         $filter[$key] = $array[$key];
+         $filter[$key] = getf($array, $key);
       }
 
       return $filter;
    }
 
    # Find an object by property value
-   function array_find(&$array, $key, $value) {
+   function array_find(array &$array, $key, $value) {
       foreach ((array) $array as $object) {
          if (getf($object, $key) == $value) {
             return $object;
@@ -58,7 +62,7 @@
    }
 
    # Find all matching values
-   function array_find_all(&$array, $key, $value) {
+   function array_find_all(array &$array, $key, $value) {
       $objects = array();
       foreach ((array) $array as $object) {
          if (getf($object, $key) == $value) {
@@ -70,7 +74,7 @@
    }
 
    # Find all matching values by regular expression
-   function array_grep(&$array, $key, $pattern=null) {
+   function array_grep(array &$array, $key, $pattern=null) {
       if (is_null($pattern)) {
          $pattern = $key;
          $key = null;
@@ -87,9 +91,9 @@
    }
 
    # Collect the given array keys or object properties from each value
-   function array_pluck(&$array, $key, $hash=false) {
+   function array_pluck(array &$array, $key, $hash=false) {
       $values = array();
-      foreach ((array) $array as $object) {
+      foreach ($array as $object) {
          if ($value = getf($object, $key)) {
             if ($hash) {
                $values[$value] = $value;
@@ -103,7 +107,7 @@
    }
 
    # Delete one or more keys from an array
-   function array_delete(&$array, $keys) {
+   function array_delete(array &$array=null, $keys) {
       if (!is_array($array)) {
          return;
       }
@@ -132,7 +136,7 @@
    }
 
    # Delete one or more values from an array
-   function array_remove(&$array, $values) {
+   function array_remove(array &$array, $values) {
       $values = (array) $values;
       $removed = false;
 
@@ -150,8 +154,14 @@
       return $removed;
    }
 
+   function array_update(array &$array) {
+      $args = array_slice(func_get_args(), 1);
+      array_unshift($args, $array);
+      return $array = call_user_func_array(array_merge, $args);
+   }
+
    # Call a method on each object
-   function array_send(&$objects, $method, $args=null) {
+   function array_send(array &$objects, $method, $args=null) {
       if (!is_array($args)) {
          $args = array_slice(func_get_args(), 2);
       }
@@ -165,7 +175,7 @@
    }
 
    # Shift a value from the array and complain if it's empty
-   function array_shift_arg(&$array, $message="Too few arguments") {
+   function array_shift_arg(array &$array, $message="Too few arguments") {
       if (empty($array)) {
          throw new ApplicationError($message);
       } else {

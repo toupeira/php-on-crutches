@@ -14,18 +14,6 @@
 
    safe_require(TEST.'test_helper.php');
 
-   # Define TESTING for some custom behaviour when testing:
-   # - config_init() always loads memory cache store
-   # - Connection#set_headers() ignores header errors
-   # - DatabaseConnection::load() appends '_test' to database configuration names
-   # - Mail#send doesn't send out mails but stores them in $_SENT_MAILS instead
-   define('TESTING', 1);
-
-   # Reset some configuration values
-   config_set('debug', false);
-   config_set('debug_redirects', false);
-   config_set('rewrite_urls', true);
-
    global $_TEST_DIRS;
    $_TEST_DIRS = array_map(basename, array_filter(glob(TEST.'*'), is_dir));
    array_remove($_TEST_DIRS, array('coverage', 'fixtures', 'framework'));
@@ -33,20 +21,27 @@
    function run_tests($path, $message=null, $reporter=null) {
       $group = new GroupTest($message);
       $name = basename($path);
+      $dirs = array();
 
       if (is_file($path)) {
-         $message = "Testing ".basename($path).": ";
+         $message = "Testing [1m".basename($path)."[0m: ";
          $group->addTestFile($path);
+         $dirs[] = dirname(realpath($path));
       } else {
-         $message = "Testing $name: ";
+         $message = "Testing [1m$name[0m: ";
          $dir = TEST.$name;
          foreach (find_files($dir, '-type f -name "*_test.php"') as $file) {
             $group->addTestFile($file);
+            $dirs[] = dirname($file);
          }
       }
 
       print $message.pluralize($group->getSize(), 'test', 'tests');
       if ($group->getSize() > 0) {
+         foreach (array_unique($dirs) as $dir) {
+            safe_require($dir.'/test_helper.php');
+         }
+
          if (!$reporter) {
             $reporter = new ConsoleReporter();
          }
@@ -109,7 +104,7 @@
       return array_unique($paths);
    }
 
-   function find_related_tests($files) {
+   function find_related_tests(array $files) {
       $tests = array();
 
       foreach ($files as $file) {
@@ -171,11 +166,19 @@
       }
 
       function paintFail($message) {
+         while (ob_get_level()) {
+            ob_end_clean();
+         }
+
          print "F\n";
          parent::paintFail($message);
       }
 
       function paintError($message) {
+         while (ob_get_level()) {
+            ob_end_clean();
+         }
+
          print "E\n";
          parent::paintError($message);
       }

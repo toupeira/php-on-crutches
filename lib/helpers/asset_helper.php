@@ -27,7 +27,7 @@
    }
 
    # Build a stylesheet tag
-   function stylesheet_tag($file, $options=null) {
+   function stylesheet_tag($file, array $options=null) {
       return tag('link', $options, array(
          'rel' => 'stylesheet', 'type' => 'text/css',
          'href' => asset_path(STYLESHEETS, $file, '.css')
@@ -35,7 +35,7 @@
    }
 
    # Build a javascript tag
-   function javascript_tag($file, $options=null) {
+   function javascript_tag($file, array $options=null) {
       return content_tag('script', null, $options, array(
          'type' => 'text/javascript',
          'src' => asset_path(JAVASCRIPTS, $file, '.js')
@@ -43,7 +43,7 @@
    }
 
    # Build an image tag
-   function image_tag($file, $options=null) {
+   function image_tag($file, array $options=null) {
       return tag('img', $options, array(
          'src' => asset_path(IMAGES, $file), 'alt' => ''
       ));

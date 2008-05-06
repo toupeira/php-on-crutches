@@ -26,6 +26,23 @@
    class RoutingError extends NotFound {}
    class MissingTemplate extends NotFound {}
 
+   class TypeError extends StandardError {
+      function __construct($value) {
+         $type = (is_object($value) ? get_class($value) : gettype($value));
+         parent::__construct("Invalid argument of type '$type'");
+      }
+   }
+
+   class UndefinedMethod extends StandardError {
+      function __construct($class, $method) {
+         if (is_object($class)) {
+            $class = get_class($class);
+         }
+
+         parent::__construct("Call to undefined method $class#$method()");
+      }
+   }
+
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
       if (error_reporting()) {
@@ -36,75 +53,22 @@
    # Handler for uncaught exceptions
    function exception_handler($exception) {
       if (log_running()) {
-         log_error("\n".get_class($exception).': '.$exception->getMessage()
-                   ."  ".str_replace("\n", "\n  ", $exception->getTraceAsString()));
-      }
-
-      if ($exception instanceof NotFound) {
-         $status = 404;
-         $text = "Not Found";
-      } else {
-         $status = 500;
-         $text = "Server Error";
+         log_error("\n".dump_exception($exception));
       }
 
       while (ob_get_level()) {
          ob_end_clean();
       }
 
-      header("HTTP/1.x $status");
+      Dispatcher::$controller = new ErrorsController();
+      print Dispatcher::$controller->perform('show', array($exception));
 
-      if (config('debug')) {
-         print render_exception($exception);
-      } else {
-         $controller = new ErrorsController();
-         print $controller->perform('show', $status);
+      if (log_level(LOG_INFO)) {
+         Dispatcher::log_footer();
       }
+
+      exit;
    }
 
-   # Render an exception with stack trace
-   function render_exception($exception) {
-      $class = get_class($exception);
-      $file = $exception->getFile();
-      $line = $exception->getLine();
-      $message = preg_replace("/('[^']+'|[^ ]+\(\))/", '<code>$1</code>', $exception->getMessage());
-      $trace = $exception->getTraceAsString();
-
-      try {
-         $view = new View('errors/debug');
-         $view->set('exception', $class);
-         $view->set('message', $message);
-         $view->set('trace', $trace);
-         $view->set('file', str_replace(ROOT, '', $file));
-         $view->set('line', $line);
-         $view->set('params', Dispatcher::$params);
-
-         if (is_file($file)) {
-            $code = '';
-            $start = max(0, $line - 12);
-            $lines = array_slice(file($file), $start, 23);
-            $width = strlen($line + 23);
-
-            foreach ($lines as $i => $text) {
-               $i += $start + 1;
-               $text = sprintf("%{$width}d %s", $i, htmlspecialchars($text));
-               if ($i == $line) {
-                  $text = "<strong>$text</strong>";
-               }
-               $code .= $text;
-            }
-            $view->set('code', $code);
-         }
-
-         return $view->render();
-
-      } catch (Exception $e) {
-         ob_end_clean();
-         return "<h1>".titleize($class)."</h1>\n"
-              . "<p>$message, at line $line in <code>$file</code></p>\n"
-              . "<pre>$trace</pre>";
-
-      }
-   }
 
 ?>

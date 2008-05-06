@@ -7,12 +7,19 @@
 # $Id$
 #
 
-   function current_params($params=null) {
-      return array_merge((array) Dispatcher::$params, (array) $params);
+   function current_params(array $params=null) {
+      $params = array_merge((array) Dispatcher::$params, (array) $params);
+      foreach ($params as $key => $value) {
+         if ($key[0] == '_') {
+            unset($params[$key]);
+         }
+      }
+
+      return $params;
    }
 
    # Build a URL for the given options
-   function url_for($path, $options=null) {
+   function url_for($path, array $options=null) {
       if (is_null($path)) {
          return;
 
@@ -21,8 +28,7 @@
          $path = Router::generate($path);
 
       } elseif (!is_string($path)) {
-         $type = gettype($path);
-         throw new ApplicationError("Invalid argument of type '$type'");
+         throw new TypeError($path);
 
       } elseif ($path[0] == ':') {
          # Generate path from route string
@@ -95,7 +101,7 @@
    }
 
    # Build a link tag
-   function link_to($title, $path, $options=null, $link_options=null) {
+   function link_to($title, $path, array $options=null, array $link_options=null) {
       $confirm = add_confirm_options($options);
 
       # Send a POST request by dyamically building a form element
@@ -117,7 +123,7 @@
    }
 
    # Build a link button
-   function button_to($title, $path, $options=null) {
+   function button_to($title, $path, array $options=null) {
       add_confirm_options(&$options);
 
       $method = any($options['post'] ? 'POST' : null, $options['method'], 'GET');
@@ -132,7 +138,7 @@
    }
 
    # Add necessary options for confirmation, used in link_to() and button_to()
-   function add_confirm_options(&$options) {
+   function add_confirm_options(array &$options=null) {
       $confirm = $options['confirm'];
       unset($options['confirm']);
 

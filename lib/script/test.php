@@ -8,7 +8,9 @@
 # $Id$
 #
 
-   require_once dirname(__FILE__).'/../../config/environment.php';
+   define(ENVIRONMENT, 'test');
+
+   require_once dirname(__FILE__).'/../script.php';
    require_once LIB.'test/runner.php';
 
    if (in_array('-v', $argv)) {
@@ -17,8 +19,6 @@
    } else {
       $_LOGGER->level = LOG_DISABLED;
    }
-
-   fake_request();
 
    $paths = find_tests(array_slice($argv, 1));
 

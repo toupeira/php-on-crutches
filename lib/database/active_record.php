@@ -9,101 +9,87 @@
 
    abstract class ActiveRecord extends Model
    {
-      protected $mapper;
-      protected $database = 'default';
-      protected $table;
+      protected $_mapper;
 
-      protected $new_record = true;
-      protected $load_attributes = true;
+      protected $_new_record = true;
+      protected $_load_attributes = true;
+      protected $_virtual_attributes;
 
-      protected $virtual_attributes;
-      protected $defaults;
-
-      protected $associations;
-      protected $has_one;
-      protected $has_many;
-      protected $belongs_to;
-
-      function __construct($attributes=null, $defaults=null) {
-         if (empty($this->database)) {
-            throw new ConfigurationError("No database set for model '".get_class($this)."'");
-         } elseif (empty($this->table)) {
-            throw new ConfigurationError("No table set for model '".get_class($this)."'");
-         }
-
+      function __construct(array $attributes=null, array $defaults=null) {
          # Use attributes from the database
-         if ($this->load_attributes and empty($this->attributes)) {
-            foreach ($this->get_mapper()->attributes as $key) {
-               $this->attributes[$key] = null;
+         if ($this->_load_attributes and empty($this->_attributes)) {
+            foreach ($this->mapper->attributes as $key) {
+               $this->_attributes[$key] = null;
             }
          }
 
          # Add virtual attributes
-         foreach ((array) $this->virtual_attributes as $key) {
-            $this->attributes[$key] = null;
+         foreach ((array) $this->_virtual_attributes as $key) {
+            $this->set_virtual($key, null);
          }
 
          # Always protect the ID from mass-assignments
-         $this->protected[] = 'id';
+         $this->_protected[] = $this->mapper->primary_key;
 
          # Set the default values
          $this->set_attributes($attributes, array_merge(
-            (array) $this->defaults, (array) $defaults
+            (array) $this->mapper->defaults, (array) $defaults
          ));
-
-         # Load association objects
-         $this->add_associations();
       }
 
       function __get($key) {
-         if ($association = $this->associations[$key]) {
-            return $association->data;
+         if (!array_key_exists($key, $this->_attributes) and
+            $association = $this->mapper->associations[$key])
+         {
+            return $this->set_virtual($key, $association->load($this));
          } else {
             return parent::__get($key);
          }
       }
 
       function get_mapper() {
-         if (is_null($this->mapper)) {
-            $this->mapper = DatabaseMapper::load($this);
+         if (is_null($this->_mapper)) {
+            $this->_mapper = DatabaseMapper::load(get_class($this));
          }
 
-         return $this->mapper;
+         return $this->_mapper;
       }
 
-      function get_database() {
-         return $this->database;
+      function get_id() {
+         return $this->_attributes[$this->mapper->primary_key];
       }
 
-      function get_table() {
-         return $this->table;
+      function get_new_record() {
+         return $this->_new_record;
+      }
+
+      function set_virtual($key, $value) {
+         $this->_virtual_attributes[] = $key;
+         return $this->_attributes[$key] = $value;
       }
 
       # Wrapper for database finders
-      function load($attributes) {
+      function load(array $attributes) {
          foreach ($attributes as $key => $value) {
-            if (!array_key_exists($key, $this->attributes)) {
-               $this->virtual_attributes[] = $key;
+            if (!array_key_exists($key, $this->_attributes)) {
+               $this->set_virtual($key, $value);
+            } else {
+               $this->_attributes[$key] = $value;
             }
-            $this->attributes[$key] = $value;
          }
-         $this->new_record = false;
-         $this->changed_attributes = array();
+         $this->_new_record = false;
+         $this->_changed_attributes = array();
 
          return $this;
       }
 
       # Reload attributes from database
       function reload() {
-         if ($this->exists() and !array_key_exists('id', $this->changed_attributes)) {
+         if (!$this->_new_record and !array_key_exists($this->mapper->primary_key, $this->_changed_attributes)) {
             return $this->load($this->mapper->find($this->id)->attributes);
          } else {
             return false;
          }
-      }
-
-      function exists() {
-         return !$this->new_record;
       }
 
       function save($force_update=false) {
@@ -111,90 +97,79 @@
             return false;
          }
 
-         if ($this->exists()) {
-            $action = $sql_action = 'update';
-         } else {
+         if ($this->_new_record) {
             $action = 'create';
             $sql_action = 'insert';
+         } else {
+            $action = $sql_action = 'update';
          }
 
          $this->call_filter("before_$action");
          $this->call_filter(before_save);
 
-         $attributes = array_get($this->attributes,
-            array_keys($this->changed_attributes));
-         array_delete($attributes, $this->virtual_attributes);
+         $attributes = array_get($this->_attributes,
+            array_keys($this->_changed_attributes)
+         );
+         array_delete($attributes, $this->_virtual_attributes);
 
-         if ($this->exists()) {
+         if ($this->_new_record) {
+            $args = array($attributes);
+         } else {
             if (empty($attributes) and !$force_update) {
                return $this;
             }
 
-            $args = array($this->id, $attributes, $force_update);
-         } else {
-            $args = array($attributes);
+            $args = array($attributes, $this->id, $force_update);
          }
 
-         $id = call_user_func_array(array($this->get_mapper(), $sql_action), $args);
+         $id = call_user_func_array(array($this->mapper, $sql_action), $args);
 
          if ($action == 'create') {
-            $this->new_record = false;
-            $this->attributes['id'] = $id;
+            $this->_new_record = false;
+            $this->_attributes[$this->mapper->primary_key] = $id;
          }
 
          $this->call_filter(after_save);
          $this->call_filter("after_$action");
 
-         $this->changed_attributes = array();
+         $this->_changed_attributes = array();
 
          return $this;
       }
 
       function destroy() {
-         if ($this->exists()) {
+         if ($this->_new_record) {
+            return false;
+         } else {
             $this->call_filter(before_destroy);
             $this->delete();
             $this->call_filter(after_destroy);
             return true;
-         } else {
-            return false;
          }
       }
 
       function delete() {
-         if ($this->exists()) {
-            $this->get_mapper()->delete($this->id);
-            $this->new_record = true;
-            $this->readonly = array_keys($this->attributes);
-            return true;
-         } else {
+         if ($this->_new_record) {
             return false;
-         }
-      }
-
-      protected function add_associations() {
-         foreach (array('has_one', 'has_many', 'has_many_through', 'belongs_to') as $type) {
-            if (!empty($this->$type)) {
-               require_once LIB."database/associations/{$type}_association.php";
-               $association = camelize($type).'Association';
-               foreach ($this->$type as $key => $class) {
-                  $this->associations[$key] = new $association($this, $class);
-               }
-            }
+         } else {
+            $this->mapper->delete($this->id);
+            $this->_new_record = true;
+            $this->_readonly = array_keys($this->attributes);
+            return true;
          }
       }
 
       # Database specific validation checks
 
       protected function is_unique($key) {
-         $conditions = array($key => $this->attributes[$key]);
-         if ($this->exists()) {
-            $conditions['`id` != ?'] = $this->attributes['id'];
+         $objects = $this->mapper->where($key, $this->$key);
+         if (!$this->_new_record) {
+            $objects->where("`{$this->mapper->primary_key}` != ?", $this->id);
          }
 
          return $this->validate_attribute($key,
             _("already exists"),
-            $this->mapper->count(array('conditions' => $conditions)) == 0
+            $objects->count() == 0
          );
       }
    }

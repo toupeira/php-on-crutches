@@ -8,13 +8,13 @@
 # $Id$
 #
 
-   require_once dirname(__FILE__).'/../../config/environment.php';
+   require_once dirname(__FILE__).'/../script.php';
 
    function status($action, $path) {
       printf("%12s  %s\n", $action, substr($path, strlen(ROOT)));
    }
 
-   function create_file($path, $lines=null) {
+   function create_file($path, array $lines=null) {
       if (is_file($path) and !$GLOBALS['force']) {
          status('exists', $path);
       } else {
@@ -53,13 +53,17 @@
       }
    }
 
-   function generate_model($name, $table=null) {
-      if (check_class($class = camelize($name))) {
+   function generate_model($name=null, $table=null) {
+      if ($name and check_class($class = camelize($name))) {
          if (preg_match('/^\w+$/', $table)) {
             create_file(MODELS.underscore($name).'.php', array(
+               "class {$class}Mapper extends DatabaseMapper",
+               "{",
+               "   protected \$_table = '$table';",
+               "}",
+               "",
                "class {$class} extends ActiveRecord",
                "{",
-               "   protected \$table = '$table';",
                "}",
             ));
             create_file(FIXTURES.'00_'.underscore($name).'.php', array(
@@ -85,10 +89,10 @@
       }
    }
 
-   function generate_controller($name) {
+   function generate_controller($name=null) {
       $name = strtolower($name);
       $class = camelize($name).'Controller';
-      if (check_class($class)) {
+      if ($name and check_class($class)) {
          create_file(CONTROLLERS.underscore($name).'_controller.php', array(
             "class {$class} extends ApplicationController",
             "{",

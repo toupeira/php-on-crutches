@@ -8,12 +8,10 @@
 # $Id$
 #
 
-   require_once dirname(__FILE__).'/../../config/environment.php';
-
-   $_LOGGER->level = LOG_DISABLED;
+   require_once dirname(__FILE__).'/../script.php';
 
    $languages = (array) config('languages');
-   $domain = config('application');
+   $domain = config('name');
 
    $master = LANG.$domain.'.pot';
    $additional = LANG.'additional.pot';

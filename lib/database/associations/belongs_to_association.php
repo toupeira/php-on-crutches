@@ -9,10 +9,10 @@
 
    class BelongsToAssociation extends Association
    {
-      function load() {
-         $key = underscore($this->class).'_id';
-         if ($id = $this->model->$key) {
-            return DB($this->class)->find($id);
+      protected function load_data(ActiveRecord $model) {
+         $key = underscore($this->_related).'_id';
+         if ($id = $model->$key) {
+            return DB($this->_related)->find($id);
          }
       }
    }

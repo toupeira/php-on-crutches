@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   function build_tag($name, $options, $defaults=null) {
+   function build_tag($name, array $options=null, array $defaults=null) {
       $options = array_merge(
          (array) $defaults,
          (array) $options
@@ -43,11 +43,11 @@
       return $html;
    }
 
-   function tag($name, $options=null, $defaults=null) {
+   function tag($name, array $options=null, array $defaults=null) {
       return build_tag($name, $options, $defaults)." />";
    }
 
-   function content_tag($name, $content=null, $options=null, $defaults=null) {
+   function content_tag($name, $content=null, array $options=null, array $defaults=null) {
       if ($options['open']) {
          $open = true;
          unset($options['open']);

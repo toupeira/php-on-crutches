@@ -9,8 +9,8 @@
 
    class HasOneAssociation extends Association
    {
-      function load() {
-         return DB($this->class)->find($this->key, $this->model->id);
+      protected function load_data(ActiveRecord $model) {
+         return DB($this->_related)->find($this->_key, $model->id);
       }
    }
 

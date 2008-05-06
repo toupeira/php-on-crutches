@@ -23,47 +23,69 @@
          return array_shift(glob("$base$path$lang.thtml", GLOB_BRACE));
       }
 
-      public $template;
-      public $layout;
+      protected $_template;
+      protected $_layout;
+      protected $_data;
 
-      protected $data;
-      protected $partial;
-      protected $locals;
+      protected $_partial;
+      protected $_locals;
 
       function __construct($template=null, $layout=null) {
-         $this->template = $template;
-         $this->layout = $layout;
+         $this->_template = $template;
+         $this->_layout = $layout;
+      }
+
+      function __toString() {
+         return parent::__toString($this->_data);
       }
 
       function get_template_name() {
-         return substr(basename($this->template), 0, -6);
+         return substr(basename($this->_template), 0, -6);
+      }
+
+      function get_template() {
+         return $this->_template;
+      }
+
+      function set_template($template) {
+         return $this->_template = $template;
+      }
+
+      function get_layout() {
+         return $this->_layout;
+      }
+
+      function set_layout($layout) {
+         return $this->_layout = $layout;
       }
 
       function get_data() {
-         return (array) $this->data;
+         return (array) $this->_data;
       }
 
       # Get and set template values
       function get($key) {
-         return $this->data[$key];
+         return $this->_data[$key];
       }
 
       function set($key, $value) {
-         $this->data[$key] = &$value;
+         $this->_data[$key] = &$value;
          return $this;
       }
 
       # Render a template
       function render($template=null, $layout=null) {
-         if (!$this->template and !$this->template = $template) {
+         if (!$this->_template and !$this->_template = $template) {
             throw new ApplicationError("No template set");
-         } elseif (!is_file($this->template)) {
-            if (is_file($file = View::find_template($this->template))) {
-               $this->template = $file;
+         } elseif (!is_file($this->_template)) {
+            if (is_file($file = View::find_template($this->_template))) {
+               $this->_template = $file;
             } else {
-               throw new MissingTemplate("Template '{$this->template}.thtml' not found");
+               throw new MissingTemplate("Template '{$this->_template}.thtml' not found");
             }
          }
+
+         Dispatcher::$render_time -= microtime(true);
 
          # Discard local variables to avoid conflicts with assigned template variables
          # (keep $layout to allow overriding inside the template)
@@ -71,76 +93,78 @@
          unset($file);
 
          # Extract assigned values as local variables
-         if (extract((array) $this->data, EXTR_SKIP) != count($this->data)) {
+         if (extract((array) $this->_data, EXTR_SKIP) != count($this->_data)) {
             throw new ApplicationError("Couldn't extract all template variables");
          }
 
          # Render the template
+         log_info(sprintf('Rendering '.str_replace(VIEWS, '', $this->_template)));
          ob_start();
-         require $this->template;
+         require $this->_template;
          $content_for_layout = ob_get_clean();
-         log_debug("Rendered template {$this->template}");
 
          if (!is_null($layout)) {
-            $this->layout = $layout;
+            $this->_layout = $layout;
          }
 
-         if ($this->layout and !is_file($this->layout)) {
-            if (is_file($_file = View::find_template("layouts/{$this->layout}"))) {
-               $this->layout = $_file;
+         if ($this->_layout and !is_file($this->_layout)) {
+            if (is_file($_file = View::find_template("layouts/{$this->_layout}"))) {
+               $this->_layout = $_file;
                unset($_file);
             } else {
-               throw new MissingTemplate("Layout '{$this->layout}' not found");
+               throw new MissingTemplate("Layout '{$this->_layout}' not found");
             }
          }
 
-         if (is_file($this->layout)) {
+         if (is_file($this->_layout)) {
             # Render the layout
+            log_info('Rendering template within '.str_replace(VIEWS, '', $this->_layout));
             ob_start();
-            require $this->layout;
+            require $this->_layout;
             $output = ob_get_clean();
-            log_debug("Rendered layout {$this->layout}");
          } else {
             $output = $content_for_layout;
          }
+
+         Dispatcher::$render_time += microtime(true);
 
          return $output;
       }
 
       # Render a partial template
-      protected function render_partial($partial, $locals=null) {
+      protected function render_partial($partial, array $locals=null) {
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
          } else {
-            $partial = substr(dirname($this->template), strlen(VIEWS)).'/_'.$partial;
+            $partial = substr(dirname($this->_template), strlen(VIEWS)).'/_'.$partial;
          }
 
-         if (!$this->partial = View::find_template($partial) and
-             !$this->partial = View::find_template(VIEWS.basename($partial))) {
+         if (!$this->_partial = View::find_template($partial) and
+             !$this->_partial = View::find_template(VIEWS.basename($partial))) {
             throw new ApplicationError("Partial '$partial' not found");
          }
 
-         $this->locals = $locals;
+         $this->_locals = $locals;
 
          # Discard local variables to avoid conflicts with assigned template variables
          unset($partial);
          unset($locals);
 
          # Extract assigned values as local variables
-         if (extract((array) $this->data, EXTR_SKIP) != count($this->data)) {
+         if (extract((array) $this->_data, EXTR_SKIP) != count($this->_data)) {
             throw new ApplicationError("Couldn't extract all template variables");
          }
 
          # Extract passed values as local variables
-         if (is_array($this->locals) and extract((array) $this->locals, EXTR_SKIP) != count($this->locals)) {
+         if (is_array($this->_locals) and extract((array) $this->_locals, EXTR_SKIP) != count($this->_locals)) {
             throw new ApplicationError("Couldn't extract all passed locales");
          }
 
          # Render the partial
+         log_info("Rendering partial {$this->_partial}");
          ob_start();
-         require $this->partial;
+         require $this->_partial;
          $output = ob_get_clean();
-         log_debug("Rendered partial {$this->partial}");
 
          return $output;
       }

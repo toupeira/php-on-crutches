@@ -9,8 +9,8 @@
 
    class HasManyAssociation extends Association
    {
-      function load() {
-         return DB($this->class)->find_all($this->key, $this->model->id);
+      protected function load_data(ActiveRecord $model) {
+         return DB($this->_related)->where($this->_key, $model->id);
       }
    }
 

@@ -9,35 +9,22 @@
 
    abstract class Association extends Object
    {
-      protected $model;
-      protected $class;
-      protected $key;
+      protected $_model;
+      protected $_related;
+      protected $_key;
 
-      protected $data;
-      protected $loaded = false;
-
-      function __construct($model, $class) {
-         $this->model = $model;
-         $this->class = $class;
-         $this->key = underscore(get_class($model)).'_id';
+      function __construct($model, $related) {
+         $this->_model = $model;
+         $this->_related = $related;
+         $this->_key = underscore($model).'_id';
       }
 
-      function load() {
-         throw new ApplicationError("Association doesn't implement 'load'");
+      function load(ActiveRecord $model) {
+         return $this->load_data($model);
       }
 
-      function get_data() {
-         if ($this->loaded) {
-            return $this->data;
-         } else {
-            $this->loaded = true;
-            return $this->data = $this->load();
-         }
-      }
-
-      function set_data($data) {
-         $this->loaded = true;
-         $this->data = &$data;
+      protected function load_data(ActiveRecord $model) {
+         throw new ApplicationError("Association doesn't implement 'load_data'");
       }
    }
 

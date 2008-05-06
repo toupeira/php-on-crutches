@@ -17,6 +17,13 @@
       }
    }
 
+   # Define a constant if it isn't set yet
+   function define_default($constant, $value) {
+      if (!defined($constant)) {
+         define($constant, $value);
+      }
+   }
+
    # Return the first non-empty value
    function any() {
       foreach (func_get_args() as $arg) {

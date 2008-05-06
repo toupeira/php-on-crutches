@@ -8,32 +8,30 @@
 # $Id$
 #
 
-   require_once dirname(__FILE__).'/../../config/environment.php';
+   require_once dirname(__FILE__).'/../script.php';
 
-   $_LOGGER->level = LOG_DISABLED;
    chdir(ROOT);
-
-   $files = array();
 
    print "[1;34m>>>[0m ";
 
-   if ($args = array_slice($argv, 1)) {
-      $files = 
-      print "editing [1m".$args[0]."[0m\n";
-      $files = explode("\n", trim(`find app/controllers app/models app/helpers app/views public test/controllers test/models test/helpers -type f | egrep -v '\.(svn|swp|bak)' | grep '{$args[0]}'`));
-      $files == array('') and $files = null;
+   if ($filter = $argv[1]) {
+      print "editing [1m".$filter."[0m\n";
+      $files = find_files(array(
+         CONTROLLERS,
+         MODELS,
+         HELPERS,
+         VIEWS,
+         WEBROOT,
+         TEST.'controllers',
+         TEST.'models',
+         TEST.'helpers',
+      ), "-type f -path '*$filter*' \\( -name '*.php' -o -name '*.thtml' \\)", false);
    } else {
       print "editing [1mapplication[0m\n";
-      $app = config('application');
       $files = array(
          CONTROLLERS.'application_controller.php',
          HELPERS.'application_helper.php',
-         VIEWS.'layouts/application.rhtml',
-         STYLESHEETS.$app.'.css',
-         JAVASCRIPTS.$app.'.css',
-         CONFIG.'routes.php',
-         CONFIG.'database.php',
-         CONFIG.'framework.php',
+         VIEWS.'layouts/application.thtml',
          CONFIG.'application.php',
       );
    }
@@ -41,7 +39,13 @@
    if (empty($files)) {
       print "No files found.\n";
    } else {
-      spawn($_ENV['EDITOR'].' '.implode(' ', $files));
+      # Reset locale
+      putenv("LANG={$_ENV['LANG']}");
+      putenv("LANGUAGE=");
+
+      $files = array_map(escapeshellarg, $files);
+      $editor = any($_ENV['EDITOR'], $_ENV['DISPLAY'] ? 'gvim' : 'vim');
+      proc_open("$editor ".implode(' ', $files), array(), $pipes);
    }
 
 ?>

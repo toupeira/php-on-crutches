@@ -8,9 +8,7 @@
 # $Id$
 #
 
-   require_once dirname(__FILE__).'/../../config/environment.php';
-
-   $_LOGGER->level = LOG_DISABLED;
+   require_once dirname(__FILE__).'/../script.php';
 
    if (!run('lighttpd -v')) {
       print "You need lighttpd to run the server.\n";

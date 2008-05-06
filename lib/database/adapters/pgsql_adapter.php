@@ -9,8 +9,8 @@
 
    class PgsqlAdapter extends DatabaseConnection
    {
-      function get_dsn($options) {
-         return "pgsql:host={$options['hostname']} dbname={$options['database']}";
+      function get_dsn() {
+         return "pgsql:host={$this->options['hostname']} dbname={$this->options['database']}";
       }
    }
 

@@ -16,7 +16,6 @@
    function log_warn($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_WARN); }
    function log_info($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_INFO); }
    function log_debug($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_DEBUG); }
-   function log_dump($data) { return log_debug(var_export($data, true)); }
 
    function log_running() {
       return $GLOBALS['_LOGGER'] instanceof Logger;
@@ -32,65 +31,71 @@
 
    class Logger extends Object
    {
-      protected $file;
-      protected $level;
-      protected $buffer;
+      protected $_file;
+      protected $_level;
+      protected $_buffer;
 
       function __construct($file=STDERR, $level=LOG_INFO) {
          if (is_resource($file)) {
-            $this->buffer = $file;
+            $this->_buffer = $file;
          } else {
-            $this->file = $file;
+            $this->_file = $file;
          }
 
          if (is_numeric($level)) {
-            $this->level = $level;
+            $this->_level = $level;
          }
       }
 
       function __destruct() {
-         if ($this->running()) {
-            fclose($this->buffer);
+         if ($this->running) {
+            fclose($this->_buffer);
          }
       }
 
-      function running() {
-         return is_resource($this->buffer);
+      function get_running() {
+         return is_resource($this->_buffer);
       }
 
       function get_file() {
-         return $this->file;
+         return $this->_file;
       }
 
       function set_file($file) {
          $this->__destruct();
-         $this->file = $file;
+         $this->_file = $file;
       }
 
       function get_level() {
-         return $this->level;
+         return $this->_level;
       }
 
       function set_level($level) {
-         $this->level = intval($level);
+         $this->_level = intval($level);
       }
 
       function log($msg, $level=LOG_INFO) {
-         if ($level <= $this->level) {
-            if (!$this->running()) {
-               if (($this->buffer = @fopen($this->file, 'a')) === false) {
-                  print "<p><b>Warning:</b> the logfile <tt>{$this->file}</tt> is not writable</p>";
-                  $this->level = LOG_DISABLED;
+         if ($level <= $this->_level) {
+            if (!$this->running) {
+               if (($this->_buffer = @fopen($this->_file, 'a')) === false) {
+                  print "<p><b>Warning:</b> the logfile <tt>{$this->_file}</tt> is not writable</p>";
+                  $this->_level = LOG_DISABLED;
                   return false;
                }
             }
 
-            if (fwrite($this->buffer, "$msg\n") === false) {
-               throw new ApplicationError("Couldn't write to logfile {$this->file}", false);
+            if (is_array($msg)) {
+               ob_start();
+               print_r($msg);
+               $msg = ob_get_clean();
             }
 
-            if (fflush($this->buffer) === false) {
-               throw new ApplicationError("Couldn't flush logfile {$this->file}", false);
+            if (fwrite($this->_buffer, "$msg\n") === false) {
+               throw new ApplicationError("Couldn't write to logfile {$this->_file}", false);
+            }
+
+            if (fflush($this->_buffer) === false) {
+               throw new ApplicationError("Couldn't flush logfile {$this->_file}", false);
             }
 
             return true;

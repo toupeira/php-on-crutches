@@ -7,62 +7,113 @@
 # $Id$
 #
 
-   require CONFIG.'framework.php';
    require CONFIG.'application.php';
+   require CONFIG.'environments/'.ENVIRONMENT.'.php';
+
    require CONFIG.'routes.php';
    require CONFIG.'database.php';
 
-   $_CONFIG = array_merge($_FRAMEWORK, (array) $_APPLICATION);
+   # Default framework settings
+   $_CONFIG['defaults'] = array(
+      'name'              => basename(ROOT),
+      'languages'         => null,
 
-   function config($key) {
-      return $GLOBALS['_CONFIG'][$key];
+      'log_file'          => LOG.ENVIRONMENT.'.log',
+      'log_level'         => LOG_INFO,
+
+      'session_store'     => 'php',
+      'cache_store'       => 'memory',
+      'cache_path'        => TMP.'cache',
+
+      'error_handler'     => error_handler,
+      'exception_handler' => exception_handler,
+
+      'output_buffering'  => true,
+      'rewrite_urls'      => true,
+      'debug_redirects'   => false,
+      'debug_queries'     => false,
+
+      'send_mails'        => true,
+      'mail_from'         => '',
+      'mail_from_name'    => '',
+      'notify_exceptions' => null,
+      'trusted_hosts'     => null,
+   );
+
+   # Merge application settings
+   $_CONFIG['application'] = array_merge(
+      $_CONFIG['defaults'],
+      $_CONFIG['application'],
+      $_CONFIG[ENVIRONMENT]
+   );
+
+   if (PHP_SAPI == 'cli') {
+      # Force custom settings when running in a console
+      array_update($_CONFIG['application'], array(
+         'log_file'          => STDERR,
+         'session_store'     => 'none',
+         'cache_store'       => 'memory',
+         'exception_handler' => false,
+         'output_buffering'  => false,
+      ));
+   }
+
+   function config($key, $subkey=null) {
+      if (array_key_exists($key, $GLOBALS['_CONFIG'])) {
+         if ($subkey) {
+            return $GLOBALS['_CONFIG'][$key][$subkey];
+         } else {
+            return $GLOBALS['_CONFIG'][$key];
+         }
+      } else {
+         return $GLOBALS['_CONFIG']['application'][$key];
+      }
    }
 
    function config_set($key, $value) {
-      return $GLOBALS['_CONFIG'][$key] = $value;
+      return $GLOBALS['_CONFIG']['application'][$key] = $value;
    }
 
    function config_init() {
-      $config = &$GLOBALS['_CONFIG'];
+      $config = config('application');
 
-      # Start output buffering (unless running in a console)
-      if (PHP_SAPI != 'cli') {
+      # Start output buffering
+      if ($config['output_buffering']) {
          ob_start();
       }
 
       # Configure error reporting
-      ini_set('display_errors', ($config['debug'] or PHP_SAPI == 'cli'));
       error_reporting(E_ALL ^ E_NOTICE);
-      set_error_handler('error_handler', error_reporting());
-      (PHP_SAPI != 'cli') and set_exception_handler('exception_handler');
+      ini_set('display_errors',
+         (ENVIRONMENT == 'development' or PHP_SAPI == 'cli'));
 
-      # Load routes
-      if (!empty($GLOBALS['_ROUTES'])) {
-         Router::add($GLOBALS['_ROUTES']);
+      # Set global PHP error handler
+      if ($handler = $config['error_handler']) {
+         set_error_handler($handler, error_reporting());
       }
 
+      # Set global exception handler
+      if ($handler = $config['exception_handler']) {
+         set_exception_handler($handler);
+      }
+
+      # Load routes
+      Router::add(config('routes'));
+
       # Load database support if necessary
-      if (!empty($GLOBALS['_DATABASE'])) {
+      if (config('database')) {
          require LIB.'database/base.php';
       }
 
       # Configure the logger
-      $log_file = (PHP_SAPI == 'cli')
-         ? STDERR
-         : any($config['log_file'], LOG.'application.log');
-      $GLOBALS['_LOGGER'] = new Logger($log_file, any($config['log_level'], LOG_INFO));
+      $GLOBALS['_LOGGER'] = new Logger($config['log_file'], $config['log_level']);
 
-      # Setup cache store, always use memory store for debug mode and console
-      if ($config['debug'] or PHP_SAPI == 'cli') {
-         $store = 'memory';
-      } else {
-         $store = $config['cache_store'];
-      }
-      load_store('cache', $store, 'memory');
+      # Setup cache store, always use memory store in console
+      load_store('cache', $config['cache_store'], 'memory');
 
       # Setup session store if enabled and not running in a console
-      if ($store = $config['session_store'] and PHP_SAPI != 'cli') {
-         if ($store != 'php' and $store = load_store('session', $store, 'cookie')) {
+      if ($store = $config['session_store'] and $store != 'none') {
+         if ($store != 'php' and $store = load_store('session', $store, 'php')) {
             session_set_save_handler(
                array($store, 'open'),
                array($store, 'close'),
@@ -84,9 +135,9 @@
       mb_internal_encoding('UTF-8');
 
       # Configure gettext domain
-      textdomain($config['application']);
-      bindtextdomain($config['application'], LANG);
-      bind_textdomain_codeset($config['application'], 'UTF-8');
+      textdomain($config['name']);
+      bindtextdomain($config['name'], LANG);
+      bind_textdomain_codeset($config['name'], 'UTF-8');
 
       # Set a locale, so $LANGUAGE will be respected
       if (!setlocale(LC_MESSAGES, 'en_US.UTF-8')) {

@@ -23,7 +23,7 @@
       protected $comment = false;
       protected $last = true;
 
-      function __construct($coverage, $target=null, $include=null, $exclude=null) {
+      function __construct(array $coverage, $target=null, $include=null, $exclude=null) {
          $this->files = $coverage;
          $this->target = $target;
 
@@ -88,7 +88,7 @@
          return true;
       }
 
-      protected function render_file($path, $coverage) {
+      protected function render_file($path, array $coverage) {
 
          $name = substr($path, strlen(ROOT));
 
@@ -184,7 +184,7 @@
          ));
       }
 
-      protected function render($template, $file, $data) {
+      protected function render($template, $file, array $data) {
          $view = new View(
             $this->view_path."$template.thtml",
             $this->view_path."layout.thtml"

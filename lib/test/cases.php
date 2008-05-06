@@ -17,7 +17,7 @@
          return $this->assertWantedPattern($pattern, $subject, $message);
       }
 
-      function assertInArray($member, $array, $message=null) {
+      function assertInArray($member, array $array, $message=null) {
          if (!$message) {
             $dumper = &new SimpleDumper();
             $message = "[" . $dumper->describeValue($member)
@@ -28,7 +28,7 @@
             in_array($member, $array), $message);
       }
 
-      function assertKey($key, $array, $message=null) {
+      function assertKey($key, array $array, $message=null) {
          if (!$message) {
             $dumper = &new SimpleDumper();
             $message = "[" . $dumper->describeValue($array)
@@ -54,11 +54,12 @@
          $raised = false;
          try {
             eval("$code;");
-         } catch (ApplicationError $e) {
+         } catch (Exception $e) {
             if ($e instanceof $class) {
                $raised = true;
             }
          }
+
          $this->assertTrue($raised, "Expected code to raise $class");
          return $e;
       }
@@ -71,7 +72,7 @@
          return $this->assertWantedPattern($pattern, file_get_contents($file), $message);
       }
 
-      function assertHasError($object, $key) {
+      function assertHasError(Model $object, $key) {
          $dumper = &new SimpleDumper();
          $message = "[" . $dumper->describeValue($object)
                   . "] should have an error on ["
@@ -80,7 +81,7 @@
             $key, $object->errors, $message);
       }
 
-      function assertRecognizes($expected_values, $path) {
+      function assertRecognizes(array $expected_values, $path) {
          $values = Router::recognize($path);
          $message = "Route '$path' wasn't recognized as "
                   . array_to_str($expected_values) . ", got "
@@ -88,14 +89,14 @@
          return $this->assertEqual($expected_values, $values, str_replace('%', '%%', $message));
       }
 
-      function assertGenerates($expected_path, $values) {
+      function assertGenerates($expected_path, array $values) {
          $path = Router::generate($values);
          $message = "Expected " . array_to_str($values) . " to "
                   . "generate '$expected_path', got '$path'";
          return $this->assertEqual($expected_path, $path, str_replace('%', '%%', $message));
       }
 
-      function assertRouting($path, $values) {
+      function assertRouting($path, array $values) {
          $this->assertRecognizes($values, $path);
          $this->assertGenerates($path, $values);
       }
@@ -168,7 +169,7 @@
          }
       }
 
-      function request($action, $post=null) {
+      function request($action, array $post=null) {
          $path = "{$this->controller->name}/$action";
          $_POST = (array) $post;
          fake_request($path, is_array($post) ? 'POST' : 'GET');
@@ -183,11 +184,11 @@
          return $this->request($action);
       }
 
-      function post($action, $args=null) {
+      function post($action, array $args=null) {
          return $this->request($action, (array) $args);
       }
 
-      function ajax($method, $action, $args=null) {
+      function ajax($method, $action, array $args=null) {
          $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest';
          $this->$method($action, $args);
          unset($_SERVER['HTTP_X_REQUESTED_WITH']);
@@ -250,14 +251,21 @@
          }
       }
 
-      function assertAssigns($assigns) {
+      function assertAssigns(array $assigns) {
          foreach ($assigns as $key => $type) {
             $this->assertTrue(
                array_key_exists($key, $this->assigns()),
                "Expected assigned variable '$key'");
+
+            if (class_exists($type)) {
+               $real_type = get_class($this->assigns($key));
+            } else {
+               $real_type = gettype($this->assigns($key));
+            }
+
             $this->assertEqual(
-               gettype($this->assigns($key)), $type,
-               "Expected assigned variable '$key' to be of type '$type', got '".gettype($this->assigns($key))."'");
+               $type, $real_type,
+               "Expected assigned variable '$key' to be of type '$type', got '$real_type'");
          }
       }
 

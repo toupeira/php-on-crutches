@@ -9,17 +9,14 @@
 
    class DatabaseConnection extends Object
    {
-      static protected $connections;
-
-      protected $name;
-      protected $connection;
-
       static function load($name) {
-         if ($connection = self::$connections[$name]) {
+         static $_cache;
+
+         if ($connection = $_cache[$name]) {
             return $connection;
          }
 
-         $config = $GLOBALS['_DATABASE'];
+         $config = config('database');
          $names = array_keys($config);
 
          if ($name == 'default' and !isset($config[$name])) {
@@ -28,15 +25,13 @@
             $real_name = $name;
          }
 
-         if (defined('TESTING')) {
-            $real_name .= '_test';
-         }
-
          while (is_string($options = $config[$real_name])) {
             $real_name = $options;
          }
 
          if (is_array($options)) {
+            $options = array_merge($options, (array) $options[ENVIRONMENT]);
+
             if ($driver = array_delete($options, 'driver')) {
                $file = LIB."database/adapters/{$driver}_adapter.php";
                if (is_file($file)) {
@@ -46,7 +41,8 @@
                   $adapter = get_class();
                }
 
-               return self::$connections[$name] = new $adapter($real_name, $options);
+               $connection = new $adapter($real_name, $options);
+               return $_cache[$name] = $connection;
             } else {
                throw new ConfigurationError("No driver set for database '$real_name'");
             }
@@ -55,11 +51,16 @@
          }
       }
 
-      protected function __construct($name, $options) {
-         $this->name = $name;
+      protected $_name;
+      protected $_options;
+      protected $_connection;
+
+      protected function __construct($name, array $options) {
+         $this->_name = $name;
+         $this->_options = $options;
 
          list($user, $pass) = array_delete($options, 'username', 'password');
-         $this->connection = new PDO(
+         $this->_connection = new PDO(
             $this->get_dsn($options), $user, $pass, array(
                PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
                PDO::ATTR_PERSISTENT       => true,
@@ -71,23 +72,40 @@
          );
       }
 
-      function get_name() {
-         return $this->name;
+      function __toString() {
+         return parent::__toString($this->_options);
       }
 
-      function execute($sql, $params=null) {
+      function get_name() {
+         return $this->_name;
+      }
+
+      function get_options() {
+         return $this->_options;
+      }
+
+      function execute($sql, array $params=null) {
          if (!is_array($params)) {
             $params = array_slice(func_get_args(), 1);
          }
 
-         if (log_level(LOG_DEBUG)) {
-            $args = array_map(proc('var_export($a, true)'), $params);
+         if (log_level(LOG_INFO)) {
+            $args = array();
+            foreach ($params as $param) {
+               $args[] = var_export($param, true);
+            }
             array_unshift($args, str_replace('?', '%s',
-               str_replace('%', '%%', $sql)));
-            log_debug("Database query: [{$this->name}] ".call_user_func_array(sprintf, $args));
+               str_replace('%', '%%', $sql)
+            ));
+
+            log_info("  SQL [{$this->name}] [1m".call_user_func_array(sprintf, $args)."[0m");
+
+            if (config('analyze_queries') and substr($sql, 0, 6) == 'SELECT') {
+               $this->analyze_query($sql, $params);
+            }
          }
 
-         $stmt = $this->connection->prepare(
+         $stmt = $this->_connection->prepare(
             $sql, array(PDO::ATTR_STATEMENT_CLASS => array(DatabaseStatement))
          );
          $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -95,10 +113,14 @@
       }
 
       function insert_id() {
-         return $this->connection->lastInsertId();
+         return $this->_connection->lastInsertId();
       }
 
-      function get_dsn($options) {
+      function analyze_query($sql, array $params) {
+         throw new NotImplemented(get_class()." doesn't implement 'analyze_query'");
+      }
+
+      function get_dsn() {
          throw new NotImplemented(get_class()." doesn't implement 'get_dsn'");
       }
 
@@ -115,7 +137,7 @@
       }
 
       function get_tables() {
-         $key = "db-{$this->name}-tables";
+         $key = "db-{$this->_name}-tables";
          if ($tables = cache($key)) {
             return $tables;
          } else {
@@ -124,7 +146,7 @@
       }
 
       function table_attributes($table) {
-         $key = "db-{$this->name}-attributes-$table";
+         $key = "db-{$this->_name}-attributes-$table";
          if ($attributes = cache($key)) {
             return $attributes;
          } else {
@@ -135,9 +157,18 @@
 
    class DatabaseStatement extends PDOStatement
    {
-      function execute($params=array()) {
-         parent::execute($params);
+      function execute(array $params=null) {
+         Dispatcher::$db_queries++;
+         parent::execute((array) $params);
          return $this;
+      }
+
+      function row_count() {
+         return parent::rowCount();
+      }
+
+      function column_count() {
+         return parent::columnCount();
       }
 
       function fetch_all() {
@@ -185,7 +216,7 @@
       protected $connection;
       protected $finished;
 
-      function __construct($connection) {
+      function __construct(PDO $connection) {
          $this->connection = $connection;
          $this->connection->beginTransaction();
       }

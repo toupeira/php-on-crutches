@@ -7,63 +7,127 @@
 # $Id$
 #
 
-   class DatabaseMapper extends Object
-   {
-      static protected $mappers;
+   require LIB.'database/query_set.php';
+   require LIB.'database/association.php';
 
+   abstract class DatabaseMapper extends Object
+   {
       static function load($model) {
-         $class = is_object($model) ? get_class($model) : $model;
-         if ($mapper = self::$mappers[$class]) {
+         static $_cache;
+
+         $model = (is_object($model) ? get_class($model) : $model);
+
+         if ($mapper = $_cache[$model]) {
             return $mapper;
          } else {
-            return self::$mappers[$class] = new DatabaseMapper($model);
+            $mapper = $model.'Mapper';
+            return $_cache[$model] = new $mapper();
          }
       }
 
-      protected $model;
-      protected $connection;
-      protected $database;
-      protected $table;
+      protected $_model;
+      protected $_table;
+      protected $_primary_key = 'id';
+      protected $_database = 'default';
+      protected $_connection;
 
-      protected function __construct($model) {
-         if (is_object($model)) {
-            $this->model = get_class($model);
-         } else {
-            $this->model = $model;
-            $model = new $model();
+      protected $_attributes;
+      protected $_defaults;
+      protected $_order;
+      protected $_page_size;
+
+      protected $_associations;
+      protected $_has_one;
+      protected $_has_many;
+      protected $_belongs_to;
+
+      function __construct() {
+         $this->_model = substr(get_class($this), 0, -6);
+
+         if (empty($this->_database)) {
+            throw new ConfigurationError("No database set for model '{$this->_model}'");
+         } elseif (empty($this->_table)) {
+            throw new ConfigurationError("No table set for model '{$this->_model}'");
          }
 
-         if (! $model instanceof ActiveRecord) {
-            throw new ApplicationError("Invalid model '".get_class($this)."'");
+         foreach (array('has_one', 'has_many', 'has_many_through', 'belongs_to') as $type) {
+            if (!empty($this->{'_'.$type})) {
+               require_once LIB."database/associations/{$type}_association.php";
+               $association = camelize($type).'Association';
+               foreach ($this->{'_'.$type} as $key => $class) {
+                  $this->_associations[$key] = new $association($this->_model, $class);
+               }
+            }
          }
+      }
 
-         $this->database = $model->database;
-         $this->table = $model->table;
+      function __toString() {
+         return parent::__toString(array(
+            'model'    => $this->_model,
+            'database' => $this->_database,
+            'table'    => $this->_table,
+         ));
+      }
+
+      function get_model() {
+         return $this->_model;
+      }
+
+      function get_database() {
+         return $this->_database;
+      }
+
+      function get_table() {
+         return $this->_table;
+      }
+
+      function get_primary_key() {
+         return $this->_primary_key;
       }
 
       function get_connection() {
-         if (!$this->connection) {
-            $this->connection = DatabaseConnection::load($this->database);
+         if (!$this->_connection) {
+            $this->_connection = DatabaseConnection::load($this->_database);
          }
 
-         return $this->connection;
+         return $this->_connection;
       }
 
       function get_attributes() {
-         return $this->get_connection()->table_attributes($this->table);
+         if ($this->_attributes) {
+            return $this->_attributes;
+         } else {
+            return $this->_attributes = $this->connection->table_attributes($this->_table);
+         }
+      }
+
+      function get_defaults() {
+         return $this->_defaults;
+      }
+
+      function get_order() {
+         return $this->_order;
+      }
+
+      function get_page_size() {
+         return $this->_page_size;
+      }
+
+      function get_associations() {
+         return $this->_associations;
       }
 
       function execute() {
          $args = func_get_args();
-         return call_user_func_array(array($this->get_connection(), execute), $args);
+         return call_user_func_array(array($this->connection, execute), $args);
       }
 
-      function create($attributes) {
-         $model = new $this->model($attributes);
+      function create(array $attributes) {
+         $model = new $this->_model($attributes);
          return $model->save();
       }
 
-      function insert($attributes) {
+      function insert(array $attributes) {
          $columns = array();
          $keys = array();
          $values = array();
@@ -78,19 +142,19 @@
             }
          }
 
-         if (in_array('created_at', $this->get_attributes()) and !isset($attributes['created_at'])) {
+         if (in_array('created_at', $this->attributes) and !isset($attributes['created_at'])) {
             $columns[] = "`created_at`";
-            $keys[] = $this->get_connection()->get_timestamp();
+            $keys[] = $this->connection->timestamp;
          }
 
          $query = sprintf("INSERT INTO `%s` (%s) VALUES (%s)",
-                          $this->table, implode(", ", $columns), implode(", ", $keys));
+                          $this->_table, implode(", ", $columns), implode(", ", $keys));
          $this->execute($query, $values);
 
          return $this->connection->insert_id();
       }
 
-      function update($id, $attributes, $force=false) {
+      function update(array $attributes, $conditions, $force=false) {
          if (empty($attributes) and !$force) {
             return true;
          }
@@ -107,15 +171,21 @@
             }
          }
 
-         if (in_array('updated_at', $this->get_attributes()) and !isset($attributes['updated_at'])) {
-            $keys[] = "`updated_at` = ".$this->get_connection()->get_timestamp();
+         if (in_array('updated_at', $this->attributes) and !isset($attributes['updated_at'])) {
+            $keys[] = "`updated_at` = ".$this->connection->timestamp;
          } elseif (empty($attributes)) {
             return true;
          }
 
-         $query = sprintf("UPDATE `%s` SET %s WHERE `id` = ?",
-                          $this->table, implode(", ", $keys));
-         $values[] = $id;
+         list($conditions, $condition_values) = $this->build_condition($conditions);
+         if (blank($conditions)) {
+            throw new ApplicationError("No conditions given");
+         } else {
+            $values = array_merge($values, $condition_values);
+         }
+
+         $query = sprintf("UPDATE `%s` SET %s WHERE $conditions",
+                          $this->_table, implode(", ", $keys));
          $this->execute($query, $values);
 
          return $id;
@@ -127,52 +197,48 @@
             throw new ApplicationError("No conditions given");
          }
 
-         $this->execute("DELETE FROM `{$this->table}` WHERE $conditions", (array) $values);
+         $this->execute("DELETE FROM `{$this->_table}` WHERE $conditions", (array) $values);
          return $id;
       }
 
       function delete_all() {
-         $this->execute("DELETE FROM `{$this->table}`");
+         $this->execute("DELETE FROM `{$this->_table}`");
       }
 
-      function find($id) {
-         if ($id) {
-            list($select, $values) = $this->build_select(func_get_args(),
-               array('limit' => 1));
-            return $this->execute($select, (array) $values)->fetch_load($this->model);
-         }
-      }
-
-      function find_all() {
-         list($select, $values) = $this->build_select(func_get_args());
-         return $this->execute($select, (array) $values)->fetch_all_load($this->model);
-      }
-
-      function find_pairs($key='id', $value='name', $blank=true) {
-         if ($blank === true) {
-            $pairs = array(null => '');
-         } elseif ($blank !== false) {
-            $pairs = array(null => $blank);
+      function get_query_set() {
+         if (class_exists($class = $this->_model.'QuerySet')) {
+            return new $class($this);
          } else {
-            $pairs = array();
+            return new QuerySet($this);
          }
-
-         foreach ($this->find_all() as $model) {
-            $pairs[$model->$key] = $model->$value;
-         }
-
-         return $pairs;
       }
 
-      function find_by_sql($sql) {
-         $values = array_slice(func_get_args(), 1);
-         return $this->execute($sql, $values)->fetch_all_load($this->model);
+      function __get($key) {
+         $getter = "get_$key";
+         if (method_exists($this, $getter)) {
+            return $this->$getter();
+         } else {
+            return $this->get_query_set()->$getter();
+         }
+      }
+
+      function __set($key, $value) {
+         $setter = "set_$key";
+         if (method_exists($this, $setter)) {
+            $this->$setter($value);
+            return $this;
+         } else {
+            return $this->get_query_set()->$setter($key);
+         }
       }
 
       # Handle find(_all)_by_* calls
       function __call($method, $args) {
-         if (preg_match('/^(find(?:_all)?)_(by|like)_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
+         if ($method != 'find_by_sql' and preg_match('/^(find(?:_all)?)_(by|like)_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
             list($method, $finder, $equality, $key, $operator, $keys) = $match;
+
+            $finder = ($finder == 'find' ? 'first' : 'all');
+
             $argc = count($args);
 
             $equality = ($equality == 'by') ? '=' : 'LIKE';
@@ -188,95 +254,34 @@
             $op = '';
             foreach ($keys as $key) {
                $where .= "$op`$key` $equality ?";
-               $params[] = array_shift_arg($args);
+               $conditions[] = array_shift_arg($args);
                $op = ' '.strtoupper($operator).' ';
             }
 
-            array_unshift($params, $where);
+            array_unshift($conditions, $where);
 
             if ($args) {
-               if (is_array($options = array_shift($args))) {
-                  $params[] = $options;
-               } else {
-                  throw new ApplicationError('Too many arguments');
-               }
+               throw new ApplicationError('Too many arguments');
             }
 
-            return call_user_func_array(array($this, $finder), $params);
+            return $this->get_query_set()->where($conditions)->$finder;
+            #return call_user_func_array(array($this, $finder), $params);
 
          } else {
-            throw new ApplicationError("Invalid method '$method'");
+            return call_user_func_array(array($this->get_query_set(), $method), $args);
          }
       }
 
-      function count() {
-         list($select, $values) = $this->build_select(func_get_args(), array('select' => 'count(*)'));
-         return intval($this->execute($select, (array) $values)->fetch_column());
-      }
-
-      protected function build_select($args, $defaults=null) {
-         $options = array();
-         $conditions = array();
-         foreach ($args as $i => $arg) {
-            if (is_array($arg) and $i == count($args) - 1) {
-               $options = $arg;
-            } else {
-               $conditions[] = $arg;
-            }
-         }
-
-         $options = array_merge(
-            array('select' => '*', 'from' => "`{$this->table}`"),
-            (array) $defaults, $options
-         );
-
-         if ($conditions) {
-            $options['conditions'] = $conditions;
-         }
-
-         $params = array();
-         $select = 'SELECT '
-                 . implode(', ', (array) $options['select'])
-                 . ' FROM '
-                 . implode(', ', (array) $options['from']);
-
-         if ($joins = $options['joins']) {
-            $select .= ' '.implode(' ', (array) $joins);
-         }
-
-         if ($conditions = $options['conditions']) {
-            list($conditions, $params) = $this->build_condition($conditions);
-            if (!blank($conditions)) {
-               $select .= " WHERE $conditions";
-            }
-         }
-
-         if ($group = $options['group']) { $select .= " GROUP BY $group"; }
-
-         if ($conditions = $options['having']) {
-            list($conditions, $having_params) = $this->build_condition($conditions);
-            $select .= " HAVING $conditions";
-            $params = array_merge($params, $having_params);
-         }
-
-         if ($order = $options['order']) {
-            $select .= ' ORDER BY '.implode(', ', (array) $order);
-         }
-
-         if ($limit = $options['limit']) { $select .= " LIMIT $limit"; }
-         if ($offset = $options['offset']) { $select .= " OFFSET $offset"; }
-
-         return array($select, $params);
-      }
-
-      protected function build_condition($conditions) {
+      function build_condition($conditions) {
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
             $conditions = func_get_args();
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
             # Conditions are passed as array
-            #$conditions = $conditions[0];
-         } elseif (empty($conditions)) {
+            $conditions = $conditions[0];
+         }
+
+         if (empty($conditions)) {
             return null;
          }
 
@@ -302,12 +307,12 @@
                   # Use array key as condition with placeholders
                   #   e.g.: find(array('key LIKE ?' => $value))
                   #
-                  $condition .= " $key";
+                  $condition .= $key;
                } else {
                   # Use array key as column name
                   #   e.g.: find(array('key' => $value))
                   #
-                  $condition .= " `$key` = ?";
+                  $condition .= "`$key` = ?";
                   $count = 1;
                }
 
@@ -320,7 +325,7 @@
                # Use array value as ID
                #   e.g.: find($id)
                #
-               $condition .= "$operator`id` = ?";
+               $condition .= "$operator`{$this->_table}`.`{$this->_primary_key}` = ?";
                $params[] = $value;
 
                # Allow passing multiple IDs
@@ -353,7 +358,7 @@
                array_shift($keys);
 
             } elseif (!is_null($value)) {
-               throw new ApplicationError("Invalid argument '$value'");
+               throw new TypeError($value);
             }
          }
 

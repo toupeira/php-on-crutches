@@ -15,11 +15,9 @@
       exit(1);
    }
 
-   require_once dirname(__FILE__).'/../../config/environment.php';
+   require_once dirname(__FILE__).'/../script.php';
    require_once LIB.'test/runner.php';
    require_once LIB.'test/coverage.php';
-
-   $_LOGGER->level = LOG_DISABLED;
 
    $tests = array();
    $include = array(APP);

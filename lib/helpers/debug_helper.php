@@ -19,4 +19,16 @@
       return "<pre>$output</pre>";
    }
 
+   # Dump an exception with colored backtrace
+   function dump_exception($exception) {
+      $dump = "[1;31m".get_class($exception)."[0m: [1m".$exception->getMessage()."[0m\n";
+
+      foreach (explode("\n", $exception->getTraceAsString()) as $line) {
+         list($line, $text) = explode(' ', $line, 2);
+         $dump .= "   [1m".$line."[0m ".$text."\n";
+      }
+
+      return $dump;
+   }
+
 ?>

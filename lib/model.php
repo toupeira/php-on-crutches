@@ -10,26 +10,30 @@
    abstract class Model extends Object
    {
       # Model attributes
-      protected $attributes = array();
+      protected $_attributes = array();
 
       # Changed attributes
-      protected $changed_attributes = array();
+      protected $_changed_attributes = array();
 
       # Cached attributes
-      protected $cache = array();
+      protected $_cache = array();
 
       # Read-only attributes can't be changed
-      protected $readonly = array();
+      protected $_readonly = array();
       # Protected attributes can only be set explicitly
-      protected $protected = array();
+      protected $_protected = array();
       # Attributes which should not be automatically trimmed
-      protected $skip_trim = array();
+      protected $_skip_trim = array();
 
       # List of error messages
-      protected $errors = array();
+      protected $_errors = array();
 
-      function __construct($attributes=null, $defaults=null) {
+      function __construct(array $attributes=null, array $defaults=null) {
          $this->set_attributes($attributes, $defaults);
+      }
+
+      function __toString() {
+         return parent::__toString($this->attributes);
       }
 
       # Stubs for implementation-specific actions
@@ -58,33 +62,31 @@
          $getter = "get_$key";
          if (method_exists($this, $getter)) {
             return $this->$getter();
-         } elseif (array_key_exists($key, $this->attributes)) {
+         } elseif (array_key_exists($key, $this->_attributes)) {
             return $this->read_attribute($key);
          } else {
-            $class = get_class($this);
-            throw new ApplicationError("Call to undefined method $class#$getter()");
+            throw new UndefinedMethod($this, $getter);
          }
       }
 
       function __set($key, $value) {
-         if (in_array($key, $this->readonly)) {
+         if (in_array($key, $this->_readonly)) {
             throw new ApplicationError("Can't change read-only attribute '$key'");
          } else {
             $setter = "set_$key";
-            if (is_string($value) and !in_array($key, $this->skip_trim)) {
+            if (is_string($value) and !in_array($key, $this->_skip_trim)) {
                $value = trim($value);
             }
 
             if (method_exists($this, $setter)) {
                $this->$setter(&$value);
-            } elseif (array_key_exists($key, $this->attributes)) {
+            } elseif (array_key_exists($key, $this->_attributes)) {
                $this->write_attribute($key, $value);
             } else {
-               $class = get_class($this);
-               throw new ApplicationError("Call to undefined method $class#$setter()");
+               throw new UndefinedMethod($this, $setter);
             }
 
-            unset($this->cache[$key]);
+            unset($this->_cache[$key]);
          }
 
          return $this;
@@ -93,34 +95,34 @@
       # Wrappers for use in custom setters and getters
 
       function read_attribute($key) {
-         return $this->attributes[$key];
+         return $this->_attributes[$key];
       }
 
       function write_attribute($key, $value) {
          $old_value = $this->read_attribute($key);
-         $this->attributes[$key] = &$value;
+         $this->_attributes[$key] = &$value;
 
          if ($this->read_attribute($key) != $old_value) {
-            $this->changed_attributes[$key] = $old_value;
+            $this->_changed_attributes[$key] = $old_value;
          }
          return $this;
       }
 
       function get_attributes() {
-         return $this->attributes;
+         return $this->_attributes;
       }
 
       function changed($key) {
-         return array_key_exists($key, $this->changed_attributes);
+         return array_key_exists($key, $this->_changed_attributes);
       }
 
       function get_changed() {
-         return !empty($this->changed_attributes);
+         return !empty($this->_changed_attributes);
       }
 
       function get_changes() {
          $changes = array();
-         foreach ($this->changed_attributes as $key => $old) {
+         foreach ($this->_changed_attributes as $key => $old) {
             if (($new = $this->$key) != $old) {
                $changes[$key] = array($old, $new);
             }
@@ -130,22 +132,22 @@
       }
 
       function reset($key) {
-         if (!is_null($old = $this->changed_attributes[$key])) {
-            unset($this->changed_attributes[$key]);
-            return $this->attributes[$key] = $old;
+         if (!is_null($old = $this->_changed_attributes[$key])) {
+            unset($this->_changed_attributes[$key]);
+            return $this->_attributes[$key] = $old;
          }
 
          return false;
       }
 
       # Set attributes
-      function set_attributes($attributes, $defaults=null) {
+      function set_attributes(array $attributes=null, array $defaults=null) {
          if (is_array($defaults)) {
             $attributes = array_merge($defaults, (array) $attributes);
          }
 
          if (is_array($attributes) and !empty($attributes)) {
-            array_delete($attributes, $this->protected);
+            array_delete($attributes, $this->_protected);
             foreach ($attributes as $key => $value) {
                $this->__set($key, $value);
             }
@@ -164,7 +166,7 @@
       }
 
       # Update attributes and save
-      function update($attributes) {
+      function update(array $attributes) {
          if ($this->set_attributes($attributes) and $this->is_valid()) {
             return $this->save();
          } else {
@@ -174,34 +176,34 @@
 
       # Generate cached property value with PHP code
       protected function cache($key, $code) {
-         if (!isset($this->cache[$key])) {
-            $this->cache[$key] = eval("return $code;");
+         if (!isset($this->_cache[$key])) {
+            $this->_cache[$key] = eval("return $code;");
          }
 
-         return $this->cache[$key];
+         return $this->_cache[$key];
       }
 
       # Error handling and validation
 
       function add_error($key, $message) {
-         $this->errors[$key][] = $message;
+         $this->_errors[$key][] = $message;
       }
 
       function get_errors() {
-         return $this->errors;
+         return $this->_errors;
       }
 
       function is_valid() {
-         $this->errors = array();
+         $this->_errors = array();
          $this->validate();
-         return empty($this->errors);
+         return empty($this->_errors);
       }
 
       protected function validate_attribute($key, $message, $valid) {
          if ($valid) {
             return true;
          } else {
-            if (!in_array($key, $this->errors)) {
+            if (!in_array($key, $this->_errors)) {
                $this->add_error($key, _(humanize($key))." $message");
             }
             return false;
@@ -213,12 +215,12 @@
       protected function is_present($key) {
          return $this->validate_attribute($key,
             _("can't be blank"),
-            !blank($this->attributes[$key])
+            !blank($this->_attributes[$key])
          );
       }
 
       protected function is_numeric($key, $allow_empty=false) {
-         $value = $this->attributes[$key];
+         $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("is not numeric"),
             ($allow_empty and $value == '') or is_numeric($value)
@@ -226,7 +228,7 @@
       }
 
       protected function is_alpha($key, $allow_empty=false) {
-         $value = $this->attributes[$key];
+         $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("can only contain letters"),
             ($allow_empty and $value == '') or ctype_alpha($value)
@@ -234,7 +236,7 @@
       }
 
       protected function is_alnum($key, $allow_empty=false) {
-         $value = $this->attributes[$key];
+         $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("can only contain alphanumeric characters"),
             ($allow_empty and $value == '') or preg_match('/^[\w\.-]*$/', $value)
@@ -242,7 +244,7 @@
       }
 
       protected function is_email($key, $allow_empty=false) {
-         $value = $this->attributes[$key];
+         $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("is not a valid email address"),
             ($allow_empty and $value == '') or preg_match('/^[\w._%+-]+@([\w.-]+\.)+[a-z]{2,6}$/i', $value)
@@ -252,12 +254,12 @@
       protected function is_confirmed($key) {
          return $this->validate_attribute("{$key}_confirmation",
             _("doesn't match"),
-            $this->attributes[$key] == $this->attributes["{$key}_confirmation"]
+            $this->_attributes[$key] == $this->_attributes["{$key}_confirmation"]
          );
       }
 
       protected function in_array($key, $array, $allow_empty=false) {
-         $value = $this->attributes[$key];
+         $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("is invalid"),
             ($allow_empty and $value == '') or in_array($value, $array)
@@ -265,7 +267,7 @@
       }
 
       protected function has_length($key, $min=null, $max=null, $allow_empty=false) {
-         $value = $this->attributes[$key];
+         $value = $this->_attributes[$key];
          $length = mb_strlen($value);
 
          if ($allow_empty and $value == '') {
@@ -287,23 +289,24 @@
       }
 
       protected function has_format($key, $format) {
-         $length = count($this->attributes[$key]);
+         $length = count($this->_attributes[$key]);
          return $this->validate_attribute($key,
             _("is invalid"),
-            preg_match($format, $this->attributes[$key])
+            preg_match($format, $this->_attributes[$key])
          );
       }
 
       # Wrappers for form helpers
 
-      function form_element($tag, $key, $options=null) {
-         if (isset($this->errors[$key])) {
+      function form_element($attribute, $tag, array $options=null) {
+         $key = underscore(get_class($this))."[$attribute]";
+         $value = any(array_delete($options, 'value'), $this->_attributes[$attribute]);
+
+         $options['id'] = $this->get_dom_id($attribute);
+         $options['force'] = true;
+         if (isset($this->_errors[$attribute])) {
             $options['errors'] = true;
          }
-
-         $options['id'] = $this->get_dom_id($key);
-         $value = any(array_delete($options, 'value'), $this->__get($key));
-         $key = underscore(get_class($this))."[$key]";
 
          switch ($tag) {
             case 'check_box':
@@ -316,34 +319,42 @@
          }
       }
 
-      function label($key, $label=null, $options=null) {
-         return label_tag($this->get_dom_id($key), any($label, humanize($key)));
+      function label($key, $label=null, array $options=null) {
+         return label($this->get_dom_id($key), any($label, humanize($key)));
       }
 
-      function text_field($key, $options=null) {
-         return $this->form_element('text_field', $key, $options);
+      function text_field($key, array $options=null) {
+         return $this->form_element($key, 'text_field', $options);
       }
 
-      function text_area($key, $options=null) {
-         return $this->form_element('text_area', $key, $options);
+      function text_area($key, array $options=null) {
+         return $this->form_element($key, 'text_area', $options);
       }
 
-      function password_field($key, $options=null) {
-         return $this->form_element('password_field', $key, $options);
+      function password_field($key, array $options=null) {
+         return $this->form_element($key, 'password_field', $options);
       }
 
-      function check_box($key, $options=null) {
-         return $this->form_element('check_box', $key, $options);
+      function hidden_field($key, array $options=null) {
+         return $this->form_element($key, 'hidden_field', $options);
       }
 
-      function select_tag($key, $values, $options=null) {
+      function check_box($key, array $options=null) {
+         return $this->form_element($key, 'check_box', $options);
+      }
+
+      function select_tag($key, $values, array $options=null) {
          $options['values'] = $values;
-         return $this->form_element('select_tag', $key, $options);
+         return $this->form_element($key, 'select_tag', $options);
+      }
+
+      function date_field($key=null, array $options=null) {
+         return $this->form_element($key, 'date_field', $options);
       }
 
       function get_dom_id($key=null) {
          if ($key) {
-            return underscore(get_class($this)).($key ? ":$key" : '');
+            return underscore(get_class($this)).($key ? "_$key" : '');
          } else {
             return underscore(get_class($this)).'-'.$this->id;
          }

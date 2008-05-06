@@ -9,8 +9,12 @@
 
    class SqliteAdapter extends DatabaseConnection
    {
-      function get_dsn($options) {
-         return "sqlite:{$options['filename']}";
+      function get_name() {
+         return basename($this->options['filename']);
+      }
+
+      function get_dsn() {
+         return "sqlite:{$this->options['filename']}";
       }
 
       function get_timestamp() {

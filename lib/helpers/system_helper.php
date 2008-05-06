@@ -25,7 +25,7 @@
          $command = call_user_func_array(sprintf, $args);
       }
 
-      log_debug("Running '$command'");
+      log_info("Running '$command'");
       exec($command, $output, $status);
       return ($status === 0);
    }
@@ -36,19 +36,20 @@
    }
 
    # Wrapper for find, returns an array of paths
-   function find_files($paths, $options=null) {
+   function find_files($paths, $options=null, $sort=true) {
       $paths = implode(' ', array_map(escapeshellarg, (array) $paths));
-      $command = sprintf('find %s %s 2>/dev/null | sort', $paths, $options);
-      $paths = explode("\n", trim(`$command`));
+      $sort = ($sort ? '| sort' : '');
+      $paths = explode("\n", trim(`find $paths $options 2>/dev/null $sort`));
       return ($paths == array('') ? array() : $paths);
    }
 
    # Create a temporary file or directory which will be removed when
    # the request is finished.
    function mktemp($dir=false) {
-      $template = config('application').'.XXXXXX';
+      $tmpdir = sys_get_temp_dir();
+      $template = config('name').'.XXXXXX';
       $dir = $dir ? '-d' : '';
-      $path = trim(`mktemp $dir -p /tmp $template`);
+      $path = trim(`mktemp $dir -p $tmpdir $template`);
       register_shutdown_function(rm_rf, $path);
       return $path;
    }
