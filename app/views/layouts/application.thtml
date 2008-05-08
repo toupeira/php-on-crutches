@@ -3,10 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><?= config('name') ?></title>
-  <?= stylesheet_tag(config('application')).N ?>
+  <title><?= titleize(config('name')) ?></title>
+  <?= stylesheet_tag(config('name')).N ?>
   <?= javascript_tag('prototype').N ?>
-  <?= javascript_tag(config('application')).N ?>
+  <?= javascript_tag(config('name')).N ?>
 </head>
 <body>
 <?= messages() ?>

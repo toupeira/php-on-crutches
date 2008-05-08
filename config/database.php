@@ -1,6 +1,6 @@
 <?
 
-   $_DATABASE = array(
+   $_CONFIG['database'] = array(
    );
 
 ?>

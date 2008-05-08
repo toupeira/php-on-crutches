@@ -1,6 +1,7 @@
 <?
 
-   $_APPLICATION = array(
+   $_CONFIG['application'] = array(
+      'name' => basename(ROOT),
    );
 
 ?>

@@ -1,6 +1,6 @@
 <?
 
-   $_ROUTES = array(
+   $_CONFIG['routes'] = array(
       ':controller/:action/*id' => array('controller' => 'pages'),
    );
 
