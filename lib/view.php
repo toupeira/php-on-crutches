@@ -12,7 +12,7 @@
       # Find a template for the given path
       static function find_template($path) {
          # Look in /app/views first, then in /lib/views
-         $base = '{'.VIEWS.','.LIB.'views/}';
+         $views = '{'.VIEWS.','.LIB.'views/}';
 
          # Look for templates with a language suffix first (e.g. index.en.thtml)
          if ($lang = config('language')) {
@@ -20,7 +20,7 @@
          }
 
          # Return the first match
-         return array_shift(glob("$base$path$lang.thtml", GLOB_BRACE));
+         return array_shift(glob("$views$path$lang.thtml", GLOB_BRACE));
       }
 
       protected $_template;
@@ -132,7 +132,7 @@
       }
 
       # Render a partial template
-      protected function render_partial($partial, array $locals=null) {
+      function render_partial($partial, array $locals=null) {
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
          } else {

@@ -11,7 +11,7 @@
    {
       function show($path) {
          # Catch path traversal attacks
-         $path = ltrim($path, './');
+         $path = str_replace('..', '', trim($this->params['id'], '/'));
 
          if ($template = View::find_template("pages/$path") or
              $template = View::find_template("pages/$path/index")) {

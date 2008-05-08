@@ -30,10 +30,10 @@
          unset($_GET['path']);
 
          # Detect the relative path used to reach the website
-         self::$prefix = preg_replace(
-            "#(index\.(php|fcgi))?(\?[^/]*)?($path)?(\?.*)?$#", '',
+         self::$prefix = rtrim(preg_replace(
+            "#/+(index\.(php|fcgi)(\?[^/]*)?/*)?($path)?(\?.*)?/*$#", '/',
             $_SERVER['REQUEST_URI']
-         );
+         ), '/').'/';
 
          $args = Router::recognize($path);
          $controller = $args['controller'];

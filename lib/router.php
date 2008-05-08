@@ -112,6 +112,7 @@
             } else {
                # Add literal text
                $this->_pattern .= "/?$part";
+               continue;
             }
 
             # Add keys and pattern
@@ -132,9 +133,8 @@
             }
          }
 
-         # Set default values
+         # Set default action
          if (!in_array('action', $this->_required)) {
-            $this->_defaults['controller'] = '';
             $this->_defaults['action'] = 'index';
          }
 
@@ -167,10 +167,9 @@
 
       # Check if the path matches this route
       function recognize($path, array $defaults=null) {
-         $values = array_merge($this->_defaults, (array) $defaults);
-
-         # Get parameter values
          if (preg_match("#^{$this->_pattern}$#", $path, $match)) {
+            $values = array_merge($this->_defaults, (array) $defaults);
+
             $i = 1;
             foreach ($this->_params as $key => $symbol) {
                $value = $match[$i];
