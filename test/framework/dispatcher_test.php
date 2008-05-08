@@ -1,10 +1,14 @@
 <?# $Id$ ?>
 <?
 
-   class DispatcherTestController extends ApplicationController {};
+   class DispatcherTestController extends Controller {};
 
    class DispatcherTest extends TestCase
    {
+      function teardown() {
+         Dispatcher::$prefix = $_SERVER['REQUEST_URI'] = '/';
+      }
+
       function dispatch($path) {
          ob_start();
          $this->controller = Dispatcher::run($path);
@@ -16,6 +20,7 @@
          $this->dispatch($path);
          $this->assertEqual($prefix, Dispatcher::$prefix,
             "Expected prefix '$prefix', got '".Dispatcher::$prefix."'");
+
       }
 
       function test_prefix() {
