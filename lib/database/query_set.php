@@ -47,27 +47,8 @@
          ), (array) $options);
       }
 
-      function get_statement($paginate=true) {
+      function get_statement() {
          if (!$this->_statement) {
-            # Paginate the QuerySet, do this at the last possible moment so it doesn't matter
-            # where the call to get_paginated() is (e.g. before a where() call which changes the
-            # size of the resultset).
-            if ($paginate and $this->_paginate and $size = $this->page_size) {
-               $this->replace_limit();
-               $this->replace_offset();
-
-               $count = $this->count;
-               $this->_count = null;
-
-               $this->limit($size);
-
-               if ($count > $size) {
-                  $this->_pages = ceil($count / $size);
-                  $this->_page = max(1, min($this->_pages, intval($_REQUEST['page'])));
-                  $this->offset(($this->_page - 1) * $size);
-               }
-            }
-
             $this->_statement = $this->_mapper->execute($this->sql, $this->params);
          }
 
@@ -84,16 +65,16 @@
 
       function get_count() {
          if (is_null($this->_count)) {
-            if (is_null($this->_statement)) {
+            if ($this->_statement or $this->_options['group']) {
+               return $this->row_count;
+            } else {
                $current_select = $this->_options['select'];
                $this->replace_select('count(*)');
 
-               $this->_count = $this->get_statement(false)->fetch_column();
+               $this->_count = $this->statement->fetch_column();
                $this->_sql = $this->_statement = null;
 
                $this->replace_select($current_select);
-            } else {
-               $this->row_count;
             }
          }
 
@@ -149,6 +130,18 @@
 
          if ($order = any($options['order'], $this->_mapper->order)) {
             $sql .= ' ORDER BY '.implode(', ', (array) $order);
+         }
+
+         if ($this->_paginate and $size = $this->page_size) {
+            $query = new QuerySet($this->_mapper, $this->_options);
+            $count = $query->count;
+
+            if ($count > $size) {
+               $this->_pages = ceil($count / $size);
+               $this->_page = max(1, min($this->_pages, intval($_REQUEST['page'])));
+               $options['limit'] = $size;
+               $options['offset'] = ($this->_page - 1) * $size;
+            }
          }
 
          if ($limit = $options['limit']) { $sql .= " LIMIT $limit"; }
