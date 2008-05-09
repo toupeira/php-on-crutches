@@ -94,12 +94,11 @@
    function array_pluck(array &$array, $key, $hash=false) {
       $values = array();
       foreach ($array as $object) {
-         if ($value = getf($object, $key)) {
-            if ($hash) {
-               $values[$value] = $value;
-            } else {
-               $values[] = $value;
-            }
+         $value = getf($object, $key);
+         if ($hash) {
+            $values[$value] = $value;
+         } else {
+            $values[] = $value;
          }
       }
 

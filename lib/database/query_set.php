@@ -217,6 +217,10 @@
          return $this;
       }
 
+      function reset() {
+         $this->_statement = $this->_count = $this->_objects = null;
+      }
+
       function find($id) {
          return $this->where(func_get_args())->first;
       }
