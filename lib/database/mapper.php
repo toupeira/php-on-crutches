@@ -109,8 +109,16 @@
          return $this->_order;
       }
 
+      function set_order($order) {
+         return $this->_order = $order;
+      }
+
       function get_page_size() {
          return $this->_page_size;
+      }
+
+      function set_page_size($page_size) {
+         return $this->_page_size = $page_size;
       }
 
       function get_associations() {
