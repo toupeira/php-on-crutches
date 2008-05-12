@@ -12,8 +12,11 @@
 
    # Require a file if it exists
    function safe_require($file) {
-      if (is_file($file)) {
-         require_once $file;
+      foreach (func_get_args() as $file) {
+         if (is_file($file)) {
+            require_once $file;
+            return true;
+         }
       }
    }
 

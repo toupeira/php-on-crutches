@@ -153,7 +153,7 @@
             ((($hosts = config('trusted_hosts') and
                ($this->_require_trusted === true or
                   # Use default hosts
-                  in_array($action, $this->_require_trusted))) or
+                  in_array($action, (array) $this->_require_trusted))) or
                      # Use specified hosts
                      ($hosts = $this->_require_trusted[$action]) or
                         ($hosts = $this->_require_trusted['all'])) and

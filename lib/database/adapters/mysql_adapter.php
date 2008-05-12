@@ -34,8 +34,17 @@
          $attributes = array();
          $columns = $this->execute("DESCRIBE `$table`")->fetch_all();
          foreach ($columns as $column) {
-            $attributes[] = $column['Field'];
+            list($type, $size) = $this->parse_type($column['Type']);
+            $attributes[$column['Field']] = array(
+               'key'     => $column['Key'] == 'PRI',
+               'type'    => $type,
+               'size'    => $size,
+               'null'    => $column['Null'] == 'YES',
+               'default' => $column['Default'] === '' ? null : $column['Default'],
+               'unique'  => $column['Key'] == 'UNI',
+            );
          }
+
          return $attributes;
       }
 

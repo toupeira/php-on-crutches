@@ -130,7 +130,10 @@
       unset($options['post']);
       unset($options['method']);
 
-      if ($options['post']) {
+      $path = url_for($path);
+
+      if ($method == 'GET') {
+         $options['onclick'] = "location.href = '$path'; return false";
       }
 
       return form_tag($path, array('method' => $method))

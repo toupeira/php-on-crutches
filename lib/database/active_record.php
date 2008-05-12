@@ -18,7 +18,7 @@
       function __construct(array $attributes=null, array $defaults=null) {
          # Use attributes from the database
          if ($this->_load_attributes and empty($this->_attributes)) {
-            foreach ($this->mapper->attributes as $key) {
+            foreach ($this->mapper->attributes as $key => $options) {
                $this->_attributes[$key] = null;
             }
          }
@@ -160,6 +160,40 @@
       }
 
       # Database specific validation checks
+
+      function is_valid() {
+         $this->call_filter('before_validation');
+         parent::is_valid();
+
+         foreach ($this->mapper->attributes as $key => $options) {
+            if (!$options['key'] and !$this->_errors[$key]) {
+               if ($key == 'email' and !$this->is_email($key)) {
+                  continue;
+               }
+
+               if (!$options['null'] and is_null($options['default']) and
+                  !$this->is_present($key)) {
+                  continue;
+               }
+
+               if ($options['unique'] and !$this->is_unique($key)) {
+                  continue;
+               }
+
+               if ($options['type'] == 'integer' or $options['type'] == 'float' and
+                  !$this->is_numeric($key, true)) {
+                  continue;
+               }
+
+               if ($options['size'] > 0 and in_array($options['type'], array('string', 'text'))) {
+                  $this->has_length($key, 0, $options['size']);
+               }
+            }
+         }
+
+         $this->call_filter('after_validation');
+         return empty($this->_errors);
+      }
 
       protected function is_unique($key) {
          $objects = $this->mapper->where($key, $this->$key);

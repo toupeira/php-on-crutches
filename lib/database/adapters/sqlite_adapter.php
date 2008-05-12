@@ -36,8 +36,16 @@
          $attributes = array();
          $columns = $this->execute("PRAGMA table_info(`$table`)")->fetch_all();
          foreach ($columns as $column) {
-            $attributes[] = $column['name'];
+            list($type, $size) = $this->parse_type($column['type']);
+            $attributes[$column['name']] = array(
+               'key'     => (bool) $column['pk'],
+               'type'    => $type,
+               'size'    => $size,
+               'null'    => $column['notnull'] == 0,
+               'default' => $column['dflt_value'],
+            );
          }
+
          return $attributes;
       }
    }

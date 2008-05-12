@@ -12,11 +12,15 @@
    function form_tag($action=null, array $options=null) {
       $defaults = array(
          'action' => url_for(any($action, Dispatcher::$path)),
-         'method' => 'post', 'open' => true,
+         'method' => 'POST', 'open' => true,
       );
 
       if (array_delete($options, 'multipart')) {
          $defaults['enctype'] = 'multipart/form-data';
+      }
+
+      if ($options['method']) {
+         $options['method'] = strtoupper($options['method']);
       }
 
       return content_tag('form', null, $options, $defaults).N;
@@ -171,10 +175,8 @@
       ));
    }
 
-   function cancel_button($title=null, array $options=null) {
-      return tag('input', $options, array(
-         'type' => 'button', 'value' => any($title, _('Cancel')), 'onclick' => 'history.back()'
-      ));
+   function cancel_button($path=null, $title=null, array $options=null) {
+      return button_to(any($title, _('Cancel')), any($path, ':'), $options);
    }
 
 ?>

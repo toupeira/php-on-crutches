@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   class QuerySet extends Object implements Iterator, Countable, ArrayAccess
+   class QuerySet extends Object implements Iterator, ArrayAccess, Countable
    {
       protected $_mapper;
       protected $_table;
@@ -236,20 +236,53 @@
          return $this;
       }
 
-      # Wrapper for replace() and merge()
-      function __call($key, $args) {
-         if (count($args) == 1) {
+      # Handle automatic methods
+      function __call($method, $args) {
+         if (count($args) == 1 and is_array($args[0])) {
             $args = $args[0];
          }
 
-         if (substr($key, 0, 8) == 'replace_') {
-            return $this->replace(substr($key, 8), $args);
-         } elseif (substr($key, 0, 6) == 'merge_') {
-            return $this->merge(substr($key, 6), $args);
-         } elseif (in_array($key, array('group', 'order', 'limit', 'offset'))) {
-            return $this->replace($key, $args);
+         # find(_all)_by_* calls
+         if (preg_match('/^(find(?:_all)?)_(by|like)_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
+            list($method, $finder, $equality, $key, $operator, $keys) = $match;
+
+            $finder = ($finder == 'find' ? 'first' : 'all');
+
+            $argc = count($args);
+
+            $equality = ($equality == 'by') ? '=' : 'LIKE';
+
+            if ($operator) {
+               $keys = explode("_{$operator}_", $keys);
+               array_unshift($keys, $key);
+            } else {
+               $keys = (array) $key;
+            }
+
+            $where = '';
+            $op = '';
+            foreach ($keys as $key) {
+               $where .= "$op`$key` $equality ?";
+               $conditions[] = array_shift_arg($args);
+               $op = ' '.strtoupper($operator).' ';
+            }
+
+            array_unshift($conditions, $where);
+
+            if ($args) {
+               throw new ApplicationError('Too many arguments');
+            }
+
+            return $this->where($conditions)->$finder;
+
+         } elseif (substr($method, 0, 8) == 'replace_') {
+            return $this->replace(substr($method, 8), $args);
+         } elseif (substr($method, 0, 6) == 'merge_') {
+            return $this->merge(substr($method, 6), $args);
+         } elseif (in_array($method, array('group', 'order', 'limit', 'offset'))) {
+            return $this->replace($method, $args);
          } else {
-            return $this->merge($key, $args);
+            return $this->merge($method, $args);
          }
       }
 
@@ -389,7 +422,11 @@
 
       # Countable implementation
 
-      function count() {
+      function count($conditions=null) {
+         if ($conditions) {
+            $this->where(func_get_args());
+         }
+
          return $this->count;
       }
    }

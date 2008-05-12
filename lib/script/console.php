@@ -222,7 +222,7 @@
 
    function to_string($value) {
       if (is_object($value)) {
-         if (method_exists($value, __toString)) {
+         if (method_exists($value, __toString) and !$value instanceof Exception) {
             return $value->__toString();
          } else {
             return get_class($value);

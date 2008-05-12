@@ -37,7 +37,7 @@
       'mail_from'         => '',
       'mail_from_name'    => '',
       'notify_exceptions' => null,
-      'trusted_hosts'     => null,
+      'trusted_hosts'     => array('127.0.0.1'),
    );
 
    # Merge application settings
@@ -59,14 +59,12 @@
    }
 
    function config($key, $subkey=null) {
-      if (array_key_exists($key, $GLOBALS['_CONFIG'])) {
-         if ($subkey) {
-            return $GLOBALS['_CONFIG'][$key][$subkey];
-         } else {
-            return $GLOBALS['_CONFIG'][$key];
-         }
-      } else {
+      if (!array_key_exists($key, $GLOBALS['_CONFIG'])) {
          return $GLOBALS['_CONFIG']['application'][$key];
+      } elseif ($subkey) {
+         return $GLOBALS['_CONFIG'][$key][$subkey];
+      } else {
+         return $GLOBALS['_CONFIG'][$key];
       }
    }
 

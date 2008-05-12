@@ -223,7 +223,7 @@
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("is not numeric"),
-            ($allow_empty and $value == '') or is_numeric($value)
+            ($allow_empty and $value == '') or is_numeric($value) or is_bool($value)
          );
       }
 

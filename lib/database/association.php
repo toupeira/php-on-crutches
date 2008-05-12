@@ -16,7 +16,18 @@
       function __construct($model, $related) {
          $this->_model = $model;
          $this->_related = $related;
-         $this->_key = underscore($model).'_id';
+      }
+
+      function get_model() {
+         return $this->_model;
+      }
+
+      function get_related() {
+         return $this->_related;
+      }
+
+      function get_key() {
+         return underscore($this->_model).'_id';
       }
 
       function load(ActiveRecord $model) {

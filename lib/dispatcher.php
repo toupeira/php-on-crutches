@@ -35,16 +35,16 @@
             $_SERVER['REQUEST_URI']
          ), '/').'/';
 
-         $args = Router::recognize($path);
-         $controller = $args['controller'];
-         $action = $args['action'];
-         self::$params = array_merge($_GET, $_POST, $args);
+         $params = Router::recognize($path);
+         $controller = $params['controller'];
+         $action = $params['action'];
+         self::$params = array_merge($_GET, $_POST, $params);
 
          if ($controller and $action and $controller != 'application') {
+            # Collect the arguments for the action
+            $args = $params;
             unset($args['controller']);
             unset($args['action']);
-
-            # Collect the arguments for the controller
             if (count($args) == 1) {
                $args = explode('/', array_shift($args));
             }

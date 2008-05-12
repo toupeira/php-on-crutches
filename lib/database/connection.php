@@ -116,8 +116,52 @@
          return $this->_connection->lastInsertId();
       }
 
-      function analyze_query($sql, array $params) {
-         throw new NotImplemented(get_class()." doesn't implement 'analyze_query'");
+      function get_tables() {
+         $key = "db-{$this->_name}-tables";
+         if ($tables = cache($key)) {
+            return $tables;
+         } else {
+            return cache_set($key, $this->fetch_tables());
+         }
+      }
+
+      function table_attributes($table) {
+         $key = "db-{$this->_name}-attributes-$table";
+         if ($attributes = cache($key)) {
+            return $attributes;
+         } else {
+            return cache_set($key, $this->fetch_attributes($table));
+         }
+      }
+
+      function parse_type($type) {
+         if (preg_match('/^(\w+)\(([0-9]+)\)/', $type, $match)) {
+            $type = $match[1];
+            $size = $match[2];
+         } else {
+            $size = -1;
+         }
+
+         switch (strtolower($type)) {
+            case 'char':
+            case 'varchar':
+               $type = 'string';
+               break;
+            case 'int':
+            case 'tinyint':
+            case 'bigint':
+               $type = 'integer';
+               break;
+            case 'double':
+               $type = 'float';
+               break;
+            case 'datetime':
+            case 'timestamp':
+               $type = 'datetime';
+               break;
+         }
+
+         return array($type, $size);
       }
 
       function get_dsn() {
@@ -136,22 +180,8 @@
          throw new NotImplemented(get_class()." doesn't implement 'fetch_attributes'");
       }
 
-      function get_tables() {
-         $key = "db-{$this->_name}-tables";
-         if ($tables = cache($key)) {
-            return $tables;
-         } else {
-            return cache_set($key, $this->fetch_tables());
-         }
-      }
-
-      function table_attributes($table) {
-         $key = "db-{$this->_name}-attributes-$table";
-         if ($attributes = cache($key)) {
-            return $attributes;
-         } else {
-            return cache_set($key, $this->fetch_attributes($table));
-         }
+      function analyze_query($sql, array $params) {
+         throw new NotImplemented(get_class()." doesn't implement 'analyze_query'");
       }
    }
 

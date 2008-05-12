@@ -54,8 +54,8 @@
             if (!empty($this->{'_'.$type})) {
                require_once LIB."database/associations/{$type}_association.php";
                $association = camelize($type).'Association';
-               foreach ($this->{'_'.$type} as $key => $class) {
-                  $this->_associations[$key] = new $association($this->_model, $class);
+               foreach ($this->{'_'.$type} as $key => $related) {
+                  $this->_associations[$key] = new $association($this->_model, $related);
                }
             }
          }
@@ -150,7 +150,7 @@
             }
          }
 
-         if (in_array('created_at', $this->attributes) and !isset($attributes['created_at'])) {
+         if ($this->attributes['created_at'] and !isset($attributes['created_at'])) {
             $columns[] = "`created_at`";
             $keys[] = $this->connection->timestamp;
          }
@@ -179,7 +179,7 @@
             }
          }
 
-         if (in_array('updated_at', $this->attributes) and !isset($attributes['updated_at'])) {
+         if ($this->attributes['updated_at'] and !isset($attributes['updated_at'])) {
             $keys[] = "`updated_at` = ".$this->connection->timestamp;
          } elseif (empty($attributes)) {
             return true;
@@ -240,44 +240,8 @@
          }
       }
 
-      # Handle find(_all)_by_* calls
       function __call($method, $args) {
-         if ($method != 'find_by_sql' and preg_match('/^(find(?:_all)?)_(by|like)_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
-            list($method, $finder, $equality, $key, $operator, $keys) = $match;
-
-            $finder = ($finder == 'find' ? 'first' : 'all');
-
-            $argc = count($args);
-
-            $equality = ($equality == 'by') ? '=' : 'LIKE';
-
-            if ($operator) {
-               $keys = explode("_{$operator}_", $keys);
-               array_unshift($keys, $key);
-            } else {
-               $keys = (array) $key;
-            }
-
-            $where = '';
-            $op = '';
-            foreach ($keys as $key) {
-               $where .= "$op`$key` $equality ?";
-               $conditions[] = array_shift_arg($args);
-               $op = ' '.strtoupper($operator).' ';
-            }
-
-            array_unshift($conditions, $where);
-
-            if ($args) {
-               throw new ApplicationError('Too many arguments');
-            }
-
-            return $this->get_query_set()->where($conditions)->$finder;
-            #return call_user_func_array(array($this, $finder), $params);
-
-         } else {
-            return call_user_func_array(array($this->get_query_set(), $method), $args);
-         }
+         return call_user_func_array(array($this->get_query_set(), $method), $args);
       }
 
       function build_condition($conditions) {

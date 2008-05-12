@@ -10,7 +10,11 @@
    class HasManyAssociation extends Association
    {
       protected function load_data(ActiveRecord $model) {
-         return DB($this->_related)->where($this->_key, $model->id);
+         if (!DB($this->related)->attributes[$this->key]) {
+            throw new ApplicationError("Invalid foreign key '{$this->key}' for model {$this->related}");
+         }
+
+         return DB($this->related)->where($this->key, $model->id);
       }
    }
 
