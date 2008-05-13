@@ -10,10 +10,6 @@
    class HasManyAssociation extends Association
    {
       protected function load_data(ActiveRecord $model) {
-         if (!DB($this->related)->attributes[$this->key]) {
-            throw new ApplicationError("Invalid foreign key '{$this->key}' for model {$this->related}");
-         }
-
          return DB($this->related)->where($this->key, $model->id);
       }
    }

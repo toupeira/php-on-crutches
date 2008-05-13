@@ -14,10 +14,6 @@
       }
 
       protected function load_data(ActiveRecord $model) {
-         if (!DB($this->model)->attributes[$this->key]) {
-            throw new ApplicationError("Invalid foreign key '{$this->key}' for model {$this->model}");
-         }
-
          if ($id = $model->{$this->key}) {
             return DB($this->related)->find($id);
          }

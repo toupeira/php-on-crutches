@@ -284,7 +284,7 @@
                   # Use array key as column name
                   #   e.g.: find(array('key' => $value))
                   #
-                  $condition .= "`$key` = ?";
+                  $condition .= "$key = ?";
                   $count = 1;
                }
 
@@ -325,7 +325,7 @@
             } elseif (is_string($value) and !blank($value)) {
                # Use array value as column name
                #   e.g.: find('key', $value)
-               $condition .= "$operator`$value` = ?";
+               $condition .= "$operator$value = ?";
                $params[] = array_shift_arg($values);
                array_shift($keys);
 

@@ -27,7 +27,9 @@
       }
 
       function get_key() {
-         return underscore($this->_model).'_id';
+         $table = DB($this->_related)->table;
+         $key = underscore($this->_model).'_id';
+         return "`$table`.`$key`";
       }
 
       function load(ActiveRecord $model) {
