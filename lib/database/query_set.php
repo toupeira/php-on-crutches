@@ -331,7 +331,7 @@
 
       # Order the QuerySet by the current request parameters
       function get_sorted() {
-         if (in_array($sort = $_REQUEST['sort'], $this->_mapper->attributes)) {
+         if ($this->_mapper->attributes[$sort = $_REQUEST['sort']]) {
             $this->_sorted_key = $sort;
             $this->order("`{$this->_table}`.`$sort`".(isset($_REQUEST['desc']) ? ' DESC' : ' ASC'));
          }
@@ -351,7 +351,7 @@
                   $like = false;
                }
 
-               if (in_array($key, $this->_mapper->attributes)) {
+               if ($this->_mapper->attributes[$key]) {
                   $keys[] = $key;
                   if ($like) {
                      $conditions["`{$this->_table}`.`$key` LIKE ?"] = "%$value%";
