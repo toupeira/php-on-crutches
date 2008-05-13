@@ -14,11 +14,13 @@
    function page_links($query_set) {
       $links = array();
       for ($page = 1; $page <= $query_set->pages; $page++) {
+         $link = page_link($page);
+
          if ($query_set->page == $page) {
-            $links[] = "<strong>$page</strong>";
-         } else {
-            $links[] = page_link($page);
+            $link = "<strong>$link</strong>";
          }
+
+         $links[] = $link;
       }
 
       return implode(' ', $links);
