@@ -16,6 +16,7 @@
 
       protected $_position = 0;
       protected $_count;
+      protected $_count_all;
 
       protected $_sql;
       protected $_params = array();
@@ -81,6 +82,17 @@
          return $this->_count;
       }
 
+      function get_count_all() {
+         if ($this->_paginate) {
+            if (!$this->_sql) {
+               $this->sql;
+            }
+            return $this->_count_all;
+         } else {
+            return $this->count;
+         }
+      }
+
       function get_row_count() {
          if (is_null($this->_count)) {
             $this->_count = $this->statement->row_count();
@@ -134,7 +146,7 @@
 
          if ($this->_paginate and $size = $this->page_size) {
             $query = new QuerySet($this->_mapper, $this->_options);
-            $count = $query->count;
+            $count = $this->_count_all = $query->count;
 
             if ($count > $size) {
                $this->_pages = ceil($count / $size);
@@ -391,6 +403,7 @@
       # Paginate the QuerySet by the current request parameters
       function get_paginated() {
          $this->_paginate = true;
+         $this->_sql = null;
          return $this;
       }
 
