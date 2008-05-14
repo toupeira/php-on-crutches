@@ -17,6 +17,17 @@
          return "mysql:host={$this->_options['hostname']};dbname={$this->_options['database']}";
       }
 
+      function get_attributes() {
+         return array(
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+
+            # emulate prepared statements because MySQL can't
+            # use its query cache with prepared statements
+            # (will be fixed in MySQL 5.1)
+            PDO::ATTR_EMULATE_PREPARES => true,
+         );
+      }
+
       function get_timestamp() {
          return "now()";
       }

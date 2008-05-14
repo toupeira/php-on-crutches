@@ -61,14 +61,10 @@
 
          list($user, $pass) = array_delete($options, 'username', 'password');
          $this->_connection = new PDO(
-            $this->get_dsn($options), $user, $pass, array(
+            $this->get_dsn($options), $user, $pass, array_merge(array(
                PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
                PDO::ATTR_PERSISTENT       => true,
-               # emulate prepared statements because MySQL can't
-               # use its query cache with prepared statements
-               # (will be fixed in 5.1)
-               PDO::ATTR_EMULATE_PREPARES => true,
-            )
+            ), (array) $this->get_attributes())
          );
       }
 
@@ -166,6 +162,9 @@
 
       function get_dsn() {
          throw new NotImplemented(get_class()." doesn't implement 'get_dsn'");
+      }
+
+      function get_attributes() {
       }
 
       function get_timestamp() {
