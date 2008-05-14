@@ -311,8 +311,8 @@
          }
       }
 
-      # Return a hash of the given keys and values, with an optional blank value first.
-      # Useful for building drop-down boxes.
+      # Return a hash of the given keys and values, with an optional blank value first
+      # (useful for building drop-down boxes)
       function map($key='id', $value='name', $blank=true) {
          if ($blank === true) {
             $map = array(null => '');
@@ -329,7 +329,25 @@
          return $map;
       }
 
-      # Order the QuerySet by the current request parameters
+      # Return an array with all values for the given key,
+      # or an array of hashes if multiple keys are passed
+      function collect($key) {
+         $keys = func_get_args();
+         $this->replace_select($keys);
+
+         $values = array();
+         foreach ($this->objects as $object) {
+            if (count($keys) == 1) {
+               $values[] = $object->$key;
+            } else {
+               $values[] = array_get($object->attributes, $keys);
+            }
+         }
+
+         return $values;
+      }
+
+      # Sort the QuerySet by the current request parameters
       function get_sorted() {
          if ($this->_mapper->attributes[$sort = $_REQUEST['sort']]) {
             $this->_sorted_key = $sort;

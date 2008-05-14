@@ -157,9 +157,10 @@
 
          $query = sprintf("INSERT INTO `%s` (%s) VALUES (%s)",
                           $this->_table, implode(", ", $columns), implode(", ", $keys));
-         $this->execute($query, $values);
 
-         return $this->connection->insert_id();
+         if ($this->execute($query, $values)) {
+            return $this->connection->insert_id();
+         }
       }
 
       function update(array $attributes, $conditions, $force=false) {
@@ -194,9 +195,8 @@
 
          $query = sprintf("UPDATE `%s` SET %s WHERE $conditions",
                           $this->_table, implode(", ", $keys));
-         $this->execute($query, $values);
 
-         return $id;
+         return is_object($this->execute($query, $values));
       }
 
       function delete($id) {
@@ -205,8 +205,7 @@
             throw new ApplicationError("No conditions given");
          }
 
-         $this->execute("DELETE FROM `{$this->_table}` WHERE $conditions", (array) $values);
-         return $id;
+         return is_object($this->execute("DELETE FROM `{$this->_table}` WHERE $conditions", (array) $values));
       }
 
       function delete_all() {

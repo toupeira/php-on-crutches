@@ -29,7 +29,7 @@
       return $GLOBALS['_CACHE_STORE']->clear();
    }
 
-   function cache_code($key, $code) {
+   function cache_eval($key, $code) {
       if ($data = cache($key)) {
          return $data;
       } else {
