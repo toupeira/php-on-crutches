@@ -34,7 +34,7 @@
          $this->_name = underscore(substr(get_class($this), 0, -10));
 
          # Load controller helper
-         safe_require(HELPERS."{$this->_name}_helper.php");
+         try_require(HELPERS."{$this->_name}_helper.php");
 
          # Shortcuts for request data
          $this->params = &$params;

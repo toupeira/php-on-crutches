@@ -63,6 +63,6 @@
    }
 
    require CONTROLLERS.'application_controller.php';
-   safe_require(HELPERS.'application_helper.php');
+   try_require(HELPERS.'application_helper.php');
 
 ?>

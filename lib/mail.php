@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   safe_require('/usr/share/php/libphp-phpmailer/class.phpmailer.php');
+   try_require('/usr/share/php/libphp-phpmailer/class.phpmailer.php');
 
    class Mail extends Object
    {

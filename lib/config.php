@@ -8,7 +8,7 @@
 #
 
    require CONFIG.'application.php';
-   require CONFIG.'environments/'.ENVIRONMENT.'.php';
+   try_require(CONFIG.'environments/'.ENVIRONMENT.'.php');
 
    require CONFIG.'routes.php';
    require CONFIG.'database.php';
@@ -44,7 +44,7 @@
    $_CONFIG['application'] = array_merge(
       $_CONFIG['defaults'],
       $_CONFIG['application'],
-      $_CONFIG[ENVIRONMENT]
+      (array) $_CONFIG[ENVIRONMENT]
    );
 
    if (PHP_SAPI == 'cli') {

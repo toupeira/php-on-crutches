@@ -11,7 +11,7 @@
    define('N', "\n");
 
    # Require a file if it exists
-   function safe_require($file) {
+   function try_require($file) {
       foreach (func_get_args() as $file) {
          if (is_file($file)) {
             require_once $file;

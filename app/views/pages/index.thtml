@@ -1,5 +1,7 @@
 <?# $Id$ ?>
-<? $layout = '' ?>
+<?
+   $layout = '';
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -71,8 +73,8 @@
 <body>
 <div id="content">
 <?= image_tag('php_on_crutches.png', array('width' => 147, 'height' => 200)) ?>
-<h1>Woah... it actually works!</h1>
-<h3>About your environment:</h3>
+<h1>woah... it actually works!</h1>
+<h3>About your system:</h3>
 <table id="info">
 <tr>
    <th>PHP version</th>
@@ -94,19 +96,21 @@
    <th>Session Store</th>
    <td><?= config('session_store') ? config('session_store') : 'disabled' ?></td>
 </tr>
+<tr>
    <th>Cache Store</th>
    <td><?= config('cache_store') ?></td>
+</tr>
 <tr>
-   <th>Debug Mode</th>
-   <td><?= config('debug') ? 'enabled' : 'disabled' ?></td>
+   <th>Environment</th>
+   <td><?= ENVIRONMENT ?></td>
 </tr>
 </table>
 <h3>To get started:</h3>
 <ol>
-   <li><span>Configure your database in <tt>/config/database.php</tt></span></li>
-   <li><span>Configure your routes in <tt>/config/routes.php</tt></span></li>
-   <li><span>Generate controllers and models with <tt>/script/generate</tt></span></li>
-   <li><span>Change or delete this file in <tt>/app/views/pages/index.thtml</tt></span></li>
+   <li><span>Configure your database(s) in <tt>config/database.php</tt></span></li>
+   <li><span>Configure your routes in <tt>config/routes.php</tt></span></li>
+   <li><span>Generate controllers and models with <tt>script/generate</tt></span></li>
+   <li><span>Change or delete this file in <tt>app/views/pages/index.thtml</tt></span></li>
 </ol>
 <div style="clear: both"></div>
 </div>

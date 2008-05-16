@@ -12,7 +12,7 @@
 
    require LIB.'test/cases.php';
 
-   safe_require(TEST.'test_helper.php');
+   try_require(TEST.'test_helper.php');
 
    global $_TEST_DIRS;
    $_TEST_DIRS = array_map(basename, array_filter(glob(TEST.'*'), is_dir));
@@ -39,7 +39,7 @@
       print $message.pluralize($group->getSize(), 'test', 'tests');
       if ($group->getSize() > 0) {
          foreach (array_unique($dirs) as $dir) {
-            safe_require($dir.'/test_helper.php');
+            try_require($dir.'/test_helper.php');
          }
 
          if (!$reporter) {
