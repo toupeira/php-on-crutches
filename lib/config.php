@@ -8,7 +8,10 @@
 #
 
    require CONFIG.'application.php';
-   try_require(CONFIG.'environments/'.ENVIRONMENT.'.php');
+
+   if (is_file($config = CONFIG.'environments/'.ENVIRONMENT.'.php')) {
+      require $config;
+   }
 
    require CONFIG.'routes.php';
    require CONFIG.'database.php';

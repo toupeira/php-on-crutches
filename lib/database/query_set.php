@@ -66,16 +66,17 @@
 
       function get_count() {
          if (is_null($this->_count)) {
-            if ($this->_statement or $this->_options['group']) {
+            if ($this->_statement or $this->_options['having']) {
                return $this->row_count;
             } else {
-               $current_select = $this->_options['select'];
+               $current_options = $this->_options;
                $this->replace_select('count(*)');
+               $this->replace_order();
 
                $this->_count = $this->statement->fetch_column();
                $this->_sql = $this->_statement = null;
 
-               $this->replace_select($current_select);
+               $this->_options = $current_options;
             }
          }
 

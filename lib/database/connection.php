@@ -61,10 +61,10 @@
 
          list($user, $pass) = array_delete($options, 'username', 'password');
          $this->_connection = new PDO(
-            $this->get_dsn($options), $user, $pass, array_merge(array(
+            $this->get_dsn($options), $user, $pass, array(
                PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
                PDO::ATTR_PERSISTENT       => true,
-            ), (array) $this->get_attributes())
+            ) + (array) $this->get_attributes()
          );
       }
 
