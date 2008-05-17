@@ -64,12 +64,8 @@
       prompt("php[".config('name')."] >>> ");
       $_command = trim(fgets(STDIN));
 
-      # Exit the console
-      if ($_command == 'quit') {
-         exit;
-
       # Show help
-      } elseif (in_array($_command, array('?', 'help'))) {
+      if (in_array($_command, array('?', 'help'))) {
          print "\n";
          print "  Special commands:\n";
          print "    help, ?            Show this help\n";
@@ -84,14 +80,21 @@
          print "    post(\$path, \$params)\n";
          print "\n";
          continue;
+      }
 
       # Show function help
-      } elseif (substr($_command, 0, 5) == 'help ') {
+      elseif (substr($_command, 0, 5) == 'help ') {
          dump_function(substr($_command, 5));
          continue;
+      }
+
+      # Exit the console
+      elseif (in_array($_command, array('exit', 'quit'))) {
+         exit;
+      }
 
       # Show execution time
-      } elseif (substr($_command, 0, 5) == 'time ') {
+      elseif (substr($_command, 0, 5) == 'time ') {
          $_command = substr($_command, 5);
          if (($_count = (int) $_command) > 0) {
             if ($_command = substr($_command, strlen($_count))) {
@@ -103,30 +106,41 @@
             $_command = 'print ""; $_start = microtime(true); '.$_command
                      . '; printf("\n%.5f seconds\n", microtime(true) - $_start)';
          }
+      }
 
       # 'ls' wrapper
-      } elseif ($_command == 'ls' or substr($_command, 0, 3) == 'ls ') {
+      elseif (trim(substr($_command, 0, 3)) == 'ls') {
          print `$_command -x --color`;
          continue;
+      }
 
       # 'cd' wrapper
-      } elseif (substr($_command, 0, 3) == 'cd ') {
+      elseif (substr($_command, 0, 3) == 'cd ') {
          chdir(substr($_command, 3));
          print getcwd()."\n";
          continue;
+      }
 
       # 'cd ..' wrapper
-      } elseif ($_command == '..') {
+      elseif ($_command == '..') {
          chdir('..');
          print getcwd()."\n";
          continue;
+      }
+
+      # Execute files
+      elseif (substr($_command, 0, 1) == '!') {
+         $_shell_command = substr($_command, 1);
+         $_command = 'system($_shell_command)';
+      }
 
       # Dump variable
-      } elseif (preg_match('/^\$\w+\?$/', $_command)) {
+      elseif (preg_match('/^\$\w+\?$/', $_command)) {
          $_command = 'to_string('.rtrim($_command, '?').')';
+      }
 
       # Execute normal PHP code
-      } else {
+      else {
          $_command = rtrim($_command, ';');
       }
 
@@ -134,7 +148,6 @@
          # Check for statements and definitions, which don't have a return value
          if (preg_match('/^([a-z]+) /', $_command, $_m) and !in_array($_m[1], array('new', 'null'))) {
             $_result = 'statement';
-
          } else {
             $_command = "\$_result = ($_command)";
          }
@@ -143,9 +156,10 @@
          try {
             ob_start();
             eval("$_command;");
+         }
 
          # Dump exceptions with colored backtrace
-         } catch (Exception $_e) {
+         catch (Exception $_e) {
             print dump_exception($_e);
             $_result = $_e;
          }

@@ -84,7 +84,7 @@
             "}",
          ));
       } else {
-         print "Usage: {$argv[0]} [-f] model NAME [TABLE]\n";
+         print "Usage: {$GLOBALS['argv'][0]} [-f] model NAME [TABLE]\n";
          exit(1);
       }
    }
@@ -131,7 +131,9 @@
    if (function_exists($generator)) {
       call_user_func_array($generator, $args);
    } else {
-      print "Usage: {$argv[0]} [-f] [controller|model] NAME\n";
+      print "Usage: {$argv[0]} [-f] controller NAME\n"
+          . str_repeat(' ', strlen($argv[0]))
+          . "             model NAME [TABLE]\n";
       exit(1);
    }
 

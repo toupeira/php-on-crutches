@@ -15,7 +15,7 @@
       static function load($model) {
          static $_cache;
 
-         $model = (is_object($model) ? get_class($model) : $model);
+         is_object($model) and $model = get_class($model);
 
          if ($mapper = $_cache[$model]) {
             return $mapper;
@@ -206,6 +206,33 @@
          }
 
          return is_object($this->execute("DELETE FROM `{$this->_table}` WHERE $conditions", (array) $values));
+      }
+
+      function destroy($conditions) {
+         $args = func_get_args();
+         $object = call_user_func_array(
+            array($this->get_query_set(), 'find'), $args
+         );
+
+         if (is_object($object)) {
+            return $object->destroy();
+         } else {
+            return false;
+         }
+      }
+
+      function destroy_all($conditions) {
+         $args = func_get_args();
+         $objects = call_user_func_array(
+            array($this->get_query_set(), 'where'), $args
+         );
+
+         $status = false;
+         foreach ($objects as $object) {
+            $status = $object->destroy();
+         }
+
+         return $status;
       }
 
       function delete_all() {

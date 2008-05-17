@@ -82,7 +82,13 @@
 
       $objects = array();
       foreach ((array) $array as $object) {
-         if (preg_match("#$pattern#", getf($object, $key))) {
+         if ($key) {
+            $value = getf($object, $key);
+         } else {
+            $value = $object;
+         }
+
+         if (preg_match("#$pattern#i", $value)) {
             $objects[] = $object;
          }
       }

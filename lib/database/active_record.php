@@ -16,20 +16,24 @@
       protected $_virtual_attributes;
 
       function __construct(array $attributes=null, array $defaults=null) {
-         # Use attributes from the database
+         # Always protect the ID from mass-assignments
+         $this->_protected[] = $this->mapper->primary_key;
+
+         # Load attributes from the database
          if ($this->_load_attributes and empty($this->_attributes)) {
             foreach ($this->mapper->attributes as $key => $options) {
                $this->_attributes[$key] = null;
+
+               if ($default = $options['default']) {
+                  $this->_attributes[$key] = $default;
+               }
             }
          }
 
          # Add virtual attributes
          foreach ((array) $this->_virtual_attributes as $key) {
-            $this->set_virtual($key, null);
+            $this->add_virtual($key, null);
          }
-
-         # Always protect the ID from mass-assignments
-         $this->_protected[] = $this->mapper->primary_key;
 
          # Set the default values
          $this->set_attributes($attributes, array_merge(
@@ -41,7 +45,7 @@
          if (!array_key_exists($key, $this->_attributes) and
             $association = $this->mapper->associations[$key])
          {
-            return $this->set_virtual($key, $association->load($this));
+            return $this->add_virtual($key, $association->load($this));
          } else {
             return parent::__get($key);
          }
@@ -63,7 +67,7 @@
          return $this->_new_record;
       }
 
-      function set_virtual($key, $value) {
+      function add_virtual($key, $value) {
          $this->_virtual_attributes[] = $key;
          return $this->_attributes[$key] = $value;
       }
@@ -72,11 +76,13 @@
       function load(array $attributes) {
          foreach ($attributes as $key => $value) {
             if (!array_key_exists($key, $this->_attributes)) {
-               $this->set_virtual($key, $value);
+               # Add unknown column names as virtual attributes
+               $this->add_virtual($key, $value);
             } else {
                $this->_attributes[$key] = $value;
             }
          }
+
          $this->_new_record = false;
          $this->_changed_attributes = array();
 

@@ -42,7 +42,7 @@
             'where'  => null,
             'group'  => null,
             'having' => null,
-            'order'  => null,
+            'order'  => $this->_mapper->order,
             'limit'  => null,
             'offset' => null,
          ), (array) $options);
@@ -71,7 +71,7 @@
             } else {
                $current_options = $this->_options;
                $this->replace_select('count(*)');
-               $this->replace_order();
+               $this->order();
 
                $this->_count = $this->statement->fetch_column();
                $this->_sql = $this->_statement = null;
@@ -141,7 +141,7 @@
             }
          }
 
-         if ($order = any($options['order'], $this->_mapper->order)) {
+         if ($order = $options['order']) {
             $sql .= ' ORDER BY '.implode(', ', (array) $order);
          }
 
@@ -235,7 +235,7 @@
       }
 
       function find($id) {
-         return $this->where(func_get_args())->first;
+         return $this->where(func_get_args())->order()->first;
       }
 
       function find_by_sql($sql, array $params=null) {
