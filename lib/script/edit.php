@@ -45,7 +45,7 @@
 
       $files = array_map(escapeshellarg, $files);
       $editor = any($_ENV['EDITOR'], $_ENV['DISPLAY'] ? 'gvim' : 'vim');
-      proc_open("$editor ".implode(' ', $files), array(), $pipes);
+      term_exec($editor.' '.implode(' ', $files));
    }
 
 ?>

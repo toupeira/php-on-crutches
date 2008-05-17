@@ -7,16 +7,9 @@
 # $Id$
 #
 
-   # Run a shell command.
-   #
-   # $command may contain placeholders which will be replaced
-   # by the remaining, shell-escaped arguments.
-   #
-   # Returns true if the command was successful.
-   #
-   function run($command, $args=null) {
-      if (!is_array($args)) {
-         $args = array_slice(func_get_args(), 1);
+   function build_shell_command($command, $args=null) {
+      if (count($args) == 1 and is_array($args[0])) {
+         $args = $args[0];
       }
 
       if ($args) {
@@ -25,9 +18,28 @@
          $command = call_user_func_array(sprintf, $args);
       }
 
+      return $command;
+   }
+
+   # Run a shell command.
+   #
+   # $command may contain placeholders which will be replaced
+   # by the remaining, shell-escaped arguments.
+   #
+   # Returns true if the command was successful.
+   #
+   function run($command, $args=null) {
       log_info("Running '$command'");
-      exec($command, $output, $status);
+      $args = func_get_args();
+      exec(build_shell_command($command, $args), $output, $status);
       return ($status === 0);
+   }
+
+   # Execute a terminal application.
+   function term_exec($command, $args=null) {
+      log_info("Executing '$command'");
+      $args = func_get_args();
+      return proc_open(build_shell_command($command, $args), array(), $pipes);
    }
 
    # Run a shell command in the background.
