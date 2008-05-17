@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
 
-   class SystemHelperTest extends TestCase
+   class SystemTest extends TestCase
    {
       function test_run() {
          $this->assertTrue(run('true'));
