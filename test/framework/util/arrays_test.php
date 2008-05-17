@@ -48,7 +48,7 @@
 
       function test_array_pluck() {
          $this->assertEqual(array('a', 'b', 'c'), array_pluck($this->b, 'name'));
-         $this->assertEqual(array(), array_pluck($this->b, 'foo'));
+         $this->assertEqual(array(null, null, null), array_pluck($this->b, 'foo'));
       }
    }
 
