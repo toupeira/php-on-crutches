@@ -175,6 +175,12 @@
       ));
    }
 
+   function button_tag($title, array $options=null) {
+      return tag('input', $options, array(
+         'type' => 'button', 'value' => $title
+      ));
+   }
+
    function cancel_button($path=null, $title=null, array $options=null) {
       return button_to(any($title, _('Cancel')), any($path, ':'), $options);
    }
