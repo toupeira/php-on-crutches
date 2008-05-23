@@ -186,7 +186,7 @@
                   continue;
                }
 
-               if ($options['type'] == 'integer' or $options['type'] == 'float' and
+               if (($options['type'] == 'integer' or $options['type'] == 'float') and
                   !$this->is_numeric($key, true)) {
                   continue;
                }
