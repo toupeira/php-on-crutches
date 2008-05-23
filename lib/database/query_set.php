@@ -280,7 +280,7 @@
                $op = ' '.strtoupper($operator).' ';
             }
 
-            array_unshift($conditions, $where);
+            array_unshift($conditions, "($where)");
 
             if ($args) {
                throw new ApplicationError('Too many arguments');
