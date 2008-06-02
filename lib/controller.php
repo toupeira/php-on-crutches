@@ -144,25 +144,40 @@
             # Check for POST requirements
             (!$this->is_post() and
                ($this->_require_post === true or
-                  in_array($action, (array) $this->_require_post))) or
+                  in_array($action, (array) $this->_require_post)))
+         ) {
+            $error = 'needs POST';
+         }
+
+
             # Check for Ajax requirements
-            (!$this->is_ajax() and
+         if (!$this->is_ajax() and
                ($this->_require_ajax === true or
-                  in_array($action, (array) $this->_require_ajax))) or
+                  in_array($action, (array) $this->_require_ajax))
+         ) {
+            $error = 'needs Ajax';
+         }
+
             # Check for trusted host requirements
-            ((($hosts = config('trusted_hosts') and
+         if ((($hosts = config('trusted_hosts') and
+               # Use default hosts
                ($this->_require_trusted === true or
-                  # Use default hosts
                   in_array($action, (array) $this->_require_trusted))) or
                      # Use specified hosts
                      ($hosts = $this->_require_trusted[$action]) or
                         ($hosts = $this->_require_trusted['all'])) and
-                           !in_array($_SERVER['REMOTE_ADDR'], (array) $hosts))
+                           !in_array($_SERVER['REMOTE_ADDR'], (array) $hosts)
          ) {
-            if (ENVIRONMENT == 'development') {
-               throw new ApplicationError('Invalid request for this action');
+            $error = 'untrusted host';
+         }
+
+         if ($error) {
+            $message = "Invalid request for this action: $error";
+
+            if (config('debug')) {
+               throw new ApplicationError($message);
             } else {
-               log_warn("Invalid request for this action");
+               log_warn($message);
                if ($action == 'index' or !method_exists($this, 'index')) {
                   # Redirect to default path if the default action was requested
                   $this->redirect_to('/');

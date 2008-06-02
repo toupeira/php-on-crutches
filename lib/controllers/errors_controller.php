@@ -24,7 +24,7 @@
 
          $this->headers['Status'] = $status;
 
-         if (ENVIRONMENT != 'development' or !$exception instanceof Exception) {
+         if (!config('debug') or !$exception instanceof Exception) {
             if (View::find_template("errors/$status")) {
                $this->render($status);
             } else {
