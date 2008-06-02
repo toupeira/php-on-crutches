@@ -320,7 +320,7 @@
       }
 
       function label($key, $label=null, array $options=null) {
-         return label($this->get_dom_id($key), any($label, humanize($key)));
+         return label($this->get_dom_id($key), any($label, _(humanize($key))));
       }
 
       function text_field($key, array $options=null) {

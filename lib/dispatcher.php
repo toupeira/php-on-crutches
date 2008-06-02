@@ -49,7 +49,12 @@
                $args = explode('/', array_shift($args));
             }
 
-            if ($class = classify($controller.'Controller')) {
+            $controller = $controller.'_controller';
+            if ($class = classify($controller)) {
+               if (config($controller) === false) {
+                  throw new RoutingError("$class is disabled");
+               }
+
                if (log_level(LOG_INFO)) {
                   self::log_header($class, $action);
                }

@@ -105,7 +105,7 @@
       $confirm = add_confirm_options($options);
 
       # Send a POST request by dyamically building a form element
-      if ($options['post']) {
+      if ($options['post'] and $path != '#') {
          unset($options['post']);
          $options['onclick'] = "var f = document.createElement('form');"
                              . "f.style.display = 'none'; this.parentNode.appendChild(f);"
@@ -123,14 +123,14 @@
    }
 
    # Build a link button
-   function button_to($title, $path, array $options=null) {
+   function button_to($title, $path, array $options=null, array $link_options=null) {
       add_confirm_options(&$options);
 
       $method = any($options['post'] ? 'POST' : null, $options['method'], 'GET');
       unset($options['post']);
       unset($options['method']);
 
-      $path = url_for($path);
+      $path = url_for($path, $link_options);
 
       if ($method == 'GET') {
          $options['onclick'] = "location.href = '$path'; return false";

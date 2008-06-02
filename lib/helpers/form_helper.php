@@ -88,7 +88,7 @@
    }
 
    function label($key, $label=null, array $options=null) {
-      return content_tag('label', _(any($label, humanize($key))), array_merge(
+      return content_tag('label', any($label, _(humanize($key))), array_merge(
          (array) $options, array('for' => $key,)
       ));
    }
@@ -182,6 +182,7 @@
    }
 
    function cancel_button($path=null, $title=null, array $options=null) {
+      $options['class'] = $options['class'].' cancel';
       return button_to(any($title, _('Cancel')), any($path, ':'), $options);
    }
 

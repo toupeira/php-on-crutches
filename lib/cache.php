@@ -115,7 +115,7 @@
       }
 
       function expire($key) {
-         return unlink($this->build_path($key));
+         return rm_f($this->build_path($key));
       }
 
       function clear() {

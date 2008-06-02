@@ -36,12 +36,19 @@
          proc('link_to(h($a[1]), $a[1])'), $text);
    }
 
-   define_default('FORMAT_TIME', '%Y-%d-%m %T');
-   define_default('FORMAT_DATE', '%Y-%d-%m');
+   define_default('FORMAT_TIME', '%Y-%m-%d %T');
+   define_default('FORMAT_DATE', '%Y-%m-%d');
+
+   define_default('FORMAT_DB_TIME', '%Y-%m-%d %T');
+   define_default('FORMAT_DB_DATE', '%Y-%m-%d');
 
    function format_time($time, $format=FORMAT_TIME) {
+      if (!is_numeric($time)) {
+         $time = strtotime($time);
+      }
+
       if ($time) {
-         return strftime($format, strtotime($time));
+         return strftime($format, $time);
       }
    }
 
@@ -85,6 +92,19 @@
          $_cycle = 0;
       }
       return $value;
+   }
+
+   function colorize($text) {
+      return strtr(str_replace('[0;', '[1;', $text), array(
+         '[1;31m' => '<strong style="color: red">',
+         '[1;32m' => '<strong style="color: green">',
+         '[1;33m' => '<strong style="color: yellow">',
+         '[1;34m' => '<strong style="color: blue">',
+         '[1;35m' => '<strong style="color: purple">',
+         '[1;36m' => '<strong style="color: cyan">',
+         '[1m' => '<strong style="color: white">',
+         '[0m' => '</strong>',
+      ));
    }
 
 ?>

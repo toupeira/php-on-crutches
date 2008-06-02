@@ -20,7 +20,8 @@
    }
 
    function underscore($text) {
-      return strtolower(preg_replace('/([a-z]) ?([A-Z])/', '\1_\2', $text));
+      return strtolower(preg_replace('/([a-z])([A-Z])/', '\1_\2',
+                        preg_replace('/\s+/', '_', $text)));
    }
 
    function classify($class) {
