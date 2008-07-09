@@ -210,19 +210,6 @@
 
       function destroy($conditions) {
          $args = func_get_args();
-         $object = call_user_func_array(
-            array($this->get_query_set(), 'find'), $args
-         );
-
-         if (is_object($object)) {
-            return $object->destroy();
-         } else {
-            return false;
-         }
-      }
-
-      function destroy_all($conditions) {
-         $args = func_get_args();
          $objects = call_user_func_array(
             array($this->get_query_set(), 'where'), $args
          );
