@@ -11,7 +11,7 @@
    # Use `$options['multipart'] = true` for upload forms.
    function form_tag($action=null, array $options=null) {
       $defaults = array(
-         'action' => url_for(any($action, Dispatcher::$path)),
+         'action' => url_for(any($action, ltrim(Dispatcher::$path, '/'))),
          'method' => 'POST', 'open' => true,
       );
 

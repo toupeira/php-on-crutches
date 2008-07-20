@@ -185,8 +185,12 @@
 
       # Error handling and validation
 
-      function add_error($key, $message) {
-         $this->_errors[$key][] = $message;
+      function add_error($key, $message=null) {
+         if ($message) {
+            $this->_errors[$key][] = $message;
+         } else {
+            $this->_errors['generic'][] = $message;
+         }
       }
 
       function get_errors() {

@@ -7,6 +7,15 @@
 # $Id$
 #
 
+   function add_message($key, $message=null) {
+      if (!$message) {
+         $message = $key;
+         $key = 'info';
+      }
+
+      Dispatcher::$controller->msg[$key][] = $message;
+   }
+
    function messages($keys=null) {
       $keys = func_get_args();
       $messages = '';

@@ -30,7 +30,7 @@
    #
    function run($command, $args=null) {
       log_info("Running '$command'");
-      $args = func_get_args();
+      $args = array_slice(func_get_args(), 1);
       exec(build_shell_command($command, $args), $output, $status);
       return ($status === 0);
    }
