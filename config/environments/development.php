@@ -15,6 +15,9 @@
       # Don't send emails
       'send_mails'      => false,
 
+      # Show error messages
+      'debug'           => true,
+
       # Analyze database queries
       'debug_queries'   => false,
 
