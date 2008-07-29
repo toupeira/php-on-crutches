@@ -74,7 +74,8 @@
 
    function rm_rf($file) {
       if (file_exists($file)) {
-         return system("rm -rf ".escapeshellarg($file));
+         system("rm -rf ".escapeshellarg($file), $status);
+         return $status == 0;
       }
    }
 
