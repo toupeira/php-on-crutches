@@ -58,6 +58,12 @@
          }
       }
 
+      function test_system() {
+         $this->assertEqual('', system('true'));
+         $this->assertEqual('', system('false'));
+         $this->assertEqual('', system('/what/the/fuck 2>/dev/null'));
+      }
+
       function test_strict_binding() {
          $this->assertEqual('PhpBreakageParent', PhpBreakageParent::get_class());
          $this->assertEqual('PhpBreakageParent', PhpBreakageChild::get_class());
