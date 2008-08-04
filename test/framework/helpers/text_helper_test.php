@@ -25,7 +25,12 @@
       function test_auto_link() {
          $url = "http://foo/?id=1&bar=2";
          $h_url = h($url);
+
          $this->assertEqual("<a href=\"$h_url\">$h_url</a>", auto_link($url));
+         $this->assertEqual("(<a href=\"$h_url\">$h_url</a>)", auto_link("($url)"));
+         $this->assertEqual("<a href=\"$h_url\">$h_url</a>,", auto_link("$url,"));
+
+         $this->assertEqual("<a href=\"http://www.foo.com\">www.foo.com</a>", auto_link('www.foo.com'));
       }
 
       function test_br2nl() {
