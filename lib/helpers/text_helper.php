@@ -31,9 +31,39 @@
       return str_replace("\n", "<br />\n", h($text));
    }
 
+   # Shamelessly stolen from Rails
+   define_default('AUTO_LINK_PATTERN', '{
+      (                                               # leading text
+         <\w+.*?>|                                    # leading HTML tag, or
+         [^=!:\'"/]|                                  # leading punctuation, or
+         ^                                            # beginning of line
+      )
+      (
+         (?:https?://)|                               # protocol spec, or
+         (?:www\.)                                    # www.*
+      )
+      (
+         [-\w]+                                       # subdomain or domain
+         (?:\.[-\w]+)*                                # remaining subdomains or domain
+         (?::\d+)?                                    # port
+         (?:/(?:(?:[~\w\+@%-]|(?:[,.;:][^\s$]))+)?)*  # path
+         (?:\?[\w\+@%&=.;-]+)?                        # query string
+         (?:\#[\w\-]*)?                               # trailing anchor
+      )
+      ([[:punct:]]|\s|<|$)                            # trailing text
+   }x');
+
    function auto_link($text) {
-      return preg_replace_callback('#\b(\w+://[-\.\w]+(:\d+)?(/[^\s]*)?)#',
-         proc('link_to(h($a[1]), $a[1])'), $text);
+      return preg_replace_callback(AUTO_LINK_PATTERN, auto_link_urls, $text);
+   }
+
+   function auto_link_urls($match) {
+      list($all, $a, $b, $c, $d) = $match;
+      if (preg_match('/<a\s/i', $match[1])) {
+         return $all;
+      } else {
+         return "$a<a href=\"".h(($b == 'www.' ? 'http://www.' : $b).$c)."\">".h($b.$c)."</a>$d";
+      }
    }
 
    define_default('FORMAT_TIME', '%Y-%m-%d %T');
