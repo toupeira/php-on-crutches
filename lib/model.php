@@ -251,7 +251,7 @@
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
             _("is not a valid email address"),
-            ($allow_empty and $value == '') or preg_match('/^[\w._%+-]+@([\w.-]+\.)+[a-z]{2,6}$/i', $value)
+            ($allow_empty and $value == '') or is_email($value)
          );
       }
 
