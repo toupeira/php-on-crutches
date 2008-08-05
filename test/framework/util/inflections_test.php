@@ -21,6 +21,8 @@
 
       function test_underscore() {
          $this->assertEqual("under_score", underscore('UnderScore'));
+         $this->assertEqual("under_score", underscore('Under Score'));
+         $this->assertEqual("under_score", underscore('UNDER  score'));
       }
    }
 
