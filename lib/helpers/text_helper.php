@@ -31,8 +31,16 @@
       return str_replace("\n", "<br />\n", h($text));
    }
 
+   function is_email($text) {
+      return preg_match('/^[\w._%+-]+@([\w.-]+\.)+[a-z]{2,6}$/i', $text);
+   }
+
+   function auto_link($text) {
+      return preg_replace_callback(AUTO_LINK_URLS_PATTERN, auto_link_urls, $text);
+   }
+
    # Shamelessly stolen from Rails
-   define_default('AUTO_LINK_PATTERN', '{
+   define_default('AUTO_LINK_URLS_PATTERN', '{
       (                                               # leading text
          <\w+.*?>|                                    # leading HTML tag, or
          [^=!:\'"/]|                                  # leading punctuation, or
@@ -52,10 +60,6 @@
       )
       ([[:punct:]]|\s|<|$)                            # trailing text
    }x');
-
-   function auto_link($text) {
-      return preg_replace_callback(AUTO_LINK_PATTERN, auto_link_urls, $text);
-   }
 
    function auto_link_urls($match) {
       list($all, $a, $b, $c, $d) = $match;
