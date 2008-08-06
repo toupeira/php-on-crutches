@@ -8,7 +8,12 @@
 #
 
    function h($text, $double_encode=false) {
-      return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
+      try {
+         return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
+      } catch (StandardError $e) {
+         # Catch invalid Unicode characters
+         return htmlspecialchars($text, ENT_COMPAT, null, $double_encode);
+      }
    }
 
    function strip_html($text) {
