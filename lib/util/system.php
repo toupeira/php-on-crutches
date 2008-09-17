@@ -55,28 +55,90 @@
       return ($paths == array('') ? array() : $paths);
    }
 
-   # Create a temporary file or directory which will be removed when
-   # the request is finished.
-   function mktemp($dir=false) {
-      $tmpdir = sys_get_temp_dir();
-      $template = config('name').'.XXXXXX';
-      $dir = $dir ? '-d' : '';
-      $path = trim(`mktemp $dir -p $tmpdir $template`);
-      register_shutdown_function(rm_rf, $path);
-      return $path;
+   # Safely delete files
+   function rm_f($files) {
+      if (!is_array($files)) {
+         $files = func_get_args();
+      }
+
+      $status = null;
+      foreach ($files as $file) {
+         if (file_exists($file)) {
+            $status = @unlink($file);
+         }
+      }
+
+      return $status;
    }
 
-   function rm_f($file) {
-      if (file_exists($file)) {
-         return @unlink($file);
+   # Safely delete directories
+   function rm_rf($paths) {
+      if (!is_array($paths)) {
+         $paths = func_get_args();
+      }
+
+      $status = null;
+      foreach ($paths as $path) {
+         if (file_exists($path)) {
+            system('rm -rf '.escapeshellarg($path), $status);
+         }
+      }
+
+      return $status == 0;
+   }
+
+   # Create a temporary file which will be automatically deleted when
+   # the object instance goes out of scope.
+   class Tempfile extends Object
+   {
+      protected $_path;
+
+      function __construct($name=null) {
+         if (function_exists(config)) {
+            $name = any($name, config('name'));
+         }
+
+         $tmpdir = sys_get_temp_dir();
+         $this->_path = trim(`mktemp -p $tmpdir $name.XXXXXX`);
+      }
+
+      function __destruct() { rm_f($this->_path); }
+      function destroy()    { $this->__destruct(); }
+      function exists()     { return is_file($this->_path); }
+      function get_path()   { return $this->_path; }
+
+      function read() {
+         if ($this->exists()) {
+            return file_get_contents($this->_path);
+         }
+      }
+
+      function write($data, $mode=FILE_APPEND) {
+         if ($this->exists()) {
+            return file_put_contents($this->_path, $data, $mode);
+         }
       }
    }
 
-   function rm_rf($file) {
-      if (file_exists($file)) {
-         system("rm -rf ".escapeshellarg($file), $status);
-         return $status == 0;
+   # Create a temporary directory which will be automatically deleted when
+   # the object instance goes out of scope.
+   class Tempdir extends Object
+   {
+      protected $_path;
+
+      function __construct($name=null) {
+         if (function_exists(config)) {
+            $name = any($name, config('name'));
+         }
+
+         $tmpdir = sys_get_temp_dir();
+         $this->_path = trim(`mktemp -d -p $tmpdir $name.XXXXXX`);
       }
+
+      function __destruct() { rm_rf($this->_path); }
+      function destroy()    { $this->__destruct(); }
+      function exists()     { return is_dir($this->_path); }
+      function get_path()   { return $this->_path; }
    }
 
 ?>

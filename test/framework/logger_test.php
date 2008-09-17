@@ -4,9 +4,10 @@
    class LoggerTest extends TestCase
    {
       function setup() {
-         $this->file = mktemp();
+         $this->file = new Tempfile();
+         $this->path = $this->file->path;
          $this->logger = $GLOBALS['_LOGGER'];
-         $this->logger->file = $this->file;
+         $this->logger->file = $this->path;
          $this->logger->level = LOG_INFO;
       }
 
@@ -24,27 +25,27 @@
 
       function test_construct() {
          $this->assertIsA($this->logger, Logger);
-         $this->assertEqual($this->file, $this->logger->file);
+         $this->assertEqual($this->path, $this->logger->file);
          $this->assertEqual(LOG_INFO, $this->logger->level);
       }
 
       function test_log() {
          $this->logger->log("foo");
-         $this->assertFileContents("foo", $this->file);
+         $this->assertFileContents("foo", $this->path);
          $this->logger->log("bar");
-         $this->assertFileContents("foo\nbar", $this->file);
+         $this->assertFileContents("foo\nbar", $this->path);
       }
 
       function test_log_with_higher_level() {
          $this->logger->log("foo");
          $this->logger->log("bar", LOG_DEBUG);
-         $this->assertFileContents("foo", $this->file);
+         $this->assertFileContents("foo", $this->path);
       }
 
       function test_log_with_lower_level() {
          $this->logger->log("foo");
          $this->logger->log("bar", LOG_ERROR);
-         $this->assertFileContents("foo\nbar", $this->file);
+         $this->assertFileContents("foo\nbar", $this->path);
       }
 
       function test_log_with_invalid_file() {
@@ -63,7 +64,7 @@
          log_info('3');
          log_debug('4');
 
-         $this->assertFileContents("1\n2\n3\n4", $this->file);
+         $this->assertFileContents("1\n2\n3\n4", $this->path);
       }
    }
 

@@ -57,11 +57,11 @@
       }
    }
 
-   $config = mktemp();
-   $socket = mktemp();
+   $config = new Tempfile();
+   $socket = new Tempfile();
    $webroot = WEBROOT;
 
-   file_put_contents($config, <<<CONF
+   $config->write(<<<CONF
 
 server.port = $port
 server.bind = "$ip"
@@ -74,7 +74,7 @@ index-file.names = ( "index.php" )
 static-file.exclude-extensions = ( ".php", ".fcgi" )
 
 fastcgi.server = ( ".php" => ( "localhost" => (
-   "socket" => "$socket",
+   "socket" => "{$socket->path}",
    "bin-path" => "$php"
 )))
 
@@ -88,17 +88,17 @@ CONF
 
    if ($verbose) {
       print "\n\nStarting lighttpd on $ip:$port...\n\n";
-      file_put_contents($config, <<<CONF
+      $config->write(<<<CONF
 accesslog.filename = "/proc/" + var.PID + "/fd/2"
 accesslog.format = "%h %V %t \"%r\" %>s %b \"%{Referer}i\""
 CONF
-      , FILE_APPEND);
+      );
    }
 
    # Ignore interrupt signal
    pcntl_signal(2, proc(''));
 
-   system("lighttpd -D -f $config");
+   system("lighttpd -D -f {$config->path}");
 
    if ($verbose) {
       print "\n\n\n";

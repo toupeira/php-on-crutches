@@ -71,11 +71,15 @@
          $this->set('msg', &$this->msg);
 
          # Collect all public methods defined in this controller
-         $this->_actions = array_diff(
-            get_class_methods($this),
-            get_class_methods(Controller),
-            get_class_methods(ApplicationController)
-         );
+         $this->_actions = array();
+         $class = new ReflectionClass($this);
+         foreach ($class->getMethods() as $method) {
+            $name = $method->getName();
+            if ($method->isPublic() and !method_exists(Controller, $name)
+                                    and !method_exists(ApplicationController, $name)) {
+               $this->_actions[] = $name;
+            }
+         }
 
          # Call custom initializer
          $this->call_if_defined('init');

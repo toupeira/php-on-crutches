@@ -2,7 +2,7 @@
 
    $_CONFIG['development'] = array(
       # Log level
-      'log_level'       => LOG_INFO,
+      'log_level'       => LOG_DEBUG,
 
       # Session store (php, cookie, cache, database)
       'session_store'   => 'php',
