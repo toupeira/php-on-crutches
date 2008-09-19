@@ -1,6 +1,6 @@
 <?
 
-   class ApplicationControllerTest extends CustomControllerTestCase
+   class ApplicationControllerTest extends ControllerTestCase
    {
    }
 
