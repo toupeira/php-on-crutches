@@ -1,7 +1,13 @@
 <?
 
    $_CONFIG['routes'] = array(
-      ':controller/:action/*id' => array('controller' => 'pages'),
+      ':controller/*id' => array(
+         'controller' => 'pages', 'action' => 'show', 'id' => '/\d+/'
+      ),
+
+      ':controller/:action/*id' => array(
+         'controller' => 'pages'
+      ),
    );
 
 ?>
