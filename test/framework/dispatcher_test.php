@@ -76,8 +76,8 @@
          $this->assertEqual($this->output, Dispatcher::$controller->output);
 
          $this->assertTrue(Dispatcher::$start_time - $start_time < 1);
-         $this->assertEqual(0, Dispatcher::$render_time);
-         $this->assertEqual(0, Dispatcher::$db_queries);
+         $this->assertTrue(Dispatcher::$render_time >= 0);
+         $this->assertTrue(Dispatcher::$db_queries >= 0);
       }
    }
 

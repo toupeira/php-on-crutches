@@ -48,7 +48,7 @@
       }
 
       function test_rm_f() {
-         $this->assertNull(rm_f('/tmp/invalid/file'));
+         $this->assertFalse(rm_f('/tmp/invalid/file'));
          $file = new Tempfile();
          $this->assertTrue(rm_f($file->path));
          $this->assertFalse(is_file($file->path));
