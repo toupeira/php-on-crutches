@@ -92,6 +92,9 @@
          unset($template);
          unset($file);
 
+         # Provide a reference to the HTML builder
+         $html = HtmlBuilder::instance();
+
          # Extract assigned values as local variables
          if (extract((array) $this->_data, EXTR_SKIP) != count($this->_data)) {
             throw new ApplicationError("Couldn't extract all template variables");
