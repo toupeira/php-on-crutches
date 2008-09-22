@@ -20,7 +20,7 @@
       } else {
          status('create', $path);
 
-         $content = "<?\n\n";
+         $content = "<?# \$Id\$ ?>\n<?\n\n";
          foreach ((array) $lines as $line) {
             $content .= "   $line\n";
          }
