@@ -360,7 +360,7 @@
          return $values;
       }
 
-      # Sort the QuerySet by the current request parameters
+      # Sort the query set by the current request parameters
       function get_sorted() {
          if ($this->_mapper->attributes[$sort = $_REQUEST['sort']]) {
             $this->_sorted_key = $sort;
@@ -370,10 +370,9 @@
          return $this;
       }
 
-      # Filter the QuerySet by the current request parameters
+      # Filter the query set by the current request parameters
       function get_filtered() {
          if (is_array($filter = $_REQUEST['filter'])) {
-            # nach einer oder mehreren Spalten filtern
             foreach ($filter as $key => $value) {
                if (substr($key, -5) == '_like') {
                   $key = substr($key, 0, -5);
@@ -401,7 +400,7 @@
          return $this;
       }
 
-      # Paginate the QuerySet by the current request parameters
+      # Paginate the query set by the current request parameters
       function get_paginated() {
          $this->_paginate = true;
          $this->_sql = null;
