@@ -65,6 +65,8 @@
                'from'      => $this->from,
                'from_name' => $this->from_name,
                'to'        => $recipients,
+               'cc'        => array_pluck($this->_mailer->cc, 0),
+               'bcc'       => array_pluck($this->_mailer->bcc, 0),
                'subject'   => $this->subject,
                'template'  => $this->template,
                'layout'    => $this->layout,
