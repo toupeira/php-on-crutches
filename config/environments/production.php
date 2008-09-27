@@ -12,6 +12,9 @@
       # Cache path for file store (Default: ROOT/tmp/cache)
       #'cache_path'        => '',
 
+      # Merge CSS and JS files
+      'merge_assets'      => true,
+
       # Send emails
       'send_mails'        => true,
 

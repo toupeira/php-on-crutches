@@ -4,9 +4,8 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?= titleize(config('name')) ?></title>
-  <?= stylesheet_tag(config('name')).N ?>
-  <?= javascript_tag('prototype').N ?>
-  <?= javascript_tag(config('name')).N ?>
+  <?= include_stylesheets(config('name')).N ?>
+  <?= include_javascripts('framework/prototype', config('name')).N ?>
 </head>
 <body>
 <?= messages() ?>
