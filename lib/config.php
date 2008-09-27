@@ -27,6 +27,7 @@
       'session_store'     => 'php',
       'cache_store'       => 'memory',
       'cache_path'        => TMP.'cache',
+      'merge_assets'      => false,
 
       'error_handler'     => error_handler,
       'exception_handler' => exception_handler,

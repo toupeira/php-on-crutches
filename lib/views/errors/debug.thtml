@@ -20,11 +20,11 @@
 
     h1 {
       font-size: 17pt;
-      margin: 0;
+      margin: 0 0 -0.5em;
     }
 
     p {
-      margin: 1em 0;
+      margin: 0.8em 0 1.2em;
       padding: 1em;
       background: #666;
       color: white;
@@ -62,7 +62,7 @@
 <body>
 
 <h1>Exception caught: <?= $exception ?></h1>
-<small>at line <?= $line ?> in <?= $file ?></small>
+<h3>in <strong><?= $file ?></strong> at line <strong><?= $line ?></strong>:</h3>
 <p><?= $message ?></p>
 
 <? if ($code): ?>
@@ -73,18 +73,29 @@
 </div>
 <? endif ?>
 
+<? if ($trace): ?>
 <h3>Stack Trace:</h3>
 <pre><?= $trace ?></pre>
+<? endif ?>
 
+<? if ($params): ?>
 <h3>Request Parameters:</h3>
 <?= dump($params) ?>
+<? endif ?>
 
+<? if ($_COOKIE): ?>
+<h3>Cookies</h3>
+<?= dump($_COOKIE) ?>
+<? endif ?>
+
+<? if ($_SESSION): ?>
 <h3>Session Variables:</h3>
 <?= dump($_SESSION) ?>
+<? endif ?>
 
 <?= link_to('Show server information', '#', array('onclick' => 'return toggle(this)')) ?>
 <div style="display: none">
-   <h3>Client Information:</h3>
+   <h3>Server Information:</h3>
    <?= dump($_SERVER) ?>
 </div>
 

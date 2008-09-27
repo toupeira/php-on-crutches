@@ -67,7 +67,7 @@
             } catch (Exception $e) {
                ob_end_clean();
                return "<h1>".titleize($class)."</h1>\n"
-                  . "<p>$message, at line $line in <code>$file</code></p>\n"
+                  . "<p>$message, in <code>$file</code> at line $line</p>\n"
                   . "<pre>$trace</pre>";
 
             }

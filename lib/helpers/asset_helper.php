@@ -26,6 +26,68 @@
       }
    }
 
+   # Include multiple stylesheets
+   function include_stylesheets($args) {
+      $args = func_get_args();
+      return merge_assets(stylesheet_tag, STYLESHEETS, '.css', $args);
+   }
+
+   # Include multiple javascripts
+   function include_javascripts($args) {
+      $args = func_get_args();
+      return merge_assets(javascript_tag, JAVASCRIPTS, '.js', $args);
+   }
+
+   # Merge multiple assets into one file and return a tag
+   function merge_assets($tag, $dir, $ext, $assets) {
+      if (config('debug')) {
+         $assets[] = 'framework/debug';
+      }
+      $assets = array_unique($assets);
+
+      if (config('merge_assets') and count($assets) > 1) {
+         $mtime = 0;
+         $all = WEBROOT.$dir.'all'.$ext;
+         $paths = array();
+         foreach ($assets as $asset) {
+            if (is_file($path = WEBROOT.$dir.$asset.$ext)) {
+               $paths[$asset] = $path;
+               $mtime = max($mtime, filemtime($path));
+            }
+         }
+
+         while (true) {
+            if (!is_file($all) or $mtime > filemtime($all)) {
+               if (!$target = @fopen($all, 'w')) {
+                  log_error("Couldn't create merged asset: $all");
+
+                  # Fallthrough to unmerged assets
+                  break;
+               }
+
+               foreach ($paths as $asset => $path) {
+                  $source = fopen($path, 'r');
+                  while ($input = fread($source, 8192)) {
+                     fwrite($target, $input, 8192);
+                  }
+                  fclose($source);
+               }
+               fclose($target);
+               log_info("Created merged asset: $all");
+            }
+
+            return $tag('all');
+         }
+      }
+      
+      $html = '';
+      foreach ($assets as $asset) {
+         $html .= $tag($asset)."\n";
+      }
+
+      return $html;
+   }
+
    # Build a stylesheet tag
    function stylesheet_tag($file, array $options=null) {
       return tag('link', $options, array(
