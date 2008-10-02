@@ -127,6 +127,11 @@
          return $this;
       }
 
+      function set_default($key, $value) {
+         $this->_view->set_default($key, &$value);
+         return $this;
+      }
+
       # Check if this is a POST request
       function is_post() {
          return $_SERVER['REQUEST_METHOD'] == 'POST';

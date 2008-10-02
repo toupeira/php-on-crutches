@@ -73,6 +73,14 @@
          return $this;
       }
 
+      function set_default($key, $value) {
+         if (!array_key_exists($key, $this->_data)) {
+            $this->set($key, &$value);
+         }
+
+         return $this;
+      }
+
       # Render a template
       function render($template=null, $layout=null) {
          if (!$this->_template and !$this->_template = $template) {
@@ -170,6 +178,28 @@
          $output = ob_get_clean();
 
          return $output;
+      }
+
+      # Render a collection of model instances using partials
+      # based on their class name
+      function render_collection($objects) {
+         if ($objects instanceof QuerySet) {
+            $objects = $objects->objects;
+         }
+
+         if ($objects[0] instanceof Model) {
+            $output = '';
+            foreach ($objects as $object) {
+               $model = underscore(get_class($object));
+               $output .= $this->render_partial(
+                  $model, array($model => $object)
+               );
+            }
+
+            return $output;
+         } else {
+            throw new ApplicationError('Not a Model instance');
+         }
       }
    }
 

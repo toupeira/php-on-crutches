@@ -27,13 +27,13 @@
    }
 
    # Include multiple stylesheets
-   function include_stylesheets($args) {
+   function include_stylesheets() {
       $args = func_get_args();
       return merge_assets(stylesheet_tag, STYLESHEETS, '.css', $args);
    }
 
    # Include multiple javascripts
-   function include_javascripts($args) {
+   function include_javascripts() {
       $args = func_get_args();
       return merge_assets(javascript_tag, JAVASCRIPTS, '.js', $args);
    }
@@ -43,12 +43,20 @@
       if (config('debug')) {
          $assets[] = 'framework/debug';
       }
-      $assets = array_unique($assets);
 
+      if ($assets) {
+         $assets = array_unique($assets);
+      } else {
+         return;
+      }
+
+      # Combine multiple assets
       if (config('merge_assets') and count($assets) > 1) {
-         $mtime = 0;
          $all = WEBROOT.$dir.'all'.$ext;
+
+         # Build the file paths and get the last modification time
          $paths = array();
+         $mtime = 0;
          foreach ($assets as $asset) {
             if (is_file($path = WEBROOT.$dir.$asset.$ext)) {
                $paths[$asset] = $path;
@@ -56,15 +64,9 @@
             }
          }
 
-         while (true) {
-            if (!is_file($all) or $mtime > filemtime($all)) {
-               if (!$target = @fopen($all, 'w')) {
-                  log_error("Couldn't create merged asset: $all");
-
-                  # Fallthrough to unmerged assets
-                  break;
-               }
-
+         # Create the combined file when necessary
+         if (!is_file($all) or $mtime > filemtime($all)) {
+            if ($target = @fopen($all, 'w')) {
                foreach ($paths as $asset => $path) {
                   $source = fopen($path, 'r');
                   while ($input = fread($source, 8192)) {
@@ -74,10 +76,17 @@
                }
                fclose($target);
                log_info("Created merged asset: $all");
+            } else {
+               log_error("Couldn't create merged asset: $all");
             }
-
-            return $tag('all');
          }
+
+         if (is_file($all)) {
+            return $tag('all')."\n";
+         }
+
+         # If the file couldn't be created,
+         # fall through to the default behaviour
       }
       
       $html = '';
