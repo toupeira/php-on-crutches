@@ -137,11 +137,11 @@
       return strtr(str_replace('[0;', '[1;', $text), array(
          '[1;31m' => '<strong style="color: red">',
          '[1;32m' => '<strong style="color: green">',
-         '[1;33m' => '<strong style="color: yellow">',
-         '[1;34m' => '<strong style="color: blue">',
+         '[1;33m' => '<strong style="color: orange">',
+         '[1;34m' => '<strong style="color: darkblue">',
          '[1;35m' => '<strong style="color: purple">',
-         '[1;36m' => '<strong style="color: cyan">',
-         '[1m' => '<strong style="color: white">',
+         '[1;36m' => '<strong style="color: blue">',
+         '[1m' => '<strong>',
          '[0m' => '</strong>',
       ));
    }

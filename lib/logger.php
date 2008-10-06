@@ -31,9 +31,15 @@
 
    class Logger extends Object
    {
+      static protected $_messages;
+
       protected $_file;
       protected $_level;
       protected $_buffer;
+
+      static function messages() {
+         return self::$_messages;
+      }
 
       function __construct($file=STDERR, $level=LOG_INFO) {
          if (is_resource($file)) {
@@ -88,6 +94,10 @@
                ob_start();
                print_r($msg);
                $msg = ob_get_clean();
+            }
+
+            if (config('debug')) {
+               self::$_messages[] = $msg;
             }
 
             if (fwrite($this->_buffer, "$msg\n") === false) {

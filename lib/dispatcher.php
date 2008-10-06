@@ -15,15 +15,17 @@
       static public $controller;
       static public $params;
 
-      static public $start_time;
-      static public $render_time;
-      static public $db_queries;
+      static public $start_time = 0;
+      static public $render_time = 0;
+      static public $db_queries = 0;
+      static public $db_queries_sql = array();
 
       # Run a request for the given path.
       static function run($path) {
          self::$start_time = microtime(true);
          self::$render_time = 0;
          self::$db_queries = 0;
+         self::$db_queries_sql = array();
 
          $path = ltrim($path, '/');
          self::$path = "/$path";
@@ -31,7 +33,7 @@
 
          # Detect the relative path used to reach the website
          self::$prefix = rtrim(preg_replace(
-            "#/+(index\.(php|fcgi)(\?[^/]*)?/*)?($path)?(\?.*)?/*$#", '/',
+            "#/+(index\.(php|fcgi)(\?[^/]*)?/*)?(".preg_quote($path).")?(\?.*)?/*$#", '/',
             $_SERVER['REQUEST_URI']
          ), '/').'/';
 
@@ -64,7 +66,14 @@
                self::$controller->perform($action, $args);
 
                # Print the output
-               print self::$controller->output;
+               if (config('debug_toolbar')) {
+                  # Add the debug toolbar if enabled
+                  $controller = new DebugController();
+                  $toolbar = $controller->perform('toolbar');
+                  print preg_replace('|(</body>)|', $toolbar.'\1', self::$controller->output);
+               } else {
+                  print self::$controller->output;
+               }
 
                if (log_level(LOG_INFO)) {
                   self::log_footer();
@@ -105,6 +114,9 @@
          $text = 'Completed in %.5f (%d reqs/sec)';
          $args = array($time, 1/ $time);
 
+         $text .= ' | Size: %.2fK';
+         $args[] = strlen(self::$controller->output) / 1024;
+
          if ($render_time = Dispatcher::$render_time) {
             $text .= ' | Rendering: %.5f (%d%%)';
             $args[] = $render_time;
@@ -112,7 +124,7 @@
          }
 
          if ($db_queries = Dispatcher::$db_queries) {
-            $text .= ' | DB: '.pluralize(Dispatcher::$db_queries, 'query', 'queries');
+            $text .= ' | DB: '.pluralize($db_queries, 'query', 'queries');
          }
 
          $text .= ' | Status: %s';
@@ -125,12 +137,6 @@
          array_unshift($args, $text);
 
          log_info(call_user_func_array(sprintf, $args));
-            #'Rendering: %.5f (%d%%) | DB: %.5f (%d%%) | Status: %s',
-            #$time, 1 / $time,
-            #Dispatcher::$render_time, 100 * Dispatcher::$render_time / $time,
-            #Dispatcher::$db_time, 100 * Dispatcher::$db_time / $time,
-            #($status == 200 ? "[0;32m$status[0m" : "[1;31m$status[0m")
-         #));
       }
    }
 

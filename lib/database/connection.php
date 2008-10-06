@@ -94,7 +94,10 @@
                str_replace('%', '%%', $sql)
             ));
 
-            log_info("  SQL [{$this->name}] [1m".call_user_func_array(sprintf, $args)."[0m");
+            $query = call_user_func_array(sprintf, $args);
+            log_info("  SQL [{$this->name}] [1m$query[0m");
+            Dispatcher::$db_queries++;
+            Dispatcher::$db_queries_sql[$this->name][] = $query;
 
             if (config('analyze_queries') and substr($sql, 0, 6) == 'SELECT') {
                $this->analyze_query($sql, $params);
@@ -187,7 +190,6 @@
    class DatabaseStatement extends PDOStatement
    {
       function execute(array $params=null) {
-         Dispatcher::$db_queries++;
          parent::execute((array) $params);
          return $this;
       }

@@ -1,8 +1,80 @@
 #debug-toolbar {
   position: fixed;
+  white-space: nowrap;
   left: 0;
   bottom: 0;
-  height: 24px;
+  padding: 4px;
+  background: #eee;
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  font-family: sans-serif !important;
+  font-size: 11px !important;
+}
+
+#debug-toolbar strong {
+  padding: 0 0.5em 0 0.2em;
+}
+
+#debug-toolbar span {
+  border-left: 1px solid #ccc;
+  padding: 5px;
+}
+
+#debug-toolbar span, #debug-toolbar a {
+  color: #666 !important;
+  font-weight: bold !important;
+  text-decoration: none !important;
+}
+
+#debug-toolbar a:hover {
+  color: black !important;
+}
+
+#debug-toolbar img {
+  margin-bottom: -5px;
+}
+
+#debug-toolbar div {
+  position: fixed;
+  bottom: 22px;
+  max-width: 600px;
+  max-height: 600px;
+  overflow: auto;
+  padding: 4px;
   background: #eee;
   border: 1px solid #ccc;
+}
+
+#debug-toolbar table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#debug-toolbar th {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.4em;
+  padding-right: 1em;
+  border-bottom: 1px solid #ccc;
+}
+
+#debug-toolbar td {
+  vertical-align: top;
+  padding: 0.4em;
+  border-bottom: 1px solid #ccc;
+}
+
+#debug-toolbar pre {
+  margin: 0;
+}
+
+#debug-toolbar ul {
+  margin: 0;
+  padding: 0 0 0 1.5em;
+  list-style-type: square;
+}
+
+#debug-toolbar li {
+  margin: 0;
+  padding: 0;
 }

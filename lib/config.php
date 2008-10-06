@@ -36,6 +36,7 @@
       'rewrite_urls'      => true,
 
       'debug'             => false,
+      'debug_toolbar'     => false,
       'debug_redirects'   => false,
       'debug_queries'     => false,
 

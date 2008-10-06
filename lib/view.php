@@ -63,6 +63,11 @@
          return (array) $this->_data;
       }
 
+      function set_data($data) {
+         $this->_data = (array) $data;
+         return $this;
+      }
+
       # Get and set template values
       function get($key) {
          return $this->_data[$key];
