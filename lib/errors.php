@@ -10,6 +10,11 @@
    # Base class for all custom exceptions
    class StandardError extends ErrorException {}
 
+   # PHP errors
+   class SyntaxError extends StandardError {}
+   class RuntimeError extends StandardError {}
+   class FatalError extends RuntimeError {}
+
    # Framework exceptions
    class ApplicationError extends StandardError {}
    class NotImplemented extends ApplicationError {}
@@ -36,28 +41,73 @@
       }
    }
 
+   $_ERROR_CAUGHT = false;
+
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
       if (error_reporting()) {
-         throw new StandardError($errstr, 0, $errno, $errfile, $errline);
+         if ($GLOBALS['_ERROR_CAUGHT']) return;
+         throw new RuntimeError($errstr, 0, $errno, $errfile, $errline);
+      }
+   }
+
+   # Catch "fatal" PHP errors
+   function fatal_error_handler() {
+      if ($handler = config('error_handler') and $error = error_get_last()) {
+         if ((error_reporting() & $error['type']) == 0) {
+            return;
+         } elseif ($error['type'] == 4) {
+            $exception = SyntaxError;
+         } else {
+            $exception = FatalError;
+         }
+
+         exception_handler(new $exception(
+            $error['message'].' '.array_to_str($error),
+            0,
+            $error['type'],
+            $error['file'],
+            $error['line']
+         ));
       }
    }
 
    # Handler for uncaught exceptions
    function exception_handler($exception) {
-      if (log_running()) {
-         log_error("\n".dump_exception($exception));
-      }
+      if ($GLOBALS['_ERROR_CAUGHT']) return;
+      $GLOBALS['_ERROR_CAUGHT'] = true;
 
       while (ob_get_level()) {
          ob_end_clean();
       }
 
-      Dispatcher::$controller = new ErrorsController();
-      print Dispatcher::$controller->perform('show', array($exception));
+      if (PHP_SAPI == 'cli') {
+         print dump_exception($exception)."\n";
+      } else {
+         if (log_running()) {
+            log_error("\n".dump_exception($exception));
+         }
 
-      if (log_level(LOG_INFO)) {
-         Dispatcher::log_footer();
+         Dispatcher::$controller = new ErrorsController();
+         print Dispatcher::$controller->perform('show', array($exception));
+
+         if (log_level(LOG_INFO)) {
+            Dispatcher::log_footer();
+         }
+
+         if ($notify = config('notify_exceptions')) {
+            $mail = new Mail();
+            $mail->subject = get_class($exception);
+            $mail->alt_body = dump_exception($exception);
+            $mail->body = Dispatcher::$controller->show_debug($exception, true);
+            $mail->content_type = 'text/html';
+
+            foreach ((array) $notify as $address) {
+               $mail->add_address($address);
+            }
+
+            $mail->send();
+         }
       }
 
       exit;

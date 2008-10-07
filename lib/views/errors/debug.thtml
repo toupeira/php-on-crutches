@@ -1,3 +1,7 @@
+<?
+   $expand_source = ($expand or $exception == 'SyntaxError');
+   $expand_server = $expand;
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -66,8 +70,12 @@
 <p><?= $message ?></p>
 
 <? if ($code): ?>
+<? if ($expand_source): ?>
+<div>
+<? else: ?>
 <?= link_to('Show source', '#', array('onclick' => 'return toggle(this)')) ?>
 <div style="display:none">
+<? endif ?>
    <h3>Extracted source from <strong><?= $file ?></strong> (around line <strong>#<?= $line ?></strong>):</h3>
    <pre><?= $code ?></pre>
 </div>
@@ -93,8 +101,12 @@
 <?= dump($_SESSION) ?>
 <? endif ?>
 
+<? if ($expand_server): ?>
+<div>
+<? else: ?>
 <?= link_to('Show server information', '#', array('onclick' => 'return toggle(this)')) ?>
-<div style="display: none">
+<div style="display:none">
+<? endif ?>
    <h3>Server Information:</h3>
    <?= dump($_SERVER) ?>
 </div>

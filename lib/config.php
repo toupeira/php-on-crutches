@@ -65,6 +65,23 @@
       ));
    }
 
+   # Auto-load models and controllers
+   function __autoload($class) {
+      $name = underscore($class);
+      if (is_file($file = MODELS."$name.php")) {
+         return require $file;
+      } elseif (substr($name, -6) == 'mapper' and
+         is_file($file = MODELS.substr($name, 0, -7).'.php')) {
+         return require $file;
+      } elseif (substr($name, -10) == 'controller') {
+         if (is_file($file = CONTROLLERS."$name.php")) {
+            return require $file;
+         } elseif (is_file($file = LIB."controllers/$name.php")) {
+            return require $file;
+         }
+      }
+   }
+
    function config($key, $subkey=null) {
       if (!array_key_exists($key, $GLOBALS['_CONFIG'])) {
          return $GLOBALS['_CONFIG']['application'][$key];
@@ -87,6 +104,12 @@
          ob_start();
       }
 
+      # Configure the logger
+      $GLOBALS['_LOGGER'] = new Logger(
+         $config['log_file'],
+         $config['log_level']
+      );
+
       # Configure error reporting
       error_reporting(E_ALL ^ E_NOTICE);
       ini_set('display_errors', (config('debug') or PHP_SAPI == 'cli'));
@@ -94,6 +117,9 @@
       # Set global PHP error handler
       if ($handler = $config['error_handler']) {
          set_error_handler($handler, error_reporting());
+
+         # Register a shutdown function to catch fatal errors
+         register_shutdown_function(fatal_error_handler);
       }
 
       # Set global exception handler
@@ -108,9 +134,6 @@
       if (config('database')) {
          require LIB.'database/base.php';
       }
-
-      # Configure the logger
-      $GLOBALS['_LOGGER'] = new Logger($config['log_file'], $config['log_level']);
 
       # Setup cache store, always use memory store in console
       load_store('cache', $config['cache_store'], 'memory');

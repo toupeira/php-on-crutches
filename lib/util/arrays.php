@@ -39,7 +39,7 @@
    }
 
    # Get one or more key/value pairs from an array
-   function array_get(&$array, $keys=null) {
+   function array_get($array, $keys=null) {
       if (!is_array($keys) and !is_null($keys)) {
          $keys = array_slice(func_get_args(), 1);
       }
@@ -53,7 +53,7 @@
    }
 
    # Find an object by property value
-   function array_find(&$array, $key, $value) {
+   function array_find($array, $key, $value) {
       foreach ((array) $array as $object) {
          if (getf($object, $key) == $value) {
             return $object;
@@ -62,7 +62,7 @@
    }
 
    # Find all matching values
-   function array_find_all(&$array, $key, $value) {
+   function array_find_all($array, $key, $value) {
       $objects = array();
       foreach ((array) $array as $object) {
          if (getf($object, $key) == $value) {
@@ -74,7 +74,7 @@
    }
 
    # Find all matching values by regular expression
-   function array_grep(&$array, $key, $pattern=null) {
+   function array_grep($array, $key, $pattern=null) {
       if (is_null($pattern)) {
          $pattern = $key;
          $key = null;
@@ -88,7 +88,7 @@
             $value = $object;
          }
 
-         if (preg_match("#$pattern#i", $value)) {
+         if (preg_match("#$pattern#i", (string) $value)) {
             $objects[] = $object;
          }
       }
@@ -97,7 +97,7 @@
    }
 
    # Collect the given array keys or object properties from each value
-   function array_pluck(&$array, $key, $hash=false) {
+   function array_pluck($array, $key, $hash=false) {
       $values = array();
       foreach ($array as $object) {
          $value = getf($object, $key);
@@ -166,7 +166,7 @@
    }
 
    # Call a method on each object
-   function array_send(&$objects, $method, $args=null) {
+   function array_send($objects, $method, $args=null) {
       if (!is_array($args)) {
          $args = array_slice(func_get_args(), 2);
       }
