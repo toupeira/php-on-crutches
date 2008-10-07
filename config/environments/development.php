@@ -18,6 +18,9 @@
       # Show error messages
       'debug'           => true,
 
+      # Show debug toolbar
+      'debug_toolbar'   => true,
+
       # Analyze database queries
       'debug_queries'   => false,
 
