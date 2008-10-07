@@ -23,6 +23,9 @@
 #debug-toolbar span, #debug-toolbar a {
   color: #666 !important;
   font-weight: bold !important;
+}
+
+#debug-toolbar a {
   text-decoration: none !important;
   border: none !important;
 }
