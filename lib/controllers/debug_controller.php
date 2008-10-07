@@ -99,7 +99,7 @@
 
       function render_window() {
          $request = array(
-            'Path'       => h(Dispatcher::$path),
+            'Path'       => h($_SERVER['REQUEST_URI']),
             'Method'     => $_SERVER['REQUEST_METHOD'],
             'Parameters' => $this->dump_array(Dispatcher::$params),
          );

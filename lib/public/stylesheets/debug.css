@@ -24,10 +24,14 @@
   color: #666 !important;
   font-weight: bold !important;
   text-decoration: none !important;
+  border: none !important;
 }
 
 #debug-toolbar a:hover {
   color: black !important;
+  background: none !important;
+  text-decoration: none !important;
+  border: none !important;
 }
 
 #debug-toolbar img {
