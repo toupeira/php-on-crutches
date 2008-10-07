@@ -63,7 +63,7 @@
          }
 
          exception_handler(new $exception(
-            $error['message'].' '.array_to_str($error),
+            $error['message'],
             0,
             $error['type'],
             $error['file'],
