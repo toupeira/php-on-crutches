@@ -95,7 +95,7 @@
             Dispatcher::log_footer();
          }
 
-         if ($notify = config('notify_exceptions')) {
+         if ($notify = config('notify_exceptions') and !$exception instanceof NotFound) {
             $mail = new Mail();
             $mail->subject = get_class($exception);
             $mail->alt_body = dump_exception($exception);
