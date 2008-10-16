@@ -24,6 +24,12 @@
    class RoutingError extends NotFound {}
    class MissingTemplate extends NotFound {}
 
+   class ValueError extends StandardError {
+      function __construct($value) {
+         parent::__construct("Invalid value '$value'");
+      }
+   }
+
    class TypeError extends StandardError {
       function __construct($value) {
          $type = (is_object($value) ? get_class($value) : gettype($value));
