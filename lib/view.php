@@ -188,23 +188,19 @@
       # Render a collection of model instances using partials
       # based on their class name
       function render_collection($objects) {
-         if ($objects instanceof QuerySet) {
-            $objects = $objects->objects;
-         }
-
-         if ($objects[0] instanceof Model) {
-            $output = '';
-            foreach ($objects as $object) {
+         $output = '';
+         foreach ($objects as $object) {
+            if (is_object($object)) {
                $model = underscore(get_class($object));
                $output .= $this->render_partial(
                   $model, array($model => $object)
                );
+            } else {
+               throw new TypeError($object);
             }
-
-            return $output;
-         } else {
-            throw new ApplicationError('Not a Model instance');
          }
+
+         return $output;
       }
    }
 
