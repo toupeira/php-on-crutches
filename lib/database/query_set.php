@@ -111,11 +111,7 @@
       }
 
       function get_empty() {
-         if ($this->_statement) {
-            return count($this->objects) == 0;
-         } else {
-            return $this->count == 0;
-         }
+         return count($this->objects) == 0;
       }
 
       function get_sql() {
