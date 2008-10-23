@@ -426,7 +426,11 @@
       }
 
       function current() {
-         return $this->_objects[$this->_position];
+         if ($object = $this->_objects[$this->_position]) {
+            return $object;
+         } elseif ($object = $this->statement->fetch_load($this->_mapper->model)) {
+            return $this->_objects[$this->_position] = $object;
+         }
       }
 
       function key() {
@@ -438,14 +442,7 @@
       }
 
       function valid() {
-         if (array_key_exists($this->_position, (array) $this->_objects)) {
-            return true;
-         } elseif ($object = $this->statement->fetch_load($this->_mapper->model)) {
-            $this->_objects[$this->_position] = $object;
-            return true;
-         } else {
-            return false;
-         }
+         return is_object($this->current());
       }
 
       # ArrayAccess implementation
