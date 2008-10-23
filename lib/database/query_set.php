@@ -57,7 +57,15 @@
       }
 
       function get_objects() {
-         if (is_null($this->_statement) or count($this->_objects) != $this->count) {
+         if ($this->_statement) {
+            # Statement was already executed, fetch all remaining objects
+            $current_pos = $this->_position;
+            while ($this->valid()) {
+               $this->next();
+            }
+            $this->_position = $current_pos;
+         } else {
+            # Statement wasn't executed yet, load all objects in one run
             $this->_objects = $this->statement->fetch_all_load($this->_mapper->model);
          }
 
@@ -66,17 +74,25 @@
 
       function get_count() {
          if (is_null($this->_count)) {
-            if ($this->_statement or $this->_options['having']) {
-               return $this->row_count;
+            if ($this->_statement) {
+               $this->_count = count($this->objects);
             } else {
                $current_options = $this->_options;
-               $this->replace_select('count(*)');
+               $current_sql = $this->_sql;
+
                $this->order();
 
+               if ($this->_paginate or $this->_options['having'] or is_numeric($this->_options['limit']) or is_numeric($this->_options['offset'])) {
+                  $this->_sql = "SELECT count(*) FROM ({$this->sql}) internal_count_alias";
+               } else {
+                  $this->replace_select('count(*)');
+               }
+
                $this->_count = $this->statement->fetch_column();
-               $this->_sql = $this->_statement = null;
 
                $this->_options = $current_options;
+               $this->_sql = $current_sql;
+               $this->_statement = null;
             }
          }
 
@@ -94,16 +110,12 @@
          }
       }
 
-      function get_row_count() {
-         if (is_null($this->_count)) {
-            $this->_count = $this->statement->row_count();
-         }
-
-         return $this->_count;
-      }
-
       function get_empty() {
-         return $this->row_count == 0;
+         if ($this->_statement) {
+            return count($this->objects) == 0;
+         } else {
+            return $this->count == 0;
+         }
       }
 
       function get_sql() {
@@ -215,6 +227,7 @@
       }
 
       function get_last() {
+         $this->objects;
          return $this->objects[$this->count - 1];
       }
 
@@ -223,7 +236,7 @@
       }
 
       function get_is_last() {
-         return $this->_position == $this->_count - 1;
+         return $this->_position == $this->count - 1;
       }
 
       function get_all() {
@@ -414,11 +427,7 @@
       }
 
       function current() {
-         if ($object = $this->_objects[$this->_position]) {
-            return $object;
-         } else {
-            return $this->_objects[$this->_position] = $this->statement->fetch_load($this->_mapper->model);
-         }
+         return $this->_objects[$this->_position];
       }
 
       function key() {
@@ -430,7 +439,14 @@
       }
 
       function valid() {
-         return $this->_position < $this->row_count;
+         if (array_key_exists($this->_position, (array) $this->_objects)) {
+            return true;
+         } elseif ($object = $this->statement->fetch_load($this->_mapper->model)) {
+            $this->_objects[$this->_position] = $object;
+            return true;
+         } else {
+            return false;
+         }
       }
 
       # ArrayAccess implementation
