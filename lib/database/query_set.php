@@ -223,7 +223,10 @@
       }
 
       function get_first() {
-         return $this->current();
+         $this->_position = 0;
+         if ($this->valid()) {
+            return $this->current();
+         }
       }
 
       function get_last() {
