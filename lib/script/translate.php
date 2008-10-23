@@ -42,7 +42,7 @@ TXT;
       }
 
       if (`wc -l $file` > 6) {
-         system("sed -ri 's|^#: ".ROOT."|#: |' $file");
+         system("sed -ri 's| (".ROOT.")([^ ]+:[0-9]+)| \\2|g' $file");
       } else {
          unlink($file);
       }
