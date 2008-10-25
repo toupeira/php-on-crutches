@@ -11,13 +11,13 @@
   font-size: 11px !important;
 }
 
-#debug-toolbar strong {
-  padding: 0 0.5em 0 0.2em;
+#debug-toolbar.disabled strong, #debug-toolbar.disabled span, #debug-toolbar.disabled div {
+  display: none !important;
 }
 
 #debug-toolbar span {
-  border-left: 1px solid #ccc;
   padding: 5px;
+  border-left: 1px solid #ccc;
 }
 
 #debug-toolbar span, #debug-toolbar a {
@@ -26,22 +26,24 @@
 }
 
 #debug-toolbar a {
-  text-decoration: none !important;
   border: none !important;
+  background: none !important;
+  text-decoration: none !important;
 }
 
 #debug-toolbar a:hover {
   color: black !important;
   background: none !important;
   text-decoration: none !important;
-  border: none !important;
 }
 
 #debug-toolbar img {
   margin-bottom: -5px;
+  border: none;
 }
 
 #debug-toolbar div {
+  display: none;
   position: fixed;
   bottom: 22px;
   max-width: 600px;

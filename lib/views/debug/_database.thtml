@@ -1,0 +1,12 @@
+<?# $Id$ ?>
+<?
+   $all_queries = array();
+   foreach (Dispatcher::$db_queries_sql as $database => $queries) {
+      $database = '<strong>'.h($database).':</strong>';
+      foreach ($queries as $query) {
+         $all_queries[$database][] = '<code>'.h($query).'</code>';
+      }
+   }
+?>
+<span><a>DB: <?= Dispatcher::$db_queries ?> queries</a></span>
+<div><?= list_tag($all_queries) ?></div>

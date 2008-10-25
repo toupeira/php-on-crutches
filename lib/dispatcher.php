@@ -69,7 +69,7 @@
                if (config('debug_toolbar')) {
                   # Add the debug toolbar if enabled
                   $controller = new DebugController();
-                  $toolbar = $controller->perform('toolbar');
+                  $toolbar = $controller->perform('toolbar', array(true));
                   print preg_replace('|(</body>)|', $toolbar.'\1', self::$controller->output);
                } else {
                   print self::$controller->output;

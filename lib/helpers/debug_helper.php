@@ -19,6 +19,23 @@
       return "<pre>$output</pre>";
    }
 
+   function dump_colored($value) {
+      ob_start();
+      var_dump($value);
+      $output = ob_get_clean();
+
+      if (is_array($value)) {
+         $lines = explode("\n", $output);
+         $output = '<pre>';
+         foreach (array_slice($lines, 2, -1) as $line) {
+            $output .= substr($line, 2)."\n";
+         }
+         $output .= '</pre>';
+      }
+
+      return $output;
+   }
+
    # Dump an exception with colored backtrace
    function dump_exception($exception) {
       $dump = "[1;31m".get_class($exception)."[0m: [1m".$exception->getMessage()."[0m\n";
