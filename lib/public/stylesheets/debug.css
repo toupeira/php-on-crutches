@@ -91,7 +91,7 @@
   white-space: normal;
 }
 
-#debug-toolbar td, #debug-toolbar div > pre, #debug-toolbar li li {
+#debug-toolbar td, #debug-toolbar > div > pre, #debug-toolbar li li {
   padding: 0.4em;
   background: #eee;
   border: 1px solid #bbb;
