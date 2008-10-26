@@ -17,7 +17,7 @@
          if ($model and $action) {
             $title = link_to(humanize($model), ":/database/$model");
             if ($action != 'index') {
-               $title .= ' &#x25b8; '.humanize($action);
+               $title .= ' <dfn>&#x25b8;</dfn> '.humanize($action);
             }
             $this->set('title', $title);
 

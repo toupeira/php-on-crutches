@@ -29,7 +29,6 @@
     h1 {
       margin: 1em 0;
       color: #333;
-      font-family: "Arial", sans-serif;
       font-size: 14pt;
       border-bottom: 1px solid #ccc;
     }
@@ -46,6 +45,12 @@
       text-decoration: underline;
     }
 
+    h1 dfn {
+      font-size: 12pt;
+      line-height: 15pt;
+      vertical-align: top;
+    }
+
     table.scaffold-list {
       font-size: 8.5pt;
     }
@@ -58,7 +63,7 @@
   </style>
 </head>
 <body>
-<h1><?= link_to('Database', ':/database') ?><?= $title ? " &#x25b8; $title" : '' ?></h1>
+<h1><?= link_to('Database', ':/database') ?><?= $title ? " <dfn>&#x25b8;</dfn> $title" : '' ?></h1>
 
 <div id="content">
 <?= messages() ?>
