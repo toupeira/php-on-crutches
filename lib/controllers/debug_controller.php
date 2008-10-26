@@ -23,7 +23,7 @@
 
             if ($action == 'attributes') {
                $this->set('attributes', DB(camelize($model))->attributes);
-               $this->render('debug/attributes');
+               $this->render('debug/database/attributes');
             } else {
                $this->model(camelize($model), $action, $id, array(
                   'page_size'   => 20,
@@ -46,7 +46,7 @@
 
             $this->set('title', 'Models');
             $this->set('models', $models);
-            $this->render('debug/database');
+            $this->render('debug/database/index');
          }
       }
    }
