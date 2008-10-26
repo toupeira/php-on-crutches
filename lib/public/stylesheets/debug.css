@@ -84,17 +84,22 @@
 
 #debug-toolbar td {
   vertical-align: top;
-  padding: 0.4em;
   width: 100%;
-  border-bottom: 1px solid #bbb;
 }
 
 #debug-toolbar td, #debug-toolbar code {
   white-space: normal;
 }
 
+#debug-toolbar td, #debug-toolbar div > pre, #debug-toolbar li li {
+  padding: 0.4em;
+  background: #eee;
+  border: 1px solid #bbb;
+}
+
 #debug-toolbar pre {
   margin: 0;
+  overflow: auto;
 }
 
 #debug-toolbar ul {
@@ -106,4 +111,8 @@
 #debug-toolbar li {
   margin: 0;
   padding: 0;
+}
+
+#debug-toolbar li li {
+  margin: 0.4em 0;
 }
