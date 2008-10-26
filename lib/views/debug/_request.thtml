@@ -1,18 +1,21 @@
 <?# $Id$ ?>
 <?
    $request = array(
-      'Request'    => h($_SERVER['REQUEST_URI']),
-      'Method'     => $_SERVER['REQUEST_METHOD'],
-      'Parameters' => dump(Dispatcher::$params),
+      'Request'        => ($_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.h($_SERVER['SERVER_NAME']).h($_SERVER['REQUEST_URI']),
+      'Client Address' => $_SERVER['REMOTE_ADDR'],
+      'Method'         => $_SERVER['REQUEST_METHOD'],
+      'Parameters'     => dump(Dispatcher::$params),
    );
+
+   if ($forward = $_SERVER['HTTP_X_FORWARDED_FOR']) {
+      $request['Client Address'] .= " (forwarded for $forward)";
+   }
 
    if ($_COOKIE) {
       $request['Cookies'] = dump($_COOKIE);
    }
 
    if (config('session_store')) {
-      $request['Session ID'] = session_id();
-
       if ($_SESSION) {
          $request['Session'] = dump($_SESSION);
       }

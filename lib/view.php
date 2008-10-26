@@ -152,7 +152,7 @@
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
          } else {
-            $partial = substr(dirname($this->_template), strlen(VIEWS)).'/_'.$partial;
+            $partial = substr(dirname(any($this->_template, $this->_partial)), strlen(VIEWS)).'/_'.$partial;
          }
 
          if (!$this->_partial = View::find_template($partial) and

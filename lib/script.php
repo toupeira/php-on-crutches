@@ -9,7 +9,7 @@
 
    require dirname(__FILE__).'/../config/environment.php';
 
-   $_LOGGER->level = LOG_DISABLED;
+   log_level_set(LOG_DISABLED);
    fake_request();
 
 ?>

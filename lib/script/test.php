@@ -15,9 +15,9 @@
 
    if (in_array('-v', $argv)) {
       array_remove($argv, '-v');
-      $_LOGGER->level = LOG_DEBUG;
+      log_level_set(LOG_DEBUG);
    } else {
-      $_LOGGER->level = LOG_DISABLED;
+      log_level_set(LOG_DISABLED);
    }
 
    $paths = find_tests(array_slice($argv, 1));

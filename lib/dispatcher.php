@@ -68,9 +68,14 @@
                # Print the output
                if (config('debug_toolbar')) {
                   # Add the debug toolbar if enabled
-                  $controller = new DebugController();
-                  $toolbar = $controller->perform('toolbar', array(true));
+                  $log_level = log_level();
+                  log_level_set(LOG_DISABLED);
+
+                  $view = new View();
+                  $toolbar = $view->render_partial('debug/toolbar');
                   print preg_replace('|(</body>)|', $toolbar.'\1', self::$controller->output);
+
+                  log_level_set($log_level);
                } else {
                   print self::$controller->output;
                }

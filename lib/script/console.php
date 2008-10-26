@@ -55,7 +55,7 @@
 
    require_once dirname(__FILE__).'/../script.php';
 
-   $_LOGGER->level = $log_level;
+   log_level_set($log_level);
 
    prompt("\n\n".`php -v`."\n");
    prompt("Loading [1m".ENVIRONMENT."[0m environment\n\n");

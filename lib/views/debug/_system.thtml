@@ -1,17 +1,17 @@
 <?# $Id$ ?>
 <?
    $system = array(
-      'Hostname'       => h(`hostname -f`),
-      'IP Address'     => $_SERVER['SERVER_ADDR'],
-      'Operating System'             => h(`uname -srmo`),
-      'PHP Version'    => PHP_VERSION.' ('.PHP_SAPI.')',
-      'Framework root' => ROOT,
-      'URL Prefix'     => Dispatcher::$prefix,
-      'URL Rewriting'  => config('rewrite_urls') ? 'enabled' : 'disabled',
-      'Session Store'  => config('session_store') ? config('session_store') : 'disabled',
-      'Cache Store'    => config('cache_store'),
-      'Environment'    => ENVIRONMENT,
-      'Memory Usage'   => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
+      'Hostname'         => h(`hostname -f`). '('.$_SERVER['SERVER_ADDR'].')',
+      'Operating System' => h(`uname -srmo`),
+      'Server Software'  => h($_SERVER['SERVER_SOFTWARE']),
+      'PHP Version'      => PHP_VERSION.' ('.PHP_SAPI.')',
+      'Environment'      => ENVIRONMENT,
+      'Framework root'   => ROOT,
+      'URL Prefix'       => Dispatcher::$prefix,
+      'URL Rewriting'    => config('rewrite_urls') ? 'enabled' : 'disabled',
+      'Session Store'    => config('session_store') ? config('session_store') : 'disabled',
+      'Cache Store'      => config('cache_store'),
+      'Memory Usage'     => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
    );
 ?>
 <span>System</span>

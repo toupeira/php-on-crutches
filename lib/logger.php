@@ -29,6 +29,10 @@
       }
    }
 
+   function log_level_set($level) {
+      return $GLOBALS['_LOGGER']->level = $level;
+   }
+
    class Logger extends Object
    {
       static protected $_messages;
