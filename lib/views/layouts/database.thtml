@@ -1,0 +1,69 @@
+<?# $Id$ ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title><?= $title ? strip_tags($title).' - ' : '' ?><?= $main_title ?></title>
+  <?= include_stylesheets('framework/scaffold').N ?>
+  <?= include_javascripts('framework/prototype') ?>
+  <style type="text/css">
+    body {
+      margin: 0;
+      padding: 0 1em;
+      background: white;
+      font-size: 9pt;
+      font-family: "Arial", sans-serif;
+    }
+
+    a {
+      color: #446e96;
+      padding: 0 0.2em;
+    }
+
+    a:hover {
+      color: white;
+      background: #446e96;
+    }
+
+    h1 {
+      margin: 1em 0;
+      color: #333;
+      font-family: "Arial", sans-serif;
+      font-size: 14pt;
+      border-bottom: 1px solid #ccc;
+    }
+
+    h1 a {
+      color: #333;
+      text-decoration: none;
+      padding: 0;
+    }
+
+    h1 a:hover {
+      color: black;
+      background: none;
+      text-decoration: underline;
+    }
+
+    table.scaffold-list {
+      font-size: 8.5pt;
+    }
+
+    div.scroll {
+      margin: 0 1em;
+      border-left: 1px solid #bbb;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+<h1><?= link_to('Database', ':/database') ?><?= $title ? " &#x25b8; $title" : '' ?></h1>
+
+<div id="content">
+<?= messages() ?>
+<?= $content_for_layout ?>
+</div>
+
+</body>
+</html>

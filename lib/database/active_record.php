@@ -165,6 +165,13 @@
          }
       }
 
+      # Automatic form fields based on database schema
+      function auto_field($key) {
+         $args = func_get_args();
+         $field = 'text_field';
+         return call_user_func_array(array($this, $field), $args);
+      }
+
       # Database specific validation checks
 
       function is_valid() {

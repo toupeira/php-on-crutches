@@ -24,9 +24,15 @@
       return $count == 1 ? "$count $singular" : "$count $plural";
    }
 
-   function truncate($text, $length=40) {
+   function truncate($text, $length=40, $add_title=false) {
       if (strlen($text) > $length) {
-         return substr($text, 0, $length)."...";
+         $truncated = substr($text, 0, $length)."...";
+
+         if ($add_title) {
+            $truncated = '<span title="'.h($text).'">'.$truncated.'</span>';
+         }
+
+         return $truncated;
       } else {
          return $text;
       }

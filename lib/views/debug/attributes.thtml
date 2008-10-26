@@ -1,0 +1,22 @@
+<table class="scaffold-list">
+<tr>
+   <th>Name</th>
+   <th>Type</th>
+   <th>Size</th>
+   <th>Null</th>
+   <th>Default</th>
+   <th>Primary Key</th>
+   <th>Unique</th>
+</tr>
+<? foreach ($attributes as $key => $options): ?>
+<tr>
+   <td><?= $key ?></td>
+   <td><?= $options['type'] ?></td>
+   <td><?= $options['size'] >= 0 ? $options['size'] : '-' ?></td>
+   <td><?= $options['null'] ? 'true' : 'false' ?></td>
+   <td><?= h($options['default']) ?></td>
+   <td><?= $options['key'] ? 'true' : 'false' ?></td>
+   <td><?= $options['unique'] ? 'true' : 'false' ?></td>
+</tr>
+<? endforeach ?>
+</table>

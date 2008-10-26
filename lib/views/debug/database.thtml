@@ -1,0 +1,6 @@
+<?# $Id$ ?>
+<ul>
+<? foreach ($models as $model): ?>
+   <li><?= link_to(h($model), ':/database/'.underscore($model)) ?></li>
+<? endforeach ?>
+</ul>

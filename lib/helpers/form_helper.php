@@ -12,7 +12,7 @@
    function form_tag($action=null, array $options=null) {
       $defaults = array(
          'action' => url_for(any($action, ltrim(Dispatcher::$path, '/'))),
-         'method' => 'POST', 'open' => true,
+         'method' => 'post', 'open' => true,
       );
 
       if (array_delete($options, 'multipart')) {
@@ -20,7 +20,7 @@
       }
 
       if ($options['method']) {
-         $options['method'] = strtoupper($options['method']);
+         $options['method'] = strtolower($options['method']);
       }
 
       return content_tag('form', null, $options, $defaults).N;

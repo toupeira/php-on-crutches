@@ -25,15 +25,18 @@
    class MissingTemplate extends NotFound {}
 
    class ValueError extends StandardError {
-      function __construct($value) {
-         parent::__construct("Invalid value '$value'");
+      function __construct($value, $message=null) {
+         parent::__construct(any($message, "Invalid value '$value'"));
       }
    }
 
    class TypeError extends StandardError {
-      function __construct($value) {
-         $type = (is_object($value) ? get_class($value) : gettype($value));
-         parent::__construct("Invalid argument of type '$type'");
+      function __construct($value, $message=null) {
+         if (!$message) {
+            $type = (is_object($value) ? get_class($value) : gettype($value));
+            $message = "Invalid argument of type '$type'";
+         }
+         parent::__construct($message);
       }
    }
 

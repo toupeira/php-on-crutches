@@ -263,7 +263,9 @@
       # Render an action
       function render($action, $layout=null) {
          if ($this->_output === null) {
-            if (strstr($action, '/') === false) {
+            if (is_array($action)) {
+               $template = '{'.implode(',', $action).'}';
+            } elseif (strstr($action, '/') === false) {
                $template = $this->_name.'/'.$action;
             } else {
                $template = $action;
@@ -441,6 +443,61 @@
 
          if (!empty($messages)) {
             $this->msg['error'] = $messages;
+         }
+      }
+
+      # Scaffold default model actions
+      function model($model, $action) {
+         if (is_subclass_of($model, ActiveRecord)) {
+            $args = array_slice(func_get_args(), 2);
+            if (is_array($args[count($args) - 1])) {
+               $options = array_pop($args);
+            }
+
+            $db = DB($model);
+            $model_key = underscore($model);
+            $this->set('model', $model_key);
+            $this->set('attributes', array_keys($db->attributes));
+
+            switch ($action) {
+               case 'index':
+                  if ($page_size = $options['page_size']) {
+                     $db->page_size = $page_size;
+                  }
+
+                  $this->set('items', $db->sorted->paginated);
+                  break;
+               case 'show':
+                  if ($item = $db->find($args[0])) {
+                     $this->set('item', $item);
+                  } else {
+                     throw new NotFound();
+                  }
+                  break;
+               case 'create':
+                  $item = new $model($this->params[$model_key]);
+                  $this->set('new_item', $item);
+
+                  if ($this->is_post() and $item->save()) {
+                     $this->msg['info'] = any(
+                        $options['msg_info'],
+                        sprintf(_("%s successfully created"), $model)
+                     );
+                     return $this->redirect_to(any($options['redirect_to'], ':'));
+                  }
+                  break;
+               case 'edit':
+                  break;
+               case 'destroy':
+                  break;
+               default:
+                  throw new ValueError("Invalid action '$action'");
+            }
+
+            $this->render(array($action, "scaffold/$action"));
+
+         } else {
+            throw new TypeError("Invalid model '$model'");
          }
       }
    }

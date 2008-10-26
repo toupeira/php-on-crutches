@@ -1,0 +1,17 @@
+<?= form_tag() ?>
+<table class="scaffold-form">
+<? foreach ($attributes as $key): ?>
+<tr>
+   <th><?= $new_item->label($key) ?></th>
+   <td><?= $new_item->auto_field($key) ?></td>
+</tr>
+<? endforeach ?>
+<tr>
+   <th></th>
+   <td>
+      <?= submit_button() ?>
+      <?= cancel_button(":/database/$model") ?>
+   </td>
+</tr>
+</table>
+<?= form_end() ?>

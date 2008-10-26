@@ -1,3 +1,8 @@
 <?# $Id$ ?>
-<span>Log: <?= count(Logger::messages()) ?> entries</span>
-<div><pre><?= colorize(h(implode("\n", (array) Logger::messages()))) ?></pre></div>
+<?
+   $messages = Logger::messages();
+?>
+<? if ($messages): ?>
+<span>Log: <?= count($messages) ?> entries</span>
+<div><pre><?= colorize(h(implode("\n", (array) $messages))) ?></pre></div>
+<? endif ?>

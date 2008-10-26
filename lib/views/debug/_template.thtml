@@ -17,5 +17,7 @@
 
    ksort($values);
 ?>
+<? if ($values): ?>
 <span>Template: <?= count($values) ?> values</span>
 <div><?= table_tag($values) ?></div>
+<? endif ?>
