@@ -1,0 +1,7 @@
+<?# $Id$ ?>
+<?
+   $headers = $_SERVER;
+   ksort($headers);
+?>
+<span>Headers</span>
+<div><?= table_tag($headers) ?></div>

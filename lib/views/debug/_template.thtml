@@ -1,0 +1,21 @@
+<?# $Id$ ?>
+<?
+   $values = array();
+   foreach (Dispatcher::$controller->view->data as $key => $value) {
+      if (is_array($value) or is_object($value)) {
+         $dump = dump($value);
+         $value = link_to(h((string) $value), '#', array(
+            'onclick' => '$(this.nextSibling).toggle(); return false'
+         ));
+         $value .= '<div style="display: none">'.$dump.'</div>';
+      } else {
+         $value = var_export($value, true);
+      }
+
+      $values[h($key)] = $value;
+   }
+
+   ksort($values);
+?>
+<span>Template: <?= count($values) ?> values</span>
+<div><?= table_tag($values) ?></div>

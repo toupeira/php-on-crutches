@@ -1,18 +1,22 @@
 <?# $Id$ ?>
 <?
    $request = array(
-      'Path'       => h($_SERVER['REQUEST_URI']),
+      'Request'    => h($_SERVER['REQUEST_URI']),
       'Method'     => $_SERVER['REQUEST_METHOD'],
-      'Parameters' => dump_colored(Dispatcher::$params),
+      'Parameters' => dump(Dispatcher::$params),
    );
 
    if ($_COOKIE) {
-      $request['Cookies'] = dump_colored($_COOKIE);
+      $request['Cookies'] = dump($_COOKIE);
    }
 
-   if ($_SESSION) {
-      $request['Session'] = dump_colored($_SESSION);
+   if (config('session_store')) {
+      $request['Session ID'] = session_id();
+
+      if ($_SESSION) {
+         $request['Session'] = dump($_SESSION);
+      }
    }
 ?>
-<span><a>Request: <?= h(Dispatcher::$path) ?></a></span>
+<span>Request: <?= h(Dispatcher::$path) ?></span>
 <div><?= table_tag($request) ?></div>

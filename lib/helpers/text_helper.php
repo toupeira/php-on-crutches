@@ -95,15 +95,15 @@
    define_default('MB', 1024 * KB);
    define_default('GB', 1024 * MB);
 
-   function format_size($size) {
+   function format_size($size, $format='d') {
       if ($size < KB) {
          return "$size Bytes";
       } elseif ($size < MB) {
-         return sprintf('%d KB', $size / KB);
+         return sprintf("%$format KB", $size / KB);
       } elseif ($size < GB) {
-         return sprintf('%d MB', $size / MB);
+         return sprintf("%$format MB", $size / MB);
       } else {
-         return sprintf('%d GB', $size / GB);
+         return sprintf("%$format GB", $size / GB);
       }
    }
 

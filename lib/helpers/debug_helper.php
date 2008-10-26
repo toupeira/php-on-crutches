@@ -9,11 +9,14 @@
 
    # Dump a value
    function dump($value) {
-      ob_start();
-      print_r($value);
-      $output = htmlspecialchars(ob_get_clean());
+      $output = htmlspecialchars(print_r($value, true));
       if (is_array($value)) {
-         $output = implode("\n", array_slice(explode("\n", $output), 1));
+         $lines = array_slice(explode("\n", $output), 2, -2);
+         $output = '';
+         foreach ($lines as $line) {
+            $output .= substr($line, 4)."\n";
+         }
+         #$output = implode("\n", array_slice(explode("\n", $output), 2, -2));
       }
 
       return "<pre>$output</pre>";

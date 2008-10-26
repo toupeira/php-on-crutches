@@ -6,52 +6,66 @@
   padding: 4px;
   background: #eee;
   border-top: 1px solid #ccc;
-  border-right: 1px solid #ccc;
   font-family: sans-serif !important;
   font-size: 11px !important;
+  z-index: 1000;
 }
 
 #debug-toolbar.disabled strong, #debug-toolbar.disabled span, #debug-toolbar.disabled div {
   display: none !important;
 }
 
-#debug-toolbar span {
-  padding: 5px;
-  border-left: 1px solid #ccc;
-}
-
-#debug-toolbar span, #debug-toolbar a {
-  color: #666 !important;
-  font-weight: bold !important;
-}
-
 #debug-toolbar a {
+  color: black !important;
+  font-weight: bold !important;
   border: none !important;
   background: none !important;
   text-decoration: none !important;
 }
 
-#debug-toolbar a:hover {
-  color: black !important;
-  background: none !important;
-  text-decoration: none !important;
+#debug-toolbar > span {
+  padding: 5px;
+  color: #666;
+  font-weight: bold;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  margin-right: -4px;
+  position: relative;
+  cursor: pointer;
+  z-index: 1001;
 }
 
-#debug-toolbar img {
+#debug-toolbar > span:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+#debug-toolbar > span.active {
+  color: black;
+  background: #ddd;
+  padding-top: 11px;
+  margin-right: -4px;
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  z-index: 1002;
+}
+
+#debug-toolbar > * > img {
   margin-bottom: -5px;
   border: none;
 }
 
-#debug-toolbar div {
+#debug-toolbar > div {
   display: none;
   position: fixed;
-  bottom: 22px;
-  max-width: 600px;
-  max-height: 600px;
+  bottom: 28px;
+  max-width: 60em;
+  right: 6px;
+  max-height: 50%;
   overflow: auto;
   padding: 4px;
-  background: #eee;
-  border: 1px solid #ccc;
+  background: #ddd;
+  border: 1px solid #aaa;
 }
 
 #debug-toolbar table {
@@ -64,13 +78,19 @@
   vertical-align: top;
   padding: 0.4em;
   padding-right: 1em;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #bbb;
+  border-right: 1px solid #bbb;
 }
 
 #debug-toolbar td {
   vertical-align: top;
   padding: 0.4em;
-  border-bottom: 1px solid #ccc;
+  width: 100%;
+  border-bottom: 1px solid #bbb;
+}
+
+#debug-toolbar td, #debug-toolbar code {
+  white-space: normal;
 }
 
 #debug-toolbar pre {

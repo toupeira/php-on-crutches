@@ -242,9 +242,7 @@
             return get_class($value);
          }
       } elseif (is_array($value)) {
-         ob_start();
-         print_r($value);
-         return trim(ob_get_clean());
+         return trim(print_r($value, true));
       } elseif (is_resource($value)) {
          ob_start();
          var_dump($value);

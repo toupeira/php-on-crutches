@@ -91,9 +91,7 @@
             }
 
             if (is_array($msg)) {
-               ob_start();
-               print_r($msg);
-               $msg = ob_get_clean();
+               $msg = print_r($msg, true);
             }
 
             if (config('debug')) {

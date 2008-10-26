@@ -5,5 +5,8 @@
 </a>
 <?= $this->render_partial('request') ?>
 <?= $this->render_partial('log') ?>
+<?= $this->render_partial('template') ?>
 <?= $this->render_partial('database') ?>
+<?= $this->render_partial('headers') ?>
+<?= $this->render_partial('system') ?>
 </div>

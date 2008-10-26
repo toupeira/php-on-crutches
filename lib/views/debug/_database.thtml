@@ -8,5 +8,5 @@
       }
    }
 ?>
-<span><a>DB: <?= Dispatcher::$db_queries ?> queries</a></span>
+<span>DB: <?= Dispatcher::$db_queries ?> queries</span>
 <div><?= list_tag($all_queries) ?></div>
