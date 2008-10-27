@@ -9,7 +9,7 @@
    <th>Unique</th>
 </tr>
 <? foreach ($attributes as $key => $options): ?>
-<tr>
+<tr class="<?= cycle() ?>">
    <td><?= $key ?></td>
    <td><?= $options['type'] ?></td>
    <td><?= $options['size'] >= 0 ? $options['size'] : '-' ?></td>

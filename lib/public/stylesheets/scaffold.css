@@ -8,6 +8,28 @@ table.scaffold-list {
   white-space: nowrap;
 }
 
+table.scaffold-list a {
+  color: #333;
+  font-weight: normal !important;
+  background: none !important;
+  text-decoration: none !important;
+  border: none !important;
+  border-bottom: 1px solid #ccc !important;
+}
+
+table.scaffold-list a:hover {
+  color: black;
+  border-color: black !important;
+}
+
+table.scaffold-list tr:hover {
+  background: #ccc !important;
+}
+
+table.scaffold-list tr.even {
+  background: #e3e3e3;
+}
+
 table.scaffold-list th, table.scaffold-list td {
   padding: 0.2em 2em 0.2em 0.4em;
   border: 1px solid #ccc;
@@ -18,14 +40,18 @@ table.scaffold-list th, table.scaffold-list td {
 table.scaffold-list th {
   padding: 0.4em;
   color: white;
-  background: #333;
+  background: #444;
   border-color: #999;
 }
 
 table.scaffold-list td {
 }
 
-table.scaffold-form th {
-  text-align: right;
+table.scaffold-list img {
+  margin-bottom: -4px;
 }
 
+table.scaffold-form th {
+  text-align: right;
+  padding: 0 0.5em;
+}

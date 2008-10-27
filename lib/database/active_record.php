@@ -168,8 +168,43 @@
       # Automatic form fields based on database schema
       function auto_field($key) {
          $args = func_get_args();
-         $field = 'text_field';
-         return call_user_func_array(array($this, $field), $args);
+
+         if (!$column = $this->mapper->attributes[$key]) {
+            throw new ValueError("Invalid attribute '$key'");
+         }
+
+         $options = array();
+
+         switch (array_shift(explode(' ', $column['type'], 2))) {
+            case 'integer':
+            case 'float':
+               $method = 'text_field';
+               break;
+            case 'bool':
+               $method = 'check_box';
+               break;
+            case 'string':
+               $method = 'text_field';
+               $options['maxlength'] = $column['size'];
+               $options['size'] = min(40, $column['size']);
+               break;
+            case 'text':
+               $method = 'text_area';
+               break;
+            case 'date':
+               $method = 'date_field';
+               break;
+            case 'datetime';
+               $method = 'text_field';
+               $options['size'] = $options['maxlength'] = strlen($this->$key);
+               break;
+            default:
+               throw new NotImplemented("Unsupported column type '{$column['type']}'");
+         }
+
+         $args[] = $options;
+
+         return call_user_func_array(array($this, $method), $args);
       }
 
       # Database specific validation checks

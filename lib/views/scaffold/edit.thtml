@@ -1,0 +1,3 @@
+<?# $Id$ ?>
+<h3><?= sprintf(_("Edit %s #%d"), _(humanize($model)), $object->id) ?></h3>
+<?= $this->render_partial('form') ?>

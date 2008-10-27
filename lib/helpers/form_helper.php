@@ -101,7 +101,7 @@
 
    function text_area($key, $value=null, array $options=null) {
       return form_element('textarea', $key, $value, $options, array(
-         'cols' => 40, 'rows' => 5
+         'cols' => 50, 'rows' => 8
       ));
    }
 
@@ -156,7 +156,11 @@
    }
 
    function date_field($key, $value, array $options) {
-      list($year, $month, $day) = explode('-', strftime('%Y-%m-%d'), 3);
+      if (!is_numeric($value)) {
+         $value = strtotime($value);
+      }
+
+      list($year, $month, $day) = explode('-', strftime('%Y-%m-%d', $value), 3);
 
       $years = any(array_delete($options, 'years'), range($year + 25, $year - 100));
       $months = any(array_delete($options, 'months'), range(1, 12));

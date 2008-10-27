@@ -28,6 +28,7 @@
                $this->model(camelize($model), $action, $id, array(
                   'page_size'   => 20,
                   'redirect_to' => ":/database/$model",
+                  'template'    => array("debug/database/$action", "scaffold/$action"),
                ));
             }
          } else {
@@ -40,13 +41,13 @@
             $models = array();
             foreach (get_declared_classes() as $class) {
                if (is_subclass_of($class, ActiveRecord)) {
-                  $models[] = $class;
+                  $models[DB($class)->connection->name][$class] = DB($class)->count;
                }
             }
 
             $this->set('title', 'Models');
-            $this->set('models', $models);
-            $this->render('debug/database/index');
+            $this->set('databases', $models);
+            $this->render('debug/database/models');
          }
       }
    }

@@ -146,10 +146,17 @@
             case 'varchar':
                $type = 'string';
                break;
+            case 'bool':
+               $type = 'bool';
+               break;
             case 'int':
             case 'tinyint':
             case 'bigint':
-               $type = 'integer';
+               if ($size > 1) {
+                  $type = 'integer';
+               } else {
+                  $type = 'bool';
+               }
                break;
             case 'double':
                $type = 'float';

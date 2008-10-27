@@ -457,7 +457,7 @@
             $db = DB($model);
             $model_key = underscore($model);
             $this->set('model', $model_key);
-            $this->set('attributes', array_keys($db->attributes));
+            $attributes = array_keys($db->attributes);
 
             switch ($action) {
                case 'index':
@@ -465,36 +465,76 @@
                      $db->page_size = $page_size;
                   }
 
-                  $this->set('items', $db->sorted->paginated);
+                  $this->set('objects', $db->sorted->paginated);
                   break;
                case 'show':
-                  if ($item = $db->find($args[0])) {
-                     $this->set('item', $item);
+                  if ($object = $db->find((int) $args[0])) {
+                     $this->set('object', $object);
                   } else {
                      throw new NotFound();
                   }
                   break;
                case 'create':
-                  $item = new $model($this->params[$model_key]);
-                  $this->set('new_item', $item);
+                  $object = new $model($this->params[$model_key]);
+                  $this->set('object', $object);
+                  array_remove($attributes, array('created_at', 'updated_at'));
 
-                  if ($this->is_post() and $item->save()) {
+                  if ($this->is_post() and $object->save()) {
                      $this->msg['info'] = any(
-                        $options['msg_info'],
+                        $options['message'],
                         sprintf(_("%s successfully created"), $model)
                      );
                      return $this->redirect_to(any($options['redirect_to'], ':'));
                   }
                   break;
                case 'edit':
+                  if ($object = $db->find((int) $args[0])) {
+                     $this->set('object', $object);
+
+                     if ($this->is_post() and $object->update($this->params[$model_key])) {
+                        $this->msg['info'] = any(
+                           $options['message'],
+                           sprintf(_("%s successfully updated"), $model)
+                        );
+                        return $this->redirect_to(any($options['redirect_to'], ':'));
+                     }
+                  } else {
+                     $this->msg['error'] = any(
+                        $options['error'],
+                        sprintf(_("Couldn't find %s #%d"), $model, $args[0])
+                     );
+                     return $this->redirect_to(any($options['redirect_to'], ':'));
+                  }
                   break;
                case 'destroy':
+                  if ($object = $db->find((int) $args[0])) {
+                     try {
+                        $object->destroy();
+                        $this->msg['info'] = any(
+                           $options['message'],
+                           sprintf(_("%s successfully deleted"), $model)
+                        );
+                     } catch (PDOException $e) {
+                        $this->msg['error'] = any(
+                           $options['error'],
+                           sprintf(_("Couldn't delete %s #%d"), $model, $args[0])
+                        );
+                     }
+                  } else {
+                     $this->msg['error'] = any(
+                        $options['error'],
+                        sprintf(_("Couldn't find %s #%d"), $model, $args[0])
+                     );
+                  }
+
+                  return $this->redirect_to(any($options['redirect_to'], ':'));
                   break;
                default:
                   throw new ValueError("Invalid action '$action'");
             }
 
-            $this->render(array($action, "scaffold/$action"));
+            $this->set('attributes', $attributes);
+            $this->render(any($options['template'], array($action, "scaffold/$action")));
 
          } else {
             throw new TypeError("Invalid model '$model'");

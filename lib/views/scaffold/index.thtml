@@ -1,24 +1,22 @@
 <?# $Id$ ?>
 <p>
-   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":/database/$model/create") ?>
-   <?= link_to("Show attributes", ":/database/$model/attributes") ?>
+   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":/create") ?>
 </p>
-<div class="scroll">
 <table class="scaffold-list">
 <tr>
 <? foreach ($attributes as $key): ?>
    <th><?= _(humanize($key)) ?></th>
 <? endforeach ?>
 </tr>
-<? foreach ($items as $item): ?>
-<tr>
+<? foreach ($objects as $object): ?>
+<tr class="<?= cycle() ?>">
 <?    foreach ($attributes as $key): ?>
-   <td><?= truncate(h($item->$key), 40, true) ?></td>
+   <td><?= link_to(truncate(h($object->$key), 40, true), ":/edit/{$object->id}") ?></td>
 <?    endforeach ?>
 </tr>
 <? endforeach ?>
 </table>
 </div>
 <p>
-   Page <?= page_links($items) ?>
+   Page <?= page_links($objects) ?>
 </p>

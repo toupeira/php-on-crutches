@@ -6,9 +6,12 @@
   padding: 4px;
   background: #eee;
   border-top: 1px solid #ccc;
-  font-family: sans-serif !important;
-  font-size: 11px !important;
+  font-family: "Arial", sans-serif !important;
   z-index: 1000;
+}
+
+#debug-toolbar, #debug-toolbar * {
+  font-size: 11px !important;
 }
 
 #debug-toolbar.disabled strong, #debug-toolbar.disabled span, #debug-toolbar.disabled div {
@@ -43,7 +46,7 @@
 #debug-toolbar > span.active {
   color: black;
   background: #ddd;
-  padding-top: 11px;
+  padding-top: 12px;
   margin-right: -4px;
   border-left: 1px solid #aaa;
   border-right: 1px solid #aaa;
@@ -105,7 +108,8 @@
 #debug-toolbar ul {
   margin: 0;
   padding: 0 0 0 1.5em;
-  list-style-type: square;
+  list-style-type: square !important;
+  list-style-image: none;
 }
 
 #debug-toolbar li {

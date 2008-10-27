@@ -26,7 +26,7 @@
 
    function truncate($text, $length=40, $add_title=false) {
       if (strlen($text) > $length) {
-         $truncated = substr($text, 0, $length)."...";
+         $truncated = mb_substr($text, 0, $length)."...";
 
          if ($add_title) {
             $truncated = '<span title="'.h($text).'">'.$truncated.'</span>';
@@ -128,10 +128,15 @@
       return str_replace("<br />", "\n", $text);
    }
 
-   function cycle($values) {
+   function cycle($values=null) {
       static $_cycle;
 
-      $values = func_get_args();
+      if ($values) {
+         $values = func_get_args();
+      } else {
+         $values = array('odd', 'even');
+      }
+
       $value = $values[intval($_cycle)];
       if (++$_cycle >= count($values)) {
          $_cycle = 0;
