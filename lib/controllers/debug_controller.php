@@ -10,9 +10,10 @@
    class DebugController extends Controller
    {
       protected $_require_trusted = true;
+      protected $_layout = 'debug';
 
       function database($model=null, $action='index', $id=null) {
-         $this->view->layout = 'database';
+         $this->set('section', 'Database Browser');
 
          if ($model and $action) {
             $title = link_to(humanize($model), ":/database/$model");
