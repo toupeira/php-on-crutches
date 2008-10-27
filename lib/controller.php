@@ -177,7 +177,7 @@
                         ($hosts = $this->_require_trusted['all'])) and
                            !in_array($_SERVER['REMOTE_ADDR'], (array) $hosts)
          ) {
-            $error = 'untrusted host';
+            $error = "untrusted host {$_SERVER['REMOTE_ADDR']}";
          }
 
          if ($error) {
