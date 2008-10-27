@@ -447,7 +447,7 @@
       }
 
       # Scaffold default model actions
-      function model($model, $action) {
+      function model($model, $action='list') {
          if (is_subclass_of($model, ActiveRecord)) {
             $args = array_slice(func_get_args(), 2);
             if (is_array($args[count($args) - 1])) {
@@ -460,7 +460,7 @@
             $attributes = array_keys($db->attributes);
 
             switch ($action) {
-               case 'index':
+               case 'list':
                   if ($page_size = $options['page_size']) {
                      $db->page_size = $page_size;
                   }

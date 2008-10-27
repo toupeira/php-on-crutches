@@ -12,15 +12,27 @@
       protected $_require_trusted = true;
       protected $_layout = 'debug';
 
-      function database($model=null, $action='index', $id=null) {
-         $this->set('section', 'Database Browser');
+      function php() {
+         if ($this->is_ajax()) {
+         } else {
+            $this->set('title', 'PHP Console');
+         }
+      }
+
+      function sql() {
+         if ($this->is_ajax()) {
+         } else {
+            $this->set('title', 'SQL Console');
+         }
+      }
+
+      function models($model=null, $action='index', $id=null) {
+         $this->set('title', 'Database Browser');
 
          if ($model and $action) {
             $title = link_to(humanize($model), ":/database/$model");
-            if ($action != 'index') {
-               $title .= ' <dfn>&#x25b8;</dfn> '.humanize($action);
-            }
-            $this->set('title', $title);
+            $title .= ' <dfn>&#x25b8;</dfn> '.humanize($action);
+            $this->set('subtitle', $title);
 
             if ($action == 'attributes') {
                $this->set('attributes', DB(camelize($model))->attributes);
@@ -29,7 +41,7 @@
                $this->model(camelize($model), $action, $id, array(
                   'page_size'   => 20,
                   'redirect_to' => ":/database/$model",
-                  'template'    => array("debug/database/$action", "scaffold/$action"),
+                  'template'    => array("debug/models/$action", "scaffold/$action"),
                ));
             }
          } else {
@@ -46,9 +58,9 @@
                }
             }
 
-            $this->set('title', 'Models');
+            $this->set('subtitle', 'Models');
             $this->set('databases', $models);
-            $this->render('debug/database/models');
+            $this->render('debug/models/index');
          }
       }
    }
