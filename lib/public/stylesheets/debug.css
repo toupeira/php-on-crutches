@@ -18,6 +18,10 @@
   display: none !important;
 }
 
+#debug-toolbar.disabled {
+  border-right: 1px solid #ccc;
+}
+
 #debug-toolbar a {
   color: black !important;
   font-weight: bold !important;

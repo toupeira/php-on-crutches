@@ -1,5 +1,5 @@
 <div id="debug-toolbar">
-<a href="#" onclick="$('debug-toolbar').toggleClassName('disabled'); return false">
+<a href="#" title="Toggle Debug Toolbar" onclick="$('debug-toolbar').toggleClassName('disabled'); return false">
    <?= image_tag('framework/icons/debug.png') ?>
    <strong>Debug</strong>
 </a>
