@@ -1,29 +1,14 @@
 <?# $Id$ ?>
-<p>
-   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":/database/$model/create") ?>
-   <?= link_to("Show attributes", ":/database/$model/attributes") ?>
-</p>
-<div class="scroll">
 <table class="scaffold-list">
+<? foreach ($databases as $database => $models): ?>
 <tr>
-<? foreach ($attributes as $key): ?>
-   <th><?= _(humanize($key)) ?></th>
-<? endforeach ?>
+   <th colspan="2"><?= h($database) ?></th>
 </tr>
-<? foreach ($objects as $object): ?>
+<? foreach ($models as $model => $count): ?>
 <tr class="<?= cycle() ?>">
-<?    foreach ($attributes as $key): ?>
-<td>
-<? if (is_null($value = $object->$key)): ?>
-   <em>null</em>
-<? elseif ($value !== ''): ?>
-   <?= link_to(truncate(h($object->$key), 40, true), ":/database/$model/edit/{$object->id}") ?>
-<? endif ?>
-<?    endforeach ?>
+   <td><?= image_tag('framework/icons/debug.png') ?> <?= link_to(h($model), ':/models/'.underscore($model)) ?></td>
+   <td><?= pluralize($count, 'record', 'records') ?></td>
 </tr>
+<? endforeach ?>
 <? endforeach ?>
 </table>
-</div>
-<p>
-   Page <?= page_links($objects) ?>
-</p>

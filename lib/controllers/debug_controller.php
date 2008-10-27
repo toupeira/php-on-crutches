@@ -26,7 +26,7 @@
          }
       }
 
-      function models($model=null, $action='index', $id=null) {
+      function models($model=null, $action='list', $id=null) {
          $this->set('title', 'Database Browser');
 
          if ($model and $action) {
