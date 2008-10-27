@@ -22,4 +22,4 @@
    }
 ?>
 <span>Request: <?= h(Dispatcher::$path) ?></span>
-<div><?= table_tag($request) ?></div>
+<div><?= table_tag($request, array('escape' => false)) ?></div>

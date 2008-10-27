@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <p>
-   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":/models/$model/create") ?>
-   <?= link_to("Show attributes", ":/models/$model/attributes") ?>
+   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":$prefix/create") ?>
+   <?= link_to("Show attributes", ":$prefix/attributes") ?>
 </p>
 <div class="scroll">
 <table class="scaffold-list">
@@ -17,13 +17,15 @@
 <? if (is_null($value = $object->$key)): ?>
    <em>null</em>
 <? elseif ($value !== ''): ?>
-   <?= link_to(truncate(h($object->$key), 40, true), ":/models/$model/edit/{$object->id}") ?>
+   <?= link_to(truncate(h($object->$key), 40, true), ":$prefix/show/{$object->id}") ?>
 <? endif ?>
 <?    endforeach ?>
 </tr>
 <? endforeach ?>
 </table>
 </div>
+<? if ($objects->pages > 1): ?>
 <p>
    Page <?= page_links($objects) ?>
 </p>
+<? endif ?>

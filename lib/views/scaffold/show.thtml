@@ -1,2 +1,7 @@
-<h3><?= _(humanize($model)) ?> #<?= $object->id ?></h3>
-<?= table_tag($object->attributes, array('class' => 'scaffold-list')) ?>
+<p>
+   <?= link_to(_("Index"), ":$prefix") ?>
+   <?= link_to(sprintf(_("Edit %s"), _(humanize($model))), ":$prefix/edit/{$object->id}") ?>
+   <?= link_to(sprintf(_("Delete %s"), _(humanize($model))), ":$prefix/destroy/{$object->id}",
+               array('post' => true)) ?>
+</p>
+<?= table_tag($data, array('class' => 'scaffold-show', 'escape' => false)) ?>

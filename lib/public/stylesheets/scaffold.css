@@ -51,6 +51,29 @@ table.scaffold-list img {
   margin-bottom: -4px;
 }
 
+table.scaffold-show {
+  border-collapse: collapse;
+  border-bottom: hidden;
+}
+
+table.scaffold-show th, table.scaffold-show td {
+  padding: 0.4em;
+  vertical-align: top;
+  border-bottom: 1px solid #ccc;
+}
+
+table.scaffold-show th {
+  padding: 0.4em 0.8em;
+  text-align: right;
+  border-right: 1px solid #ccc;
+}
+
+table.scaffold-show td div {
+  min-width: 30em;
+  max-height: 20em;
+  overflow-y: auto;
+}
+
 table.scaffold-form th {
   text-align: right;
   padding: 0 0.5em;

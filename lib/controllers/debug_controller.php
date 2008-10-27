@@ -27,20 +27,25 @@
       }
 
       function models($model=null, $action='list', $id=null) {
-         $this->set('title', 'Database Browser');
+         $this->set('title', 'Model Browser');
 
          if ($model and $action) {
-            $title = link_to(humanize($model), ":/database/$model");
-            $title .= ' <dfn>&#x25b8;</dfn> '.humanize($action);
+            $title = link_to(humanize($model), ":/models/$model");
+            if ($action == 'show' or $action == 'edit') {
+               $title .= ' <dfn>&#x25b8;</dfn> #'.$id;
+            }
+            if ($action != 'list' and $action != 'show') {
+               $title .= ' <dfn>&#x25b8;</dfn> '.humanize($action);
+            }
             $this->set('subtitle', $title);
 
             if ($action == 'attributes') {
                $this->set('attributes', DB(camelize($model))->attributes);
-               $this->render('debug/database/attributes');
+               $this->render('debug/models/attributes');
             } else {
                $this->model(camelize($model), $action, $id, array(
                   'page_size'   => 20,
-                  'redirect_to' => ":/database/$model",
+                  'path_prefix' => "/models/$model",
                   'template'    => array("debug/models/$action", "scaffold/$action"),
                ));
             }
@@ -58,7 +63,6 @@
                }
             }
 
-            $this->set('subtitle', 'Models');
             $this->set('databases', $models);
             $this->render('debug/models/index');
          }

@@ -190,6 +190,8 @@
                break;
             case 'text':
                $method = 'text_area';
+               $options['cols'] = 84;
+               $options['rows'] = 12;
                break;
             case 'date':
                $method = 'date_field';

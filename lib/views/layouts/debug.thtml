@@ -9,7 +9,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><?= $section ?> <?= strip_tags($subtitle) ?></title>
+  <title><?= $title ?> <?= strip_tags($subtitle) ?></title>
   <?= include_stylesheets('framework/scaffold') ?>
   <?= include_javascripts('framework/prototype') ?>
   <style type="text/css">
@@ -98,7 +98,7 @@
 <body>
 <h1>
    <?= image_tag('framework/icons/debug.png') ?>
-   <?= link_to($section, ":/$action") ?><?= $title ?>
+   <?= link_to($title, ":/$action") ?><?= $subtitle ?>
 </h1>
 <?= messages() ?>
 <?= $content_for_layout ?>

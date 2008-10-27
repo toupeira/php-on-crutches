@@ -11,7 +11,7 @@
    <th></th>
    <td>
       <?= submit_button() ?>
-      <?= cancel_button(":/database/$model") ?>
+      <?= cancel_button(any($options['redirect_to'], ":$prefix/show/{$object->id}")) ?>
    </td>
 </tr>
 </table>

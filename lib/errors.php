@@ -10,19 +10,10 @@
    # Base class for all custom exceptions
    class StandardError extends ErrorException {}
 
-   # PHP errors
+   # PHP exceptions
    class SyntaxError extends StandardError {}
    class RuntimeError extends StandardError {}
    class FatalError extends RuntimeError {}
-
-   # Framework exceptions
-   class ApplicationError extends StandardError {}
-   class NotImplemented extends ApplicationError {}
-   class ConfigurationError extends ApplicationError {}
-   class MailerError extends ApplicationError {}
-   class NotFound extends ApplicationError {}
-   class RoutingError extends NotFound {}
-   class MissingTemplate extends NotFound {}
 
    class ValueError extends StandardError {
       function __construct($value, $message=null) {
@@ -47,6 +38,21 @@
          }
 
          parent::__construct("Call to undefined method $class#$method()");
+      }
+   }
+
+   # Framework exceptions
+   class ApplicationError extends StandardError {}
+   class NotImplemented extends ApplicationError {}
+   class ConfigurationError extends ApplicationError {}
+   class MailerError extends ApplicationError {}
+   class NotFound extends ApplicationError {}
+   class RoutingError extends NotFound {}
+   class MissingTemplate extends NotFound {}
+
+   class InvalidRequest extends ApplicationError {
+      function __construct($error) {
+         parent::__construct("Invalid request for this action: $error");
       }
    }
 

@@ -181,10 +181,8 @@
          }
 
          if ($error) {
-            $message = "Invalid request for this action: $error";
-
             if (config('debug')) {
-               throw new ApplicationError($message);
+               throw new InvalidRequest($error);
             } else {
                log_warn($message);
                if ($action == 'index' or !method_exists($this, 'index')) {
@@ -452,12 +450,17 @@
             $args = array_slice(func_get_args(), 2);
             if (is_array($args[count($args) - 1])) {
                $options = array_pop($args);
+               $this->set('options', $options);
             }
 
             $db = DB($model);
             $model_key = underscore($model);
             $this->set('model', $model_key);
             $attributes = array_keys($db->attributes);
+
+            # Use a path prefix for all redirects
+            $prefix = $options['path_prefix'];
+            $this->set('prefix', $prefix);
 
             switch ($action) {
                case 'list':
@@ -469,7 +472,13 @@
                   break;
                case 'show':
                   if ($object = $db->find((int) $args[0])) {
+                     $data = array();
+                     foreach ($object->attributes as $key => $value) {
+                        $data[h(_(humanize($key)))] = '<div>'.nl2br(h($value)).'<div>';
+                     }
+
                      $this->set('object', $object);
+                     $this->set('data', $data);
                   } else {
                      throw new NotFound();
                   }
@@ -477,14 +486,14 @@
                case 'create':
                   $object = new $model($this->params[$model_key]);
                   $this->set('object', $object);
-                  array_remove($attributes, array('created_at', 'updated_at'));
+                  array_remove($attributes, array('created_at', 'updated_at', $db->primary_key));
 
                   if ($this->is_post() and $object->save()) {
                      $this->msg['info'] = any(
                         $options['message'],
                         sprintf(_("%s successfully created"), $model)
                      );
-                     return $this->redirect_to(any($options['redirect_to'], ':'));
+                     return $this->redirect_to(any($options['redirect_to'], ":$prefix/show/{$object->id}"));
                   }
                   break;
                case 'edit':
@@ -496,17 +505,21 @@
                            $options['message'],
                            sprintf(_("%s successfully updated"), $model)
                         );
-                        return $this->redirect_to(any($options['redirect_to'], ':'));
+                        return $this->redirect_to(any($options['redirect_to'], ":$prefix/show/{$object->id}"));
                      }
                   } else {
                      $this->msg['error'] = any(
                         $options['error'],
                         sprintf(_("Couldn't find %s #%d"), $model, $args[0])
                      );
-                     return $this->redirect_to(any($options['redirect_to'], ':'));
+                     return $this->redirect_to(any($options['redirect_to'], ":$prefix"));
                   }
                   break;
                case 'destroy':
+                  if (!$this->is_post()) {
+                     throw new InvalidRequest('needs POST');
+                  }
+
                   if ($object = $db->find((int) $args[0])) {
                      try {
                         $object->destroy();
@@ -527,7 +540,7 @@
                      );
                   }
 
-                  return $this->redirect_to(any($options['redirect_to'], ':'));
+                  return $this->redirect_to(any($options['redirect_to'], ":$prefix"));
                   break;
                default:
                   throw new ValueError("Invalid action '$action'");

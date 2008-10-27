@@ -1,6 +1,6 @@
 <?# $Id$ ?>
 <p>
-   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":/create") ?>
+   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":$prefix/create") ?>
 </p>
 <table class="scaffold-list">
 <tr>
@@ -11,12 +11,14 @@
 <? foreach ($objects as $object): ?>
 <tr class="<?= cycle() ?>">
 <?    foreach ($attributes as $key): ?>
-   <td><?= link_to(truncate(h($object->$key), 40, true), ":/edit/{$object->id}") ?></td>
+   <td><?= link_to(truncate(h($object->$key), 40, true), ":$prefix/show/{$object->id}") ?></td>
 <?    endforeach ?>
 </tr>
 <? endforeach ?>
 </table>
 </div>
+<? if ($objects->pages > 1): ?>
 <p>
    Page <?= page_links($objects) ?>
 </p>
+<? endif ?>

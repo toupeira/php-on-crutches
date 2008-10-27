@@ -64,7 +64,7 @@
 
 #debug-toolbar > div {
   display: none;
-  position: fixed;
+  position: fixed !important;
   bottom: 28px;
   max-width: 60em;
   right: 6px;

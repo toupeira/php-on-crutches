@@ -8,8 +8,18 @@
 #
 
    function table_tag(array $items, array $options=null) {
+      $escape = true;
+      if (isset($options['escape'])) {
+         $escape = $options['escape'];
+         unset($options['escape']);
+      }
+
       $html = '';
       foreach ((array) $items as $key => $value) {
+         if ($escape) {
+            $key = h($key);
+            $value = h($value);
+         }
          $html .= "<tr><th>$key</th><td>$value</td></tr>";
       }
 

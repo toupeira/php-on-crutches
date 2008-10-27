@@ -14,7 +14,7 @@
          if (is_array($data) and $data) {
             foreach ($data as $key => $value) {
                if ($value and !is_array($value)) {
-                  $values[] = "$key: '$value'";
+                  $values[] = $key.': '.truncate($value);
                }
             }
 

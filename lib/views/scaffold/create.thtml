@@ -1,3 +1,2 @@
 <?# $Id$ ?>
-<h3><?= sprintf(_("Create new %s"), _(humanize($model))) ?></h3>
 <?= $this->render_partial('form') ?>

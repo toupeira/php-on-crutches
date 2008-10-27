@@ -17,8 +17,8 @@
 
       $start = max(1, $current - 5);
       $end = min($pages, $current + 5);
-      if ($start == 1) $end = 11;
-      if ($end == $pages) $start = $pages - 10;
+      if ($start == 1) $end = min($pages, 11);
+      if ($end == $pages) $start = max(1, $pages - 10);
 
       $links = array();
       for ($page = $start; $page <= $end; $page++) {

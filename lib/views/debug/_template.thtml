@@ -9,7 +9,7 @@
          ));
          $value .= '<div style="display: none">'.$dump.'</div>';
       } else {
-         $value = var_export($value, true);
+         $value = h(var_export($value, true));
       }
 
       $values[h($key)] = $value;
@@ -19,5 +19,5 @@
 ?>
 <? if ($values): ?>
 <span>Template: <?= count($values) ?> values</span>
-<div><?= table_tag($values) ?></div>
+<div><?= table_tag($values, array('escape' => false)) ?></div>
 <? endif ?>
