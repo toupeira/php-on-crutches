@@ -2,9 +2,14 @@ label {
   cursor: pointer;
 }
 
+table .blank, table .blank * {
+  background: none !important;
+  border: none !important;
+  height: 1.2em;
+}
+
 table.scaffold-list {
   border-collapse: collapse;
-  background: #eee;
   white-space: nowrap;
 }
 
@@ -22,12 +27,16 @@ table.scaffold-list a:hover {
   border-color: black !important;
 }
 
-table.scaffold-list tr:hover {
-  background: #ccc !important;
+table.scaffold-list tr {
+  background: #eee;
 }
 
 table.scaffold-list tr.even {
   background: #e3e3e3;
+}
+
+table.scaffold-list tr:hover {
+  background: #ccc;
 }
 
 table.scaffold-list th, table.scaffold-list td {
