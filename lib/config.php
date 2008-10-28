@@ -86,7 +86,7 @@
       $config = &$GLOBALS['_CONFIG'];
 
       if (!array_key_exists($key, $config)) {
-         if (substr($key, 0, 6) == 'debug_' and !$config['debug']) {
+         if (substr($key, 0, 6) == 'debug_' and !$config['application']['debug']) {
             return false;
          } else {
             return $config['application'][$key];
