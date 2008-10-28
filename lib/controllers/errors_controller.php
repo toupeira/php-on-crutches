@@ -19,7 +19,10 @@
          if (config('debug') and $exception instanceof Exception) {
             $this->show_debug($exception);
          } else {
-            if ($exception == 404 or $exception instanceof NotFound) {
+            if ($exception == 400 or $exception instanceof InvalidRequest) {
+               $status = 400;
+               $text = 'Bad Request';
+            } elseif ($exception == 404 or $exception instanceof NotFound) {
                $status = 404;
                $text = 'Not Found';
             } else {

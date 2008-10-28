@@ -149,35 +149,54 @@
 
       # Check request requirements
       function is_valid_request($action) {
-         if (
-            # Check for POST requirements
-            (!$this->is_post() and
+         # Check for POST requirements
+         if ((!$this->is_post() and
                ($this->_require_post === true or
-                  in_array($action, (array) $this->_require_post)))
-         ) {
+                  in_array($action, (array) $this->_require_post))))
+         {
             $error = 'needs POST';
          }
 
 
-            # Check for Ajax requirements
+         # Check for Ajax requirements
          if (!$this->is_ajax() and
                ($this->_require_ajax === true or
-                  in_array($action, (array) $this->_require_ajax))
-         ) {
+                  in_array($action, (array) $this->_require_ajax)))
+         {
             $error = 'needs Ajax';
          }
 
-            # Check for trusted host requirements
-         if ((($hosts = config('trusted_hosts') and
-               # Use default hosts
-               ($this->_require_trusted === true or
-                  in_array($action, (array) $this->_require_trusted))) or
-                     # Use specified hosts
-                     ($hosts = $this->_require_trusted[$action]) or
-                        ($hosts = $this->_require_trusted['all'])) and
-                           !in_array($_SERVER['REMOTE_ADDR'], (array) $hosts)
-         ) {
-            $error = "untrusted host {$_SERVER['REMOTE_ADDR']}";
+         # Check for trusted host requirements
+         if ($this->_require_trusted === true or
+               in_array($action, (array) $this->_require_trusted) or
+                  array_key_exists($action, (array) $this->_require_trusted))
+         {
+            $hosts = any(
+               $this->_require_trusted[$action],
+               $this->_require_trusted['all'],
+               config('trusted_hosts')
+            );
+
+            if (empty($hosts)) {
+               throw new ConfigurationError('No hosts given');
+            }
+
+            $client = $_SERVER['REMOTE_ADDR'];
+            $found = false;
+            foreach ($hosts as $host) {
+               $host = strtr($host, array(
+                  '*' => '[0-9]+',
+                  '.' => '\\.',
+               ));
+               if (preg_match("/^$host$/", $client)) {
+                  $found = true;
+                  break;
+               }
+            }
+
+            if (!$found) {
+               $error = "untrusted host $client";
+            }
          }
 
          if ($error) {
