@@ -144,6 +144,18 @@
       return $value;
    }
 
+   function syntax_highlight($code, $lang='php') {
+      switch ($lang) {
+         case 'php':
+            return strtr(highlight_string("<? $code ?>", true), array(
+               '&lt;?&nbsp;' => '',
+               '?&gt;'       => '',
+            ));
+         default:
+            throw new NotImplemented("Unsupported language '$lang'");
+      }
+   }
+
    function colorize($text) {
       return strtr(str_replace('[0;', '[1;', $text), array(
          '[1;31m' => '<strong style="color: red">',

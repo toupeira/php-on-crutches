@@ -1,2 +1,5 @@
 <?# $Id$ ?>
+<p>
+   <?= link_to(_("Index"), ":$prefix") ?>
+</p>
 <?= $this->render_partial('form') ?>

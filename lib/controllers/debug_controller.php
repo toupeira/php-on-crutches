@@ -13,7 +13,15 @@
       protected $_layout = 'debug';
 
       function php() {
-         if ($this->is_ajax()) {
+         if ($this->is_post() or $this->is_ajax('post')) {
+            $input = $this->params['input'];
+            $code = syntax_highlight($input);
+
+            ob_start();
+            eval("$input;");
+            $output = syntax_highlight(ob_get_clean());
+
+            $this->set('output', "$code<br />&nbsp;=&gt; $output");
          } else {
             $this->set('title', 'PHP Console');
          }

@@ -138,7 +138,11 @@
       }
 
       # Check if this is an Ajax request
-      function is_ajax() {
+      function is_ajax($method=null) {
+         if ($method and $_SERVER['REQUEST_METHOD'] != strtoupper($method)) {
+            return false;
+         }
+
          return strstr($_SERVER['HTTP_X_REQUESTED_WITH'], 'XMLHttpRequest');
       }
 

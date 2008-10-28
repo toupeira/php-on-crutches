@@ -63,6 +63,10 @@
          return $this->_attributes[$this->mapper->primary_key];
       }
 
+      function get_exists() {
+         return !$this->_new_record;
+      }
+
       function get_new_record() {
          return $this->_new_record;
       }

@@ -1,2 +1,8 @@
 <?# $Id$ ?>
+<p>
+   <?= link_to(_("Index"), ":$prefix") ?>
+   <?= link_to(sprintf(_("Show %s"), _(humanize($model))), ":$prefix/show/{$object->id}") ?>
+   <?= link_to(sprintf(_("Delete %s"), _(humanize($model))), ":$prefix/destroy/{$object->id}",
+               array('post' => true, 'confirm' => true)) ?>
+</p>
 <?= $this->render_partial('form') ?>

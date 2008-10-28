@@ -1,0 +1,12 @@
+<?# $Id$ ?>
+<script type="text/javascript">
+   
+</script>
+<div class="scroll">
+<div id="output">
+<?= $output ?>
+</div>
+<?= form_tag() ?>
+<?= text_field('input') ?>
+<?= form_end() ?>
+</div>

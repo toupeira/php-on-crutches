@@ -11,7 +11,8 @@
    <th></th>
    <td>
       <?= submit_button() ?>
-      <?= cancel_button(any($options['redirect_to'], ":$prefix/show/{$object->id}")) ?>
+      <?= cancel_button(any($options['redirect_to'],
+             $object->exists ? ":$prefix/show/{$object->id}" : ":$prefix")) ?>
    </td>
 </tr>
 </table>
