@@ -83,12 +83,18 @@
    }
 
    function config($key, $subkey=null) {
-      if (!array_key_exists($key, $GLOBALS['_CONFIG'])) {
-         return $GLOBALS['_CONFIG']['application'][$key];
+      $config = &$GLOBALS['_CONFIG'];
+
+      if (!array_key_exists($key, $config)) {
+         if (substr($key, 0, 6) == 'debug_' and !$config['debug']) {
+            return false;
+         } else {
+            return $config['application'][$key];
+         }
       } elseif ($subkey) {
-         return $GLOBALS['_CONFIG'][$key][$subkey];
+         return $config[$key][$subkey];
       } else {
-         return $GLOBALS['_CONFIG'][$key];
+         return $config[$key];
       }
    }
 
