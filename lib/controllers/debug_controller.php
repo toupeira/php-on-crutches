@@ -18,10 +18,15 @@
             $code = syntax_highlight($input);
 
             ob_start();
-            eval("$input;");
-            $output = syntax_highlight(ob_get_clean());
+            try {
+               eval("$input;");
+               $output = ob_get_clean();
+            } catch (Exception $e) {
+               ob_end_clean();
+               $output = $e->getMessage();
+            }
 
-            $this->set('output', "$code<br />&nbsp;=&gt; $output");
+            $this->render_text("<code>&gt;&gt;&gt; </code>$code<br /><code>&nbsp;=&gt; </code>".syntax_highlight($output)."<br />");
          } else {
             $this->set('title', 'PHP Console');
          }
