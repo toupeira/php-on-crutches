@@ -247,7 +247,9 @@
       }
 
       function find($id) {
-         return $this->where(func_get_args())->order()->first;
+         if (!is_null($id)) {
+            return $this->where(func_get_args())->order()->first;
+         }
       }
 
       function find_by_sql($sql, array $params=null) {
