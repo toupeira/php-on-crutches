@@ -11,7 +11,7 @@
       'URL Rewriting'    => config('rewrite_urls') ? 'enabled' : 'disabled',
       'Session Store'    => config('session_store') ? config('session_store') : 'disabled',
       'Cache Store'      => config('cache_store'),
-      'Load Average'     => implode(', ', sys_getloadavg()),
+      'Load Average'     => implode(' / ', sys_getloadavg()),
       'Memory Usage'     => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
    );
 ?>
