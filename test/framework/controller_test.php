@@ -236,7 +236,7 @@
       }
 
       function test_render_with_action() {
-         $this->assertTrue($this->controller->render('index'));
+         $this->assertTrue($this->controller->render('index', ''));
          $this->assertOutput('Index Template');
       }
 
@@ -256,7 +256,7 @@
       }
 
       function test_render_with_template() {
-         $this->assertTrue($this->controller->render($this->views.'blank.thtml'));
+         $this->assertTrue($this->controller->render($this->views.'blank.thtml', ''));
          $this->assertOutput('Blank Template');
       }
 
