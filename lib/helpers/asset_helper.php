@@ -40,8 +40,8 @@
 
    # Merge multiple assets into one file and return a tag
    function merge_assets($tag, $dir, $ext, $assets) {
-      if (config('debug')) {
-         $assets[] = 'framework/debug';
+      if (config('debug_toolbar')) {
+         $assets[] = 'framework/toolbar';
       }
 
       if ($assets) {
