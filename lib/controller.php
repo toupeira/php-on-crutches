@@ -17,7 +17,7 @@
       public $msg;
 
       protected $_name;
-      protected $_layout;
+      protected $_layout = 'application';
       protected $_view;
       protected $_output;
       protected $_action;
@@ -94,13 +94,7 @@
       }
 
       function get_layout() {
-         if (!is_null($this->_layout)) {
-            return $this->_layout;
-         } elseif ($this->is_ajax()) {
-            return '';
-         } else {
-            return 'application';
-         }
+         return $this->_layout;
       }
 
       function set_layout($layout) {
@@ -256,6 +250,11 @@
          if ($this->is_valid_request($action)) {
             $this->_action = $action;
             $this->set('action', $action);
+
+            # Reset the layout for Ajax requests
+            if ($this->is_ajax()) {
+               $this->_layout = null;
+            }
 
             # Call before filters
             $this->call_filter("global_before", $action);
