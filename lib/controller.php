@@ -94,7 +94,17 @@
       }
 
       function get_layout() {
-         return (string) $this->_layout;
+         if (!is_null($this->_layout)) {
+            return $this->_layout;
+         } elseif ($this->is_ajax()) {
+            return '';
+         } else {
+            return 'application';
+         }
+      }
+
+      function set_layout($layout) {
+         return $this->_layout = $layout;
       }
 
       function get_view() {
@@ -247,15 +257,6 @@
             $this->_action = $action;
             $this->set('action', $action);
 
-            # Set the layout, don't use one for Ajax requests
-            if ($this->is_ajax()) {
-               $this->_view->layout = null;
-            } elseif (!is_null($this->_layout)) {
-               $this->_view->layout = $this->_layout;
-            } else {
-               $this->_view->layout = 'application';
-            }
-
             # Call before filters
             $this->call_filter("global_before", $action);
             $this->call_filter("before", $action);
@@ -293,9 +294,7 @@
             }
 
             $this->_view->template = $template;
-            if (!is_null($layout)) {
-               $this->_view->layout = $layout;
-            }
+            $this->_view->layout = (is_null($layout) ? $this->layout : $layout);
             $this->set_model_errors();
 
             return $this->_output = $this->_view->render();
