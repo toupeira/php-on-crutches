@@ -16,7 +16,6 @@
 </tr>
 <? endforeach ?>
 </table>
-</div>
 <? if ($objects->pages > 1): ?>
 <p>
    Page <?= page_links($objects) ?>

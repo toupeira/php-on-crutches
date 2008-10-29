@@ -4,7 +4,7 @@
    foreach (Dispatcher::$db_queries_sql as $database => $queries) {
       $database = '<strong>'.h($database).':</strong>';
       foreach ($queries as $query) {
-         $all_queries[$database][] = '<code>'.h($query).'</code>';
+         $all_queries[$database][] = str_replace('&nbsp;', ' ', syntax_highlight($query));
       }
    }
 ?>

@@ -78,7 +78,7 @@
             log_level_set(LOG_DISABLED);
 
             $view = new View();
-            $toolbar = $view->render_partial('debug/toolbar');
+            $toolbar = $view->render('debug/toolbar/index');
             print preg_replace('|(</body>)|', $toolbar.'\1', self::$controller->output);
 
             log_level_set($log_level);

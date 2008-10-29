@@ -1,10 +1,10 @@
 <?# $Id$ ?>
 <?
    $request = array(
-      'URL'            => ($_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.h($_SERVER['SERVER_NAME']).h($_SERVER['REQUEST_URI']),
+      'URL'            => ($_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.h($_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']),
       'Method'         => $_SERVER['REQUEST_METHOD'],
       'Client Address' => $_SERVER['REMOTE_ADDR'],
-      'Parameters'     => dump(Dispatcher::$params),
+      'Parameters'     => dump(Dispatcher::$params, true),
    );
 
    if ($forward = $_SERVER['HTTP_X_FORWARDED_FOR']) {
@@ -12,12 +12,12 @@
    }
 
    if ($_COOKIE) {
-      $request['Cookies'] = dump($_COOKIE);
+      $request['Cookies'] = dump($_COOKIE, true);
    }
 
    if (config('session_store')) {
       if ($_SESSION) {
-         $request['Session'] = dump($_SESSION);
+         $request['Session'] = dump($_SESSION, true);
       }
    }
 ?>

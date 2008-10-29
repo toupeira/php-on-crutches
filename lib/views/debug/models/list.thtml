@@ -17,8 +17,9 @@
 <? if (is_null($value = $object->$key)): ?>
    <em>null</em>
 <? elseif ($value !== ''): ?>
-   <?= link_to(truncate(h($object->$key), 40, true), ":$prefix/show/{$object->id}") ?>
+   <?= link_to(truncate(h($object->$key), 40, true), ":$prefix/show/{$object->id}").N ?>
 <? endif ?>
+</td>
 <?    endforeach ?>
 </tr>
 <? endforeach ?>

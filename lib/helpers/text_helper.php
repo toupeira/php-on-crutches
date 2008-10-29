@@ -147,6 +147,7 @@
    function syntax_highlight($code, $lang='php') {
       switch ($lang) {
          case 'php':
+         case 'sql':
             return strtr(highlight_string("<? $code ?>", true), array(
                '&lt;?&nbsp;' => '',
                '?&gt;'       => '',

@@ -48,6 +48,13 @@
          ), (array) $options);
       }
 
+      function __toString() {
+         return parent::__toString(array(
+            'model' => $this->_mapper->model,
+            'sql'    => $this->sql,
+         ));
+      }
+
       function get_statement() {
          if (!$this->_statement) {
             $this->_statement = $this->_mapper->execute($this->sql, $this->params);

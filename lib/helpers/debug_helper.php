@@ -8,18 +8,23 @@
 #
 
    # Dump a value
-   function dump($value) {
-      $output = htmlspecialchars(print_r($value, true));
+   function dump($value, $colored=false) {
+      $output = trim(print_r($value, true));
+
       if (is_array($value)) {
-         $lines = array_slice(explode("\n", $output), 2, -2);
-         $output = '';
+         $lines = array_slice(explode("\n", $output), 2, -1);
+         $output = array();
          foreach ($lines as $line) {
-            $output .= substr($line, 4)."\n";
+            $output[] = mb_substr($line, 4);
          }
-         #$output = implode("\n", array_slice(explode("\n", $output), 2, -2));
+         $output = implode("\n", $output);
       }
 
-      return "<pre>$output</pre>";
+      if ($colored) {
+         return syntax_highlight($output);
+      } else {
+         return '<pre>'.h($output).'</pre>';
+      }
    }
 
    function dump_colored($value) {

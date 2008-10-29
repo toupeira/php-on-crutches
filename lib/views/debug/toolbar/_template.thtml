@@ -2,12 +2,14 @@
 <?
    $values = array();
    foreach (Dispatcher::$controller->view->data as $key => $value) {
-      if (is_array($value) or is_object($value)) {
-         $dump = dump($value);
+      if (is_array($value)) {
+         $dump = dump($value, true);
          $value = link_to(h((string) $value), '#', array(
             'onclick' => '$(this.nextSibling).toggle(); return false'
          ));
          $value .= '<div style="display: none">'.$dump.'</div>';
+      } elseif (is_object($value)) {
+         $value = h((string) $value);
       } else {
          $value = h(var_export($value, true));
       }
