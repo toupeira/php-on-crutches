@@ -89,8 +89,9 @@
 
    # Handler for uncaught exceptions
    function exception_handler($exception) {
-      if ($GLOBALS['_ERROR_CAUGHT']) return;
-      $GLOBALS['_ERROR_CAUGHT'] = true;
+      # Only handle the initial error
+      #if ($GLOBALS['_ERROR_CAUGHT']) return;
+      #$GLOBALS['_ERROR_CAUGHT'] = true;
 
       while (ob_get_level()) {
          ob_end_clean();
@@ -104,7 +105,7 @@
          }
 
          Dispatcher::$controller = new ErrorsController();
-         print Dispatcher::$controller->perform('show', array($exception));
+         print Dispatcher::$controller->show($exception);
 
          if (log_level(LOG_INFO)) {
             Dispatcher::log_footer();

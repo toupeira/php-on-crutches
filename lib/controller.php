@@ -297,8 +297,9 @@
                $this->_view->layout = $layout;
             }
             $this->set_model_errors();
-            $this->_output = $this->_view->render();
-            return true;
+
+            return $this->_output = $this->_view->render();
+
          } else {
             throw new ApplicationError("Can only render once per request");
          }
@@ -306,8 +307,7 @@
 
       # Render only the given text without layout
       function render_text($text) {
-         $this->_output = $text;
-         return true;
+         return $this->_output = $text;
       }
 
       # Redirect to a path

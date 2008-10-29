@@ -14,26 +14,26 @@
       }
 
       function show($exception) {
+         if ($exception == 400 or $exception instanceof InvalidRequest) {
+            $status = 400;
+            $text = 'Bad Request';
+         } elseif ($exception == 404 or $exception instanceof NotFound) {
+            $status = 404;
+            $text = 'Not Found';
+         } else {
+            $status = 500;
+            $text = 'Internal Server Error';
+         }
+
          $this->headers['Status'] = $status;
 
          if (config('debug') and $exception instanceof Exception) {
-            $this->show_debug($exception);
+            return $this->show_debug($exception);
          } else {
-            if ($exception == 400 or $exception instanceof InvalidRequest) {
-               $status = 400;
-               $text = 'Bad Request';
-            } elseif ($exception == 404 or $exception instanceof NotFound) {
-               $status = 404;
-               $text = 'Not Found';
-            } else {
-               $status = 500;
-               $text = 'Internal Server Error';
-            }
-
             if (View::find_template("errors/$status")) {
-               $this->render($status);
+               return $this->render($status);
             } else {
-               $this->render_text("<h1>$status $text</h1>");
+               return $this->render_text("<h1>$status $text</h1>");
             }
          }
       }
@@ -44,20 +44,26 @@
          }
 
          $class = get_class($exception);
+         $message = preg_replace(
+            "/('[^']+'|[^ ]+\(\))/",
+            '<code>$1</code>',
+            $exception->getMessage()
+         );
          $file = $exception->getFile();
          $line = $exception->getLine();
-         $message = preg_replace("/('[^']+'|[^ ]+\(\))/", '<code>$1</code>', $exception->getMessage());
          $trace = $exception->getTraceAsString();
 
          try {
             $this->set('exception', $class);
             $this->set('message', $message);
-            $this->set('trace', $trace);
             $this->set('file', str_replace(ROOT, '', $file));
             $this->set('line', $line);
+            $this->set('trace', $trace);
+
             $this->set('params', Dispatcher::$params);
             $this->set('expand', $expand);
 
+            # Get source code where the error occurred
             if (is_file($file)) {
                $code = '';
                $start = max(0, $line - 12);
@@ -68,6 +74,7 @@
                   $i += $start + 1;
                   $text = sprintf("%{$width}d %s", $i, htmlspecialchars($text));
                   if ($i == $line) {
+                     # Highlight the line with the error
                      $text = "<strong>$text</strong>";
                   }
                   $code .= $text;
@@ -77,14 +84,22 @@
 
             $this->_output = null;
             $this->render('debug', '');
+            $this->send_headers();
             return $this->_output;
 
          } catch (Exception $e) {
-            return $e->getMessage();
-            ob_end_clean();
-            return "<h1>".titleize($class)."</h1>\n"
-               . "<p>$message, in <code>$file</code> at line $line</p>\n"
-               . "<pre>$trace</pre>";
+            while (ob_get_level()) {
+               ob_end_clean();
+            }
+
+            return "<h2>".titleize($class).": $message</h2>\n"
+                 . "<p>in <strong><code>$file</code></strong> at line <strong>$line</strong></p>\n"
+                 . "<pre>$trace</pre>\n"
+                 . "<br><br>\n"
+                 . "Additionaly, the following internal error occured while trying to handle the exception:\n"
+                 . "<h2>".titleize(get_class($e)).': '.$e->getMessage()."</h2>\n"
+                 . "<p>in <strong><code>".$e->getFile()."</code></strong> at line <strong>".$e->getLine()."</strong></p>\n"
+                 . "<pre>".$e->getTraceAsString()."</pre>";
 
          }
       }
