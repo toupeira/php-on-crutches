@@ -493,13 +493,7 @@
                   break;
                case 'show':
                   if ($object = $db->find((int) $args[0])) {
-                     $data = array();
-                     foreach ($object->attributes as $key => $value) {
-                        $data[h(_(humanize($key)))] = '<div>'.nl2br(h($value)).'<div>';
-                     }
-
                      $this->set('object', $object);
-                     $this->set('data', $data);
                   } else {
                      throw new NotFound();
                   }

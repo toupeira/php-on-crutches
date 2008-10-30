@@ -1,4 +1,10 @@
 <?# $Id$ ?>
+<?
+   $data = array();
+   foreach ($attributes as $key => $options) {
+      $data[h(_(humanize($key)))] = '<div>'.nl2br(h($object->$key)).'<div>';
+   }
+?>
 <p class="scaffold-links">
    <?= image_tag('framework/icons/database.png') ?>
    <?= link_to(_("Show all"), ":$prefix") ?>
