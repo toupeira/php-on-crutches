@@ -18,6 +18,10 @@
 </table>
 <? if ($objects->pages > 1): ?>
 <p>
-   Page <?= page_links($objects) ?>
+   <div style="float: right">
+      Page <?= page_links($objects) ?>
+   </div>
+   Showing <strong><?= $objects->page_start.' - '.$objects->page_end ?></strong>
+   of <strong><?= $objects->count_all ?></strong>
 </p>
 <? endif ?>

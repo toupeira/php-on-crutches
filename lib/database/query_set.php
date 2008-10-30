@@ -225,6 +225,14 @@
          }
       }
 
+      function get_page_start() {
+         return $this->_mapper->page_size * ($this->page - 1) + 1;
+      }
+
+      function get_page_end() {
+         return min($this->count_all, $this->page_start + $this->page_size - 1);
+      }
+
       function get_first() {
          $this->_position = 0;
          if ($this->valid()) {
