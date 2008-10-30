@@ -43,7 +43,9 @@
          $this->set('title', 'Model Browser');
 
          if ($model and $action) {
-            $title = link_to(humanize($model), ":/models/$model");
+            $title = image_tag('framework/icons/database.png') . ' '
+                   . link_to(humanize($model), ":/models/$model");
+
             if ($action == 'show' or $action == 'edit') {
                $title .= ' <dfn>&#x25b8;</dfn> #'.$id;
             }
@@ -57,7 +59,7 @@
                $this->render('debug/models/attributes');
             } else {
                $this->model(camelize($model), $action, $id, array(
-                  'page_size'   => 20,
+                  'page_size'   => 25,
                   'path_prefix' => "/models/$model",
                   'template'    => array("debug/models/$action", "scaffold/$action"),
                ));

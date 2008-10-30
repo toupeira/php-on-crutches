@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?= form_tag() ?>
 <table class="scaffold-form">
-<? foreach ($attributes as $key): ?>
+<? foreach ($attributes as $key => $column): ?>
 <tr>
    <th><?= $object->label($key) ?></th>
    <td><?= $object->auto_field($key) ?></td>

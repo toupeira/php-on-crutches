@@ -477,7 +477,7 @@
             $db = DB($model);
             $model_key = underscore($model);
             $this->set('model', $model_key);
-            $attributes = array_keys($db->attributes);
+            $attributes = $db->attributes;
 
             # Use a path prefix for all redirects
             $prefix = $options['path_prefix'];
@@ -507,7 +507,7 @@
                case 'create':
                   $object = new $model($this->params[$model_key]);
                   $this->set('object', $object);
-                  array_remove($attributes, array('created_at', 'updated_at', $db->primary_key));
+                  array_delete($attributes, array('created_at', 'updated_at', $db->primary_key));
 
                   if ($this->is_post() and $object->save()) {
                      $this->msg['info'] = any(

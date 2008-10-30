@@ -42,7 +42,8 @@ h1 a:hover {
 }
 
 h1 img {
-  margin-bottom: -2px;
+  margin-bottom: -1px;
+  margin-right: -2px;
 }
 
 h1 dfn {

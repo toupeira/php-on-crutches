@@ -1,5 +1,6 @@
 <?# $Id$ ?>
-<p>
-   <?= link_to(_("Index"), ":$prefix") ?>
+<p class="scaffold-links">
+   <?= image_tag('framework/icons/database.png') ?>
+   <?= link_to(_("Show all"), ":$prefix") ?>
 </p>
 <?= $this->render_partial('form') ?>

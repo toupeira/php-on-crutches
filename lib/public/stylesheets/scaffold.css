@@ -2,6 +2,14 @@ label {
   cursor: pointer;
 }
 
+p.scaffold-links a {
+  margin-right: 1em;
+}
+
+p.scaffold-links img {
+  margin-bottom: -4px;
+}
+
 table .blank, table .blank * {
   background: none !important;
   border: none !important;
@@ -39,7 +47,9 @@ table.scaffold-list th {
   border-color: #999;
 }
 
-table.scaffold-list td {
+table.scaffold-list td.right {
+  padding: 0.2em 0.4em 0.2em 2em;
+  text-align: right;
 }
 
 table.scaffold-list a {
