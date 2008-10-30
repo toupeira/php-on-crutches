@@ -26,7 +26,7 @@
                $output = $e->getMessage();
             }
 
-            $this->render_text("<code>&gt;&gt;&gt; </code>$code<br /><code>&nbsp;=&gt; </code>".syntax_highlight($output)."<br />");
+            $this->render_text("<code>&gt;&gt;&gt; </code>$code<br />".syntax_highlight($output)."<br />");
          } else {
             $this->set('title', 'PHP Console');
          }

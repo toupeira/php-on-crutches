@@ -145,6 +145,7 @@
    }
 
    function syntax_highlight($code, $lang='php') {
+      $code = trim($code);
       switch ($lang) {
          case 'php':
          case 'sql':
