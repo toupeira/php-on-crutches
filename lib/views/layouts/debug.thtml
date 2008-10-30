@@ -14,12 +14,24 @@
   <?= include_javascripts('framework/prototype', 'framework/debug') ?>
 </head>
 <body>
+
 <h1>
    <?= image_tag('framework/icons/debug.png') ?>
    <?= link_to($title, ":/$action", array('style' => 'color: #666')) ?><?= $subtitle ?>
 </h1>
+
+<div id="content">
 <?= messages() ?>
 <?= $content_for_layout ?>
+</div>
+
+<div id="menu">
+   <?= link_to('System', ':/system', array('class' => $action == 'system' ? 'active' : '')) ?>
+   <?= link_to('Model Browser', ':/models', array('class' => $action == 'models' ? 'active' : '')) ?>
+   <?= link_to('SQL Console', ':/sql', array('class' => $action == 'sql' ? 'active' : '')) ?>
+   <?= link_to('PHP Console', ':/php', array('class' => $action == 'php' ? 'active' : '')) ?>
+   <p>Running in <strong><?= ENVIRONMENT ?></strong> environment</p>
+</div>
 
 </body>
 </html>

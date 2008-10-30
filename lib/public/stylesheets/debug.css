@@ -6,13 +6,21 @@ body {
   font-family: "Arial", sans-serif;
 }
 
-a {
-  color: #446e96;
-  padding: 0 0.2em;
+.message {
+  margin-bottom: 1em;
+  padding: 0.5em;
+  width: 30em;
+  border: 1px solid;
 }
+.message ul { margin: 0; padding: 0 0 0 1.5em; }
 
-a:hover {
-  font-weight: bold;
+.info { color: #3a3; background: #cfc; }
+.warning { color: #884; background: #ffb; }
+.error { color: #f33; background: #fcc; }
+
+.text {
+  border: 1px solid #bbb;
+  padding: 0.2em;
 }
 
 h1 {
@@ -43,6 +51,62 @@ h1 dfn {
   vertical-align: top;
 }
 
+#menu {
+  position: absolute;
+  top: 5em;
+  left: 0.5em;
+  bottom: 0;
+  padding-top: 3em;
+  width: 12em;
+  border-right: 1px solid #ddd;
+}
+
+#menu a {
+  display: block;
+  margin-top: -1px;
+  padding: 5px 0 5px 23px;
+  color: #333;
+  background: url(/images/framework/icons/debug.png) no-repeat 3px 6px;
+  text-decoration: none;
+  font-size: larger;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+#menu a:hover {
+  text-decoration: underline;
+}
+
+#menu a.active {
+  font-weight: bold;
+  background-color: #f3f3f3;
+}
+
+#menu hr {
+  height: 1px;
+  background: #ccc;
+  border: none;
+}
+
+#content {
+  position: absolute;
+  top: 5em;
+  left: 14em;
+  right: 1em;
+  bottom: 0;
+  padding: 1em 0 4em;
+  overflow: auto;
+}
+
+#content a {
+  color: #446e96;
+  padding: 0 0.2em;
+}
+
+#content a:hover {
+  font-weight: bold;
+}
+
 table.scaffold-list {
   font-size: 8.5pt;
 }
@@ -59,23 +123,6 @@ label:after {
   content: ":";
   padding-left: 0.2em;
 }
-
-.text {
-  border: 1px solid #bbb;
-  padding: 0.2em;
-}
-
-.message {
-  margin-bottom: 1em;
-  padding: 0.5em;
-  width: 30em;
-  border: 1px solid;
-}
-.message ul { margin: 0; padding: 0 0 0 1.5em; }
-
-.info { color: #3a3; background: #cfc; }
-.warning { color: #884; background: #ffb; }
-.error { color: #f33; background: #fcc; }
 
 #php-console {
   padding: 0.5em;
