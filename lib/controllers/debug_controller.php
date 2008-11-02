@@ -58,7 +58,7 @@
                $this->set('attributes', DB(camelize($model))->attributes);
                $this->render('debug/models/attributes');
             } else {
-               $this->model(camelize($model), $action, $id, array(
+               $this->scaffold(camelize($model), $action, $id, array(
                   'page_size'   => 25,
                   'path_prefix' => "/models/$model",
                   'template'    => array("debug/models/$action", "scaffold/$action"),

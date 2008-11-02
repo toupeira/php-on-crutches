@@ -30,6 +30,15 @@
       protected $_require_ssl;
       protected $_require_trusted;
 
+      protected $_scaffold;
+      protected $_scaffold_actions = array(
+         'index',
+         'show',
+         'create',
+         'edit',
+         'destroy',
+      );
+
       function __construct(array &$params=null) {
          $this->_name = underscore(substr(get_class($this), 0, -10));
 
@@ -264,6 +273,10 @@
             # Call the action itself if it's defined
             if (in_array($action, $this->_actions) and !method_exists(get_parent_class($this), $action)) {
                call_user_func_array(array($this, $action), (array) $args);
+            } elseif ($model = $this->_scaffold and in_array($action, $this->_scaffold_actions)) {
+               array_unshift($args, $action == 'index' ? 'list' : $action);
+               array_unshift($args, $model);
+               call_user_func_array(array($this, scaffold), $args);
             }
 
             # Call after filters
@@ -466,7 +479,7 @@
       }
 
       # Scaffold default model actions
-      function model($model, $action='list') {
+      function scaffold($model, $action='list') {
          if (is_subclass_of($model, ActiveRecord)) {
             $args = array_slice(func_get_args(), 2);
             if (is_array($args[count($args) - 1])) {
@@ -562,7 +575,7 @@
             }
 
             $this->set('attributes', $attributes);
-            $this->render(any($options['template'], array($action, "scaffold/$action")));
+            $this->render(any($options['template'], array("{$this->name}/$action", "scaffold/$action")));
 
          } else {
             throw new TypeError("Invalid model '$model'");

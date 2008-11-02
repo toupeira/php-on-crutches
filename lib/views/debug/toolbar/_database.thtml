@@ -9,6 +9,6 @@
    }
 ?>
 <? if ($all_queries): ?>
-<span>DB: <?= Dispatcher::$db_queries ?> queries</span>
+<a><?= image_tag('framework/icons/database.png') ?> DB: <?= Dispatcher::$db_queries ?> queries</a>
 <div><?= list_tag($all_queries) ?></div>
 <? endif ?>

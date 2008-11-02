@@ -10,6 +10,6 @@
    <td class="right"><?= pluralize($count, 'record', 'records') ?></td>
 </tr>
 <? endforeach ?>
-<tr class="blank"><td colspan="2"></tr>
+<tr class="blank"><td colspan="2"></td></tr>
 <? endforeach ?>
 </table>

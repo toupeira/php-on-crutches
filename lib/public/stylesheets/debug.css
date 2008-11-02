@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  padding: 1em 1em 4em;
+  padding: 1em 0.5em 4em;
   background: white;
   font-size: 9pt;
   font-family: "Arial", sans-serif;
@@ -54,10 +54,10 @@ h1 dfn {
 
 #menu {
   position: absolute;
-  top: 5em;
+  top: 40pt;
   left: 0.5em;
   bottom: 0;
-  padding-top: 3em;
+  padding-top: 5em;
   width: 12em;
   border-right: 1px solid #ddd;
 }

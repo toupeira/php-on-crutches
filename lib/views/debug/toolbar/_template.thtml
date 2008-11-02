@@ -20,6 +20,6 @@
    ksort($values);
 ?>
 <? if ($values): ?>
-<span>Template: <?= count($values) ?> values</span>
+<a><?= image_tag('framework/icons/template.png') ?> Template: <?= count($values) ?> values</a>
 <div><?= table_tag($values, array('escape' => false)) ?></div>
 <? endif ?>

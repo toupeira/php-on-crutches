@@ -1,0 +1,15 @@
+<?# $Id$ ?>
+<a><?= image_tag('framework/icons/debug.png') ?> Debug</a>
+<div>
+   <?= link_to('System', ':debug/system') ?>
+   <?= link_to('Model Browser', ':debug/models') ?>
+   <?= link_to('SQL Console', ':debug/sql') ?>
+   <?= link_to('PHP Console', ':debug/php') ?>
+   <br />
+   <?= link_to('Hide toolbar', '#', array(
+          'onclick' => '$("debug-toolbar").remove()'
+       )) ?>
+   <?= link_to('Disable toolbar', '#', array(
+          'onclick' => 'DebugToolbar.toggle()'
+       )) ?>
+</div>

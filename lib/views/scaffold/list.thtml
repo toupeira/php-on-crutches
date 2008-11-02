@@ -19,7 +19,7 @@
          if ($column['type'] == 'bool') {
             $value = ($value ? 'true' : 'false');
          } elseif (in_array($column['type'], array('integer', 'float'))) {
-            $right = 'class ="right"';
+            $right = ' class="right"';
          }
 ?>
    <td<?= $right ?>><?= link_to(truncate($value, 40, true), ":$prefix/show/{$object->id}") ?></td>

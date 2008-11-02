@@ -1,12 +1,12 @@
+<?# $Id$ ?>
+<?
+   $panels = array_merge(
+      array('menu', 'request', 'log', 'template', 'database', 'headers', 'system'),
+      glob(VIEWS.'debug/_*.thtml')
+   );
+?>
 <div id="debug-toolbar">
-<a href="#" title="Toggle Debug Toolbar" onclick="$('debug-toolbar').toggleClassName('disabled'); return false">
-   <?= image_tag('framework/icons/debug.png') ?>
-   <strong>Debug</strong>
-</a>
-<?= $this->render_partial('request') ?>
-<?= $this->render_partial('log') ?>
-<?= $this->render_partial('template') ?>
-<?= $this->render_partial('database') ?>
-<?= $this->render_partial('headers') ?>
-<?= $this->render_partial('system') ?>
+<? foreach ($panels as $panel): ?>
+<div id="debug-toolbar-<?= $panel ?>"><?= $this->render_partial($panel) ?></div>
+<? endforeach ?>
 </div>

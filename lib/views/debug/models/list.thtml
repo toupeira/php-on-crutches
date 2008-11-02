@@ -22,7 +22,7 @@
          if ($column['type'] == 'bool') {
             $value = ($value ? 'true' : 'false');
          } elseif (in_array($column['type'], array('integer', 'float'))) {
-            $right = ' class ="right"';
+            $right = ' class="right"';
          }
 
          if (is_null($value)) {

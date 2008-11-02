@@ -4,9 +4,10 @@
   left: 0;
   bottom: 0;
   padding: 4px;
+  color: #333;
   background: #eee;
   border-top: 1px solid #ccc;
-  font-family: "Arial", sans-serif !important;
+  font-family: "Arial", sans-serif;
   z-index: 1000;
 }
 
@@ -14,57 +15,62 @@
   font-size: 11px !important;
 }
 
-#debug-toolbar.disabled strong, #debug-toolbar.disabled span, #debug-toolbar.disabled div {
+#debug-toolbar a {
+  color: #333;
+  text-decoration: none;
+  background: none;
+  border: none;
+}
+
+#debug-toolbar a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+#debug-toolbar.disabled div, #debug-toolbar.disabled #debug-toolbar-menu > a > span {
   display: none !important;
+}
+
+#debug-toolbar.disabled > #debug-toolbar-menu {
+  display: inline !important;
 }
 
 #debug-toolbar.disabled {
   border-right: 1px solid #ccc;
 }
 
-#debug-toolbar a {
-  color: black !important;
-  font-weight: bold !important;
-  border: none !important;
-  background: none !important;
-  text-decoration: none !important;
+#debug-toolbar > div {
+  display: inline;
 }
 
-#debug-toolbar > span {
-  padding: 5px;
+#debug-toolbar > div > a {
   color: #666;
   font-weight: bold;
+  padding: 5px;
+  margin-right: -4px;
   border-left: 1px solid #ccc;
   border-right: 1px solid #ccc;
-  margin-right: -4px;
   position: relative;
   cursor: pointer;
   z-index: 1001;
 }
 
-#debug-toolbar > span:hover {
-  color: black;
-  text-decoration: underline;
-}
-
-#debug-toolbar > span.active {
+#debug-toolbar > div > a.active {
   color: black;
   background: #ddd;
   padding-top: 12px;
-  margin-right: -4px;
   border-left: 1px solid #aaa;
   border-right: 1px solid #aaa;
   z-index: 1002;
 }
 
-#debug-toolbar > * > img {
-  margin-bottom: -5px;
-  border: none;
+#debug-toolbar > div > a.active img {
+  background: #ddd;
 }
 
-#debug-toolbar > div {
+#debug-toolbar > div > div {
   display: none;
-  position: fixed !important;
+  position: fixed;
   bottom: 28px;
   max-width: 60em;
   right: 6px;
@@ -73,11 +79,41 @@
   padding: 4px;
   background: #ddd;
   border: 1px solid #aaa;
+  cursor: default;
+}
+
+#debug-toolbar > div > div > a {
+  display: block;
+  margin-top: 2px;
+  padding: 5px 5px 5px 24px;
+  border: 1px solid #aaa;
+  background: url(/images/framework/icons/debug.png) #eee no-repeat 4px 4px;
+}
+
+#debug-toolbar > div > div > a:hover {
+  background-color: white;
+}
+
+#debug-toolbar > div > div > br {
+  line-height: 0.6em;
+}
+
+#debug-toolbar img {
+  margin-bottom: -4px;
+  background: #eee;
+  border: none;
+  width: 16px;
+  height: 16px;
 }
 
 #debug-toolbar table {
   width: 100%;
   border-collapse: collapse;
+}
+
+#debug-toolbar table a {
+  color: black;
+  font-weight: bold;
 }
 
 #debug-toolbar th {
@@ -98,7 +134,7 @@
   white-space: normal;
 }
 
-#debug-toolbar td, #debug-toolbar > div > pre, #debug-toolbar li li {
+#debug-toolbar td, #debug-toolbar pre, #debug-toolbar li li {
   padding: 0.4em;
   background: #eee;
   border: 1px solid #bbb;
@@ -112,7 +148,7 @@
 #debug-toolbar ul {
   margin: 0;
   padding: 0 0 0 1.5em;
-  list-style-type: square !important;
+  list-style-type: square;
   list-style-image: none;
 }
 
@@ -123,4 +159,12 @@
 
 #debug-toolbar li li {
   margin: 0.4em 0;
+}
+
+#debug-toolbar #debug-toolbar-menu {
+  margin-left: -5px;
+}
+
+#debug-toolbar #debug-toolbar-menu > div {
+  width: 12em;
 }
