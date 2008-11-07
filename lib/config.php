@@ -34,16 +34,19 @@
 
       'output_buffering'  => true,
       'rewrite_urls'      => true,
+      'form_token'        => false,
+      'form_token_time'   => 86400,
+
+      'send_mails'        => true,
+      'mail_from'         => '',
+      'mail_from_name'    => '',
+      'notify_exceptions' => null,
 
       'debug'             => false,
       'debug_toolbar'     => false,
       'debug_redirects'   => false,
       'debug_queries'     => false,
 
-      'send_mails'        => true,
-      'mail_from'         => '',
-      'mail_from_name'    => '',
-      'notify_exceptions' => null,
       'trusted_hosts'     => array('127.0.0.1'),
    );
 
@@ -203,6 +206,7 @@
             return;
          }
       } elseif ($store == 'none') {
+         config_set($type.'_store', '');
          return;
       }
 

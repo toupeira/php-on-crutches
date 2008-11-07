@@ -31,6 +31,7 @@
       protected $_require_ajax;
       protected $_require_ssl;
       protected $_require_trusted;
+      protected $_require_form_token = true;
 
       protected $_scaffold;
       protected $_scaffold_actions = array(
@@ -47,15 +48,16 @@
          # Load controller helper
          try_require(HELPERS."{$this->_name}_helper.php");
 
+         # Start session if enabled
+         if ($this->_start_session and config('session_store')) {
+            $this->start_session();
+         }
+
          # Shortcuts for request data
          $this->params = &$params;
          $this->cookies = &$_COOKIE;
          $this->files = &$_FILES;
-
-         # Start session if enabled
-         if ($this->_start_session) {
-            $this->start_session();
-         }
+         $this->session = &$_SESSION;
 
          # Sanitize uploaded files
          foreach ($this->files as $i => &$file) {
@@ -170,30 +172,39 @@
          return $_SERVER['HTTPS'] != '' and $_SERVER['HTTPS'] != 'off';
       }
 
+      # Check for a requirement for the given action
+      function check_requirement($action, $requirement) {
+         $requirement = '_require_'.$requirement;
+         $requirement = $this->$requirement;
+
+         if ($except = $requirement['except']) {
+            if (count($requirement) > 1) {
+               throw new ApplicationError("Can't combine 'exclude' with other arguments");
+            } else {
+               return !in_array($action, (array) $except);
+            }
+         }
+
+         return $requirement === true
+             or in_array($action, (array) $requirement)
+             or array_key_exists($action, (array) $requirement);
+      }
+
       # Check request requirements
       function is_valid_request($action) {
          # Check for POST requirements
-         if ((!$this->is_post() and
-               ($this->_require_post === true or
-                  in_array($action, (array) $this->_require_post))))
-         {
+         if (!$this->is_post() and $this->check_requirement($action, 'post')) {
             $error = 'needs POST';
          }
 
 
          # Check for Ajax requirements
-         if (!$this->is_ajax() and
-               ($this->_require_ajax === true or
-                  in_array($action, (array) $this->_require_ajax)))
-         {
+         if (!$this->is_ajax() and $this->check_requirement($action, 'ajax')) {
             $error = 'needs Ajax';
          }
 
          # Check for trusted host requirements
-         if ($this->_require_trusted === true or
-               in_array($action, (array) $this->_require_trusted) or
-                  array_key_exists($action, (array) $this->_require_trusted))
-         {
+         if ($this->check_requirement($action, 'trusted')) {
             $hosts = any(
                $this->_require_trusted[$action],
                $this->_require_trusted['all'],
@@ -219,6 +230,17 @@
 
             if (!$found) {
                $error = "untrusted host $client";
+            }
+         }
+
+         # Check for cross site request forgery
+         if ($this->is_post() and config('form_token') and $this->check_requirement($action, 'form_token')) {
+            if (!$_POST['_form_token']) {
+               $error = 'missing form token';
+            } elseif ($_POST['_form_token'] != $_SESSION['form_token']) {
+               $error = 'forged form token';
+            } elseif (time() - $_SESSION['form_token_time'] > config('form_token_time')) {
+               $error = 'expired form token';
             }
          }
 
@@ -371,7 +393,7 @@
 
       # Start the session if necessary
       function start_session() {
-         if (!session_id()) {
+         if (!session_id() and PHP_SAPI != 'cli') {
             session_start();
 
             # Override default no-cache headers
@@ -381,8 +403,6 @@
             # Make sure the session handler can clean up
             register_shutdown_function(session_write_close);
          }
-
-         $this->session = &$_SESSION;
       }
 
       # Send the configured headers

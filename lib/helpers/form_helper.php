@@ -10,20 +10,37 @@
    # Build a form for the current path, or the given action.
    # Use `$options['multipart'] = true` for upload forms.
    function form_tag($action=null, array $options=null) {
-      $defaults = array(
+      # Reuse the same token for all forms
+      static $_token;
+
+      $options = array_merge(array(
          'action' => url_for(any($action, ltrim(Dispatcher::$path, '/'))),
          'method' => 'post', 'open' => true,
-      );
+      ), (array) $options);
 
       if (array_delete($options, 'multipart')) {
-         $defaults['enctype'] = 'multipart/form-data';
+         $options['enctype'] = 'multipart/form-data';
       }
 
       if ($options['method']) {
          $options['method'] = strtolower($options['method']);
       }
 
-      return content_tag('form', null, $options, $defaults).N;
+      $form = content_tag('form', null, $options).N;
+
+      # Add a token to POST forms if request forgery protection is enabled
+      if (config('form_token') and $options['method'] == 'post' and $id = session_id()) {
+         if (!$_token) {
+            $_token = sha1($id.uniqid());
+
+            $_SESSION['form_token'] = $_token;
+            $_SESSION['form_token_time'] = time();
+         }
+
+         $form .= hidden_field('_form_token', $_token, array('force' => true));
+      }
+
+      return $form;
    }
 
    function form_end() {
