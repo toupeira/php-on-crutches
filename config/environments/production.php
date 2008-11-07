@@ -9,14 +9,15 @@
 
       # Cache store (memory, file, apc, or xcache)
       'cache_store'       => 'memory',
-      # Cache path for file store (Default: ROOT/tmp/cache)
-      #'cache_path'        => '',
-
-      # Merge CSS and JS files
-      'merge_assets'      => true,
 
       # Send emails
       'send_mails'        => true,
+
+      # Request forgery protection
+      'csrf_protection'   => true,
+
+      # Merge CSS and JS files
+      'merge_assets'      => true,
 
       # Send emails to admin_email on exceptions
       'notify_exceptions' => '',

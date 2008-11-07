@@ -2,30 +2,31 @@
 
    $_CONFIG['development'] = array(
       # Log level
-      'log_level'       => LOG_DEBUG,
+      'log_level'         => LOG_DEBUG,
 
       # Session store (php, cookie, cache, database)
-      'session_store'   => 'php',
+      'session_store'     => 'php',
 
       # Cache store (memory, file, apc, or xcache)
-      'cache_store'     => 'memory',
-      # Cache path for file store (Default: ROOT/tmp/cache)
-      #'cache_path'      => '',
+      'cache_store'       => 'memory',
 
-      # Don't send emails
-      'send_mails'      => false,
+      # Send emails
+      'send_mails'        => false,
+
+      # Request forgery protection
+      'csrf_protection'   => false,
 
       # Show error messages
-      'debug'           => true,
+      'debug'             => true,
 
       # Show debug toolbar
-      'debug_toolbar'   => true,
+      'debug_toolbar'     => true,
 
       # Analyze database queries
-      'debug_queries'   => false,
+      'debug_queries'     => false,
 
       # Show redirects
-      'debug_redirects' => false,
+      'debug_redirects'   => false,
    );
 
 ?>
