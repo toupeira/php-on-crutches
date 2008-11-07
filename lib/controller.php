@@ -49,13 +49,12 @@
 
          # Shortcuts for request data
          $this->params = &$params;
-         $this->session = &$_SESSION;
          $this->cookies = &$_COOKIE;
          $this->files = &$_FILES;
 
          # Start session if enabled
          if ($this->_start_session) {
-            session_handler_start();
+            $this->start_session();
          }
 
          # Sanitize uploaded files
@@ -368,6 +367,22 @@
          }
 
          return $this->redirect_to($path);
+      }
+
+      # Start the session if necessary
+      function start_session() {
+         if (!session_id()) {
+            session_start();
+
+            # Override default no-cache headers
+            header('Cache-Control: private');
+            header('Pragma: cache');
+
+            # Make sure the session handler can clean up
+            register_shutdown_function(session_write_close);
+         }
+
+         $this->session = &$_SESSION;
       }
 
       # Send the configured headers
