@@ -45,12 +45,12 @@
          $this->assertPrefix('/foo/', '/', '/foo/index.php');
          $this->assertPrefix('/foo/', 'pages', '/foo/pages');
          $this->assertPrefix('/foo/', 'pages', '/foo/index.php?path=pages');
-         $this->assertPrefix('/foo/', 'pages/bar', '/foo///pages/bar');
+         $this->assertPrefix('/foo/bar/', 'pages/bar', '/foo/bar///pages/bar');
          $this->assertPrefix('/foo/', 'pages/bar', '/foo/index.php?path=pages/bar');
-         $this->assertPrefix('/foo/', '/pages/bar', '/foo/pages/bar');
+         $this->assertPrefix('/foo/bar/', '/pages/bar', '/foo/bar/pages/bar');
          $this->assertPrefix('/foo/', '/pages/bar', '/foo/index.php?path=///pages/bar/');
          $this->assertPrefix('///foo/', '/pages/bar', '///foo/index.php?path=/pages/bar');
-         $this->assertPrefix('/foo/', 'pages/bar', '/foo/index.php/foo/bar?path=/pages/bar');
+         $this->assertPrefix('/foo/bar/', 'pages/bar', '/foo/bar/index.php/foo/bar?path=/pages/bar');
       }
 
       function test_run() {
