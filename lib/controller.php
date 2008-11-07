@@ -25,6 +25,8 @@
       protected $_actions;
       protected $_errors;
 
+      protected $_start_session = true;
+
       protected $_require_post;
       protected $_require_ajax;
       protected $_require_ssl;
@@ -50,6 +52,11 @@
          $this->session = &$_SESSION;
          $this->cookies = &$_COOKIE;
          $this->files = &$_FILES;
+
+         # Start session if enabled
+         if ($this->_start_session) {
+            session_handler_start();
+         }
 
          # Sanitize uploaded files
          foreach ($this->files as $i => &$file) {

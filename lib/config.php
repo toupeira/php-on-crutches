@@ -136,17 +136,17 @@
       # Load routes
       Router::add(config('routes'));
 
-      # Load database support if necessary
+      # Load database support if databases are defined
       if (config('database')) {
          require LIB.'database/base.php';
       }
 
-      # Setup cache store, always use memory store in console
+      # Setup cache store, use memory store as default
       load_store('cache', $config['cache_store'], 'memory');
 
-      # Setup session store if enabled and not running in a console
-      if ($store = $config['session_store'] and $store != 'none') {
-         if ($store != 'php' and $store = load_store('session', $store, 'php')) {
+      # Setup session store if enabled, use cache store as default
+      if ($store = $config['session_store'] and $store != 'php') {
+         if ($store = load_store('session', $store, 'cache')) {
             session_set_save_handler(
                array($store, 'open'),
                array($store, 'close'),
@@ -156,12 +156,6 @@
                array($store, 'expire')
             );
          }
-
-         session_start();
-         header('Cache-Control: private');
-         header('Pragma: cache');
-
-         register_shutdown_function(session_write_close);
       }
 
       # Setup mbstring
@@ -208,6 +202,8 @@
          } else {
             return;
          }
+      } elseif ($store == 'none') {
+         return;
       }
 
       $base = ucfirst($type).'Store';
