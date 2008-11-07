@@ -14,7 +14,7 @@
       'send_mails'        => false,
 
       # Request forgery protection
-      'csrf_protection'   => false,
+      'form_token'        => false,
    );
 
 ?>

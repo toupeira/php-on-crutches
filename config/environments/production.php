@@ -14,7 +14,7 @@
       'send_mails'        => true,
 
       # Request forgery protection
-      'csrf_protection'   => true,
+      'form_token'        => true,
 
       # Merge CSS and JS files
       'merge_assets'      => true,
