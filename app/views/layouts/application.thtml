@@ -6,6 +6,7 @@
   <title><?= titleize(config('name')) ?></title>
   <?= include_stylesheets(config('name')) ?>
   <?= include_javascripts('framework/prototype', config('name')) ?>
+  <?= include_form_token() ?>
 </head>
 <body>
 <?= messages() ?>
