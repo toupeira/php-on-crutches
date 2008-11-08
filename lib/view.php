@@ -30,6 +30,9 @@
       protected $_partial;
       protected $_locals;
 
+      protected $_cache_key;
+      protected $_cache_full;
+
       function __construct($template=null, $layout=null) {
          $this->_template = $template;
          $this->_layout = $layout;
@@ -98,8 +101,6 @@
             }
          }
 
-         Dispatcher::$render_time -= microtime(true);
-
          # Discard local variables to avoid conflicts with assigned template variables
          # (keep $layout to allow overriding inside the template)
          unset($template);
@@ -108,16 +109,42 @@
          # Provide a reference to the HTML builder
          $html = HtmlBuilder::instance();
 
+         if ($this->_cache_key === true) {
+            $this->_cache_key = "view_".urlencode($this->_template);
+         }
+
+         # Render the template
+         if ($this->_cache_key and $output = cache($this->_cache_key)) {
+            if ($this->_cache_full) {
+               # Return the full cached page
+               log_info("Using cached page '{$this->_cache_key}'");
+               return $output;
+            } else {
+               # Use the cache as content for the layout
+               log_info("Using cached content '{$this->_cache_key}'");
+               $content_for_layout = $output;
+            }
+         }
+
+         Dispatcher::$render_time -= microtime(true);
+
          # Extract assigned values as local variables
          if (extract((array) $this->_data, EXTR_SKIP) != count($this->_data)) {
             throw new ApplicationError("Couldn't extract all template variables");
          }
 
-         # Render the template
-         log_info(sprintf('Rendering '.str_replace(VIEWS, '', $this->_template)));
-         ob_start();
-         require $this->_template;
-         $content_for_layout = ob_get_clean();
+         if (!$content_for_layout) {
+            # Render the template
+            log_info(sprintf('Rendering '.str_replace(VIEWS, '', $this->_template)));
+            ob_start();
+            require $this->_template;
+            $content_for_layout = ob_get_clean();
+
+            if ($this->_cache_key and !$this->_cache_full) {
+               log_info("Caching content as '{$this->_cache_key}'");
+               cache_set($this->_cache_key, $content_for_layout);
+            }
+         }
 
          if (!is_null($layout)) {
             $this->_layout = $layout;
@@ -140,6 +167,11 @@
             $output = ob_get_clean();
          } else {
             $output = $content_for_layout;
+         }
+
+         if ($this->_cache_key and $this->_cache_full) {
+            log_info("Caching page as '{$this->_cache_key}'");
+            cache_set($this->_cache_key, $output);
          }
 
          Dispatcher::$render_time += microtime(true);
@@ -201,6 +233,11 @@
          }
 
          return $output;
+      }
+
+      function cache($key=true, $full=false) {
+         $this->_cache_key = $key;
+         $this->_cache_full = $full;
       }
    }
 

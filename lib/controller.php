@@ -21,6 +21,7 @@
       protected $_view;
       protected $_output;
       protected $_action;
+      protected $_cached;
 
       protected $_actions;
       protected $_errors;
@@ -128,6 +129,10 @@
 
       function get_action() {
          return (string) $this->_action;
+      }
+
+      function get_cached() {
+         return (bool) $this->_cached;
       }
 
       function get_actions() {
@@ -335,14 +340,25 @@
                $template = $action;
             }
 
-            $this->_view->template = $template;
-            $this->_view->layout = (is_null($layout) ? $this->layout : $layout);
             $this->set_model_errors();
 
-            return $this->_output = $this->_view->render();
+            return $this->_output = $this->_view->render(
+               $template, (is_null($layout) ? $this->layout : $layout)
+            );
 
          } else {
             throw new ApplicationError("Can only render once per request");
+         }
+      }
+
+      function cache_render($key=null, $full=false) {
+         $key = any($key, "view_".urlencode(Dispatcher::$path));
+         $this->view->cache($key, $full);
+         if (cache($key)) {
+            $this->_cached = true;
+            return true;
+         } else {
+            return false;
          }
       }
 
