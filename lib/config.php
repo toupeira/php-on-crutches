@@ -37,6 +37,10 @@
       'form_token'        => false,
       'form_token_time'   => 86400,
 
+      'cookie_defaults'   => array(
+         'path' => '/',
+      ),
+
       'send_mails'        => true,
       'mail_from'         => '',
       'mail_from_name'    => '',
@@ -146,6 +150,23 @@
 
       # Setup cache store, use memory store as default
       load_store('cache', $config['cache_store'], 'memory');
+
+      # Setup the session cookie
+      $cookie = '_session';
+      if ($name = config('name')) {
+         $cookie = "_$name$cookie";
+      }
+      session_name($cookie);
+
+      if ($defaults = $config['cookie_defaults']) {
+         session_set_cookie_params(
+            $defaults['lifetime'],
+            $defaults['path'],
+            $defaults['domain'],
+            $defaults['secure'],
+            $defaults['httponly']
+         );
+      }
 
       # Setup session store if enabled, use cache store as default
       if ($store = $config['session_store'] and $store != 'php') {

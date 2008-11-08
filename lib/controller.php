@@ -426,11 +426,12 @@
 
       # Send a cookie
       function send_cookie($name, $value, array $options=null) {
+         $options = array_merge((array) config('cookie_defaults'), (array) $options);
          $args = array(
             $name,
             $value,
             $options['expire'],
-            any($options['path'], '/'),
+            $options['path'],
             $options['domain'],
             $options['secure'],
             $options['httponly'],
