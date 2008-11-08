@@ -82,7 +82,7 @@
          }
 
          if (is_file($all)) {
-            return $tag('all')."\n";
+            return $tag('all').N;
          }
 
          # If the file couldn't be created,
@@ -102,7 +102,7 @@
       return tag('link', $options, array(
          'rel' => 'stylesheet', 'type' => 'text/css',
          'href' => asset_path(STYLESHEETS, $file, '.css')
-      ))."\n";
+      )).N;
    }
 
    # Build a javascript tag
@@ -110,7 +110,7 @@
       return content_tag('script', null, $options, array(
          'type' => 'text/javascript',
          'src' => asset_path(JAVASCRIPTS, $file, '.js')
-      ))."\n";
+      )).N;
    }
 
    # Build an image tag

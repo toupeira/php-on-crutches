@@ -6,7 +6,7 @@
       $code = "\n//<![CDATA[\n$code\n//]]>\n";
       return content_tag('script', $code, $options, array(
          'type' => 'text/javascript',
-      ))."\n";
+      )).N;
    }
 
    # Generate a link which executes JavaScript code
