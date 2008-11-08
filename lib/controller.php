@@ -237,10 +237,12 @@
          if ($this->is_post() and config('form_token') and $this->check_requirement($action, 'form_token')) {
             if (!$_POST['_form_token']) {
                $error = 'missing form token';
-            } elseif ($_POST['_form_token'] != $_SESSION['form_token']) {
+            } elseif ($_POST['_form_token'] != $this->session['form_token']) {
                $error = 'forged form token';
-            } elseif (time() - $_SESSION['form_token_time'] > config('form_token_time')) {
-               $error = 'expired form token';
+            } elseif ($max_time = config('form_token_time') and $form_time = $this->session['form_token_time']) {
+               if (time() - $form_time > $max_time) {
+                  $error = 'expired form token';
+               }
             }
          }
 
