@@ -58,11 +58,7 @@
    # Helper to generate a meta tag with the current form token (useful for Ajax)
    function include_form_token() {
       if ($token = form_token()) {
-         return tag('meta', array(
-            'name'    => 'form-token',
-            'id'      => 'form-token',
-            'content' => $token
-         ))."\n";
+         return javascript("_form_token = '$token'");
       }
    }
 
