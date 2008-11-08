@@ -91,7 +91,7 @@
       
       $html = '';
       foreach ($assets as $asset) {
-         $html .= $tag($asset)."\n";
+         $html .= $tag($asset);
       }
 
       return $html;
@@ -102,7 +102,7 @@
       return tag('link', $options, array(
          'rel' => 'stylesheet', 'type' => 'text/css',
          'href' => asset_path(STYLESHEETS, $file, '.css')
-      ));
+      ))."\n";
    }
 
    # Build a javascript tag
@@ -110,7 +110,7 @@
       return content_tag('script', null, $options, array(
          'type' => 'text/javascript',
          'src' => asset_path(JAVASCRIPTS, $file, '.js')
-      ));
+      ))."\n";
    }
 
    # Build an image tag

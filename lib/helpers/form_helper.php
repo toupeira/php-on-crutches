@@ -10,9 +10,6 @@
    # Build a form for the current path, or the given action.
    # Use `$options['multipart'] = true` for upload forms.
    function form_tag($action=null, array $options=null) {
-      # Reuse the same token for all forms
-      static $_token;
-
       $options = array_merge(array(
          'action' => url_for(any($action, ltrim(Dispatcher::$path, '/'))),
          'method' => 'post', 'open' => true,
@@ -28,16 +25,9 @@
 
       $form = content_tag('form', null, $options).N;
 
-      # Add a token to POST forms if request forgery protection is enabled
-      if (config('form_token') and $options['method'] == 'post' and $id = session_id()) {
-         if (!$_token) {
-            $_token = sha1($id.uniqid());
-
-            $_SESSION['form_token'] = $_token;
-            $_SESSION['form_token_time'] = time();
-         }
-
-         $form .= hidden_field('_form_token', $_token, array('force' => true));
+      # Add a token to POST forms
+      if ($options['method'] == 'post' and $token = form_token()) {
+         $form .= hidden_field('_form_token', $token, array('force' => true));
       }
 
       return $form;
@@ -45,6 +35,35 @@
 
    function form_end() {
       return "</form>\n";
+   }
+
+   # Generate a unique form token for this session
+   function form_token() {
+      static $_token;
+
+      if (config('form_token') and $id = session_id() and !$_token) {
+         if (!$key = config('secret_key')) {
+            throw new ConfigurationError("No secret key set");
+         }
+
+         $_token = sha1($id.$key);
+
+         $_SESSION['form_token'] = $_token;
+         $_SESSION['form_token_time'] = time();
+      }
+
+      return $_token;
+   }
+
+   # Helper to generate a meta tag with the current form token (useful for Ajax)
+   function include_form_token() {
+      if ($token = form_token()) {
+         return tag('meta', array(
+            'name'    => 'form-token',
+            'id'      => 'form-token',
+            'content' => $token
+         ))."\n";
+      }
    }
 
    function form_element($tag, $key, $default_value=null, array $options=null, array $defaults=null) {
