@@ -27,7 +27,7 @@
 
       # Add a token to POST forms
       if ($options['method'] == 'post' and $token = form_token()) {
-         $form .= hidden_field('_form_token', $token, array('force' => true)).N;
+         $form .= hidden_field('_form_token', $token, array('id' => null, 'force' => true)).N;
       }
 
       return $form;
