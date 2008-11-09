@@ -7,6 +7,8 @@
 # $Id$
 #
 
+   require LIB.'vendor/textile.php';
+
    function h($text, $double_encode=false) {
       try {
          return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
@@ -142,6 +144,12 @@
          $_cycle = 0;
       }
       return $value;
+   }
+
+   function textilize($text) {
+      static $_textile;
+      if (!$_textile) $_textile = new Textile();
+      return $_textile->TextileThis($text);
    }
 
    function syntax_highlight($code, $lang='php') {

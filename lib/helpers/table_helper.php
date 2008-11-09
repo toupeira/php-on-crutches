@@ -16,6 +16,10 @@
 
       $html = '';
       foreach ((array) $items as $key => $value) {
+         if (is_array($value)) {
+            $value = implode(', ', $value);
+         }
+
          if ($escape) {
             $key = h($key);
             $value = h($value);

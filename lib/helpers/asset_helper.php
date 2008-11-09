@@ -41,6 +41,9 @@
    # Merge multiple assets into one file and return a tag
    function merge_assets($tag, $dir, $ext, $assets) {
       if (config('debug_toolbar')) {
+         if ($ext == '.js') {
+            $assets[] = 'framework/prototype';
+         }
          $assets[] = 'framework/toolbar';
       }
 

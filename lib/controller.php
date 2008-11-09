@@ -413,6 +413,7 @@
       function start_session() {
          if (!session_id() and PHP_SAPI != 'cli') {
             session_start();
+            log_info('  Session ID: '.session_id());
 
             # Override default no-cache headers
             header('Cache-Control: private');

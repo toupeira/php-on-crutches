@@ -99,10 +99,6 @@
             . "at ".strftime("%F %T").") [{$_SERVER['REQUEST_METHOD']}]"
          );
 
-         if (config('session_store')) {
-            log_info('  Session ID: '.session_id());
-         }
-
          # Log request parameters
          log_info('  Parameters: '.array_to_str(Dispatcher::$params));
 

@@ -8,6 +8,8 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
    <title>PHP on Crutches</title>
+   <?= include_stylesheets() ?>
+   <?= include_javascripts() ?>
    <style type="text/css">
 
       body {
@@ -18,7 +20,7 @@
          background: #eee;
       }
 
-      img { float: right; position: relative; }
+      #logo { float: right; position: relative; }
 
       h1 {
          margin-bottom: 0;
@@ -72,7 +74,7 @@
 </head>
 <body>
 <div id="content">
-<?= image_tag('framework/php_on_crutches.png', array('width' => 147, 'height' => 200)) ?>
+<?= image_tag('framework/php_on_crutches.png', array('id' => 'logo', 'width' => 147, 'height' => 200)) ?>
 <h1>woah... it actually works!</h1>
 <h3>About your system:</h3>
 <table id="info">
