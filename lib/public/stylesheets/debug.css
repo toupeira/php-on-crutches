@@ -125,6 +125,17 @@ label:after {
   padding-left: 0.2em;
 }
 
+#system h2 {
+  padding: 2px 24px;
+  background: url(/images/framework/icons/system.png) 4px 4px no-repeat;
+  border-bottom: 1px solid #ccc;
+  font-size: 12pt;
+}
+
+#system table { margin-bottom: 2em; margin-left: 1em; }
+#system th { width: 10em; }
+#system td { min-width: 30em; }
+
 #php-console .scroll {
   position: absolute;
   top: 0;
@@ -143,6 +154,7 @@ label:after {
   padding: 0.4em;
   border: 1px solid #ccc;
 }
+
 #php-console .text {
   width: 100%;
   padding: 0;

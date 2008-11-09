@@ -2,20 +2,29 @@
 <?
    $title = 'System Information';
 
-   $system = array(
-      'Hostname'         => h(`hostname -f`). '('.$_SERVER['SERVER_ADDR'].')',
-      'Operating System' => h(`uname -srmo`),
-      'Server Software'  => h($_SERVER['SERVER_SOFTWARE']),
-      'PHP Version'      => PHP_VERSION.' ('.PHP_SAPI.')',
+   $server = array(
+      'Hostname'         => `hostname -f`.'('.$_SERVER['SERVER_ADDR'].')',
+      'Operating System' => `uname -srmo`,
+      'Server Software'  => $_SERVER['SERVER_SOFTWARE'],
+      'PHP Version'      => PHP_VERSION,
+      'PHP SAPI'         => PHP_SAPI,
+      'Load Average'     => implode(' / ', sys_getloadavg()),
+      'Memory Usage'     => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
+   );
+
+   $framework = array(
       'Environment'      => ENVIRONMENT,
       'Framework root'   => ROOT,
       'URL Prefix'       => Dispatcher::$prefix,
       'URL Rewriting'    => config('rewrite_urls') ? 'enabled' : 'disabled',
       'Session Store'    => config('session_store') ? config('session_store') : 'disabled',
       'Cache Store'      => config('cache_store'),
-      'Load Average'     => implode(' / ', sys_getloadavg()),
-      'Memory Usage'     => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
    );
 ?>
 <br>
-<?= table_tag($system, array('class' => 'scaffold-list')) ?>
+<div id="system">
+<h2>Server</h2>
+<?= table_tag($server, array('class' => 'scaffold-show')) ?>
+<h2>Framework</h2>
+<?= table_tag($framework, array('class' => 'scaffold-show')) ?>
+</div>
