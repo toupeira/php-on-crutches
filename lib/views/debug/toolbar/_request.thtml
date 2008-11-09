@@ -1,9 +1,8 @@
 <?# $Id$ ?>
 <?
    $request = array(
-      'URL'            => ($_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.h($_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']),
       'Method'         => $_SERVER['REQUEST_METHOD'],
-      'Client Address' => $_SERVER['REMOTE_ADDR'],
+      'URL'            => ($_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.h($_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']),
       'Parameters'     => dump(Dispatcher::$params, true),
    );
 

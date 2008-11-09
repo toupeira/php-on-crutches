@@ -1,5 +1,7 @@
 <?# $Id$ ?>
 <?
+   $title = 'System Information';
+
    $system = array(
       'Hostname'         => h(`hostname -f`). '('.$_SERVER['SERVER_ADDR'].')',
       'Operating System' => h(`uname -srmo`),
@@ -15,5 +17,5 @@
       'Memory Usage'     => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
    );
 ?>
-<a><?= image_tag('framework/icons/system.png') ?> System</a>
-<div><?= table_tag($system) ?></div>
+<br>
+<?= table_tag($system, array('class' => 'scaffold-list')) ?>

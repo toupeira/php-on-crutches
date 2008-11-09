@@ -1,4 +1,7 @@
 <?# $Id$ ?>
+<?
+   $title = 'PHP Console';
+?>
 <div id="php-console">
 <div id="output" class="scroll"><?= $output ?></div>
 <?= form_tag(null, array('onsubmit' => 'new Ajax.Request("/debug/php", {parameters: Form.serialize(this), onSuccess: function(req) { $("output").insert(req.responseText, "bottom"); $("output").lastChild.scrollIntoView()}}); return false')) ?>
