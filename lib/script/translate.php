@@ -42,7 +42,7 @@ TXT;
          exit(1);
       }
 
-      if (`wc -l $file` > 6) {
+      if (`wc -l $file` > substr_count($GLOBALS['header'], "\n")) {
          system("sed -ri 's| (".ROOT.")([^ ]+:[0-9]+)| \\2|g' $file");
       } else {
          unlink($file);
