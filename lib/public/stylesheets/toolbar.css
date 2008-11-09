@@ -1,14 +1,32 @@
 #debug-toolbar {
-  position: fixed;
   white-space: nowrap;
-  left: 0;
-  bottom: 0;
   padding: 4px;
   color: #333;
   background: #eee;
   border-top: 1px solid #ccc;
   font-family: "Arial", sans-serif;
+}
+
+#debug-toolbar-shadow {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 2px 2px 0 0;
+  background: url(/images/framework/dot.png);
   z-index: 1000;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+}
+
+#debug-panel-shadow {
+  display: none;
+  position: fixed;
+  bottom: 29px;
+  background: url(/images/framework/dot.png);
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
 }
 
 #debug-toolbar, #debug-toolbar * {
@@ -58,7 +76,7 @@
 #debug-toolbar > div > a.active {
   color: black;
   background: #ddd;
-  padding-top: 12px;
+  padding-top: 16px;
   border-left: 1px solid #aaa;
   border-right: 1px solid #aaa;
   z-index: 1002;
@@ -71,7 +89,7 @@
 #debug-toolbar > div > div {
   display: none;
   position: fixed;
-  bottom: 28px;
+  bottom: 32px;
   max-width: 60em;
   right: 6px;
   max-height: 50%;

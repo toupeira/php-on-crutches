@@ -14,6 +14,7 @@
    putenv('LANGUAGE=');
 
    $header = <<<TXT
+#, fuzzy
 msgid ""
 msgstr ""
 "MIME-Version: 1.0\\n"

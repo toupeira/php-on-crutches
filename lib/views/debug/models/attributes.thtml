@@ -1,3 +1,8 @@
+<?# $Id$ ?>
+<p class="scaffold-links">
+   <?= image_tag('framework/icons/database.png') ?>
+   <?= link_to(_("Show all"), ":debug/models/$model") ?>
+</p>
 <table class="scaffold-list">
 <tr>
    <th>Name</th>

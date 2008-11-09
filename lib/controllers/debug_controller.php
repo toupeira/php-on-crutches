@@ -51,6 +51,7 @@
             $this->set('subtitle', $title);
 
             if ($action == 'attributes') {
+               $this->set('model', $model);
                $this->set('attributes', DB(camelize($model))->attributes);
                $this->render('debug/models/attributes');
             } else {
