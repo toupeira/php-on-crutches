@@ -53,7 +53,7 @@
          unset($args['controller']);
          unset($args['action']);
          if (count($args) == 1) {
-            $args = explode('/', $args[0]);
+            $args = explode('/', array_shift($args));
          }
 
          # Load the controller and perform the action

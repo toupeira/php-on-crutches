@@ -9,10 +9,25 @@
 
    class View extends Object
    {
+      static public $handlers = array(
+         'thtml'   => 'php',
+         'textile' => 'textilize',
+      );
+
       # Find a template for the given path
-      static function find_template($path) {
+      static function find_template($template) {
+         static $_paths;
+         static $_extensions;
+
          # Look in /app/views first, then in /lib/views
-         $views = '{'.VIEWS.','.LIB.'views/}';
+         if (!$_paths) {
+            $_paths = '{'.VIEWS.','.LIB.'views/}';
+         }
+
+         # Look for all supported template extensions
+         if (!$_extensions) {
+            $_extensions = '{'.implode(',', array_keys(self::$handlers)).'}';
+         }
 
          # Look for templates with a language suffix first (e.g. index.en.thtml)
          if ($lang = config('language')) {
@@ -20,7 +35,7 @@
          }
 
          # Return the first match
-         return array_shift(glob("$views$path$lang.thtml", GLOB_BRACE));
+         return array_shift(glob("$_paths$template$lang.$_extensions", GLOB_BRACE));
       }
 
       protected $_template;
@@ -101,14 +116,6 @@
             }
          }
 
-         # Discard local variables to avoid conflicts with assigned template variables
-         # (keep $layout to allow overriding inside the template)
-         unset($template);
-         unset($file);
-
-         # Provide a reference to the HTML builder
-         $html = HtmlBuilder::instance();
-
          if ($this->_cache_key === true) {
             $this->_cache_key = "view_".urlencode($this->_template);
          }
@@ -122,29 +129,23 @@
             } else {
                # Use the cache as content for the layout
                log_info("Using cached content '{$this->_cache_key}'");
-               $content_for_layout = $output;
             }
          }
 
          Dispatcher::$render_time -= microtime(true);
 
-         # Extract assigned values as local variables
-         if (extract((array) $this->_data, EXTR_SKIP) != count($this->_data)) {
-            throw new ApplicationError("Couldn't extract all template variables");
-         }
-
-         if (!$content_for_layout) {
+         if (!$output) {
             # Render the template
             log_info(sprintf('Rendering '.str_replace(VIEWS, '', $this->_template)));
-            ob_start();
-            require $this->_template;
-            $content_for_layout = ob_get_clean();
+            $output = $this->compile($this->_template, $this->_data);
 
             if ($this->_cache_key and !$this->_cache_full) {
                log_info("Caching content as '{$this->_cache_key}'");
-               cache_set($this->_cache_key, $content_for_layout);
+               cache_set($this->_cache_key, $output);
             }
          }
+
+         $this->set('content_for_layout', $output);
 
          if (!is_null($layout)) {
             $this->_layout = $layout;
@@ -153,7 +154,6 @@
          if ($this->_layout and !is_file($this->_layout)) {
             if (is_file($_file = View::find_template("layouts/{$this->_layout}"))) {
                $this->_layout = $_file;
-               unset($_file);
             } else {
                throw new MissingTemplate("Layout '{$this->_layout}' not found");
             }
@@ -162,11 +162,7 @@
          if (is_file($this->_layout)) {
             # Render the layout
             log_info('Rendering template within '.str_replace(VIEWS, '', $this->_layout));
-            ob_start();
-            require $this->_layout;
-            $output = ob_get_clean();
-         } else {
-            $output = $content_for_layout;
+            $output = $this->compile($this->_layout, $this->_data);
          }
 
          if ($this->_cache_key and $this->_cache_full) {
@@ -192,29 +188,9 @@
             throw new ApplicationError("Partial '$partial' not found");
          }
 
-         $this->_locals = $locals;
-
-         # Discard local variables to avoid conflicts with assigned template variables
-         unset($partial);
-         unset($locals);
-
-         # Extract assigned values as local variables
-         if (extract((array) $this->_data, EXTR_SKIP) != count($this->_data)) {
-            throw new ApplicationError("Couldn't extract all template variables");
-         }
-
-         # Extract passed values as local variables
-         if (is_array($this->_locals) and extract((array) $this->_locals, EXTR_SKIP) != count($this->_locals)) {
-            throw new ApplicationError("Couldn't extract all passed locales");
-         }
-
-         # Render the partial
          log_info("Rendering partial {$this->_partial}");
-         ob_start();
-         require $this->_partial;
-         $output = ob_get_clean();
-
-         return $output;
+         $locals = array_merge((array) $this->_data, (array) $locals);
+         return $this->compile($this->_partial, $locals);
       }
 
       # Render a collection of model instances using partials
@@ -238,6 +214,37 @@
       function cache($key=true, $full=false) {
          $this->_cache_key = $key;
          $this->_cache_full = $full;
+      }
+
+      # Compile a template file
+      protected function compile($template, $locals=null) {
+         # Provide a reference to the HTML builder
+         $html = HtmlBuilder::instance();
+
+         # Extract assigned values as local variables
+         if (extract((array) $locals, EXTR_SKIP) != count($locals)) {
+            throw new ApplicationError("Couldn't extract all template variables");
+         }
+
+         ob_start();
+         require $template;
+         $output = ob_get_clean();
+
+         $ext = substr($template, strrpos($template, '.') + 1);
+         if ($handler = self::$handlers[$ext] and $handler != 'php') {
+            if (function_exists($handler)) {
+               log_info("Applying template handler '$handler'");
+               return $handler($output);
+            } elseif (class_exists($handler)) {
+               log_info("Applying template handler '$handler'");
+               $handler = new $handler();
+               return $handler->render($output);
+            } else {
+               throw new ApplicationError("Invalid handler '$handler'");
+            }
+         } else {
+            return $output;
+         }
       }
    }
 

@@ -2,7 +2,9 @@
 <?
    $values = array();
    foreach (Dispatcher::$controller->view->data as $key => $value) {
-      if (is_array($value)) {
+      if ($key == 'content_for_layout') {
+         continue;
+      } elseif (is_array($value)) {
          $dump = dump($value, true);
          $value = link_to(h((string) $value), '#', array(
             'onclick' => '$(this.nextSibling).toggle(); return false'
