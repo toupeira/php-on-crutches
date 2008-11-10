@@ -67,7 +67,7 @@
             }
          }
 
-         throw new RoutingError("Recognition failed for '$path'");
+         throw new RoutingError("Invalid path '$path'");
       }
 
       # Generate a URL from the given values
@@ -151,6 +151,10 @@
                }
             }
          }
+
+         if (!$this->_params['controller'] and !$this->_defaults['controller']) {
+            throw new ApplicationError("Route doesn't specify a controller");
+         }
       }
 
       function __toString() {
@@ -183,6 +187,20 @@
                }
 
                $i++;
+            }
+
+            # Check if a controller and action was detected
+            $controller = $values['controller'];
+            if (!$controller or !$values['action'] or $controller == 'application') {
+               return;
+            }
+
+            # Check if the controller exists and is enabled
+            $controller = $controller.'_controller';
+            if (!$class = classify($controller)) {
+               return;
+            } elseif (config($controller) === false) {
+               throw new RoutingError("$class is disabled");
             }
 
             return $values;

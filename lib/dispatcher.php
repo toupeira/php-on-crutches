@@ -41,10 +41,11 @@
          $params = Router::recognize($path);
          $controller = $params['controller'];
          $action = $params['action'];
+         $class = classify($controller.'_controller');
          self::$params = array_merge($_GET, $_POST, $params);
 
-         if (!$controller or !$action or $controller == 'application') {
-            throw new RoutingError("Invalid path '$path'");
+         if (log_level(LOG_INFO)) {
+            self::log_header($class, $action);
          }
 
          # Collect the arguments for the action
@@ -52,19 +53,7 @@
          unset($args['controller']);
          unset($args['action']);
          if (count($args) == 1) {
-            $args = explode('/', array_shift($args));
-         }
-
-         # Check if the controller exists and is enabled
-         $controller = $controller.'_controller';
-         if (!$class = classify($controller)) {
-            throw new RoutingError("No controller found for '$path'");
-         } elseif (config($controller) === false) {
-            throw new RoutingError("$class is disabled");
-         }
-
-         if (log_level(LOG_INFO)) {
-            self::log_header($class, $action);
+            $args = explode('/', $args[0]);
          }
 
          # Load the controller and perform the action
