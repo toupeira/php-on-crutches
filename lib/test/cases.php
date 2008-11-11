@@ -44,7 +44,8 @@
             $dumper = &new SimpleDumper();
             $message = "[" . $dumper->describeValue($value)
                      . "] should have a count of ["
-                     . $dumper->describeValue($count) . "]";
+                     . $dumper->describeValue($count) . "]"
+                     . ", got [".$dumper->describeValue(count($value)) . "]";
          }
          return $this->assertEqual(
             $count, count($value), $message);
