@@ -11,7 +11,11 @@
          ));
          $value .= '<div style="display: none">'.$dump.'</div>';
       } elseif (is_object($value)) {
-         $value = h((string) $value);
+         if (method_exists($value, '__toString')) {
+            $value = h((string) $value);
+         } else {
+            $value = h(get_class($value));
+         }
       } else {
          $value = h(var_export($value, true));
       }
