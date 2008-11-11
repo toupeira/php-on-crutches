@@ -51,6 +51,9 @@
       function __construct($template=null, $layout=null) {
          $this->_template = $template;
          $this->_layout = $layout;
+
+         # Provide a reference to the HTML builder
+         $this->set('html', HtmlBuilder::instance());
       }
 
       function __toString() {
@@ -217,20 +220,17 @@
       }
 
       # Compile a template file
-      protected function compile($template, $locals=null) {
-         # Provide a reference to the HTML builder
-         $html = HtmlBuilder::instance();
-
+      protected function compile($_template, $_locals=null) {
          # Extract assigned values as local variables
-         if (extract((array) $locals, EXTR_SKIP) != count($locals)) {
-            throw new ApplicationError("Couldn't extract all template variables");
+         if (extract((array) $_locals, EXTR_SKIP) != count($_locals)) {
+            #throw new ApplicationError("Couldn't extract all template variables");
          }
 
          ob_start();
-         require $template;
+         require $_template;
          $output = ob_get_clean();
 
-         $ext = substr($template, strrpos($template, '.') + 1);
+         $ext = substr($_template, strrpos($template, '.') + 1);
          if ($handler = self::$handlers[$ext] and $handler != 'php') {
             if (function_exists($handler)) {
                log_info("Applying template handler '$handler'");

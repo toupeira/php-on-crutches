@@ -240,9 +240,9 @@
 
          # Check for cross site request forgery
          if ($this->is_post() and config('form_token') and $this->check_requirement($action, 'form_token')) {
-            if (!$_POST['_form_token']) {
+            if (!$this->params['_form_token']) {
                $error = 'missing form token';
-            } elseif ($_POST['_form_token'] != $this->session['form_token']) {
+            } elseif ($this->params['_form_token'] != $this->session['form_token']) {
                $error = 'forged form token';
             } elseif ($max_time = config('form_token_time') and $form_time = $this->session['form_token_time']) {
                if (time() - $form_time > $max_time) {
@@ -255,7 +255,7 @@
             if (config('debug')) {
                throw new InvalidRequest($error);
             } else {
-               log_warn($message);
+               log_warn("Invalid Request: $error");
                if ($action == 'index' or !method_exists($this, 'index')) {
                   # Redirect to default path if the default action was requested
                   $this->redirect_to('/');
