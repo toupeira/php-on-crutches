@@ -71,9 +71,13 @@
          if (!is_file($all) or $mtime > filemtime($all)) {
             if ($target = @fopen($all, 'w')) {
                foreach ($paths as $asset => $path) {
+                  $depth = substr_count($asset, '/');
                   $source = fopen($path, 'r');
-                  while ($input = fread($source, 8192)) {
-                     fwrite($target, $input, 8192);
+                  while ($input = fgets($source)) {
+                     if ($ext == '.css' and $depth) {
+                        $input = preg_replace('#url\(((\.\./){'.$depth.'})#', 'url(', $input);
+                     }
+                     fputs($target, $input);
                   }
                   fclose($source);
                }
