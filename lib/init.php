@@ -32,6 +32,11 @@
    require LIB.'view.php';
    require LIB.'mail.php';
 
+   # Initialize the application
+   foreach (glob(CONFIG.'initializers/*.php') as $initializer) {
+      require $initializer;
+   }
+
    # Load framework helpers
    foreach (glob(LIB.'helpers/*.php') as $helper) {
       require $helper;
@@ -39,11 +44,6 @@
 
    # Initialize the framework
    config_init();
-
-   # Initialize the application
-   foreach (glob(CONFIG.'initializers/*.php') as $initializer) {
-      require $initializer;
-   }
 
    require CONTROLLERS.'application_controller.php';
    try_require(HELPERS.'application_helper.php');

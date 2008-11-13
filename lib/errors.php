@@ -57,12 +57,9 @@
       }
    }
 
-   $_ERROR_CAUGHT = false;
-
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
       if (error_reporting()) {
-         if ($GLOBALS['_ERROR_CAUGHT']) return;
          throw new RuntimeError($errstr, 0, $errno, $errfile, $errline);
       }
    }
@@ -90,10 +87,6 @@
 
    # Handler for uncaught exceptions
    function exception_handler($exception) {
-      # Only handle the initial error
-      #if ($GLOBALS['_ERROR_CAUGHT']) return;
-      #$GLOBALS['_ERROR_CAUGHT'] = true;
-
       while (ob_get_level()) {
          ob_end_clean();
       }

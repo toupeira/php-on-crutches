@@ -177,6 +177,34 @@
          return $_SERVER['HTTPS'] != '' and $_SERVER['HTTPS'] != 'off';
       }
 
+      # Check if the client host is trusted
+      function is_trusted($action=null) {
+         $hosts = any(
+            $this->_require_trusted[$action],
+            $this->_require_trusted['all'],
+            config('trusted_hosts')
+         );
+
+         if (empty($hosts)) {
+            throw new ConfigurationError('No hosts given');
+         }
+
+         $client = $_SERVER['REMOTE_ADDR'];
+         $found = false;
+         foreach ((array) $hosts as $host) {
+            $host = strtr($host, array(
+               '*' => '[0-9]+',
+               '.' => '\\.',
+            ));
+            if (preg_match("/^$host$/", $client)) {
+               $found = true;
+               break;
+            }
+         }
+
+         return $found;
+      }
+
       # Check for a requirement for the given action
       function check_requirement($action, $requirement) {
          $requirement = '_require_'.$requirement;
@@ -192,50 +220,26 @@
 
          return $requirement === true
              or in_array($action, (array) $requirement)
+             or array_key_exists('all', (array) $requirement)
              or array_key_exists($action, (array) $requirement);
       }
 
       # Check request requirements
       function is_valid_request($action) {
          # Check for POST requirements
-         if (!$this->is_post() and $this->check_requirement($action, 'post')) {
+         if ($this->check_requirement($action, 'post') and !$this->is_post()) {
             $error = 'needs POST';
          }
 
 
          # Check for Ajax requirements
-         if (!$this->is_ajax() and $this->check_requirement($action, 'ajax')) {
+         if ($this->check_requirement($action, 'ajax') and !$this->is_ajax()) {
             $error = 'needs Ajax';
          }
 
          # Check for trusted host requirements
-         if ($this->check_requirement($action, 'trusted')) {
-            $hosts = any(
-               $this->_require_trusted[$action],
-               $this->_require_trusted['all'],
-               config('trusted_hosts')
-            );
-
-            if (empty($hosts)) {
-               throw new ConfigurationError('No hosts given');
-            }
-
-            $client = $_SERVER['REMOTE_ADDR'];
-            $found = false;
-            foreach ($hosts as $host) {
-               $host = strtr($host, array(
-                  '*' => '[0-9]+',
-                  '.' => '\\.',
-               ));
-               if (preg_match("/^$host$/", $client)) {
-                  $found = true;
-                  break;
-               }
-            }
-
-            if (!$found) {
-               $error = "untrusted host $client";
-            }
+         if ($this->check_requirement($action, 'trusted') and !$this->is_trusted($action)) {
+            $error = "untrusted host {$_SERVER['REMOTE_ADDR']}";
          }
 
          # Check for cross site request forgery
