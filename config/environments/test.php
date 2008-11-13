@@ -10,7 +10,7 @@
       # Cache store (memory, file, apc, or xcache)
       'cache_store'       => 'memory',
 
-      # Don't Send emails
+      # Don't send emails
       'send_mails'        => false,
 
       # Request forgery protection
