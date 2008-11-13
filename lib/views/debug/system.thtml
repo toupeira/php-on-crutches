@@ -1,6 +1,6 @@
 <?# $Id$ ?>
 <?
-   $title = 'System Information';
+   $this->set('title', 'System Information');
 
    $server = array(
       'Hostname'         => `hostname -f`.'('.$_SERVER['SERVER_ADDR'].')',

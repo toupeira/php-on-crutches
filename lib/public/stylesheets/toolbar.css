@@ -12,7 +12,7 @@
   left: 0;
   bottom: 0;
   padding: 2px 2px 0 0;
-  background: url(/images/framework/dot.png);
+  background: url(../../images/framework/dot.png);
   z-index: 1000;
   border-radius: 4px;
   -moz-border-radius: 4px;
@@ -23,7 +23,7 @@
   display: none;
   position: fixed;
   bottom: 29px;
-  background: url(/images/framework/dot.png);
+  background: url(../../images/framework/dot.png);
   border-radius: 6px;
   -moz-border-radius: 6px;
   -webkit-border-radius: 6px;
@@ -105,7 +105,7 @@
   margin-top: 2px;
   padding: 5px 5px 5px 24px;
   border: 1px solid #aaa;
-  background: url(/images/framework/icons/debug.png) #eee no-repeat 4px 4px;
+  background: url(../../images/framework/icons/debug.png) #eee no-repeat 4px 4px;
 }
 
 #debug-toolbar > div > div > a:hover {

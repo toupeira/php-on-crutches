@@ -119,6 +119,18 @@
             }
          }
 
+         if (!is_null($layout)) {
+            $this->_layout = $layout;
+         }
+
+         if ($this->_layout and !is_file($this->_layout)) {
+            if (is_file($_file = View::find_template("layouts/{$this->_layout}"))) {
+               $this->_layout = $_file;
+            } else {
+               throw new MissingTemplate("Layout '{$this->_layout}' not found");
+            }
+         }
+
          if ($this->_cache_key === true) {
             $this->_cache_key = "view_".urlencode($this->_template);
          }
@@ -149,18 +161,6 @@
          }
 
          $this->set('content_for_layout', $output);
-
-         if (!is_null($layout)) {
-            $this->_layout = $layout;
-         }
-
-         if ($this->_layout and !is_file($this->_layout)) {
-            if (is_file($_file = View::find_template("layouts/{$this->_layout}"))) {
-               $this->_layout = $_file;
-            } else {
-               throw new MissingTemplate("Layout '{$this->_layout}' not found");
-            }
-         }
 
          if (is_file($this->_layout)) {
             # Render the layout

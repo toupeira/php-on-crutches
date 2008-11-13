@@ -67,7 +67,7 @@ h1 dfn {
   margin-top: -1px;
   padding: 5px 0 5px 23px;
   color: #333;
-  background: url(/images/framework/icons/debug.png) no-repeat 3px 6px;
+  background: url(../../images/framework/icons/debug.png) no-repeat 3px 6px;
   text-decoration: none;
   font-size: larger;
   border-top: 1px solid #ccc;
@@ -127,7 +127,7 @@ label:after {
 
 #system h2 {
   padding: 2px 24px;
-  background: url(/images/framework/icons/system.png) 4px 4px no-repeat;
+  background: url(../../images/framework/icons/system.png) 4px 4px no-repeat;
   border-bottom: 1px solid #ccc;
   font-size: 12pt;
 }
