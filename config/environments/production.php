@@ -19,7 +19,7 @@
       # Merge CSS and JS files
       'merge_assets'      => true,
 
-      # Send emails to admin_email on exceptions
+      # Email addresses to notify on exceptions
       'notify_exceptions' => '',
    );
 
