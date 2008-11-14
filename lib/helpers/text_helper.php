@@ -22,10 +22,6 @@
       return html_entity_decode(strip_tags($text), ENT_COMPAT, 'UTF-8');
    }
 
-   function pluralize($count, $singular, $plural) {
-      return $count == 1 ? "$count $singular" : "$count $plural";
-   }
-
    function truncate($text, $length=40, $add_title=false) {
       if (strlen($text) > $length) {
          $truncated = mb_substr($text, 0, $length)."...";

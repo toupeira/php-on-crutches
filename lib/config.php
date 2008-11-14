@@ -187,7 +187,7 @@
       bind_textdomain_codeset($config['name'], 'UTF-8');
 
       # Set a locale, so $LANGUAGE will be respected
-      if (!setlocale(LC_MESSAGES, 'en_US.UTF-8')) {
+      if (!setlocale(LC_MESSAGES, 'en_US.UTF-8') or !setlocale(LC_CTYPE, 'en_US.UTF-8')) {
          log_warn("Couldn't load UTF-8 locale");
       }
 

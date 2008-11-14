@@ -140,6 +140,10 @@
          return false;
       }
 
+      function freeze() {
+         $this->_readonly = array_keys($this->attributes);
+      }
+
       # Set attributes
       function set_attributes(array $attributes=null, array $defaults=null) {
          if (is_array($defaults)) {
