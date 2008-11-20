@@ -261,7 +261,7 @@
          }
 
          # Check for cross site request forgery
-         if ($this->is_post() and config('form_token') and $this->check_requirement($action, 'form_token')) {
+         if ($this->is_post() and !$this->is_ajax() and config('form_token') and $this->check_requirement($action, 'form_token')) {
             if (!$this->params['_form_token']) {
                $error = 'missing form token';
             } elseif ($this->params['_form_token'] != $this->session['form_token']) {

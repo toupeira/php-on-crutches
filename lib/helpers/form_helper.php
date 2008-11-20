@@ -55,13 +55,6 @@
       return $_token;
    }
 
-   # Helper to generate a meta tag with the current form token (useful for Ajax)
-   function include_form_token() {
-      if ($token = form_token()) {
-         return javascript("_form_token = '$token'");
-      }
-   }
-
    function form_element($tag, $key, $default_value=null, array $options=null, array $defaults=null) {
       # Merge tag options
       $options = array_merge(
