@@ -84,6 +84,8 @@
       }
    }
 
+   chdir(ROOT);
+
    if ($add_externals) {
       print "  adding default SVN externals...\n";
       if (!is_dir('.svn')) {
@@ -91,13 +93,24 @@
          exit(1);
       }
 
-      rename('lib', 'lib.old');
-      run("svn propset svn:externals %s .", "lib	http://dev.diarrhea.ch/svn/php-on-crutches/trunk/lib");
-      run("svn propset svn:ignore '*' log");
-      run("svn propset svn:ignore '*' tmp");
-      run("svn propset svn:ignore 'all.*' public/javascripts public/stylesheets");
-      term_exec("svn commit .");
-      run("svn update .");
+      run("svn add -q log tmp public") or bail();
+      run("svn propset svn:ignore '*' log") or bail();
+      run("svn propset svn:ignore '*' tmp") or bail();
+      run("svn propset svn:ignore 'all.*' public/javascripts public/stylesheets") or bail();
+
+      if (!is_dir('lib/.svn')) {
+         rename('lib', 'lib.old');
+         if (run("svn propset svn:externals %s .", "lib	http://dev.diarrhea.ch/svn/php-on-crutches/trunk/lib")) {
+            rename('lib.old', 'lib');
+         }
+      }
+
+      term_exec("svn commit");
+      run("svn update");
+
+      if (is_dir('lib/.svn')) {
+         rm_rf('lib.old');
+      }
    }
 
 ?>
