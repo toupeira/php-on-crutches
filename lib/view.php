@@ -62,7 +62,11 @@
       }
 
       function __toString() {
-         return parent::__toString($this->_data);
+         return parent::__toString($this->_template);
+      }
+
+      function inspect() {
+         return parent::inspect($this->_data);
       }
 
       function get_template_name() {
@@ -170,7 +174,7 @@
          }
 
          # Provide a reference to the current view
-         $this->set('view', self::$current = $this);
+         self::$current = $this;
 
          if (!$output) {
             # Render the template
@@ -197,7 +201,7 @@
          }
 
          # Remove the reference to the view so it can get cleaned up
-         $this->set('view', self::$current = null);
+         self::$current = null;
 
          return $output;
       }

@@ -64,12 +64,12 @@
       }
    }
 
-   function generate_controller($name) {
+   function generate_controller($name, $parent='ApplicationController') {
       $name = strtolower($name);
       check_class($class = camelize($name).'Controller');
 
       create_file(CONTROLLERS.underscore($name).'_controller.php', array(
-         "class {$class} extends ApplicationController",
+         "class {$class} extends $parent",
          "{",
          "   function index() {",
          "   }",
@@ -93,7 +93,7 @@
       create_directory(VIEWS.$name);
    }
 
-   function generate_model($name=null, $model='Model', $mapper='ModelMapper') {
+   function generate_model($name=null, $parent='Model', $mapper='ModelMapper') {
       check_class($class = camelize($name));
 
       create_file(MODELS.underscore($name).'.php', array(
@@ -101,7 +101,7 @@
          "{",
          "}",
          "",
-         "class {$class} extends $model",
+         "class {$class} extends $parent",
          "{",
          "}",
       ));
@@ -118,13 +118,13 @@
       ));
    }
 
-   function generate_db_model($name) {
-      return generate_model($name, ActiveRecord, DatabaseMapper);
+   function generate_db_model($name, $parent=ActiveRecord, $mapper=DatabaseMapper) {
+      return generate_model($name, $parent, $mapper);
    }
 
    function generate_authentication($model_name, $controller_name) {
-      generate_db_model($model_name);
-      generate_controller($controller_name);
+      generate_db_model($model_name, AuthenticationModel);
+      generate_controller($controller_name, AuthenticationController);
 
       if (!$model = classify($model_name) or !is_subclass_of($model, Model)) {
          status('error', "Invalid model '$model_name'");
@@ -164,13 +164,13 @@
          . "\n"
          . "Available generators:\n"
          . "\n"
-         . "  controller NAME\n"
+         . "  controller NAME [PARENT]\n"
          . "    Generate a controller, including views folder and tests\n"
          . "\n"
-         . "  model NAME\n"
+         . "  model NAME [PARENT] [MAPPER]\n"
          . "    Generate a model, including mapper and tests\n"
          . "\n"
-         . "  db_model NAME\n"
+         . "  db_model NAME [PARENT] [MAPPER]\n"
          . "    Generate a database model, including mapper and tests\n"
          . "\n"
          . "  authentication MODEL CONTROLLER\n"
