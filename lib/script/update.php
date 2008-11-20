@@ -93,10 +93,10 @@
          exit(1);
       }
 
-      run("svn add -q log tmp public") or bail();
-      run("svn propset svn:ignore '*' log") or bail();
-      run("svn propset svn:ignore '*' tmp") or bail();
-      run("svn propset svn:ignore 'all.*' public/javascripts public/stylesheets") or bail();
+      run("svn add -Nq log tmp public public/javascripts public/stylesheets");
+      run("svn propset svn:ignore '*' log");
+      run("svn propset svn:ignore '*' tmp");
+      run("svn propset svn:ignore 'all.*' public/javascripts public/stylesheets");
 
       if (!is_dir('lib/.svn')) {
          rename('lib', 'lib.old');
