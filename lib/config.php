@@ -57,13 +57,10 @@
    #
 
    require CONFIG.'application.php';
-
-   if (is_file($config = CONFIG.'environments/'.ENVIRONMENT.'.php')) {
-      require $config;
-   }
-
    require CONFIG.'routes.php';
    require CONFIG.'database.php';
+
+   try_require(CONFIG.'environments/'.ENVIRONMENT.'.php');
 
    # Default framework settings
    $_CONFIG['defaults'] = array(

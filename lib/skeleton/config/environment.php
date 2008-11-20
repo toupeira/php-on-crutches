@@ -4,7 +4,7 @@
    #$_SERVER['ENVIRONMENT'] = 'development';
 
    # Framework directories
-   define('ROOT',         dirname(dirname(__FILE__)).'/');
+   define('ROOT',         dirname(dirname($_SERVER['PHP_SELF'])).'/');
    define('APP',          ROOT.'app/');
    define('CONFIG',       ROOT.'config/');
    define('DB',           ROOT.'db/');

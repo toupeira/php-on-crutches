@@ -1,4 +1,4 @@
-#!/usr/bin/rlwrap php5
+#!/usr/bin/php5
 <? # vim: ft=php
 # Copyright 2008 Markus Koller
 #

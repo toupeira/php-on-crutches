@@ -58,7 +58,7 @@
    # Execute a terminal application.
    function term_exec($command, $args=null) {
       log_info("Executing '$command'");
-      $args = func_get_args();
+      $args = array_slice(func_get_args(), 1);
       return proc_open(build_shell_command($command, $args), array(), $pipes);
    }
 
