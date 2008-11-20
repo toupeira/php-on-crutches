@@ -1,0 +1,13 @@
+<?# $Id$ ?>
+<? if ($constants): ?>
+<ul class="constants">
+<? foreach (sorted($constants) as $key => $data): ?>
+   <li id="constant_<?= $key ?>">
+      <code><?= h($key) ?> = <?= h($data['value']) ?></code>
+<?    if ($data['comment']): ?>
+      <?= render_comment($data['comment']) ?>
+<?    endif ?>
+   </li>
+<? endforeach ?>
+</ul>
+<? endif ?>

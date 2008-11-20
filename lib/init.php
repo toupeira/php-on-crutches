@@ -11,12 +11,14 @@
    ini_set('display_errors', true);
 
    # Load utility libraries
-   foreach (glob(LIB.'util/*.php') as $util) {
-      require $util;
-   }
+   require LIB.'util/init.php';
 
    # Set the current environment
-   define_default('ENVIRONMENT', any($_SERVER['ENVIRONMENT'], 'development'));
+   define_default('ENVIRONMENT', any(
+      $_SERVER['ENVIRONMENT'],
+      $_ENV['ENVIRONMENT'],
+      'development'
+   ));
 
    # Load framework libraries
    require LIB.'errors.php';
@@ -25,10 +27,11 @@
    require LIB.'session.php';
    require LIB.'config.php';
 
-   require LIB.'router.php';
    require LIB.'dispatcher.php';
+   require LIB.'router.php';
    require LIB.'controller.php';
    require LIB.'model.php';
+   require LIB.'mapper.php';
    require LIB.'view.php';
    require LIB.'mail.php';
 

@@ -16,14 +16,12 @@
       static public $params;
 
       static public $start_time = 0;
-      static public $render_time = 0;
       static public $db_queries = 0;
       static public $db_queries_sql = array();
 
       # Run a request for the given path.
       static function run($path) {
          self::$start_time = microtime(true);
-         self::$render_time = 0;
          self::$db_queries = 0;
          self::$db_queries_sql = array();
 
@@ -60,6 +58,10 @@
          self::$controller = new $class(self::$params);
          self::$controller->perform($action, $args);
 
+         if (log_level(LOG_INFO)) {
+            self::log_footer();
+         }
+
          # Print the output
          if (config('debug_toolbar')) {
             # Add the debug toolbar if enabled
@@ -73,10 +75,6 @@
             log_level_set($log_level);
          } else {
             print self::$controller->output;
-         }
-
-         if (log_level(LOG_INFO)) {
-            self::log_footer();
          }
 
          return self::$controller;;
@@ -107,14 +105,8 @@
          $text .= ' | Size: %.2fK';
          $args[] = strlen(self::$controller->output) / 1024;
 
-         if ($render_time = Dispatcher::$render_time) {
-            $text .= ' | Rendering: %.5f (%d%%)';
-            $args[] = $render_time;
-            $args[] = 100 * $render_time / $time;
-         }
-
          if ($db_queries = Dispatcher::$db_queries) {
-            $text .= ' | DB: '.pluralize($db_queries, 'query', 'queries');
+            $text .= ' | DB: '.pluralize($db_queries, 'query');
          }
 
          $text .= ' | Status: %s';
@@ -126,7 +118,7 @@
 
          array_unshift($args, $text);
 
-         log_info(call_user_func_array(sprintf, $args));
+         log_info(call_user_func_array('sprintf', $args));
       }
    }
 

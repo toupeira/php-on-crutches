@@ -79,10 +79,10 @@
       }
 
       # Check if an error is set for this field
-      if (array_delete($options, 'errors')
-          or (Dispatcher::$controller->has_errors($key)
-              and !in_array($options['type'], array('checkbox', 'radio')))
-      ) {
+      if ((array_delete($options, 'errors') or
+            (Dispatcher::$controller and Dispatcher::$controller->has_errors($key)))
+               and !in_array($options['type'], array('checkbox', 'radio')))
+      {
          $options['class'] .= ' error';
          $options['onchange'] = "$(this).removeClassName('error')";
       }
@@ -120,7 +120,7 @@
    }
 
    function label($key, $label=null, array $options=null) {
-      return content_tag('label', any($label, _(humanize($key))), array_merge(
+      return content_tag('label', any($label, humanize($key)), array_merge(
          (array) $options, array('for' => $key,)
       ));
    }

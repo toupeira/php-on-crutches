@@ -1,5 +1,6 @@
 <?# $Id$ ?>
 <?
+
    $all_queries = array();
    foreach (Dispatcher::$db_queries_sql as $database => $queries) {
       $database = '<strong>'.h($database).':</strong>';
@@ -9,6 +10,6 @@
    }
 ?>
 <? if ($all_queries): ?>
-<a><?= image_tag('framework/icons/database.png') ?> DB: <?= Dispatcher::$db_queries ?> queries</a>
-<div><?= list_tag($all_queries) ?></div>
+<a><?= icon('framework/icons/database') ?> DB: <?= pluralize(Dispatcher::$db_queries, 'query') ?></a>
+<div><?= list_tag($all_queries, array('escape' => false)) ?></div>
 <? endif ?>

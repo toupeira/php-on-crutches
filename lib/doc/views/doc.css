@@ -1,0 +1,251 @@
+body {
+  margin: 0.5em;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: small;
+}
+
+a { color: #333; }
+a:visited { color: #777; }
+
+#menu {
+  position: fixed;
+  top: 0.5em;
+  left: 0.5em;
+  bottom: 0.5em;
+  width: 20em;
+  border: 1px solid #ddd;
+  background: #f8f8f8;
+}
+
+#menu div { position: relative; }
+#menu #files { height: 28%; }
+#menu #classes { height: 35%; }
+#menu #functions { height: 35%; }
+
+#menu div h3 {
+  padding: 0 0.5em;
+}
+
+#menu div div {
+  position: absolute;
+  left: 0.5em;
+  right: 0.5em;
+  top: 1.5em;
+  bottom: 0.5em;
+  height: auto;
+  overflow: auto;
+  background: white;
+  border: 1px solid #ddd;
+}
+
+#menu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0.5em;
+}
+
+#content {
+  position: fixed;
+  top: 0.5em;
+  left: 21.5em;
+  bottom: 0.5em;
+  right: 0.5em;
+  border: 1px solid #ddd;
+}
+
+#content iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+#title {
+  margin: 0 0 1em;
+  padding: 0.2em 0.5em;
+  background: #eee;
+  border: 1px solid #bbb;
+}
+
+#title.abstract {
+  background: #eed;
+  border-color: #bba;
+}
+
+#title.static {
+  background: #dcd;
+  border-color: #b9b;
+}
+
+#title table {
+  margin-bottom: 0.2em;
+  font-size: smaller;
+}
+
+#title th {
+  text-align: left;
+  color: #555;
+  padding-right: 0.5em;
+}
+
+h1, h2, h3, #title {
+  font-family: "Arial", sans-serif;
+}
+
+h1 {
+  margin: 0.1em 0;
+  font-size: 2em;
+  letter-spacing: -1px;
+}
+
+h2 {
+  margin: 1em 0 0.5em;
+  padding: 0.4em;
+  font-size: 1.5em;
+  letter-spacing: -1px;
+  border: 1px solid;
+}
+
+h3 {
+  margin: 0.2em 0;
+  font-size: 1.2em;
+}
+
+h2.classes {
+  background: #fdc;
+  border-color: #dba;
+}
+
+h2.constants {
+  background: #fed;
+  border-color: #dcb;
+}
+
+h2.properties {
+  background: #cdf;
+  border-color: #abd;
+}
+
+h2.protected.properties, h2.private.properties {
+  background: #bce;
+  border-color: #9ac;
+}
+
+h2.functions, h2.methods {
+  background: #cfd;
+  border-color: #adb;
+}
+
+h2.public.class.methods {
+  background: #fef;
+  border-color: #dbd;
+}
+
+h2.protected.class.methods, h2.private.class.methods {
+  background: #ede;
+  border-color: #cac;
+}
+
+h2.protected.instance.methods, h2.private.instance.methods {
+  background: #bec;
+  border-color: #9ca;
+}
+
+ul {
+  margin: 0 0 1em;
+  padding-left: 2em;
+  list-style-type: square;
+}
+
+ul strong a, ul strong a:visited {
+  color: black;
+}
+
+ul.properties, ul.constants {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+}
+
+div.comment {
+  margin: 0.5em 0;
+  padding: 0 0.5em;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+}
+
+ul div.comment {
+  margin: 0.2em 0 0.5em;
+  background: white;
+}
+
+div.comment h1, div.comment h2, div.comment h3 {
+  margin: 0.5em 0;
+  padding: 0;
+  border: none;
+}
+
+div.comment h3 {
+  margin-top: 1em;
+}
+
+div.comment th {
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+div.comment th.title {
+  padding-top: 1em;
+}
+
+div.comment td {
+  vertical-align: top;
+}
+
+div.comment code {
+  background: #eee;
+  padding: 0.1em;
+}
+
+div.source {
+  margin: 0.5em 1em;
+  padding: 0.5em;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+}
+
+div.function {
+  padding: 0.5em;
+  margin-bottom: 1em;
+  border: 1px solid white;
+}
+
+div.function h3 {
+  margin: 0 0 0.5em;
+  border-bottom: 1px solid #ddd;
+}
+
+div.function h3 a {
+  color: black;
+  text-decoration: none;
+}
+
+div.function small a {
+  color: #888;
+  padding: 0 0.5em;
+}
+
+div.function .flags { color: #b06; }
+div.function .public { color: #080; }
+div.function .protected { color: #060; }
+div.function .private { color: #710; }
+div.function .arguments { color: #888; }
+
+#menu, #menu div div, #content, #title, h2, ul, div.comment, div.function, div.source {
+  border-radius: 0.5em;
+  -moz-border-radius: 0.5em;
+  -webkit-border-radius: 0.5em;
+}

@@ -10,7 +10,6 @@
    class QuerySet extends Object implements Iterator, ArrayAccess, Countable
    {
       protected $_mapper;
-      protected $_table;
       protected $_statement;
       protected $_objects;
 
@@ -33,11 +32,10 @@
 
       function __construct(DatabaseMapper $mapper, array $options=null) {
          $this->_mapper = $mapper;
-         $this->_table = $mapper->table;
 
          $this->_options = array_merge(array(
-            'select' => "`{$this->_table}`.*",
-            'from'   => "`{$this->_table}`",
+            'select' => "`{$this->table}`.*",
+            'from'   => "`{$this->table}`",
             'join'   => null,
             'where'  => null,
             'group'  => null,
@@ -49,10 +47,30 @@
       }
 
       function __toString() {
-         return parent::__toString(array(
-            'model' => $this->_mapper->model,
+         return parent::__toString($this->model);
+      }
+
+      function inspect() {
+         return parent::inspect(array(
+            'model' => $this->model,
             'sql'    => $this->sql,
          ));
+      }
+
+      function to_json() {
+         return '['.implode(",\n", array_collect($this->objects, 'to_json')).']';
+      }
+
+      function to_xml() {
+         return implode("\n", array_collect($this->objects, 'to_xml'));
+      }
+
+      function get_model() {
+         return $this->_mapper->model;
+      }
+
+      function get_table() {
+         return $this->_mapper->table;
       }
 
       function get_statement() {
@@ -73,7 +91,7 @@
             $this->_position = $current_pos;
          } else {
             # Statement wasn't executed yet, load all objects in one run
-            $this->_objects = $this->statement->fetch_all_load($this->_mapper->model);
+            $this->_objects = $this->statement->fetch_all_load($this->model);
          }
 
          return $this->_objects;
@@ -129,8 +147,27 @@
          $options = &$this->_options;
          $params = array();
 
-         $sql = 'SELECT '.implode(', ', (array) $options['select'])
-                .' FROM '.implode(', ', (array) $options['from']);
+         $select = array();
+         foreach ((array) $options['select'] as $column => $alias) {
+            if (is_numeric($column)) {
+               $select[] = $alias;
+            } else {
+               $select[] = "$column AS $alias";
+            }
+         }
+
+         $sql = 'SELECT '.implode(', ', $select);
+
+         $from = array();
+         foreach ((array) $options['from'] as $table => $alias) {
+            if (is_numeric($table)) {
+               $from[] = $alias;
+            } else {
+               $from[] = "$table $alias";
+            }
+         }
+
+         $sql .= ' FROM '.implode(', ', $from);
 
          if ($join = $options['join']) {
             $sql .= ' '.implode(' ', (array) $join);
@@ -166,7 +203,7 @@
 
             if ($count > $size) {
                $this->_pages = ceil($count / $size);
-               $this->_page = max(1, min($this->_pages, intval($_REQUEST['page'])));
+               $this->_page = max(1, min($this->_pages, intval(Dispatcher::$params['page'])));
                $options['limit'] = $size;
                $options['offset'] = ($this->_page - 1) * $size;
             }
@@ -261,8 +298,8 @@
          $this->_statement = $this->_count = $this->_objects = null;
       }
 
-      function find($id) {
-         if (!is_null($id)) {
+      function find($conditions) {
+         if (!is_null($conditions)) {
             return $this->where(func_get_args())->order()->first;
          }
       }
@@ -276,6 +313,21 @@
          $this->_params = $params;
 
          return $this;
+      }
+
+      function destroy_all($conditions=null) {
+         if (is_null($conditions)) {
+            throw new ApplicationError("Not unless you really want to");
+         } elseif ($conditions and $conditions !== true) {
+            $this->where(func_get_args());
+         }
+
+         $status = false;
+         foreach ($this->objects as $object) {
+            $status = $object->destroy();
+         }
+
+         return $status;
       }
 
       # Handle automatic methods
@@ -321,8 +373,10 @@
             return $this->replace(substr($method, 8), $args);
          } elseif (substr($method, 0, 6) == 'merge_') {
             return $this->merge(substr($method, 6), $args);
-         } elseif (in_array($method, array('group', 'order', 'limit', 'offset'))) {
+         } elseif (in_array($method, array('group', 'order'))) {
             return $this->replace($method, $args);
+         } elseif (in_array($method, array('limit', 'offset'))) {
+            return $this->replace($method, $args[0]);
          } else {
             return $this->merge($method, $args);
          }
@@ -353,22 +407,32 @@
          }
       }
 
-      # Return a hash of the given keys and values, with an optional blank value first
-      # (useful for building drop-down boxes)
-      function map($key='id', $value='name', $blank=true) {
-         if ($blank === true) {
-            $map = array(null => '');
-         } elseif ($blank !== false) {
-            $map = array(null => $blank);
-         } else {
-            $map = array();
+      # Exclude the given keys from the query
+      function without($keys) {
+         if (!is_array($keys)) {
+            $keys = func_get_args();
          }
 
-         foreach ($this->objects as $object) {
-            $map[$object->$key] = $object->$value;
+         $new_keys = array();
+         foreach ($this->_mapper->attributes as $key => $column) {
+            if (!in_array($key, $keys)) {
+               $new_keys[] = "`{$this->table}`.$key";
+            }
          }
 
-         return $map;
+         return $this->replace('select', $new_keys);
+      }
+
+      # Exclude all TEXT and BLOB columns
+      function without_blobs() {
+         $keys = array();
+         foreach ($this->_mapper->attributes as $key => $column) {
+            if ($column['type'] == 'text' or $column['blob'] == 'blob') {
+               $keys[] = $key;
+            }
+         }
+
+         return $this->without($keys);
       }
 
       # Return an array with all values for the given key,
@@ -389,19 +453,62 @@
          return $values;
       }
 
-      # Sort the query set by the current request parameters
-      function get_sorted() {
-         if ($this->_mapper->attributes[$sort = $_REQUEST['sort']]) {
-            $this->_sorted_key = $sort;
-            $this->order("`{$this->_table}`.`$sort`".(isset($_REQUEST['desc']) ? ' DESC' : ' ASC'));
+      # Return a hash of the given keys and values, with an optional blank value first
+      # (useful for building drop-down boxes)
+      function map($key='id', $value='name', $blank=true) {
+         if ($blank === true) {
+            $map = array(null => '');
+         } elseif ($blank !== false) {
+            $map = array(null => $blank);
+         } else {
+            $map = array();
          }
+
+         foreach ($this->objects as $object) {
+            $map[$object->$key] = $object->$value;
+         }
+
+         return $map;
+      }
+
+      # Check if the given key exists in the query
+      function has_key($key) {
+         if (isset($this->_mapper->attributes[$key])) {
+            return 'table';
+         } else {
+            # If the attribute doesn't exist in the table, look if an aliased column exists
+            foreach ((array) $this->_options['select'] as $key => $value) {
+               if (!is_numeric($key) and $value == $key) {
+                  return 'alias';
+               }
+            }
+         }
+         
+         return false;
+      }
+
+      # Sort the query set by the current request parameters
+      function sorted() {
+         $sort_key = Dispatcher::$params['sort'];
+         $type = $this->has_key($sort_key);
+
+         if ($type == 'table') {
+            $sort_key = "`{$this->table}`.`$sort_key`";
+         } elseif ($type == 'alias') {
+            $sort_key = "`$sort_key`";
+         } else {
+            return $this;
+         }
+
+         $this->_sorted_key = $sort_key;
+         $this->order($sort_key.(isset(Dispatcher::$params['desc']) ? ' DESC' : ' ASC'));
 
          return $this;
       }
 
       # Filter the query set by the current request parameters
-      function get_filtered() {
-         if (is_array($filter = $_REQUEST['filter'])) {
+      function filtered() {
+         if (is_array($filter = Dispatcher::$params['filter'])) {
             foreach ($filter as $key => $value) {
                if (substr($key, -5) == '_like') {
                   $key = substr($key, 0, -5);
@@ -410,13 +517,20 @@
                   $like = false;
                }
 
-               if ($this->_mapper->attributes[$key]) {
-                  $keys[] = $key;
-                  if ($like) {
-                     $conditions["`{$this->_table}`.`$key` LIKE ?"] = "%$value%";
-                  } else {
-                     $conditions["`{$this->_table}`.`$key` = ?"] = $value;
-                  }
+               $type = $this->has_key($key);
+               if ($type == 'table') {
+                  $filter_key = "`{$this->table}`.`$key`";
+               } elseif ($type == 'alias') {
+                  $filter_key = "`$key`";
+               } else {
+                  continue;
+               }
+
+               $keys[] = $key;
+               if ($like) {
+                  $conditions["$filter_key LIKE ?"] = "%$value%";
+               } else {
+                  $conditions["$filter_key = ?"] = $value;
                }
             }
 
@@ -430,7 +544,7 @@
       }
 
       # Paginate the query set by the current request parameters
-      function get_paginated() {
+      function paginated() {
          $this->_paginate = true;
          $this->_sql = null;
          return $this;
@@ -445,7 +559,7 @@
       function current() {
          if ($object = $this->_objects[$this->_position]) {
             return $object;
-         } elseif ($object = $this->statement->fetch_load($this->_mapper->model)) {
+         } elseif ($object = $this->statement->fetch_load($this->model)) {
             return $this->_objects[$this->_position] = $object;
          }
       }

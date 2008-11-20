@@ -44,8 +44,8 @@
          return $this->_view->layout = $layout;
       }
 
-      function set($key, $value) {
-         $this->_view->set($key, $value);
+      function set($key, $value=null) {
+         $this->_view->set($key, &$value);
          return $this;
       }
 
@@ -84,9 +84,10 @@
       }
 
       function __get($key) {
-         $getter = "get_$key";
-         if (method_exists($this, $getter)) {
+         if (method_exists($this, $getter = "get_$key")) {
             return $this->$getter();
+         } elseif (method_exists($this, $key)) {
+            return $this->$key();
          } elseif (property_exists($this->_mailer, $key = camelize($key))) {
             return $this->_mailer->$key;
          } else {
@@ -95,8 +96,7 @@
       }
 
       function __set($key, $value) {
-         $setter = "set_$key";
-         if (method_exists($this, $setter)) {
+         if (method_exists($this, $setter = "set_$key")) {
             $this->$setter(&$value);
          } elseif (property_exists($this->_mailer, $key = camelize($key))) {
             $this->_mailer->$key = $value;

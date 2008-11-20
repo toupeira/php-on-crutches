@@ -18,21 +18,61 @@
       }
    }
 
+   function to_string($value) {
+      if (is_object($value)) {
+         if (method_exists($value, '__toString') and !$value instanceof Exception) {
+            return $value->__toString();
+         } else {
+            return get_class($value);
+         }
+      } elseif (is_array($value)) {
+         return trim(print_r($value, true));
+      } elseif (is_resource($value)) {
+         ob_start();
+         var_dump($value);
+         return trim(ob_get_clean());
+      } else {
+         return var_export($value, true);
+      }
+   }
+
+   function to_json($data) {
+      return json_encode($data);
+   }
+
+   function to_xml($data=null) {
+      $data = is_array($data) ? $data : func_get_args();
+
+      $xml = '';
+      foreach ($data as $key => $value) {
+         if (is_array($value)) {
+            $value = to_xml($value);
+         } else {
+            $value = h(to_string($value));
+         }
+
+         $xml .= content_tag($key, $value);
+      }
+
+      return $xml;
+   }
+
    function strip_html($text) {
       return html_entity_decode(strip_tags($text), ENT_COMPAT, 'UTF-8');
    }
 
-   function truncate($text, $length=40, $add_title=false) {
+   # Truncate text to a given length. If $add_title is set, the full text
+   # will be added as a tooltip.
+   function truncate($text, $length=40, $add_title=false, $add='...') {
       if (strlen($text) > $length) {
-         $truncated = mb_substr($text, 0, $length)."...";
-
+         $truncated = mb_substr($text, 0, $length);
          if ($add_title) {
-            $truncated = '<span title="'.h($text).'">'.$truncated.'</span>';
+            return '<span title="'.h($text).'">'.h($truncated).$add.'</span>';
+         } else {
+            return $truncated.$add;
          }
-
-         return $truncated;
       } else {
-         return $text;
+         return ($add_title ? h($text) : $text);
       }
    }
 
@@ -145,7 +185,7 @@
    function textilize($text) {
       static $_textile;
       if (!$_textile) $_textile = new Textile();
-      return $_textile->TextileThis($text);
+      return $_textile->process($text);
    }
 
    function syntax_highlight($code, $lang='php') {

@@ -1,0 +1,35 @@
+<?# $Id$ ?>
+<?
+   $flags = implode(' ', $class['flags']);
+?>
+<div id="title"<?= $flags ? ' class="'.$flags.'"' : '' ?>>
+   <h1>
+      <?= $class_name ?>
+      <?= $flags ? ' <small>('.ucwords($flags).')</small>' : '' ?>
+   </h1>
+   <table>
+   <tr>
+      <th>File:</th>
+      <td><code><?= doc_link($class['file'], $all_files[$class['file']]) ?></code></td>
+   </tr>
+<? if ($parent = $class['parent']): ?>
+   <tr>
+      <th>Extends:</th>
+      <td><?= class_link($parent) ?></td>
+   </tr>
+<? endif ?>
+<? if ($interfaces = $class['interfaces']): ?>
+   <tr>
+      <th>Implements:</th>
+      <td><code><?= implode(', ', $interfaces) ?></code></td>
+   </tr>
+<? endif ?>
+   </table>
+</div>
+<?= render_comment($class['comment']) ?>
+<? if ($class['constants']): ?>
+<h2 class="constants">Class Constants</h2>
+<?= $this->render_partial('constants', array('constants' => $class['constants'])) ?>
+<? endif ?>
+<?= render_items($this, $class, 'properties') ?>
+<?= render_items($this, $class, 'methods') ?>

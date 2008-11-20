@@ -1,6 +1,7 @@
 <?# $Id$ ?>
 <?
    $this->set('title', 'System Information');
+   $this->set('icon', 'system');
 
    $server = array(
       'Hostname'         => `hostname -f`.'('.$_SERVER['SERVER_ADDR'].')',
@@ -20,6 +21,9 @@
       'Session Store'    => config('session_store') ? config('session_store') : 'disabled',
       'Cache Store'      => config('cache_store'),
    );
+
+   $configuration = config('application');
+   ksort($configuration);
 ?>
 <br>
 <div id="system">
@@ -27,4 +31,6 @@
 <?= table_tag($server, array('class' => 'scaffold-show')) ?>
 <h2>Framework</h2>
 <?= table_tag($framework, array('class' => 'scaffold-show')) ?>
+<h2>Configuration</h2>
+<?= table_tag($configuration, array('class' => 'scaffold-show')) ?>
 </div>

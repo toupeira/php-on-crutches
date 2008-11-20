@@ -7,9 +7,14 @@
 # $Id$
 #
 
-   # Convert an array into a string
-   function array_to_str(array $array) {
-      return preg_replace('/\s+/', ' ', var_export($array, true));
+   # Return the first value of an array
+   function first($array) {
+      return $array[0];
+   }
+
+   # Return the first value of an array
+   function last($array) {
+      return $array[count($array) - 1];
    }
 
    # Get object property or array key
@@ -36,6 +41,11 @@
       } else {
          throw new TypeError($object);
       }
+   }
+
+   # Convert an array into a string
+   function array_to_str(array $array) {
+      return preg_replace('/\s+/', ' ', var_export($array, true));
    }
 
    # Get one or more key/value pairs from an array
@@ -162,11 +172,11 @@
    function array_update(array &$array) {
       $args = array_slice(func_get_args(), 1);
       array_unshift($args, $array);
-      return $array = call_user_func_array(array_merge, $args);
+      return $array = call_user_func_array('array_merge', $args);
    }
 
    # Call a method on each object
-   function array_send($objects, $method, $args=null) {
+   function array_collect($objects, $method, $args=null) {
       if (!is_array($args)) {
          $args = array_slice(func_get_args(), 2);
       }
@@ -186,6 +196,17 @@
       } else {
          return array_shift($array);
       }
+   }
+
+   # Return a sorted array
+   function sorted(array $array) {
+      if (isset($array[0])) {
+         sort($array);
+      } elseif (!empty($array)) {
+         ksort($array);
+      }
+
+      return $array;
    }
 
 ?>

@@ -1,0 +1,37 @@
+<?# $Id$ ?>
+<? if ($properties): ?>
+<? foreach (sorted($properties) as $property => $data): ?>
+<?
+   $content = h($property);
+   if ($data['value']) {
+      $content .= ' = '.h($data['value']);
+   }
+   $content = content_tag('code', $content);
+
+   $perm = '';
+   if ($property[0] == '_') {
+      $name = substr($property, 1);
+      if ($class['public_instance_methods']["get_$name"]) {
+         $perm .= link_to('R', "#function_get_$name");
+      }
+      if ($class['public_instance_methods']["set_$name"]) {
+         $perm .= link_to('W', "#function_set_$name");
+      }
+   }
+
+   if ($perm) {
+      $content .= ' ['.content_tag('strong', $perm).']';
+   }
+
+   if ($data['comment']) {
+      $content .= render_comment($data['comment']);
+   }
+
+   if ($data['visibility'] == 'public' or $data['comment'] or $perm):
+?>
+<li id="property_<?= $property ?>">
+   <?= $content ?>
+</li>
+<? endif ?>
+<? endforeach ?>
+<? endif ?>

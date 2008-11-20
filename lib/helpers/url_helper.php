@@ -23,7 +23,7 @@
       if (is_null($path)) {
          return;
 
-      } elseif (is_array($path)) {
+      } elseif (is_array($path) or is_object($path)) {
          # Generate path from route parameters
          $path = Router::generate($path);
 
@@ -54,6 +54,16 @@
          }
 
          $path = Router::generate($params);
+
+      } elseif (substr($path, 0, 2) == './') {
+         if ($options['full'] or $options['ssl']) {
+            $path = substr($path, 1);
+            if ($request = trim(dirname($_SERVER['REQUEST_URI']), '/')) {
+               $path = "/$request$path";
+            }
+         } else {
+            return substr($path, 2);
+         }
 
       } elseif (preg_match('#^(\w+://|mailto:).#', $path)) {
          # Return fully-qualified URLs unchanged
@@ -101,36 +111,45 @@
    }
 
    # Build a link tag
-   function link_to($title, $path, array $options=null, array $link_options=null) {
+   function link_to($title, $path, array $options=null, array $url_options=null) {
       $confirm = add_confirm_options($options);
 
       # Send a POST request by dyamically building a form element
       if ($options['post'] and $path != '#') {
          unset($options['post']);
-         $options['onclick'] = "var f = document.createElement('form');"
-                             . "f.style.display = 'none'; this.parentNode.appendChild(f);"
-                             . "f.method = 'POST'; f.action = this.href; f.submit()";
+         $js = "var f = document.createElement('form'); f.method = 'post'; f.action = this.href; "
+             . "f.style.display = 'none'; ";
+
+         if (config('form_token')) {
+            # Add form token if required
+            $js .= "t = document.createElement('input'); t.type = 'hidden'; t.name = '_form_token'; "
+                 . "t.value = '".form_token()."'; f.appendChild(t); ";
+         }
+
+         $js .= "this.parentNode.appendChild(f); f.submit()";
 
          if ($confirm) {
             # Wrap in confirmation if requested
-            $options['onclick'] = "if (confirm('$confirm')) { {$options['onclick']}; }";
+            $js = "if (confirm('$confirm')) { $js; }";
          }
 
-         $options['onclick'] .= "; return false";
+         $js .= "; return false";
+
+         $options['onclick'] = $js;
       }
 
-      return content_tag('a', $title, $options, array('href' => url_for($path, $link_options)));
+      return content_tag('a', $title, $options, array('href' => url_for($path, $url_options)));
    }
 
    # Build a link button
-   function button_to($title, $path, array $options=null, array $link_options=null) {
+   function button_to($title, $path, array $options=null, array $url_options=null) {
       add_confirm_options(&$options);
 
       $method = any($options['post'] ? 'POST' : null, $options['method'], 'GET');
       unset($options['post']);
       unset($options['method']);
 
-      $path = url_for($path, $link_options);
+      $path = url_for($path, $url_options);
 
       if ($method == 'GET') {
          $options['onclick'] = "location.href = '$path'; return false";

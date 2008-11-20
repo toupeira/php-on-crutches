@@ -64,7 +64,7 @@
             $padding = str_repeat(' ', 7 + strlen($query['table']));
 
             $text = "   [1m*[0m [1;36m{$query['table']}[0m: "
-                  . pluralize($query['rows'], 'row', 'rows')
+                  . pluralize($query['rows'], 'row')
                   . " [{$query['select_type']}] <{$query['type']}> ";
 
             if ($key = $query['key']) {

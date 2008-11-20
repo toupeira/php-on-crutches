@@ -1,5 +1,5 @@
 #!/usr/bin/php5
-<?
+<? # vim: ft=php
 # Copyright 2008 Markus Koller
 #
 # This program is free software; you can redistribute it and/or modify
@@ -30,9 +30,9 @@ TXT;
 
    function xgettext($template, $dir=null) {
       $files = find_files($dir, '-name "*.php" -o -name "*.thtml"');
-      $files = implode(' ', array_map(escapeshellarg, $files));
+      $files = implode(' ', array_map('escapeshellarg', $files));
 
-      print "Updating $template messages...\n";
+      print "Updating [1m$template[0m messages...\n";
       $file = LANG.$template.'.pot';
       file_put_contents($file, $GLOBALS['header']);
       $command = "";
@@ -54,7 +54,7 @@ TXT;
    xgettext('framework', LIB);
    xgettext('application', APP);
 
-   print "Updating database attributes...\n";
+   print "Updating [1mmodel[0m messages...\n";
 
    $attributes = array();
    $file = fopen(LANG.'attributes.pot', 'w');
@@ -67,8 +67,16 @@ TXT;
       if (is_subclass_of($class, Model)) {
          $model = new $class();
          $messages = array();
+
+         $key = humanize($class, false);
+         if (!in_array($key, $attributes)) {
+            $attributes[] = $key;
+            $messages[] = "msgid \"$key\"\n"
+                        . "msgstr \"\"\n\n";
+         }
+
          foreach ($model->attributes as $key => $value) {
-            $key = humanize($key);
+            $key = humanize($key, false);
             if (!in_array($key, $attributes)) {
                $attributes[] = $key;
                $messages[] = "msgid \"$key\"\n"
@@ -87,7 +95,7 @@ TXT;
    print "\nUpdating translations...\n";
 
    foreach ($languages as $language) {
-      print "  $language: ";
+      print "  [1m$language[0m: ";
       $path = LANG.$language."/LC_MESSAGES/";
       $all = $path.$domain.'.po';
       rm_f($all);

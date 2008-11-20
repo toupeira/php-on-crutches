@@ -1,15 +1,17 @@
 <?# $Id$ ?>
 <a><?= image_tag('framework/icons/debug.png') ?> Debug</a>
 <div>
-   <?= link_to('System', ':debug/system') ?>
-   <?= link_to('Model Browser', ':debug/models') ?>
-   <?= link_to('SQL Console', ':debug/sql') ?>
-   <?= link_to('PHP Console', ':debug/php') ?>
+   <?= link_to(icon('framework/icons/home').' Homepage', '') ?>
    <br />
-   <?= link_to('Hide toolbar', '#', array(
+   <?= link_to(icon('framework/icons/system').' System', ':debug/system') ?>
+   <?= link_to(icon('framework/icons/database').' Model Browser', ':debug/models') ?>
+   <?= link_to(icon('framework/icons/database').' SQL Console', ':debug/sql') ?>
+   <?= link_to(icon('framework/icons/console').' PHP Console', ':debug/php') ?>
+   <br />
+   <?= link_to(icon('framework/icons/debug').' Hide toolbar', '#', array(
           'onclick' => '$("debug-toolbar").remove()'
        )) ?>
-   <?= link_to('Disable toolbar', '#', array(
+   <?= link_to(icon('framework/icons/debug').' Disable toolbar', '#', array(
           'onclick' => 'DebugToolbar.toggle()'
        )) ?>
 </div>

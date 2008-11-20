@@ -1,7 +1,6 @@
 <?
 
-   # Fix magic quotes, adopted from http://nyphp.org/phundamentals/storingretrieving.php
-
+   # Revert magic quotes if enabled, adopted from http://nyphp.org/phundamentals/storingretrieving.php
    function fix_magic_quotes($var=null) {
       # disable magic_quotes_runtime
       set_magic_quotes_runtime(0);

@@ -13,10 +13,16 @@
          $key = 'info';
       }
 
-      Dispatcher::$controller->msg[$key][] = $message;
+      if (Dispatcher::$controller) {
+         Dispatcher::$controller->msg[$key][] = $message;
+      }
    }
 
    function messages($keys=null) {
+      if (!Dispatcher::$controller) {
+         return false;
+      }
+
       $keys = func_get_args();
       $messages = '';
 
@@ -26,7 +32,13 @@
                continue;
             } else {
                if (is_array($message)) {
-                  $message = (count($message) == 1 ? $message[0] : list_tag($message));
+                  if (count($message) == 1) {
+                     $message = h($message[0]);
+                  } else {
+                     $message = list_tag($message, array('escape' => true));
+                  }
+               } else {
+                  $message = h($message);
                }
 
                $message = preg_replace('/\[\[([^]]+)\]\]/', '<code>$1</code>', $message);

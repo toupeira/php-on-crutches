@@ -1,0 +1,5 @@
+<?# $Id$ ?>
+<?
+   $this->set('title', 'SQL Console');
+   $this->set('icon', 'database');
+?>

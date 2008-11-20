@@ -10,7 +10,7 @@
    require LIB.'database/query_set.php';
    require LIB.'database/association.php';
 
-   abstract class DatabaseMapper extends Object
+   abstract class DatabaseMapper extends ModelMapper
    {
       static function load($model) {
          static $_cache;
@@ -25,14 +25,11 @@
          }
       }
 
-      protected $_model;
       protected $_table;
       protected $_primary_key = 'id';
       protected $_database = 'default';
       protected $_connection;
 
-      protected $_attributes;
-      protected $_defaults;
       protected $_order;
       protected $_page_size;
 
@@ -42,11 +39,11 @@
       protected $_belongs_to;
 
       function __construct() {
-         $this->_model = substr(get_class($this), 0, -6);
+         parent::__construct();
 
          if (empty($this->_database)) {
             throw new ConfigurationError("No database set for model '{$this->_model}'");
-         } elseif (empty($this->_table)) {
+         } elseif (empty($this->_table) and !($this->_table = tableize($this->_model))) {
             throw new ConfigurationError("No table set for model '{$this->_model}'");
          }
 
@@ -61,16 +58,12 @@
          }
       }
 
-      function __toString() {
-         return parent::__toString(array(
+      function inspect() {
+         return parent::inspect(array(
             'model'    => $this->_model,
             'database' => $this->_database,
             'table'    => $this->_table,
          ));
-      }
-
-      function get_model() {
-         return $this->_model;
       }
 
       function get_database() {
@@ -101,10 +94,6 @@
          }
       }
 
-      function get_defaults() {
-         return $this->_defaults;
-      }
-
       function get_order() {
          return $this->_order;
       }
@@ -127,12 +116,41 @@
 
       function execute() {
          $args = func_get_args();
-         return call_user_func_array(array($this->connection, execute), $args);
+         return call_user_func_array(array($this->connection, 'execute'), $args);
       }
 
-      function create(array $attributes) {
-         $model = new $this->_model($attributes);
-         return $model->save();
+      function get_query_set() {
+         if (class_exists($class = $this->_model.'QuerySet')) {
+            return new $class($this);
+         } else {
+            return new QuerySet($this);
+         }
+      }
+
+      # Forward accesses to non-existent properties to a QuerySet
+      function __get($key) {
+         if (method_exists($this, $setter = "get_$key")) {
+            return $this->$setter();
+         } elseif (method_exists($this, $key)) {
+            return $this->$key();
+         } else {
+            return $this->get_query_set()->$key;
+         }
+      }
+
+      # Forward calls to non-existent methods to a QuerySet
+      function __call($method, $args) {
+         return call_user_func_array(array($this->get_query_set(), $method), $args);
+      }
+
+      function find($conditions) {
+         $args = func_get_args();
+         return $this->__call('find', $args);
+      }
+
+      function find_all($conditions=null) {
+         $args = func_get_args();
+         return $this->__call('where', $args);
       }
 
       function insert(array $attributes) {
@@ -159,11 +177,13 @@
                           $this->_table, implode(", ", $columns), implode(", ", $keys));
 
          if ($this->execute($query, $values)) {
-            return $this->connection->insert_id();
+            return array(
+               $this->_primary_key => $this->connection->insert_id()
+            );
          }
       }
 
-      function update(array $attributes, $conditions, $force=false) {
+      function update($conditions, array $attributes, $force=false) {
          if (empty($attributes) and !$force) {
             return true;
          }
@@ -186,7 +206,10 @@
             return true;
          }
 
-         list($conditions, $condition_values) = $this->build_condition($conditions);
+         list($conditions, $condition_values) = $this->build_condition(
+            is_object($conditions) ? $conditions->id : $conditions
+         );
+
          if (blank($conditions)) {
             throw new ApplicationError("No conditions given");
          } else {
@@ -199,7 +222,7 @@
          return is_object($this->execute($query, $values));
       }
 
-      function delete($id) {
+      function delete($conditions) {
          list($conditions, $values) = $this->build_condition(func_get_args());
          if (blank($conditions)) {
             throw new ApplicationError("No conditions given");
@@ -208,62 +231,18 @@
          return is_object($this->execute("DELETE FROM `{$this->_table}` WHERE $conditions", (array) $values));
       }
 
-      function destroy($conditions) {
-         $args = func_get_args();
-         $objects = call_user_func_array(
-            array($this->get_query_set(), 'where'), $args
-         );
-
-         $status = false;
-         foreach ($objects as $object) {
-            $status = $object->destroy();
-         }
-
-         return $status;
-      }
-
-      function delete_all() {
-         $this->execute("DELETE FROM `{$this->_table}`");
-      }
-
-      function get_query_set() {
-         if (class_exists($class = $this->_model.'QuerySet')) {
-            return new $class($this);
+      function delete_all($force=false) {
+         if ($force) {
+            $this->execute("DELETE FROM `{$this->_table}`");
          } else {
-            return new QuerySet($this);
+            throw new ApplicationError("Not unless you really want to");
          }
-      }
-
-      function __get($key) {
-         $getter = "get_$key";
-         if (method_exists($this, $getter)) {
-            return $this->$getter();
-         } else {
-            return $this->get_query_set()->$getter();
-         }
-      }
-
-      function __set($key, $value) {
-         $setter = "set_$key";
-         if (method_exists($this, $setter)) {
-            $this->$setter($value);
-            return $this;
-         } else {
-            return $this->get_query_set()->$setter($key);
-         }
-      }
-
-      function __call($method, $args) {
-         return call_user_func_array(array($this->get_query_set(), $method), $args);
       }
 
       function build_condition($conditions) {
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
             $conditions = func_get_args();
-         } elseif (count($conditions) == 1 and is_array($conditions[0])) {
-            # Conditions are passed as array
-            $conditions = $conditions[0];
          }
 
          if (empty($conditions)) {
@@ -279,7 +258,7 @@
 
          while (!empty($keys)) {
             $key = array_shift($keys);
-            $value = array_shift($values);
+            $value = $this->convert(array_shift($values));
 
             if ($condition and $operator == '') {
                $operator = ' AND ';
@@ -306,12 +285,12 @@
                   $params[] = $value;
                }
 
-            } elseif (is_numeric($value)) {
+            } elseif (is_numeric($value) or is_numeric($value[0])) {
                # Use array value as ID
                #   e.g.: find($id)
                #
                $condition .= "$operator`{$this->_table}`.`{$this->_primary_key}` = ?";
-               $params[] = $value;
+               $params[] = intval($value);
 
                # Allow passing multiple IDs
                $operator = ' OR ';
@@ -322,7 +301,7 @@
                #
                $condition .= "$operator$value";
                for ($i = 0; $i < $count; $i++) {
-                  $params[] = array_shift_arg($values);
+                  $params[] = $this->convert(array_shift_arg($values));
                   array_shift($keys);
                }
 
@@ -339,7 +318,7 @@
                # Use array value as column name
                #   e.g.: find('key', $value)
                $condition .= "$operator$value = ?";
-               $params[] = array_shift_arg($values);
+               $params[] = $this->convert(array_shift_arg($values));
                array_shift($keys);
 
             } elseif (!is_null($value)) {
@@ -348,6 +327,20 @@
          }
 
          return array($condition, $params);
+      }
+
+      protected function convert($value) {
+         if (is_object($value)) {
+            if (!$value instanceof ActiveRecord) {
+               throw new TypeError($value, "Invalid class '%s'");
+            } elseif ($value->changed) {
+               throw new ApplicationError("Can't use unsaved model as parameter");
+            } else {
+               return $value->id;
+            }
+         } else {
+            return $value;
+         }
       }
    }
 

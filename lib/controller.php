@@ -35,6 +35,7 @@
       protected $_require_form_token = true;
 
       protected $_scaffold;
+      protected $_scaffold_options;
       protected $_scaffold_actions = array(
          'index',
          'show',
@@ -45,6 +46,12 @@
 
       function __construct(array &$params=null) {
          $this->_name = underscore(substr(get_class($this), 0, -10));
+
+         if ($this->_scaffold === true) {
+            if ($model = classify(pluralize($this->_name))) {
+               $this->_scaffold = $model;
+            }
+         }
 
          # Load controller helper
          try_require(HELPERS."{$this->_name}_helper.php");
@@ -84,8 +91,6 @@
 
          # Standard variables for the view
          $this->set('controller', $this->_name);
-         $this->set('params', &$this->params);
-         $this->set('cookies', &$this->cookies);
          $this->set('msg', &$this->msg);
 
          # Collect all public methods defined in this controller
@@ -93,8 +98,9 @@
          $class = new ReflectionClass($this);
          foreach ($class->getMethods() as $method) {
             $name = $method->getName();
-            if ($method->isPublic() and !method_exists(Controller, $name)
-                                    and !method_exists(ApplicationController, $name)) {
+            if ($method->isPublic() and !$method->isStatic() and
+                !method_exists(ApplicationController, $name)
+            ) {
                $this->_actions[] = $name;
             }
          }
@@ -103,8 +109,8 @@
          $this->call_if_defined('init');
       }
 
-      function __toString() {
-         return parent::__toString($this->params);
+      function inspect() {
+         return parent::inspect($this->params);
       }
 
       function get_name() {
@@ -148,12 +154,12 @@
          return $this->_view->get($key);
       }
 
-      function set($key, $value) {
+      function set($key, $value=null) {
          $this->_view->set($key, &$value);
          return $this;
       }
 
-      function set_default($key, $value) {
+      function set_default($key, $value=null) {
          $this->_view->set_default($key, &$value);
          return $this;
       }
@@ -205,6 +211,12 @@
          return $found;
       }
 
+      # Check if the action exists or is provided by scaffolding
+      function has_action($action) {
+         return in_array($action, $this->_actions)
+            or (in_array($action, (array) $this->_scaffold_actions) and $this->_scaffold);
+      }
+
       # Check for a requirement for the given action
       function check_requirement($action, $requirement) {
          $requirement = '_require_'.$requirement;
@@ -226,14 +238,20 @@
 
       # Check request requirements
       function is_valid_request($action) {
+         # Check for SSL requirements
+         if (!$this->is_ssl() and $this->check_requirement($action, 'ssl')) {
+            $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");
+            return false;
+         }
+
          # Check for POST requirements
-         if ($this->check_requirement($action, 'post') and !$this->is_post()) {
+         if (!$this->is_post() and $this->check_requirement($action, 'post')) {
             $error = 'needs POST';
          }
 
 
          # Check for Ajax requirements
-         if ($this->check_requirement($action, 'ajax') and !$this->is_ajax()) {
+         if (!$this->is_ajax() and $this->check_requirement($action, 'ajax')) {
             $error = 'needs Ajax';
          }
 
@@ -260,24 +278,14 @@
                throw new InvalidRequest($error);
             } else {
                log_warn("Invalid Request: $error");
-               if ($action == 'index' or !method_exists($this, 'index')) {
-                  # Redirect to default path if the default action was requested
-                  $this->redirect_to('/');
+               if ($action == 'index' or !$this->has_action('index')) {
+                  # Redirect to default path if the index action was request or it isn't available
+                  $this->redirect_to('');
                } else {
-                  # Or else try the default action
                   $this->redirect_to(':');
                }
             }
 
-            return false;
-         }
-
-         # Check SSL requirements
-         if (!$this->is_ssl() and
-               ($this->_require_ssl === true or
-                  in_array($action, (array) $this->_require_ssl)))
-         {
-            $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");
             return false;
          }
 
@@ -287,11 +295,7 @@
       # Perform an action
       function perform($action, $args=null) {
          # Catch invalid action names
-         if ($action == 'init' or
-               substr($action, 0, 6) == 'before' or substr($action, 0, 5) == 'after' or
-                  !preg_match('/^[a-z][a-z_]*$/', $action) or
-                     method_exists(get_parent_class($this), $action))
-         {
+         if (!preg_match('/^[a-z][\w_]*$/', $action)) {
             throw new RoutingError("Invalid action '$action'");
          }
 
@@ -310,23 +314,27 @@
             $this->call_filter("before_$action");
 
             # Call the action itself if it's defined
-            if (in_array($action, $this->_actions) and !method_exists(get_parent_class($this), $action)) {
+            if (in_array($action, $this->_actions)) {
                call_user_func_array(array($this, $action), (array) $args);
-            } elseif ($model = $this->_scaffold and in_array($action, $this->_scaffold_actions)) {
-               array_unshift($args, $action == 'index' ? 'list' : $action);
-               array_unshift($args, $model);
-               call_user_func_array(array($this, scaffold), $args);
+            } elseif ($this->has_action($action)) {
+               array_unshift($args, $action);
+               call_user_func_array(array($this, 'scaffold'), $args);
+            }
+
+            # Call before-render filters
+            $this->call_filter("global_before_render", $action);
+            $this->call_filter("before_render", $action);
+            $this->call_filter("before_render_$action");
+
+            # Render the action template if the action didn't generate any output
+            if ($this->_output === null) {
+               $this->render($action);
             }
 
             # Call after filters
             $this->call_filter("after_$action");
             $this->call_filter("after", $action);
             $this->call_filter("global_after", $action);
-
-            # Render the action template if the action didn't generate any output
-            if ($this->_output === null) {
-               $this->render($action);
-            }
          }
 
          $this->send_headers();
@@ -357,8 +365,7 @@
 
       function cache_render($key=null, $full=false) {
          $key = any($key, "view_".urlencode(Dispatcher::$path));
-         $this->view->cache($key, $full);
-         if (cache($key)) {
+         if ($this->view->cache($key, $full) and cache($key)) {
             $this->_cached = true;
             return true;
          } else {
@@ -424,7 +431,7 @@
             header('Pragma: cache');
 
             # Make sure the session handler can clean up
-            register_shutdown_function(session_write_close);
+            register_shutdown_function('session_write_close');
          }
       }
 
@@ -460,9 +467,9 @@
 
          if (PHP_SAPI == 'cli') {
             # Ignore errors in console
-            return @call_user_func_array(setcookie, $args);
+            return @call_user_func_array('setcookie', $args);
          } else {
-            return call_user_func_array(setcookie, $args);
+            return call_user_func_array('setcookie', $args);
          }
       }
 
@@ -531,120 +538,180 @@
       # Get error messages from model objects assigned to the template
       function set_model_errors() {
          $messages = array();
-         foreach ($this->_view->data as $key => $value) {
+         foreach ($this->_view->data as $value) {
             if ($value instanceof Model) {
-               foreach ($value->errors as $key => $value) {
+               foreach ($value->errors as $value) {
                   $messages = array_merge($messages, (array) $value);
                }
             }
          }
 
          if (!empty($messages)) {
-            $this->msg['error'] = $messages;
+            $this->msg['error'] = array_unique($messages);
          }
       }
 
       # Scaffold default model actions
-      function scaffold($model, $action='list') {
-         if (is_subclass_of($model, ActiveRecord)) {
-            $args = array_slice(func_get_args(), 2);
-            if (is_array($args[count($args) - 1])) {
-               $options = array_pop($args);
-               $this->set('options', $options);
-            }
+      function scaffold($action='index') {
+         $options = (array) $this->_scaffold_options;
+         $args = array_slice(func_get_args(), 1);
+         if (is_array($args[count($args) - 1])) {
+            $options = array_merge(
+               $options, array_pop($args)
+            );
+         }
 
-            $db = DB($model);
-            $model_key = underscore($model);
-            $this->set('model', $model_key);
-            $attributes = $db->attributes;
-
-            # Use a path prefix for all redirects
-            $prefix = $options['path_prefix'];
-            $this->set('prefix', $prefix);
-
-            switch ($action) {
-               case 'list':
-                  if ($page_size = $options['page_size']) {
-                     $db->page_size = $page_size;
-                  }
-
-                  $this->set('objects', $db->sorted->paginated);
-                  break;
-               case 'show':
-                  if ($object = $db->find((int) $args[0])) {
-                     $this->set('object', $object);
-                  } else {
-                     throw new NotFound();
-                  }
-                  break;
-               case 'create':
-                  $object = new $model($this->params[$model_key]);
-                  $this->set('object', $object);
-                  array_delete($attributes, array('created_at', 'updated_at', $db->primary_key));
-
-                  if ($this->is_post() and $object->save()) {
-                     $this->msg['info'] = any(
-                        $options['message'],
-                        sprintf(_("%s successfully created"), $model)
-                     );
-                     return $this->redirect_to(any($options['redirect_to'], ":$prefix/show/{$object->id}"));
-                  }
-                  break;
-               case 'edit':
-                  if ($object = $db->find((int) $args[0])) {
-                     $this->set('object', $object);
-
-                     if ($this->is_post() and $object->update($this->params[$model_key])) {
-                        $this->msg['info'] = any(
-                           $options['message'],
-                           sprintf(_("%s successfully updated"), $model)
-                        );
-                        return $this->redirect_to(any($options['redirect_to'], ":$prefix/show/{$object->id}"));
-                     }
-                  } else {
-                     $this->msg['error'] = any(
-                        $options['error'],
-                        sprintf(_("Couldn't find %s #%d"), $model, $args[0])
-                     );
-                     return $this->redirect_to(any($options['redirect_to'], ":$prefix"));
-                  }
-                  break;
-               case 'destroy':
-                  if (!$this->is_post()) {
-                     throw new InvalidRequest('needs POST');
-                  }
-
-                  if ($object = $db->find((int) $args[0])) {
-                     try {
-                        $object->destroy();
-                        $this->msg['info'] = any(
-                           $options['message'],
-                           sprintf(_("%s successfully deleted"), $model)
-                        );
-                     } catch (PDOException $e) {
-                        $this->msg['error'] = any(
-                           $options['error'],
-                           sprintf(_("Couldn't delete %s #%d"), $model, $args[0])
-                        );
-                     }
-                  } else {
-                     $this->msg['error'] = any(
-                        $options['error'],
-                        sprintf(_("Couldn't find %s #%d"), $model, $args[0])
-                     );
-                  }
-
-                  return $this->redirect_to(any($options['redirect_to'], ":$prefix"));
-                  break;
-               default:
-                  throw new ValueError("Invalid action '$action'");
-            }
-
-            $this->set('attributes', $attributes);
-            $this->render(any($options['template'], array("{$this->name}/$action", "scaffold/$action")));
-
-         } else {
+         if (!$model = classify(any($options['model'], $this->_scaffold))) {
+            throw new ApplicationError("No model found");
+         } elseif (!is_subclass_of($model, ActiveRecord)) {
             throw new TypeError("Invalid model '$model'");
+         }
+
+         $id = intval($args[0]);
+         $params = $this->params[underscore($model)];
+
+         if (method_exists($this, $method = "scaffold_$action")) {
+            $status = call_user_func(array($this, $method),
+               $model, &$options, $id, $params
+            );
+         } else {
+            throw new ValueError("Invalid action '$action'");
+         }
+
+         $redirect = array_delete($status, 'redirect');
+         foreach ((array) $status as $key => $message) {
+            if (is_array($message)) {
+               $args = array_slice($message, 1);
+               array_unshift($args, humanize($model));
+               array_unshift($args, $message[0]);
+               $message = call_user_func_array('sprintf', $args);
+            } else {
+               $message = sprintf($message, humanize($model));
+            }
+
+            $this->msg[$key] = any(
+               $options[$key], $options['message'], $message
+            );
+         }
+
+         if ($redirect) {
+            if (!$this->has_action($redirect)) {
+               $redirect = '';
+            }
+
+            $id = ($redirect == 'show' or $redirect == 'edit') ? "/$id" : '';
+
+            $this->redirect_to(any(
+               $options['redirect_to'],
+               ":{$options['prefix']}/$redirect$id"
+            ));
+         } else {
+            $this->set('model', underscore($model));
+            $this->set('options', $options);
+            $this->set('prefix', $options['prefix']);
+
+            $attributes = DB($model)->attributes;
+            if ($hide = $options['hide_attributes']) {
+               array_delete($attributes, $hide);
+            }
+            $this->set('attributes', $attributes);
+
+            $this->render(any($options['template'], array(
+               "{$this->name}/$action",
+               $options['default_template'],
+               "scaffold/$action"
+            )));
+         }
+      }
+
+      protected function scaffold_assign($object) {
+         $this->set($object);
+         $this->set($object instanceof QuerySet ? 'objects' : 'object', $object);
+      }
+
+      protected function scaffold_index($model, $options) {
+         $objects = DB($model)->sorted;
+
+         if ($paginate = $options['paginate']) {
+            if (is_numeric($paginate)) {
+               DB($model)->page_size = $paginate;
+            }
+            $objects->paginated;
+         }
+
+         $this->scaffold_assign($objects);
+      }
+
+      protected function scaffold_show($model, $options, $id) {
+         if ($object = DB($model)->find($id)) {
+            $this->scaffold_assign($object);
+         } else {
+            throw new NotFound();
+         }
+      }
+
+      protected function scaffold_create($model, $options, $id, $params) {
+         $object = new $model($params);
+         $this->scaffold_assign($object);
+
+         $options['hide_attributes'] = array_merge(
+            (array) $options['hide_attributes'],
+            array(
+               'created_at',
+               'updated_at',
+               $db->primary_key,
+            )
+         );
+
+         if ($this->is_post() and $object->save()) {
+            return array(
+               'info'     => array(_("%s '%s' successfully created"), $object),
+               'redirect' => 'show',
+            );
+         }
+      }
+
+      protected function scaffold_edit($model, $options, $id, $params) {
+         if ($object = DB($model)->find($id)) {
+            $this->scaffold_assign($object);
+
+            if ($this->is_post() and $object->update($params)) {
+               return array(
+                  'info'     => array(_("%s '%s' successfully updated"), $object),
+                  'redirect' => 'show',
+               );
+            }
+         } else {
+            return array(
+               'error'    => array(_("Couldn't find %s #%d"), $id),
+               'redirect' => 'index',
+            );
+         }
+      }
+
+      protected function scaffold_destroy($model, $options, $id) {
+         if (!$this->is_post()) {
+            throw new InvalidRequest('needs POST');
+         }
+
+         if ($object = DB($model)->find($id)) {
+            try {
+               $object->destroy();
+               return array(
+                  'info'     => array(_("%s '%s' successfully deleted"), $object),
+                  'redirect' => 'index',
+               );
+            } catch (PDOException $e) {
+               return array(
+                  'error'    => array(_("Couldn't delete %s '%s'"), $object),
+                  'redirect' => 'index',
+               );
+            }
+         } else {
+            return array(
+               'error'    => array(_("Couldn't find %s #%d"), $id),
+               'redirect' => 'index',
+            );
          }
       }
    }

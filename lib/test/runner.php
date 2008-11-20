@@ -7,15 +7,17 @@
 # $Id$
 #
 
+   if (ENVIRONMENT != 'test') {
+      throw new ConfigurationError("Can only run tests in test environment");
+   }
+
    require 'simpletest/unit_tester.php';
    require 'simpletest/reporter.php';
 
    require LIB.'test/cases.php';
 
-   try_require(TEST.'test_helper.php');
-
    global $_TEST_DIRS;
-   $_TEST_DIRS = array_map(basename, array_filter(glob(TEST.'*'), is_dir));
+   $_TEST_DIRS = array_map('basename', array_filter(glob(TEST.'*'), is_dir));
    array_remove($_TEST_DIRS, array('coverage', 'fixtures', 'framework'));
 
    function run_tests($path, $message=null, $reporter=null) {
@@ -36,10 +38,23 @@
          }
       }
 
-      print $message.pluralize($group->getSize(), 'test', 'tests');
+      print $message.pluralize($group->getSize(), 'test');
       if ($group->getSize() > 0) {
+         print "wtf?\n";
+         print substr(str_replace(ROOT, '', $path), 0, 14)."\n";
+         if (substr(str_replace(ROOT, '', $path), 0, 14) == 'test/framework') {
+            $root = TEST.'framework';
+         } else {
+            $root = TEST;
+         }
+
          foreach (array_unique($dirs) as $dir) {
-            try_require($dir.'/test_helper.php');
+            if ($dir = realpath($dir)) {
+               while (check_root($dir, $root)) {
+                  try_require($dir.'/test_helper.php');
+                  $dir = dirname($dir);
+               }
+            }
          }
 
          if (!$reporter) {
@@ -123,18 +138,19 @@
       foreach (glob(TEST.'fixtures/*.php') as $fixture) {
          $fixtures = null;
          include $fixture;
+         $fixture = basename($fixture);
          if (!is_array($fixtures)) {
-            throw new ConfigurationError("'$fixture' doesn't contain any fixtures");
+            throw new ConfigurationError("Fixture '$fixture' doesn't contain any fixtures");
          }
 
          # Get the model from the filename, strip extension and leading numbers
-         preg_match('/^(\d+_)?(.+)\.php$/', basename($fixture), $match);
-         $model = classify($match[2]);
-
-         if (is_subclass_of($model, ActiveRecord)) {
-            $models[$model] = $fixtures;
-         } else {
+         preg_match('/^(\d+_)?(.+)\.php$/', $fixture, $match);
+         if (!$model = classify($match[2])) {
+            throw new ConfigurationError("Fixture '$fixture' doesn't contain a valid class name");
+         } elseif (!is_subclass_of($model, ActiveRecord)) {
             throw new ConfigurationError("'$model' is not an ActiveRecord model");
+         } else {
+            $models[$model] = $fixtures;
          }
       }
 
@@ -143,7 +159,7 @@
 
       # Empty tables in reverse order (to avoid foreign key conflicts)
       foreach (array_reverse($models) as $model => $fixtures) {
-         DB($model)->delete_all();
+         DB($model)->delete_all(true);
       }
 
       # Fill tables in order

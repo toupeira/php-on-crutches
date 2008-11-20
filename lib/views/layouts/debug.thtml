@@ -8,15 +8,15 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><?= $title ?> <?= strip_tags($subtitle) ?></title>
-  <?= include_stylesheets('framework/debug', 'framework/scaffold') ?>
-  <?= include_javascripts('framework/prototype', 'framework/debug') ?>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <title><?= $title ?> <?= strip_tags($subtitle) ?></title>
+   <?= include_stylesheets('framework/debug', 'framework/scaffold') ?>
+   <?= include_javascripts('framework/prototype', 'framework/debug') ?>
 </head>
 <body>
 
 <h1>
-   <?= image_tag('framework/icons/debug.png') ?>
+   <?= icon('framework/icons/'.any($icon, 'debug')) ?>
    <?= link_to($title, ":/$action", array('style' => 'color: #666')) ?><?= $subtitle ?>
 </h1>
 
@@ -26,10 +26,14 @@
 </div>
 
 <div id="menu">
-   <?= link_to('System', ':/system', array('class' => $action == 'system' ? 'active' : '')) ?>
-   <?= link_to('Model Browser', ':/models', array('class' => $action == 'models' ? 'active' : '')) ?>
-   <?= link_to('SQL Console', ':/sql', array('class' => $action == 'sql' ? 'active' : '')) ?>
-   <?= link_to('PHP Console', ':/php', array('class' => $action == 'php' ? 'active' : '')) ?>
+   <?= link_to(icon('framework/icons/system').' System', ':/system',
+          array('class' => $action == 'system' ? 'active' : '')) ?>
+   <?= link_to(icon('framework/icons/database').' Model Browser', ':/models',
+          array('class' => $action == 'models' ? 'active' : '')) ?>
+   <?= link_to(icon('framework/icons/database').' SQL Console', ':/sql',
+          array('class' => $action == 'sql' ? 'active' : '')) ?>
+   <?= link_to(icon('framework/icons/console').' PHP Console', ':/php',
+          array('class' => $action == 'php' ? 'active' : '')) ?>
    <p>Running in <strong><?= ENVIRONMENT ?></strong> environment</p>
 </div>
 

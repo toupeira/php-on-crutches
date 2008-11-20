@@ -1,5 +1,5 @@
 #!/usr/bin/php5
-<?
+<? # vim: ft=php
 # Copyright 2008 Markus Koller
 #
 # This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@
       putenv("LANG={$_ENV['LANG']}");
       putenv("LANGUAGE=");
 
-      $files = array_map(escapeshellarg, $files);
+      $files = array_map('escapeshellarg', $files);
       $editor = any($_ENV['EDITOR'], $_ENV['DISPLAY'] ? 'gvim' : 'vim');
       term_exec($editor.' '.implode(' ', $files));
    }

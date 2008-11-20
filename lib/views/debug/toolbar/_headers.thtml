@@ -3,5 +3,5 @@
    $headers = $_SERVER;
    ksort($headers);
 ?>
-<a><?= image_tag('framework/icons/headers.png') ?> Headers</a>
+<a><?= icon('framework/icons/headers') ?> Headers</a>
 <div><?= table_tag($headers) ?></div>

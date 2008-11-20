@@ -1,5 +1,5 @@
 #!/usr/bin/php5
-<?
+<? # vim: ft=php
 # Copyright 2008 Markus Koller
 #
 # This program is free software; you can redistribute it and/or modify

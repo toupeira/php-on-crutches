@@ -10,25 +10,37 @@
    # Base class for all objects
    class Object
    {
-      function __toString($data=null) {
+      function __toString($id=null) {
+         return $this->inspect($id);
+      }
+
+      function get_slug() {
+         return parameterize($this->__toString());
+      }
+
+      function inspect($data=null) {
          if (is_array($data) and $data) {
             foreach ($data as $key => $value) {
-               if ($value and !is_array($value)) {
-                  $values[] = $key.': '.truncate($value);
+               if ($value and !is_array($value) and $key != 'password') {
+                  if (!is_numeric($value)) {
+                     $value = '"'.str_replace("\n", " ", truncate($value, 30)).'"';
+                  }
+                  $values[] = "$key: $value";
                }
             }
 
-            $data = ($values ? implode(', ', $values) : null);
+            $data = ($values ? ' '.implode(', ', $values) : null);
          }
 
-         return '#<'.get_class($this).($data ? " $data" : '').'>';
+         return '#<'.get_class($this).($data ? $data : '').'>';
       }
 
       # Automatic getters
       function __get($key) {
-         $getter = "get_$key";
-         if (method_exists($this, $getter)) {
+         if (method_exists($this, $getter = "get_$key")) {
             return $this->$getter();
+         } elseif (method_exists($this, $key)) {
+            return $this->$key();
          } else {
             throw new UndefinedMethod($this, $key);
          }
@@ -36,8 +48,7 @@
 
       # Automatic setters
       function __set($key, $value) {
-         $setter = "set_$key";
-         if (method_exists($this, $setter)) {
+         if (method_exists($this, $setter = "set_$key")) {
             $this->$setter($value);
             return $this;
          } else {

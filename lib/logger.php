@@ -12,10 +12,11 @@
    define('LOG_ERROR',      LOG_ERR);
    define('LOG_WARN',       LOG_WARNING);
 
-   function log_error($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_ERROR); }
-   function log_warn($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_WARN); }
-   function log_info($msg)  { return $GLOBALS['_LOGGER']->log($msg, LOG_INFO); }
-   function log_debug($msg) { return $GLOBALS['_LOGGER']->log($msg, LOG_DEBUG); }
+   function log_msg($msg, $level=LOG_INFO) { return $GLOBALS['_LOGGER']->log($msg, $level); }
+   function log_error($msg) { log_msg($msg, LOG_ERROR); }
+   function log_warn($msg)  { log_msg($msg, LOG_WARN); }
+   function log_info($msg)  { log_msg($msg, LOG_INFO); }
+   function log_debug($msg) { log_msg($msg, LOG_DEBUG); }
 
    function log_running() {
       return $GLOBALS['_LOGGER'] instanceof Logger;
@@ -98,7 +99,7 @@
                $msg = print_r($msg, true);
             }
 
-            if (config('debug')) {
+            if (config('debug_toolbar')) {
                self::$_messages[] = $msg;
             }
 

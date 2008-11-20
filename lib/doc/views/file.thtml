@@ -1,0 +1,21 @@
+<?# $Id$ ?>
+<div id="title">
+   <h1><?= h($file) ?></h1>
+</div>
+<?= render_comment($comment) ?>
+<? if ($classes): ?>
+<h2 class="classes">Classes</h2>
+<ul>
+<? foreach (sorted($classes) as $class => $template): ?>
+   <li><?= doc_link($class, $template) ?></li>
+<? endforeach ?>
+</ul>
+<? endif ?>
+<? if ($constants): ?>
+<h2 class="constants">Constants</h2>
+<?= $this->render_partial('constants') ?>
+<? endif ?>
+<? if ($functions): ?>
+<h2 class="functions">Functions</h2>
+<?= $this->render_partial('functions') ?>
+<? endif ?>

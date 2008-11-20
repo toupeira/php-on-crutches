@@ -3,11 +3,20 @@
    $request = array(
       'Method'         => $_SERVER['REQUEST_METHOD'],
       'URL'            => ($_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.h($_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']),
-      'Parameters'     => dump(Dispatcher::$params, true),
    );
 
-   if ($forward = $_SERVER['HTTP_X_FORWARDED_FOR']) {
-      $request['Client Address'] .= " (forwarded for $forward)";
+   if ($model = config('auth_model')) {
+      if ($user = is_admin()) {
+         $request['Authentication'] = "Logged in as administrator <strong>$user</strong>";
+      } elseif ($user = is_logged_in()) {
+         $request['Authentication'] = "Logged in as user <strong>$user</strong>";
+      } else {
+         $request['Authentication'] = "Not logged in";
+      }
+   }
+
+   if ($params = Dispatcher::$params) {
+      $request['Parameters'] = dump($params, true);
    }
 
    if ($_COOKIE) {
@@ -20,5 +29,5 @@
       }
    }
 ?>
-<a><?= image_tag('framework/icons/request.png') ?> Request: <?= h(Dispatcher::$path) ?></a>
+<a><?= icon('framework/icons/request') ?> Request: <?= h(Dispatcher::$path) ?></a>
 <div><?= table_tag($request, array('escape' => false)) ?></div>

@@ -7,38 +7,6 @@
 # $Id$
 #
 
-   class HtmlBuilder
-   {
-      static protected $_instance;
-
-      static function instance() {
-         if (self::$_instance) {
-            return self::$_instance;
-         } else {
-            return self::$_instance = new HtmlBuilder();
-         }
-      }
-
-      private function __construct() {}
-
-      function __call($method, $args=null) {
-         $tag = strtolower($method);
-         $options = is_array($args[0]) ? array_shift($args) : null;
-         $children = $args;
-
-         if ($children) {
-            $indent = "\n  ";
-            $children = str_replace("\n", $indent, implode("\n", $children));
-            if ($children and preg_match('/\n/', $children)) {
-               $children = "$indent$children\n";
-            }
-            return content_tag($tag, $children, $options);
-         } else {
-            return tag($tag, $options);
-         }
-      }
-   }
-
    function tag($name, array $options=null, array $defaults=null) {
       return build_tag($name, $options, $defaults)." />";
    }
@@ -93,6 +61,51 @@
       }
 
       return $html;
+   }
+
+   class HtmlBuilder
+   {
+      static protected $_instance;
+
+      static function instance() {
+         if (self::$_instance) {
+            return self::$_instance;
+         } else {
+            return self::$_instance = new HtmlBuilder();
+         }
+      }
+
+      static function compile($_template, $_locals) {
+         $html = self::instance();
+
+         # Extract assigned values as local variables
+         if (extract((array) $_locals, EXTR_SKIP) != count($_locals)) {
+            #throw new ApplicationError("Couldn't extract all template variables");
+         }
+
+         ob_start();
+         require $_template;
+         return ob_get_clean();
+      }
+
+      private function __construct() {}
+
+      function __call($method, $args=null) {
+         $tag = strtolower($method);
+         $options = is_array($args[0]) ? array_shift($args) : null;
+         $children = $args;
+
+         if ($children) {
+            $indent = "\n  ";
+            $children = str_replace("\n", $indent, implode("\n", $children));
+            if ($children and preg_match('/\n/', $children)) {
+               $children = "$indent$children\n";
+            }
+            return content_tag($tag, $children, $options);
+         } else {
+            return tag($tag, $options);
+         }
+      }
    }
 
 ?>

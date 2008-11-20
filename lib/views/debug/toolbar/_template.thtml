@@ -1,31 +1,24 @@
 <?# $Id$ ?>
 <?
    $values = array();
+
    foreach (Dispatcher::$controller->view->data as $key => $value) {
-      if ($key == 'content_for_layout') {
+      if (in_array($key, array('controller', 'action', 'content_for_layout'))) {
          continue;
-      } elseif (is_array($value)) {
+      } elseif ($key == 'msg' and !$value) {
+         continue;
+      } elseif (is_array($value) and !empty($value)) {
          $dump = dump($value, true);
-         $value = link_to(h((string) $value), '#', array(
-            'onclick' => '$(this.nextSibling).toggle(); return false'
-         ));
+         $value = toggle_link(h((string) $value));
          $value .= '<div style="display: none">'.$dump.'</div>';
-      } elseif (is_object($value)) {
-         if (method_exists($value, '__toString')) {
-            $value = h((string) $value);
-         } else {
-            $value = h(get_class($value));
-         }
       } else {
-         $value = h(var_export($value, true));
+         $value = h(dump_value($value));
       }
 
       $values[h($key)] = $value;
    }
-
-   ksort($values);
 ?>
 <? if ($values): ?>
-<a><?= image_tag('framework/icons/template.png') ?> Template: <?= count($values) ?> values</a>
+<a><?= icon('framework/icons/template') ?> Template: <?= pluralize(count($values), 'value') ?></a>
 <div><?= table_tag($values, array('escape' => false)) ?></div>
 <? endif ?>

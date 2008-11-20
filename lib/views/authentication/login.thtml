@@ -1,0 +1,26 @@
+<?# $Id$ ?>
+<?
+   $this->set('title', 'Login');
+?>
+<?= form_tag() ?>
+<table>
+<tr>
+   <th><?= label('login') ?>:</th>
+   <td><?= text_field('login') ?></td>
+</tr>
+<tr>
+   <th><?= label('password') ?>:</th>
+   <td><?= password_field('password') ?></td>
+</tr>
+<tr>
+   <th></th>
+   <td>
+      <?= check_box('remember') ?> <?= label('remember') ?>
+   </td>
+</tr>
+<tr>
+   <th></th>
+   <td><?= submit_button('Login') ?></td>
+</tr>
+</table>
+</form>

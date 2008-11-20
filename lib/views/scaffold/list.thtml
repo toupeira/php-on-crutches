@@ -1,12 +1,12 @@
 <?# $Id$ ?>
 <p class="scaffold-links">
-   <?= image_tag('framework/icons/database_add.png') ?>
-   <?= link_to(sprintf(_("Create new %s"), _(humanize($model))), ":$prefix/create") ?>
+   <?= icon('framework/icons/database_add') ?>
+   <?= link_to(sprintf(_('Create %s'), humanize($model)), ":$prefix/create") ?>
 </p>
 <table class="scaffold-list">
 <tr>
 <? foreach ($attributes as $key => $column): ?>
-   <th><?= _(humanize($key)) ?></th>
+   <th><?= humanize($key) ?></th>
 <? endforeach ?>
 </tr>
 <? foreach ($objects as $object): ?>
@@ -21,8 +21,14 @@
          } elseif (in_array($column['type'], array('integer', 'float'))) {
             $right = ' class="right"';
          }
+
+         if (is_null($value)) {
+            $value = '-';
+         } elseif ($value !== '') {
+            $value = link_to(truncate($value, 40, true), ":$prefix/show/{$object->id}");
+         }
 ?>
-   <td<?= $right ?>><?= link_to(truncate($value, 40, true), ":$prefix/show/{$object->id}") ?></td>
+   <td<?= $right ?>><?= $value ?></td>
 <?
       endforeach
 ?>
@@ -32,9 +38,12 @@
 <? if ($objects->pages > 1): ?>
 <p class="scaffold-links">
    <div style="float: right">
-      Page <?= page_links($objects) ?>
+      <?= _('Page') ?> <?= page_links($objects) ?>
    </div>
-   Showing <strong><?= $objects->page_start.' - '.$objects->page_end ?></strong>
-   of <strong><?= $objects->count_all ?></strong>
+   <?= sprintf(_('Showing %s - %s of %s'),
+          "<strong>{$objects->page_start}</strong>",
+          "<strong>{$objects->page_end}</strong>",
+          "<strong>{$objects->count_all}</strong>"
+       ) ?>
 </p>
 <? endif ?>

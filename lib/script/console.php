@@ -1,5 +1,5 @@
 #!/usr/bin/rlwrap php5
-<?
+<? # vim: ft=php
 # Copyright 2008 Markus Koller
 #
 # This program is free software; you can redistribute it and/or modify
@@ -14,9 +14,9 @@
 
    $log_level = LOG_INFO;
 
-   $_args = array_slice($argv, 1);
-   while ($_arg = array_shift($_args)) {
-      switch ($_arg) {
+   $args = array_slice($argv, 1);
+   while ($arg = array_shift($args)) {
+      switch ($arg) {
          case '-v':
             # Be verbose
             $log_level = LOG_DEBUG;
@@ -31,31 +31,35 @@
             break;
          case '-e':
             # Execute given command and exit
-            if ($command = array_shift($_args)) {
-               $_quiet = ($log_level == LOG_DISABLED ? '-q' : '');
-               system("echo '$command' | php5 {$argv[0]} -s $_quiet");
+            if ($command = array_shift($args)) {
+               $quiet = ($log_level == LOG_DISABLED ? '-q' : '');
+               system("echo '$command' | php5 {$argv[0]} -s $quiet");
                exit;
             } else {
                usage();
             }
             break;
          case '-p':
-            define('ENVIRONMENT', 'production');
+            $_ENV['ENVIRONMENT'] = 'production';
             break;
          case '-d':
-            define('ENVIRONMENT', 'development');
+            $_ENV['ENVIRONMENT'] = 'development';
             break;
          case '-t':
-            define('ENVIRONMENT', 'test');
+            $_ENV['ENVIRONMENT'] = 'test';
             break;
          default:
             usage();
       }
    }
 
+   unset($args);
+   unset($arg);
+
    require_once dirname(__FILE__).'/../script.php';
 
    log_level_set($log_level);
+   unset($log_level);
 
    prompt("\n\n".`php -v`."\n");
    prompt("Loading [1m".ENVIRONMENT."[0m environment\n\n");
@@ -84,7 +88,7 @@
 
       # Show function help
       elseif (substr($_command, 0, 5) == 'help ') {
-         dump_function(substr($_command, 5));
+         print dump_function(substr($_command, 5));
          continue;
       }
 
@@ -136,7 +140,7 @@
 
       # Dump variable
       elseif (preg_match('/^\$\w+\?$/', $_command)) {
-         $_command = 'to_string('.rtrim($_command, '?').')';
+         $_command = 'dump_value('.rtrim($_command, '?').')';
       }
 
       # Execute normal PHP code
@@ -170,13 +174,18 @@
          }
 
          # Show return value
-         prompt(" :: [0;36m".to_string($_result)."[0m\n");
+         prompt(" :: [0;36m".dump_value($_result)."[0m\n");
       }
 
       $_ = $_result;
    }
 
+   # Generate a fake error so the fatal error handler
+   # won't pick up syntax errors from eval
+   $fatal_error_handler['shut_up'];
+
    prompt("\n");
+   exit;
 
    # Helper functions
 
@@ -234,53 +243,4 @@
       }
    }
 
-   function to_string($value) {
-      if (is_object($value)) {
-         if (method_exists($value, __toString) and !$value instanceof Exception) {
-            return $value->__toString();
-         } else {
-            return get_class($value);
-         }
-      } elseif (is_array($value)) {
-         return trim(print_r($value, true));
-      } elseif (is_resource($value)) {
-         ob_start();
-         var_dump($value);
-         return trim(ob_get_clean());
-      } else {
-         return var_export($value, true);
-      }
-   }
-
-   function dump_function($function) {
-      print "\n  ";
-      try {
-         $reflect = new ReflectionFunction($function);
-      } catch (Exception $e) {
-         print "Function [1m".$function."()[0m does not exist\n\n";
-         return;
-      }
-
-      print "[1m".$function." ([0m ";
-      $signatures = array();
-      foreach ($reflect->getParameters() as $param) {
-         $signature = '$'.$param->getName();
-         if ($param->isPassedByReference()) {
-            $signature = "&$signature";
-         }
-         if ($param->isDefaultValueAvailable()) {
-            $signature .= "=".to_string($param->getDefaultValue());
-         }
-         if ($param->isOptional()) {
-            $signature = "[0;32m[ ".$signature." ][0m";
-         } else {
-            $signature = "[0;36m".$signature."[0m";
-         }
-         $signatures[] = $signature;
-      }
-      print implode(', ', $signatures);
-      print " [1m)[0m\n\n";
-   }
-
-# vim: ft=php
 ?>

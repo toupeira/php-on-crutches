@@ -12,6 +12,9 @@
       if ($file[0] == '/' or preg_match('#^\w+://.#', $file)) {
          # Leave absolute paths and fully-qualified URLs alone
          return $file;
+      } elseif (substr($file, 0, 2) == './') {
+         # Convert relative paths
+         return substr($file, 2).$ext;
       } else {
          $path = $directory.$file.$ext;
          $web_path = Dispatcher::$prefix.$path;
@@ -124,6 +127,13 @@
    function image_tag($file, array $options=null) {
       return tag('img', $options, array(
          'src' => asset_path(IMAGES, $file), 'alt' => ''
+      ));
+   }
+
+   # Build an image tag for a 16x16 PNG icon
+   function icon($name, $options=null) {
+      return image_tag("$name.png", array_merge(
+         array('width' => 16, 'height' => 16, 'class' => 'icon'), (array) $options
       ));
    }
 

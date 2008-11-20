@@ -69,7 +69,11 @@
       }
 
       function __toString() {
-         return parent::__toString($this->_options);
+         return parent::__toString($this->_name);
+      }
+
+      function inspect() {
+         return parent::inspect($this->_options);
       }
 
       function get_name() {
@@ -94,10 +98,13 @@
                str_replace('%', '%%', $sql)
             ));
 
-            $query = call_user_func_array(sprintf, $args);
+            $query = call_user_func_array('sprintf', $args);
             log_info("  SQL [{$this->name}] [1m$query[0m");
             Dispatcher::$db_queries++;
-            Dispatcher::$db_queries_sql[$this->name][] = $query;
+
+            if (config('debug_toolbar')) {
+               Dispatcher::$db_queries_sql[$this->name][] = $query;
+            }
 
             if (config('analyze_queries') and substr($sql, 0, 6) == 'SELECT') {
                $this->analyze_query($sql, $params);
@@ -141,30 +148,20 @@
             $size = -1;
          }
 
-         switch (strtolower($type)) {
-            case 'char':
-            case 'varchar':
-               $type = 'string';
-               break;
-            case 'bool':
-               $type = 'bool';
-               break;
-            case 'int':
-            case 'tinyint':
-            case 'bigint':
-               if ($size > 1) {
-                  $type = 'integer';
-               } else {
-                  $type = 'bool';
-               }
-               break;
-            case 'double':
-               $type = 'float';
-               break;
-            case 'datetime':
-            case 'timestamp':
-               $type = 'datetime';
-               break;
+         $type = strtolower($type);
+
+         if (substr($type, -3) == 'int') {
+            $type = ($size > 1 ? 'integer' : 'bool');
+         } elseif (substr($type, -5) == 'float' or $type == 'double') {
+            $type = 'float';
+         } elseif (substr($type, -4) == 'char') {
+            $type = 'string';
+         } elseif (substr($type, -4) == 'text') {
+            $type = 'text';
+         } elseif (substr($type, -4) == 'blob') {
+            $type = 'blob';
+         } elseif ($type == 'datetime' or $type == 'timestamp') {
+            $type = 'time';
          }
 
          return array($type, $size);

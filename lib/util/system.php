@@ -7,15 +7,35 @@
 # $Id$
 #
 
+   function is_command($command) {
+      $command = preg_replace('/ .*/', '', trim($command));
+
+      if (is_executable($command)) {
+         return true;
+      } else {
+         foreach (explode(':', $_SERVER['PATH']) as $path) {
+            if (is_executable("$path/$command")) {
+               return true;
+            }
+         }
+      }
+
+      return false;
+   }
+
    function build_shell_command($command, $args=null) {
+      if (!is_command($command)) {
+         throw new ApplicationError("Command '$command' not found");
+      }
+
       if (count($args) == 1 and is_array($args[0])) {
          $args = $args[0];
       }
 
       if ($args) {
-         $args = array_map(escapeshellarg, $args);
+         $args = array_map('escapeshellarg', $args);
          array_unshift($args, $command);
-         $command = call_user_func_array(sprintf, $args);
+         $command = call_user_func_array('sprintf', $args);
       }
 
       return $command;
@@ -49,10 +69,30 @@
 
    # Wrapper for find, returns an array of paths
    function find_files($paths, $options=null, $sort=true) {
-      $paths = implode(' ', array_map(escapeshellarg, (array) $paths));
+      $paths = implode(' ', array_map('escapeshellarg', (array) $paths));
       $sort = ($sort ? '| sort' : '');
       $paths = explode("\n", trim(`find $paths $options 2>/dev/null $sort`));
       return ($paths == array('') ? array() : $paths);
+   }
+
+   # Check if path is below a given root
+   function check_root($path, $root) {
+      if ($path[0] != '/' or $root[0] != '/') {
+         throw new ApplicationError("Paths must be absolute");
+      }
+
+      $path = '/'.trim(($realpath = realpath($path)) ? $realpath : $path, '/');
+      $root = '/'.trim($root, '/');
+
+      while (true) {
+         if ($path == $root) {
+            return true;
+         } elseif ($path == '/') {
+            return false;
+         } else {
+            $path = dirname($path);
+         }
+      }
    }
 
    # Safely delete files

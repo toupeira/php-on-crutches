@@ -15,16 +15,24 @@
       }
 
       $html = '';
-      foreach ((array) $items as $key => $value) {
-         if (is_array($value)) {
-            $value = implode(', ', $value);
+      foreach ((array) $items as $title => $content) {
+         if (is_array($content)) {
+            $values = array();
+            foreach ($content as $key => $value) {
+               if (is_numeric($key)) {
+                  $values[] = $value;
+               } else {
+                  $values[] = "$key: $value";
+               }
+            }
+            $content = implode(', ', $values);
          }
 
          if ($escape) {
-            $key = h($key);
-            $value = h($value);
+            $title = h($title);
+            $content = h($content);
          }
-         $html .= "<tr><th>$key</th><td>$value</td></tr>";
+         $html .= "<tr><th>$title</th><td>$content</td></tr>";
       }
 
       return content_tag('table', $html, $options);

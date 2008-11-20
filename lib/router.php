@@ -42,7 +42,7 @@
          self::$_routes = array();
       }
 
-      # Extract route values from a path
+      # Extract route parameters from a path
       static function recognize($path) {
          $path = trim($path, '/');
 
@@ -62,24 +62,32 @@
 
          # Find matching route
          foreach (self::$_routes as $route) {
-            if (!is_null($values = $route->recognize($path, $defaults))) {
-               return $values;
+            if (!is_null($params = $route->recognize($path, $defaults))) {
+               return $params;
             }
          }
 
          throw new RoutingError("Invalid path '$path'");
       }
 
-      # Generate a URL from the given values
-      static function generate(array $values) {
+      # Generate a URL from the given parameters
+      static function generate($params) {
+         if (is_object($params)) {
+            if (method_exists($params, 'to_params')) {
+               $params = $params->to_params;
+            } else {
+               throw new TypeError($params, "Missing to_params() method in class '%s'");
+            }
+         }
+
          foreach (self::$_routes as $route) {
-            if (!is_null($path = $route->generate($values))) {
+            if (!is_null($path = $route->generate($params))) {
                return $path;
             }
          }
 
-         $values = array_to_str($values);
-         throw new RoutingError("Failed to generate route from '$values'");
+         $params = array_to_str($params);
+         throw new RoutingError("Failed to generate route from '$params'");
       }
    }
 
@@ -172,7 +180,7 @@
       # Check if the path matches this route
       function recognize($path, array $defaults=null) {
          if (preg_match("#^{$this->_pattern}$#", $path, $match)) {
-            $values = array_merge($this->_defaults, (array) $defaults);
+            $params = array_merge($this->_defaults, (array) $defaults);
 
             $i = 1;
             foreach ($this->_params as $key => $symbol) {
@@ -183,15 +191,15 @@
                   return;
                } elseif ($value) {
                   # Add value if not empty
-                  $values[$key] = $value;
+                  $params[$key] = $value;
                }
 
                $i++;
             }
 
             # Check if a controller and action was detected
-            $controller = $values['controller'];
-            if (!$controller or !$values['action'] or $controller == 'application') {
+            $controller = $params['controller'];
+            if (!$controller or !$params['action']) {
                return;
             }
 
@@ -201,51 +209,68 @@
                return;
             } elseif (config($controller) === false) {
                throw new RoutingError("$class is disabled");
+            } elseif ($class = new ReflectionClass($class) and !$class->isInstantiable()) {
+               return;
             }
 
-            return $values;
+            return $params;
          }
       }
 
-      # Generate a path from the given values
-      function generate(array $values) {
+      # Generate a path from the given parameters
+      function generate(array $params) {
          $route = $this->_route;
 
-         # Remove fixed values, abort if they don't match this route
-         foreach ($this->_fixed as $key => $value) {
-            if ($values[$key] != $value) {
-               return;
-            } else {
-               unset($values[$key]);
+         if ($controller = $params['controller'] and substr($controller, -10) == 'Controller') {
+            $params['controller'] = underscore(substr($controller, 0, -10));
+         }
+
+         # Expand object parameters
+         foreach ($params as $key => $value) {
+            if (is_object($value)) {
+               if (method_exists($value, 'to_param')) {
+                  $params[$key] = $value->to_param;
+               } else {
+                  throw new TypeError($value, "Missing to_param() method in class '%s'");
+               }
             }
          }
 
-         # Check for required values
+         # Remove fixed parameters, abort if they don't match this route
+         foreach ($this->_fixed as $key => $value) {
+            if ($params[$key] != $value) {
+               return;
+            } else {
+               unset($params[$key]);
+            }
+         }
+
+         # Check for required parameters
          foreach ($this->_required as $key) {
-            if (!isset($values[$key])) {
+            if (!isset($params[$key])) {
                return;
             }
          }
 
          # Check for format specifications
          foreach ($this->_formats as $key => $format) {
-            if ($value = $values[$key] and !preg_match($format, $value)) {
+            if ($value = $params[$key] and !preg_match($format, $value)) {
                return;
             }
          }
 
          # Apply default values
          foreach ($this->_defaults as $key => $value) {
-            if (!isset($values[$key]) and isset($this->_params[$key])) {
-               $values[$key] = $value;
+            if (!isset($params[$key]) and isset($this->_params[$key])) {
+               $params[$key] = $value;
             }
          }
 
-         # Build the route
+         # Replace all route symbols
          $add = false;
          foreach (array_reverse($this->_params) as $key => $symbol) {
-            $value = $values[$key];
-            unset($values[$key]);
+            $value = $params[$key];
+            unset($params[$key]);
 
             if ($add or ($value and $value != $this->_defaults[$key])) {
                $route = str_replace($symbol, $value, $route);
@@ -254,10 +279,10 @@
          }
 
          # Add remaining parameters to query string
-         if ($values) {
+         if ($params) {
             $query = array();
 
-            foreach ($values as $key => $value) {
+            foreach ($params as $key => $value) {
                if (!is_null($value)) {
                   if (is_numeric($key)) {
                      $query[] = urlencode($value);

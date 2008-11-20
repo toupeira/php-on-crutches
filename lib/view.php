@@ -9,9 +9,12 @@
 
    class View extends Object
    {
+      static public $current;
+
       static public $handlers = array(
          'thtml'   => 'php',
          'textile' => 'textilize',
+         'builder' => 'HtmlBuilder',
       );
 
       # Find a template for the given path
@@ -22,6 +25,11 @@
          # Look in /app/views first, then in /lib/views
          if (!$_paths) {
             $_paths = '{'.VIEWS.','.LIB.'views/}';
+         }
+
+         # Add the default paths if the template is a relative path
+         if ($template[0] != '/') {
+            $template = $_paths.$template;
          }
 
          # Look for all supported template extensions
@@ -35,7 +43,7 @@
          }
 
          # Return the first match
-         return array_shift(glob("$_paths$template$lang.$_extensions", GLOB_BRACE));
+         return array_shift(glob("$template$lang.$_extensions", GLOB_BRACE));
       }
 
       protected $_template;
@@ -51,9 +59,6 @@
       function __construct($template=null, $layout=null) {
          $this->_template = $template;
          $this->_layout = $layout;
-
-         # Provide a reference to the HTML builder
-         $this->set('html', HtmlBuilder::instance());
       }
 
       function __toString() {
@@ -94,14 +99,31 @@
          return $this->_data[$key];
       }
 
-      function set($key, $value) {
+      function set($key, $value=null) {
+         if (is_object($key)) {
+            $value = $key;
+            if ($value instanceof QuerySet) {
+               $key = tableize($value->model);
+            } else {
+               $key = underscore(get_class($value));
+            }
+         }
+
          $this->_data[$key] = &$value;
          return $this;
       }
 
       function set_default($key, $value) {
-         if (!array_key_exists($key, $this->_data)) {
+         if (!array_key_exists($key, (array) $this->_data)) {
             $this->set($key, &$value);
+         }
+
+         return $this;
+      }
+
+      function add($values) {
+         foreach ((array) $values as $key => $value) {
+            $this->set_default($key, $value);
          }
 
          return $this;
@@ -109,13 +131,13 @@
 
       # Render a template
       function render($template=null, $layout=null) {
-         if (!$this->_template and !$this->_template = $template) {
+         if (!$template and !$template = $this->_template) {
             throw new ApplicationError("No template set");
-         } elseif (!is_file($this->_template)) {
+         } elseif (!is_file($this->_template = $template)) {
             if (is_file($file = View::find_template($this->_template))) {
                $this->_template = $file;
             } else {
-               throw new MissingTemplate("Template '{$this->_template}.thtml' not found");
+               throw new MissingTemplate("Template '{$this->_template}' not found");
             }
          }
 
@@ -147,11 +169,12 @@
             }
          }
 
-         Dispatcher::$render_time -= microtime(true);
+         # Provide a reference to the current view
+         $this->set('view', self::$current = $this);
 
          if (!$output) {
             # Render the template
-            log_info(sprintf('Rendering '.str_replace(VIEWS, '', $this->_template)));
+            $this->log('Rendering', $this->_template);
             $output = $this->compile($this->_template, $this->_data);
 
             if ($this->_cache_key and !$this->_cache_full) {
@@ -162,9 +185,9 @@
 
          $this->set('content_for_layout', $output);
 
+         # Render the layout
          if (is_file($this->_layout)) {
-            # Render the layout
-            log_info('Rendering template within '.str_replace(VIEWS, '', $this->_layout));
+            $this->log('Rendering template within', $this->_layout);
             $output = $this->compile($this->_layout, $this->_data);
          }
 
@@ -173,7 +196,8 @@
             cache_set($this->_cache_key, $output);
          }
 
-         Dispatcher::$render_time += microtime(true);
+         # Remove the reference to the view so it can get cleaned up
+         $this->set('view', self::$current = null);
 
          return $output;
       }
@@ -182,8 +206,8 @@
       function render_partial($partial, array $locals=null) {
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
-         } else {
-            $partial = substr(dirname(any($this->_template, $this->_partial)), strlen(VIEWS)).'/_'.$partial;
+         } elseif ($path = dirname(any($this->_template, $this->_partial))) {
+            $partial = str_replace(VIEWS, '', $path).'/_'.$partial;
          }
 
          if (!$this->_partial = View::find_template($partial) and
@@ -191,13 +215,12 @@
             throw new ApplicationError("Partial '$partial' not found");
          }
 
-         log_info("Rendering partial {$this->_partial}");
+         $this->log('Rendering partial', $this->_partial);
          $locals = array_merge((array) $this->_data, (array) $locals);
          return $this->compile($this->_partial, $locals);
       }
 
-      # Render a collection of model instances using partials
-      # based on their class name
+      # Render a collection of model instances using partials based on their class name
       function render_collection($objects) {
          $output = '';
          foreach ($objects as $object) {
@@ -214,13 +237,45 @@
          return $output;
       }
 
+      # Enable view caching
       function cache($key=true, $full=false) {
-         $this->_cache_key = $key;
-         $this->_cache_full = $full;
+         if (config('cache_views')) {
+            $this->_cache_key = $key;
+            $this->_cache_full = $full;
+            return true;
+         } else {
+            return false;
+         }
+      }
+
+      protected function log($message, $template) {
+         if (log_level(LOG_INFO)) {
+            log_info($message.' '.strtr($template, array(
+               VIEWS        => '',
+               LIB.'views/' => '',
+            ))); 
+         }
       }
 
       # Compile a template file
       protected function compile($_template, $_locals=null) {
+         $ext = substr($_template, strrpos($_template, '.') + 1);
+
+         if ($handler = self::$handlers[$ext]) {
+            if ($handler == 'php') {
+               unset($handler);
+            } elseif (function_exists($handler)) {
+               log_debug("Applying template handler '$handler'");
+            } elseif (class_exists($handler)) {
+               log_debug("Applying template handler '$handler'");
+               return call_user_func(
+                  array($handler, 'compile'), $_template, $_locals
+               );
+            } else {
+               throw new ApplicationError("Invalid handler '$handler'");
+            }
+         }
+
          # Extract assigned values as local variables
          if (extract((array) $_locals, EXTR_SKIP) != count($_locals)) {
             #throw new ApplicationError("Couldn't extract all template variables");
@@ -230,21 +285,11 @@
          require $_template;
          $output = ob_get_clean();
 
-         $ext = substr($_template, strrpos($template, '.') + 1);
-         if ($handler = self::$handlers[$ext] and $handler != 'php') {
-            if (function_exists($handler)) {
-               log_info("Applying template handler '$handler'");
-               return $handler($output);
-            } elseif (class_exists($handler)) {
-               log_info("Applying template handler '$handler'");
-               $handler = new $handler();
-               return $handler->render($output);
-            } else {
-               throw new ApplicationError("Invalid handler '$handler'");
-            }
-         } else {
-            return $output;
+         if ($handler) {
+            $output = $handler($output);
          }
+
+         return $output;
       }
    }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/php5
-<?
+<? # vim: ft=php
 # Copyright 2008 Markus Koller
 #
 # This program is free software; you can redistribute it and/or modify
@@ -7,6 +7,8 @@
 #
 # $Id$
 #
+
+   $_ENV['ENVIRONMENT'] = 'test';
 
    if (function_exists('xdebug_start_code_coverage')) {
       xdebug_start_code_coverage();
@@ -20,24 +22,21 @@
    require_once LIB.'test/coverage.php';
 
    $tests = array();
+
+   $force = false;
+   $target = WEBROOT.'coverage';
    $include = array(APP);
    $exclude = array();
 
    $args = array_slice($argv, 1);
    while ($arg = array_shift($args)) {
       switch($arg) {
+         case '-f': $force = true; break;
          case '-d': $target = realpath(array_shift($args)); break;
          case '-i': $include[] = realpath(array_shift($args)); break;
          case '-e': $exclude[] = realpath(array_shift($args)); break;
-         case '-f': $force = true; break;
          default: $tests[] = $arg;
       }
-   }
-
-   $target = any($target, WEBROOT.'coverage');
-   if (file_exists($target) and !$force) {
-      print "Target path $target already exists.\n";
-      exit(1);
    }
 
    # Reset the arguments for script/test
@@ -57,9 +56,8 @@
       }
    }
 
-   rm_rf($target);
    $report = new CoverageReport($coverage, $target, $include, $exclude);
-   $report->generate() or exit(1);
+   $report->generate($force) or exit(1);
 
    # Open the report in a browser
    if (getenv('DISPLAY')) {

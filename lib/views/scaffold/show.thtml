@@ -2,16 +2,16 @@
 <?
    $data = array();
    foreach ($attributes as $key => $options) {
-      $data[h(_(humanize($key)))] = '<div>'.nl2br(h($object->$key)).'<div>';
+      $data[h(humanize($key))] = '<div>'.nl2br(h($object->$key)).'<div>';
    }
 ?>
 <p class="scaffold-links">
-   <?= image_tag('framework/icons/database.png') ?>
-   <?= link_to(_("Show all"), ":$prefix") ?>
-   <?= image_tag('framework/icons/database_edit.png') ?>
-   <?= link_to(sprintf(_("Edit %s"), _(humanize($model))), ":$prefix/edit/{$object->id}") ?>
-   <?= image_tag('framework/icons/database_delete.png') ?>
-   <?= link_to(sprintf(_("Delete %s"), _(humanize($model))), ":$prefix/destroy/{$object->id}",
+   <?= icon('framework/icons/database') ?>
+   <?= link_to(_('Show all'), ":$prefix") ?>
+   <?= icon('framework/icons/database_edit') ?>
+   <?= link_to(sprintf(_('Edit %s'), humanize($model)), ":$prefix/edit/{$object->id}") ?>
+   <?= icon('framework/icons/database_delete') ?>
+   <?= link_to(sprintf(_('Delete %s'), humanize($model)), ":$prefix/destroy/{$object->id}",
                array('post' => true, 'confirm' => true)) ?>
 </p>
 <?= table_tag($data, array('class' => 'scaffold-show', 'escape' => false)) ?>

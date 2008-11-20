@@ -3,6 +3,6 @@
    $messages = Logger::messages();
 ?>
 <? if ($messages): ?>
-<a><?= image_tag('framework/icons/log.png') ?> Log: <?= count($messages) ?> entries</a>
+<a><?= icon('framework/icons/log') ?> Log: <?= pluralize(count($messages), 'entry') ?></a>
 <div><pre><?= colorize(h(implode("\n", (array) $messages))) ?></pre></div>
 <? endif ?>

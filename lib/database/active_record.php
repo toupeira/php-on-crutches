@@ -9,11 +9,7 @@
 
    abstract class ActiveRecord extends Model
    {
-      protected $_mapper;
-
-      protected $_new_record = true;
       protected $_load_attributes = true;
-      protected $_virtual_attributes;
 
       function __construct(array $attributes=null, array $defaults=null) {
          # Always protect the ID from mass-assignments
@@ -30,15 +26,17 @@
             }
          }
 
-         # Add virtual attributes
-         foreach ((array) $this->_virtual_attributes as $key) {
-            $this->add_virtual($key, null);
-         }
-
          # Set the default values
-         $this->set_attributes($attributes, array_merge(
-            (array) $this->mapper->defaults, (array) $defaults
+         parent::__construct(array_merge(
+            (array) $this->mapper->defaults,
+            (array) $defaults,
+            (array) $attributes
          ));
+      }
+
+      function get_slug() {
+         $slug = parent::get_slug();
+         return intval($this->id).($slug ? "-$slug" : '');
       }
 
       function __get($key) {
@@ -63,118 +61,18 @@
          return $this->_attributes[$this->mapper->primary_key];
       }
 
-      function get_exists() {
-         return !$this->_new_record;
-      }
-
-      function get_new_record() {
-         return $this->_new_record;
-      }
-
-      function add_virtual($key, $value) {
-         $this->_virtual_attributes[] = $key;
-         return $this->_attributes[$key] = $value;
-      }
-
-      # Wrapper for database finders
-      function load(array $attributes) {
-         foreach ($attributes as $key => $value) {
-            if (!array_key_exists($key, $this->_attributes)) {
-               # Add unknown column names as virtual attributes
-               $this->add_virtual($key, $value);
-            } else {
-               $this->_attributes[$key] = $value;
-            }
-         }
-
-         $this->_new_record = false;
-         $this->_changed_attributes = array();
-
-         return $this;
-      }
-
-      # Reload attributes from database
-      function reload() {
-         if (!$this->_new_record and !array_key_exists($this->mapper->primary_key, $this->_changed_attributes)) {
-            return $this->load($this->mapper->find($this->id)->attributes);
-         } else {
-            return false;
-         }
-      }
-
-      function save($force_update=false) {
-         if (!$this->is_valid()) {
-            return false;
-         }
-
-         if ($this->_new_record) {
-            $action = 'create';
-            $sql_action = 'insert';
-         } else {
-            $action = $sql_action = 'update';
-         }
-
-         $this->call_filter("before_$action");
-         $this->call_filter(before_save);
-
-         $attributes = array_get($this->_attributes,
-            array_keys($this->_changed_attributes)
-         );
-         array_delete($attributes, $this->_virtual_attributes);
-
-         if ($this->_new_record) {
-            $args = array($attributes);
-         } else {
-            if (empty($attributes) and !$force_update) {
-               return $this;
-            }
-
-            $args = array($attributes, $this->id, $force_update);
-         }
-
-         $id = call_user_func_array(array($this->mapper, $sql_action), $args);
-
-         if ($action == 'create') {
-            $this->_new_record = false;
-            $this->_attributes[$this->mapper->primary_key] = $id;
-         }
-
-         $this->call_filter(after_save);
-         $this->call_filter("after_$action");
-
-         $this->_changed_attributes = array();
-
-         return $this;
-      }
-
-      function destroy() {
-         if ($this->_new_record) {
-            return false;
-         } else {
-            $this->call_filter(before_destroy);
-            $this->delete();
-            $this->call_filter(after_destroy);
-            return true;
-         }
-      }
-
-      function delete() {
-         if ($this->_new_record) {
-            return false;
-         } else {
-            $this->mapper->delete($this->id);
-            $this->_new_record = true;
-            $this->_readonly = array_keys($this->attributes);
-            return true;
-         }
-      }
-
-      # Automatic form fields based on database schema
+      # Generate automatic form fields based on database schema
       function auto_field($key) {
          $args = func_get_args();
 
-         if (!$column = $this->mapper->attributes[$key]) {
+         if (in_array($key, (array) $this->_virtual_attributes)) {
+            return call_user_func_array(array(parent, 'auto_field'), $args);
+         } elseif (!$column = $this->mapper->attributes[$key]) {
             throw new ValueError("Invalid attribute '$key'");
+         }
+
+         if ($column['key'] or in_array($key, $this->_readonly)) {
+            return h($this->$key);
          }
 
          $options = array();
@@ -188,7 +86,11 @@
                $method = 'check_box';
                break;
             case 'string':
-               $method = 'text_field';
+               if (substr($key, 0, 8) == 'password') {
+                  $method = 'password_field';
+               } else {
+                  $method = 'text_field';
+               }
                $options['maxlength'] = $column['size'];
                $options['size'] = min(40, $column['size']);
                break;

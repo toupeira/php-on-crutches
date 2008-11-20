@@ -1,5 +1,5 @@
 #!/usr/bin/php5
-<?
+<? # vim: ft=php
 # Copyright 2008 Markus Koller
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,7 +8,7 @@
 # $Id$
 #
 
-   define(ENVIRONMENT, 'test');
+   $_ENV['ENVIRONMENT'] = 'test';
 
    require_once dirname(__FILE__).'/../script.php';
    require_once LIB.'test/runner.php';
@@ -26,10 +26,10 @@
       if (strstr($argv[0], 'coverage')) {
          print "Usage: $argv[0] [OPTIONS] [TESTS..]\n"
                . "\n"
-               . "  -d DIR        Output directory for the report\n"
+               . "  -d PATH       Output directory for the report (default: WEBROOT/coverage)\n"
                . "  -i PATH       Include path in report\n"
                . "  -e PATH       Exclude path in report\n"
-               . "  -f            Overwrite an existing directory\n";
+               . "  -f            Force overwriting an existing directory\n";
       } else {
          print "Usage: $argv[0] [TESTS..]\n";
       }

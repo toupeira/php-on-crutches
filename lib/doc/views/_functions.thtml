@@ -1,0 +1,19 @@
+<?# $Id$ ?>
+<? if ($functions): ?>
+<? foreach (sorted($functions) as $function => $data): ?>
+<? if ($data['visibility'] == 'public' or $data['comment']): ?>
+<div id="function_<?= $function ?>" class="function">
+   <h3><code>
+      <span class="flags"><?= implode(', ', $data['flags']) ?></span>
+      <span class="<?= $data['visibility'] ?>"><?= $data['visibility'] ?></span>
+      <?= link_to($function, "#function_$function") ?>
+      <span class="arguments">(<?= implode(', ', $data['arguments']) ?>)</span>
+   </code></h3>
+   <?= render_comment($data['comment']) ?>
+<? if ($source = $data['source']): ?>
+   <small><?= link_to_function('Show source', 'toggle_source(this)') ?></small><div class="source" style="display: none"><?= syntax_highlight($source) ?></div>
+<? endif ?>
+</div>
+<? endif ?>
+<? endforeach ?>
+<? endif ?>

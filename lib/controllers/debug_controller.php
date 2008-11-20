@@ -35,8 +35,9 @@
          }
       }
 
-      function models($model=null, $action='list', $id=null) {
+      function models($model=null, $action='index', $id=null) {
          $this->set('title', 'Model Browser');
+         $this->set('icon', 'database');
 
          if ($model and $action) {
             $title = image_tag('framework/icons/database.png') . ' '
@@ -45,7 +46,7 @@
             if ($action == 'show' or $action == 'edit') {
                $title .= ' <dfn>&#x25b8;</dfn> #'.$id;
             }
-            if ($action != 'list' and $action != 'show') {
+            if ($action != 'index' and $action != 'show') {
                $title .= ' <dfn>&#x25b8;</dfn> '.humanize($action);
             }
             $this->set('subtitle', $title);
@@ -55,23 +56,26 @@
                $this->set('attributes', DB(camelize($model))->attributes);
                $this->render('debug/models/attributes');
             } else {
-               $this->scaffold(camelize($model), $action, $id, array(
-                  'page_size'   => 25,
-                  'path_prefix' => "/models/$model",
-                  'template'    => array("debug/models/$action", "scaffold/$action"),
+               $template = ($action == 'index' ? 'list' : $action);
+               $this->scaffold($action, $id, array(
+                  'model'     => $model,
+                  'paginate'  => 25,
+                  'prefix'    => "/models/$model",
+                  'template'  => array("debug/models/$template", "scaffold/$template"),
                ));
             }
          } else {
             # Load all model files
             foreach (glob(MODELS.'*.php') as $file) {
-               require $file;
+               require_once $file;
             }
 
             # Find all ActiveRecord models
             $models = array();
-            foreach (get_declared_classes() as $class) {
-               if (is_subclass_of($class, ActiveRecord)) {
-                  $models[DB($class)->connection->name][$class] = DB($class)->count;
+            foreach (get_declared_classes() as $model) {
+               $class = new ReflectionClass($model);
+               if ($class->isSubclassOf(ActiveRecord) and $class->isInstantiable()) {
+                  $models[DB($model)->connection->name][$model] = DB($model)->count;
                }
             }
 

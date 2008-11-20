@@ -23,6 +23,8 @@ body {
   padding: 0.2em;
 }
 
+a img { border: none; }
+
 h1 {
   margin: 1em 0;
   color: #666;
@@ -65,9 +67,8 @@ h1 dfn {
 #menu a {
   display: block;
   margin-top: -1px;
-  padding: 5px 0 5px 23px;
+  padding: 5px 0;
   color: #333;
-  background: url(../../images/framework/icons/debug.png) no-repeat 3px 6px;
   text-decoration: none;
   font-size: larger;
   border-top: 1px solid #ccc;
@@ -81,6 +82,10 @@ h1 dfn {
 #menu a.active {
   font-weight: bold;
   background-color: #f3f3f3;
+}
+
+#menu img {
+  margin-bottom: -3px;
 }
 
 #menu hr {
@@ -101,11 +106,12 @@ h1 dfn {
 
 #content a {
   color: #446e96;
-  padding: 0 0.2em;
+  padding: 0.2em;
 }
 
 #content a:hover {
-  font-weight: bold;
+  color: white;
+  background: #446e96;
 }
 
 table.scaffold-list {

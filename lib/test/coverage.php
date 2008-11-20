@@ -9,56 +9,62 @@
 
    class CoverageReport extends Object
    {
-      protected $files;
-      protected $target;
-      protected $include;
-      protected $exclude;
-      protected $reports;
-      protected $view_path;
+      protected $_files;
+      protected $_target;
+      protected $_include;
+      protected $_exclude;
+      protected $_reports;
+      protected $_view_path;
 
-      protected $total_size = 0;
-      protected $total_code = 0;
-      protected $covered_size = 0;
-      protected $covered_code = 0;
-      protected $comment = false;
-      protected $last = true;
+      protected $_total_size = 0;
+      protected $_total_code = 0;
+      protected $_covered_size = 0;
+      protected $_covered_code = 0;
+      protected $_comment = false;
+      protected $_last = true;
 
       function __construct(array $coverage, $target=null, $include=null, $exclude=null) {
-         $this->files = $coverage;
-         $this->target = $target;
+         $this->_files = $coverage;
+         $this->_target = $target;
 
          if (is_array($include)) {
-            $this->include = $include;
+            $this->_include = $include;
          } else {
-            $this->include = APP;
+            $this->_include = APP;
          }
 
-         $this->exclude = (array) $exclude;
+         $this->_exclude = (array) $exclude;
 
-         $this->view_path = LIB.'test/coverage/';
+         $this->_view_path = LIB.'test/coverage/';
       }
 
-      function generate() {
-         print "Generating code coverage report in {$this->target}...\n";
+      function generate($force=false) {
+         print "Generating code coverage report in [1m{$this->_target}[0m...\n";
 
-         if (file_exists($this->target)) {
-            print "Error: Target path {$this->target} already exists.\n";
+         if (file_exists($this->_target) and !$force) {
+            print "Error: Target path {$this->_target} already exists.\n";
             return false;
-         } elseif (!mkdir($this->target)) {
-            print "Error: Could not create target path {$this->target}.\n";
+         } else { 
+            rm_rf($this->_target);
+         }
+
+         if (!mkdir($this->_target)) {
+            print "Error: Could not create target path {$this->_target}.\n";
             return false;
-         } elseif (!copy($this->view_path.'coverage.css', "{$this->target}/coverage.css")) {
+         }
+
+         if (!copy($this->_view_path.'coverage.css', "{$this->_target}/coverage.css")) {
             print "Error: Could not copy stylesheet.\n";
             return false;
          }
 
-         ksort($this->files);
+         ksort($this->_files);
          $filtered = array();
 
-         foreach ($this->files as $file => $lines) {
+         foreach ($this->_files as $file => $lines) {
             if (is_file($file)) {
                $skip = false;
-               foreach ((array) $this->exclude as $base_path) {
+               foreach ((array) $this->_exclude as $base_path) {
                   if (strpos($file, $base_path) === 0) {
                      $skip = true;
                      break;
@@ -66,7 +72,7 @@
                }
                if ($skip) continue;
 
-               foreach ((array) $this->include as $base_path) {
+               foreach ((array) $this->_include as $base_path) {
                   if (strpos($file, $base_path) === 0) {
                      $filtered[$file] = $lines;
                      break;
@@ -75,10 +81,10 @@
             }
          }
 
-         $this->files = $filtered;
-         print pluralize(count($this->files), 'file', 'files')." found:\n";
+         $this->_files = $filtered;
+         print pluralize(count($this->_files), 'file')." found:\n";
 
-         foreach ($this->files as $path => $coverage) {
+         foreach ($this->_files as $path => $coverage) {
             $this->render_file($path, $coverage);
          }
 
@@ -89,11 +95,10 @@
       }
 
       protected function render_file($path, array $coverage) {
-
          $name = substr($path, strlen(ROOT));
+         $file = underscore($name).'.html';
 
-         $file = str_replace('/', '-', str_replace('.', '_', $name)).'.html';
-         print "   creating $file\n";
+         print "  creating $file\n";
          if (!$lines = file($path)) {
             throw new ApplicationError("Could not open file $path");
          }
@@ -105,15 +110,15 @@
 
          $states = array();
          $comments = array();
-         $this->comment = false;
-         $this->last = true;
+         $this->_comment = false;
+         $this->_last = true;
 
          foreach ($lines as $i => $line) {
             $line = $lines[$i] = rtrim($line);
 
             if ($coverage[$i + 1]) {
                $states[$i] = 'tested';
-               $this->last = true;
+               $this->_last = true;
                $code++;
                $covered_size++;
                $covered_code++;
@@ -129,7 +134,7 @@
                }
             } else {
                $states[$i] = 'untested';
-               $this->last = false;
+               $this->_last = false;
                $code++;
             }
          }
@@ -155,39 +160,39 @@
             'pad'    => strlen($size),
          ));
 
-         $this->total_size += $size;
-         $this->total_code += $code;
-         $this->covered_size += $covered_size;
-         $this->covered_code += $covered_code;
-         $this->reports[$name] = $report;
+         $this->_total_size += $size;
+         $this->_total_code += $code;
+         $this->_covered_size += $covered_size;
+         $this->_covered_code += $covered_code;
+         $this->_reports[$name] = $report;
       }
 
       protected function render_index() {
          print "   creating index.html\n";
 
-         $this->reports = array_merge(
+         $this->_reports = array_merge(
             array('TOTAL' => array(
-               'size' => $this->total_size,
-               'code' => $this->total_code,
-               'coverage_total' => ($this->total_size > 0)
-                  ? sprintf('%.1f', $this->covered_size / $this->total_size * 100)
+               'size' => $this->_total_size,
+               'code' => $this->_total_code,
+               'coverage_total' => ($this->_total_size > 0)
+                  ? sprintf('%.1f', $this->_covered_size / $this->_total_size * 100)
                   : "0.0",
-               'coverage_code'   => ($this->total_code > 0)
-                  ? sprintf('%.1f', $this->covered_code / $this->total_code * 100)
+               'coverage_code'   => ($this->_total_code > 0)
+                  ? sprintf('%.1f', $this->_covered_code / $this->_total_code * 100)
                   : "0.0")),
-            $this->reports
+            $this->_reports
          );
 
          $this->render('index', 'index.html', array(
             'title'   => '',
-            'reports' => $this->reports,
+            'reports' => $this->_reports,
          ));
       }
 
       protected function render($template, $file, array $data) {
          $view = new View(
-            $this->view_path."$template.thtml",
-            $this->view_path."layout.thtml"
+            $this->_view_path."$template.thtml",
+            $this->_view_path."layout.thtml"
          );
 
          foreach ($data as $key => $value) {
@@ -196,7 +201,7 @@
          $view->set('time', strftime('%a, %d %b %Y %H:%M:%S %z'));
          $output = $view->render();
 
-         if (!file_put_contents("{$this->target}/$file", $output)) {
+         if (!file_put_contents("{$this->_target}/$file", $output)) {
             throw new ApplicationError("Could not write file $file");
          }
       }
@@ -206,36 +211,36 @@
          $type = 'line noise';
 
          if (preg_match('/\*\/[^\'"]*/', $line)) {
-            $this->comment = false;
+            $this->_comment = false;
             $type = 'end of comment';
-         } elseif ($this->last and $this->comment) {
+         } elseif ($this->_last and $this->_comment) {
             return 'in comment';
          } elseif (preg_match('/[^\'"]*\/\*/', $line)) {
-            $this->comment = true;
+            $this->_comment = true;
             $type = 'start of comment';
          }
 
-         if ($this->last and blank($line)) {
+         if ($this->_last and blank($line)) {
             return 'blank';
-         } elseif ($this->last and !preg_match('/[^ ;(){}<>\/\*#?]/', $line)) {
+         } elseif ($this->_last and !preg_match('/[^ ;(){}<>\/\*#?]/', $line)) {
             return $type;
-         } elseif ($this->last and preg_match('/^(#|\/\/)/', $line)) {
+         } elseif ($this->_last and preg_match('/^(#|\/\/)/', $line)) {
             return 'comment';
          } elseif (preg_match('/^\<\?#.*\?>$/', $line)) {
             return 'comment tag';
-         } elseif ($this->last and preg_match('/^\}? ?(if|else|for|foreach|while|switch|case|default|try|catch) ?[:(\{]?$/', $line)) {
+         } elseif ($this->_last and preg_match('/^\}? ?(if|else|for|foreach|while|switch|case|default|try|catch) ?[:(\{]?$/', $line)) {
             return 'statement';
-         } elseif (!$this->comment and preg_match('/^(\w+ )?function \w+ ?\(.*\) ?\{?( ?\} ?;)?$/', $line)) {
+         } elseif (!$this->_comment and preg_match('/^(\w+ )?function \w+ ?\(.*\) ?\{?( ?\} ?;)?$/', $line)) {
             return 'function';
-         } elseif (!$this->comment and preg_match('/^(\w+ )?class \w+ ?(extends \w+)? ?\{?( ?\} ?;)?$/', $line)) {
+         } elseif (!$this->_comment and preg_match('/^(\w+ )?class \w+ ?(extends \w+)? ?\{?( ?\} ?;)?$/', $line)) {
             return 'class';
-         } elseif ($this->last and preg_match('/^(\w+ )?\w+ \$\w+(;| = .+)$/', $line)) {
+         } elseif ($this->_last and preg_match('/^(\w+ )?\w+ \$\w+(;| = .+)$/', $line)) {
             return 'property';
-         } elseif ($this->last and preg_match('/^(\$\w+|[\d\.]+|[\'"].*[\'"]) ?[\.,]?$/', $line)) {
+         } elseif ($this->_last and preg_match('/^(\$\w+|[\d\.]+|[\'"].*[\'"]) ?[\.,]?$/', $line)) {
             return 'literals';
-         } elseif ($this->last and preg_match('/^(\$\w+ ?= ?array\(|[\'"]?\w+[\'"]? => [\'"$]?\w+[\'"]?,?)$/', $line)) {
+         } elseif ($this->_last and preg_match('/^(\$\w+ ?= ?array\(|[\'"]?\w+[\'"]? => [\'"$]?\w+[\'"]?,?)$/', $line)) {
             return 'array assignment';
-         } elseif ($this->last and preg_match('/^[\w\s\-\+\.\/,;:!?äöü\'"]*$/u', $line)) {
+         } elseif ($this->_last and preg_match('/^[\w\s\-\+\.\/,;:!?äöü\'"]*$/u', $line)) {
             return 'text';
          } elseif (preg_match('/(^<[!\/]?\w+|[^?]>$)/', $line)) {
             return 'html';

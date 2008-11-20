@@ -17,16 +17,25 @@
 
    class ValueError extends StandardError {
       function __construct($value, $message=null) {
-         parent::__construct(any($message, "Invalid value '$value'"));
+         if ($message) {
+            $message = sprintf($message, $value);
+         } else {
+            $message = "Invalid value '$value'";
+         }
+
+         parent::__construct($message);
       }
    }
 
    class TypeError extends StandardError {
       function __construct($value, $message=null) {
-         if (!$message) {
-            $type = (is_object($value) ? get_class($value) : gettype($value));
+         $type = (is_object($value) ? get_class($value) : gettype($value));
+         if ($message) {
+            $message = sprintf($message, $type);
+         } else {
             $message = "Invalid argument of type '$type'";
          }
+
          parent::__construct($message);
       }
    }
@@ -66,7 +75,7 @@
 
    # Catch "fatal" PHP errors
    function fatal_error_handler() {
-      if ($handler = config('error_handler') and $error = error_get_last()) {
+      if ($handler = config('exception_handler') and $error = error_get_last()) {
          if ((error_reporting() & $error['type']) == 0) {
             return;
          } elseif ($error['type'] == 4) {
@@ -75,7 +84,7 @@
             $exception = FatalError;
          }
 
-         exception_handler(new $exception(
+         $handler(new $exception(
             $error['message'],
             0,
             $error['type'],
@@ -95,7 +104,7 @@
          print dump_exception($exception)."\n";
       } else {
          if (log_running()) {
-            log_error("\n".dump_exception($exception));
+            log_msg("\n".dump_exception($exception), $exception instanceof NotFound ? LOG_INFO : LOG_ERROR);
          }
 
          Dispatcher::$controller = new ErrorsController();

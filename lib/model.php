@@ -9,14 +9,17 @@
 
    abstract class Model extends Object
    {
+      # The model mapper
+      protected $_mapper;
+
       # Model attributes
       protected $_attributes = array();
 
+      # Virtual attributes
+      protected $_virtual_attributes = array();
+
       # Changed attributes
       protected $_changed_attributes = array();
-
-      # Cached attributes
-      protected $_cache = array();
 
       # Read-only attributes can't be changed
       protected $_readonly = array();
@@ -28,42 +31,78 @@
       # List of error messages
       protected $_errors = array();
 
+      # Column to use as string representation
+      protected $_display_column;
+
+      protected $_new_record = true;
+
       function __construct(array $attributes=null, array $defaults=null) {
-         $this->set_attributes($attributes, $defaults);
+         # Add virtual attributes
+         foreach ((array) $this->_virtual_attributes as $key) {
+            $this->add_virtual($key, null);
+         }
+
+         # Set default values
+         $this->set_attributes(array_merge(
+            (array) $attributes,
+            (array) $defaults
+         ));
       }
 
       function __toString() {
-         return parent::__toString($this->attributes);
+         if ($key = $this->_display_column) {
+            return $this->$key;
+         } else {
+            foreach (array('title', 'name', 'login', 'filename', 'key', 'id') as $key) {
+               $getter = any(
+                  method_exists($this, "get_$key"),
+                  array_key_exists($key, $this->_attributes)
+               );
+
+               if ($getter and $value = $this->$key) {
+                  return $value;
+               }
+            }
+         }
+
+         return parent::__toString();
       }
 
-      # Stubs for implementation-specific actions
-
-      static function find($name) {
-         throw new NotImplemented("Model doesn't implement 'find'");
+      function inspect() {
+         return parent::inspect($this->attributes);
       }
 
-      static function find_all() {
-         throw new NotImplemented("Model doesn't implement 'find_all'");
+      function to_param() {
+         return $this->slug;
       }
 
-      function save() {
-         throw new NotImplemented(get_class()." doesn't implement 'save'");
+      function to_params($action=null) {
+         return array(
+            'controller' => tableize(get_class($this)),
+            'action'     => any($action, 'show'),
+            'id'         => $this->to_param(),
+         );
       }
 
-      function destroy($name) {
-         throw new NotImplemented(get_class()." doesn't implement 'destroy'");
+      function to_json() {
+         return to_json($this->_attributes);
       }
 
-      function validate() {}
+      function to_xml() {
+         return to_xml(array(
+            underscore(get_class($this)) => $this->attributes
+         ));
+      }
 
       # Automatic property accessors for model attributes
 
       function __get($key) {
-         $getter = "get_$key";
-         if (method_exists($this, $getter)) {
+         if (method_exists($this, $getter = "get_$key")) {
             return $this->$getter();
          } elseif (array_key_exists($key, $this->_attributes)) {
             return $this->read_attribute($key);
+         } elseif (method_exists($this, $key)) {
+            return $this->$key();
          } else {
             throw new UndefinedMethod($this, $getter);
          }
@@ -73,24 +112,114 @@
          if (in_array($key, $this->_readonly)) {
             throw new ApplicationError("Can't change read-only attribute '$key'");
          } else {
-            $setter = "set_$key";
             if (is_string($value) and !in_array($key, $this->_skip_trim)) {
                $value = trim($value);
             }
 
-            if (method_exists($this, $setter)) {
+            if (method_exists($this, $setter = "set_$key")) {
                $this->$setter(&$value);
             } elseif (array_key_exists($key, $this->_attributes)) {
                $this->write_attribute($key, $value);
             } else {
                throw new UndefinedMethod($this, $setter);
             }
-
-            unset($this->_cache[$key]);
          }
 
          return $this;
       }
+
+      function get_mapper() {
+         throw new NotImplemented("Model '".get_class($this)."'doesn't have a mapper");
+      }
+
+      function get_exists() {
+         return !$this->_new_record;
+      }
+
+      function get_new_record() {
+         return $this->_new_record;
+      }
+
+      function get_attributes() {
+         return $this->_attributes;
+      }
+
+      function changed($key=null) {
+         if ($key) {
+            return array_key_exists($key, $this->_changed_attributes);
+         } else {
+            return !empty($this->_changed_attributes);
+         }
+      }
+
+      function changes() {
+         $changes = array();
+         foreach ($this->_changed_attributes as $key => $old) {
+            if (($new = $this->$key) != $old) {
+               $changes[$key] = array($old, $new);
+            }
+         }
+
+         return $changes;
+      }
+
+      # Create or update the model, calls the model mapper for the
+      # actual implementation.
+      function save($force_update=false) {
+         if (!$this->is_valid()) {
+            return false;
+         }
+
+         $action = ($this->_new_record ? 'create' : 'update');
+
+         $this->call_filter("before_$action");
+         $this->call_filter("before_save");
+
+         # Get the changed values
+         $attributes = array_get(
+            $this->_attributes, array_keys($this->_changed_attributes)
+         );
+         array_delete($attributes, $this->_virtual_attributes);
+
+         if ($action == 'create') {
+            $result = $this->mapper->insert($attributes);
+         } elseif (empty($attributes) and !$force_update) {
+            return $this;
+         } else {
+            $result = $this->mapper->update($this, $attributes, $force_update);
+         }
+
+         if (is_array($result)) {
+            $this->load($result);
+         }
+
+         $this->_new_record = false;
+         $this->call_filter("after_save");
+         $this->call_filter("after_$action");
+
+         $this->_changed_attributes = array();
+
+         return $this;
+      }
+
+      function destroy() {
+         if ($this->_new_record) {
+            return false;
+         } else {
+            $this->call_filter('before_destroy');
+
+            $this->mapper->delete($this);
+
+            $this->_new_record = true;
+            $this->freeze();
+
+            $this->call_filter('after_destroy');
+
+            return true;
+         }
+      }
+
+      function validate() {}
 
       # Wrappers for use in custom setters and getters
 
@@ -108,27 +237,13 @@
          return $this;
       }
 
-      function get_attributes() {
-         return $this->_attributes;
-      }
-
-      function changed($key) {
-         return array_key_exists($key, $this->_changed_attributes);
-      }
-
-      function get_changed() {
-         return !empty($this->_changed_attributes);
-      }
-
-      function get_changes() {
-         $changes = array();
-         foreach ($this->_changed_attributes as $key => $old) {
-            if (($new = $this->$key) != $old) {
-               $changes[$key] = array($old, $new);
-            }
+      function add_virtual($key, $value) {
+         if (array_key_exists($key, $this->_attributes)) {
+            throw new ValueError($key, "Attribute '$key' already exists");
          }
 
-         return $changes;
+         $this->_virtual_attributes[] = $key;
+         return $this->_attributes[$key] = $value;
       }
 
       function reset($key) {
@@ -144,19 +259,45 @@
          $this->_readonly = array_keys($this->attributes);
       }
 
-      # Set attributes
-      function set_attributes(array $attributes=null, array $defaults=null) {
-         if (is_array($defaults)) {
-            $attributes = array_merge($defaults, (array) $attributes);
-         }
-
+      # Merge the attributes, protected keys are skipped
+      function set_attributes(array $attributes=null) {
          if (is_array($attributes) and !empty($attributes)) {
             array_delete($attributes, $this->_protected);
             foreach ($attributes as $key => $value) {
-               $this->__set($key, $value);
+               if (is_numeric($key)) {
+                  throw new TypeError($key);
+               } else {
+                  $this->__set($key, $value);
+               }
             }
 
             return $this;
+         } else {
+            return false;
+         }
+      }
+
+      # Load attributes directly, adding as virtual if they don't exist yet
+      function load(array $attributes) {
+         foreach ($attributes as $key => $value) {
+            if (!array_key_exists($key, $this->_attributes)) {
+               # Add unknown attributes as virtual
+               $this->add_virtual($key, $value);
+            } else {
+               $this->_attributes[$key] = $value;
+            }
+         }
+
+         $this->_new_record = false;
+         $this->_changed_attributes = array();
+
+         return $this;
+      }
+
+      # Reload attributes from the mapper
+      function reload() {
+         if (!$this->_new_record) {
+            return $this->load($this->mapper->find($this)->attributes);
          } else {
             return false;
          }
@@ -176,15 +317,6 @@
          } else {
             return false;
          }
-      }
-
-      # Generate cached property value with PHP code
-      protected function cache($key, $code) {
-         if (!isset($this->_cache[$key])) {
-            $this->_cache[$key] = eval("return $code;");
-         }
-
-         return $this->_cache[$key];
       }
 
       # Error handling and validation
@@ -212,7 +344,7 @@
             return true;
          } else {
             if (!in_array($key, $this->_errors)) {
-               $this->add_error($key, _(humanize($key))." $message");
+               $this->add_error($key, humanize($key)." $message");
             }
             return false;
          }
@@ -304,6 +436,31 @@
          );
       }
 
+      # Wrappers for URL helpers
+
+      function link_to($action='show', $title=null, $options=null, $url_options=null) {
+         $this->add_url_options($options, $action);
+         $path = $this->to_params($action);
+         $title = any($title, truncate($this, 40, true));
+         return link_to($title, $path, $options, $url_options);
+      }
+
+      function button_to($action='show', $title=null, $options=null, $url_options=null) {
+         $this->add_url_options($options, $action);
+         $path = $this->to_params($action);
+         $title = any($title, truncate($this, 20, true));
+         return button_to($title, $path, $options, $url_options);
+      }
+
+      protected function add_url_options(array &$options=null, $action) {
+         if ($action == 'destroy') {
+            $options = array_merge(array(
+               'confirm' => true,
+               'post'    => true,
+            ), (array) $options);
+         }
+      }
+
       # Wrappers for form helpers
 
       function form_element($attribute, $tag, array $options=null) {
@@ -312,7 +469,7 @@
 
          $options['id'] = $this->get_dom_id($attribute);
          $options['force'] = true;
-         if (isset($this->_errors[$attribute])) {
+         if ($this->_errors[$attribute]) {
             $options['errors'] = true;
          }
 
@@ -327,8 +484,27 @@
          }
       }
 
+      # Generate automatic form fields based on a lucky guess
+      function auto_field($key) {
+         $args = func_get_args();
+
+         if (!array_key_exists($key, $this->_attributes)) {
+            throw new ValueError("Invalid attribute '$key'");
+         } elseif (in_array($key, $this->_readonly)) {
+            return h($this->$key);
+         } elseif ($key == 'text') {
+            $method = 'text_area';
+         } elseif (substr($key, 0, 8) == 'password') {
+            $method = 'password_field';
+         } else {
+            $method = 'text_field';
+         }
+
+         return call_user_func_array(array($this, $method), $args);
+      }
+
       function label($key, $label=null, array $options=null) {
-         return label($this->get_dom_id($key), any($label, _(humanize($key))));
+         return label($this->get_dom_id($key), any($label, humanize($key)));
       }
 
       function text_field($key, array $options=null) {

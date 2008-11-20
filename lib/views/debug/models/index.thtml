@@ -6,8 +6,8 @@
 </tr>
 <? foreach ($models as $model => $count): ?>
 <tr class="<?= cycle() ?>">
-   <td><?= image_tag('framework/icons/database.png') ?> <?= link_to(h($model), ':/models/'.underscore($model)) ?></td>
-   <td class="right"><?= pluralize($count, 'record', 'records') ?></td>
+   <td><?= icon('framework/icons/database') ?> <?= link_to(h($model), ':/models/'.underscore($model)) ?></td>
+   <td class="right"><?= pluralize($count, 'record') ?></td>
 </tr>
 <? endforeach ?>
 <tr class="blank"><td colspan="2"></td></tr>
