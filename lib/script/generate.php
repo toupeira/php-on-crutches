@@ -11,7 +11,7 @@
    require_once dirname(__FILE__).'/../script.php';
 
    function status($action, $path) {
-      printf("%12s  %s\n", $action, substr($path, strlen(ROOT)));
+      printf("%12s  %s\n", $action, str_replace(ROOT, '', $path));
    }
 
    function create_file($path, array $lines=null) {
