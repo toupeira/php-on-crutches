@@ -27,7 +27,7 @@
 
          $this->headers['Status'] = $status;
 
-         if (config('debug') and $exception instanceof Exception) {
+         if (config('debug') and $this->is_trusted() and $exception instanceof Exception) {
             return $this->show_debug($exception);
          } else {
             if (View::find_template("errors/$status")) {

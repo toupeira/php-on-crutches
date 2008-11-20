@@ -198,10 +198,12 @@
          $client = $_SERVER['REMOTE_ADDR'];
          $found = false;
          foreach ((array) $hosts as $host) {
+            # Expand wildcards into subnet patterns
             $host = strtr($host, array(
                '*' => '[0-9]+',
                '.' => '\\.',
             ));
+
             if (preg_match("/^$host$/", $client)) {
                $found = true;
                break;
