@@ -18,7 +18,7 @@
 
    global $_TEST_DIRS;
    $_TEST_DIRS = array_map('basename', array_filter(glob(TEST.'*'), is_dir));
-   array_remove($_TEST_DIRS, array('coverage', 'fixtures', 'framework'));
+   array_remove($_TEST_DIRS, array('fixtures', 'framework'));
 
    function run_tests($path, $message=null, $reporter=null) {
       $group = new GroupTest($message);
@@ -34,8 +34,8 @@
       } else {
          $message = "Testing [1m$name[0m: ";
          $dir = TEST.$name;
-         foreach (find_files($dir, '-type f -name "*_test.php"') as $file) {
-            load_helpers($dir);
+         foreach (find_files("$dir/", '-type f -name "*_test.php"') as $file) {
+            load_helpers(dirname($file));
             $group->addTestFile($file);
             $dirs[] = dirname($file);
          }
@@ -43,21 +43,6 @@
 
       print $message.pluralize($group->getSize(), 'test');
       if ($group->getSize() > 0) {
-         if (substr(str_replace(ROOT, '', $path), 0, 14) == 'test/framework') {
-            $root = TEST.'framework';
-         } else {
-            $root = TEST;
-         }
-
-         foreach (array_unique($dirs) as $dir) {
-            if ($dir = realpath($dir)) {
-               while (check_root($dir, $root)) {
-                  try_require($dir.'/test_helper.php');
-                  $dir = dirname($dir);
-               }
-            }
-         }
-
          if (!$reporter) {
             $reporter = new ConsoleReporter();
          }
@@ -81,23 +66,19 @@
 
       $args = (array) $args;
       $paths = (empty($args) ? $_TEST_DIRS : array());
-      $framework = (is_dir($framework = TEST.'framework') ? $framework : null);
+      $framework = TEST.'framework';
 
       while ($arg = array_shift($args)) {
          switch ($arg) {
             case 'all':
                $paths = array_merge($paths, $_TEST_DIRS);
-               if ($framework) {
-                  array_unshift($paths, $framework);
-               }
+               array_unshift($paths, $framework);
                break;
             case 'app':
                $paths = array_merge($paths, $_TEST_DIRS);
                break;
             case 'framework':
-               if ($framework) {
-                  $paths[] = $framework;
-               }
+               $paths[] = $framework;
                break;
             case 'recent':
                $paths = array_merge($paths, find_related_tests(
@@ -137,7 +118,7 @@
    function load_helpers($path) {
       if (substr(str_replace(ROOT, '', $path), 0, 14) == 'test/framework') {
          # Don't load application test helper for framework tests
-         $root = TEST.'framework';
+         $root = LIB.'test/framework';
       } else {
          $root = TEST;
       }

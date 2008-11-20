@@ -38,7 +38,7 @@
             . "Tests:\n"
             . "  all           Run all tests\n"
             . "  app           Run application tests (default)\n"
-. ($framework ? "  framework     Run framework tests\n" : "")
+            . "  framework     Run framework tests\n"
             . "\n"
             . "Special tests:\n"
             . "  recent        Test recently changed files\n"

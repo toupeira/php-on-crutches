@@ -12,16 +12,19 @@
 
    $force = false;
    $add_externals = false;
+   $diff = false;
 
    $args = array_slice($argv, 1);
    while ($arg = array_shift($args)) {
       switch ($arg) {
          case '-f': $force = true; break;
+         case '-d': $diff = true; break;
          case '-x': $add_externals = true; break;
          default:
             print "Usage: {$argv[0]}\n"
                   . "\n"
                   . "  -f        Automatically add new files\n"
+                  . "  -d        Merge changes using vimdiff\n"
                   . "  -x        Add default SVN externals\n"
                   . "\n";
                exit(255);
@@ -32,19 +35,27 @@
       printf("%12s  %s\n", $action, str_replace(ROOT, '', $path));
    }
 
-   function update_skeleton($skel, $force) {
+   function update_skeleton($skel, $diff=false, $force=false) {
       $path = ltrim(str_replace(LIB.'skeleton', '', $skel), '/');
 
       if (substr(basename($skel), 0, 1) == '.') {
          return;
+      } elseif (is_link($skel)) {
+         if (!file_exists(ROOT.$path)) {
+            status('link', $path);
+            $target = readlink($skel);
+            chdir(ROOT.dirname($path));
+            symlink($target, basename($path));
+            chdir(ROOT);
+         }
       } elseif (is_dir($skel)) {
          if (!is_dir(ROOT.$path)) {
             status('create', $path);
             mkdir(ROOT.$path);
          }
 
-         foreach (glob("$skel/*") as $skel) {
-            update_skeleton($skel, $force);
+         foreach (scandir($skel) as $path) {
+            update_skeleton("$skel/$path", $diff, $force);
          }
       } elseif (is_file($skel)) {
          if (!is_file(ROOT.$path)) {
@@ -58,9 +69,11 @@
             }
             status('create', $path);
             run("cp -p %s %s", $skel, ROOT.$path);
-         } elseif (!run("diff -q %s %s", ROOT.$path, $skel)) {
+         } elseif ($diff and !run("diff -q %s %s", ROOT.$path, $skel)) {
             status('merge', $path);
             term_exec("vimdiff %s %s", ROOT.$path, $skel);
+         } else {
+            status('exists', $path);
          }
       } else {
          print "Error: Invalid path $skel\n";
@@ -68,7 +81,7 @@
       }
    }
 
-   update_skeleton(LIB.'skeleton', $force);
+   update_skeleton(LIB.'skeleton', $diff, $force);
 
    if (!is_dir(ROOT.'script')) {
       status('create', script);
