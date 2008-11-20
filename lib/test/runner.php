@@ -116,7 +116,7 @@
 
    # Load all test helpers for the given path
    function load_helpers($path) {
-      if (substr(str_replace(ROOT, '', $path), 0, 14) == 'test/framework') {
+      if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test/framework') {
          # Don't load application test helper for framework tests
          $root = LIB.'test/framework';
       } else {
