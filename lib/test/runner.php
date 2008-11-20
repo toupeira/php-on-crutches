@@ -27,12 +27,15 @@
 
       if (is_file($path)) {
          $message = "Testing [1m".basename($path)."[0m: ";
+         $dir = dirname(realpath($path));
+         $dirs[] = $dir;
+         load_helpers($dir);
          $group->addTestFile($path);
-         $dirs[] = dirname(realpath($path));
       } else {
          $message = "Testing [1m$name[0m: ";
          $dir = TEST.$name;
          foreach (find_files($dir, '-type f -name "*_test.php"') as $file) {
+            load_helpers($dir);
             $group->addTestFile($file);
             $dirs[] = dirname($file);
          }
@@ -40,8 +43,6 @@
 
       print $message.pluralize($group->getSize(), 'test');
       if ($group->getSize() > 0) {
-         print "wtf?\n";
-         print substr(str_replace(ROOT, '', $path), 0, 14)."\n";
          if (substr(str_replace(ROOT, '', $path), 0, 14) == 'test/framework') {
             $root = TEST.'framework';
          } else {
@@ -130,6 +131,27 @@
       }
 
       return $tests;
+   }
+
+   # Load all test helpers for the given path
+   function load_helpers($path) {
+      if (substr(str_replace(ROOT, '', $path), 0, 14) == 'test/framework') {
+         # Don't load application test helper for framework tests
+         $root = TEST.'framework';
+      } else {
+         $root = TEST;
+      }
+
+      if (is_file($path)) {
+         $path = dirname($path);
+      }
+
+      if ($dir = realpath($path)) {
+         while (check_root($dir, $root)) {
+            try_require($dir.'/test_helper.php');
+            $dir = dirname($dir);
+         }
+      }
    }
 
    function load_fixtures() {
