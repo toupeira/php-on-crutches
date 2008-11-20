@@ -18,7 +18,7 @@
 
       function build_condition() {
          $args = func_get_args();
-         list($this->sql, $this->args) = call_user_func_array(array(parent, build_condition), $args);
+         list($this->sql, $this->args) = call_user_func_array(array(parent, 'build_condition'), $args);
          return array($this->sql, $this->args);
       }
 

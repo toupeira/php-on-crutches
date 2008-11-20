@@ -9,7 +9,7 @@
          $this->controller = new SampleController($params = array());
          $this->views = LIB.'views/sample/';
          $this->send_file_output = null;
-         register_shutdown_function(rm_rf, $this->views);
+         register_shutdown_function('rm_rf', $this->views);
 
          mkdir($this->views);
          file_put_contents($this->views.'index.thtml', 'Index Template');
@@ -30,6 +30,7 @@
       }
 
       function assertCalls() {
+         print_r($this->controller->calls);
          $this->assertEqual(func_get_args(), $this->controller->calls);
       }
 
@@ -50,7 +51,8 @@
 
          $this->assertEqual(
             array('index', 'edit', 'filter', 'fail', 'set_headers', 'set_errors'),
-            $this->controller->actions);
+            $this->controller->actions
+         );
 
          $this->assertCalls('init');
       }
@@ -207,8 +209,17 @@
          $this->assertCalls('init', 'before', 'after');
       }
 
+      function test_perform_with_missing_action() {
+         foreach (array('init', 'before', 'after', 'before_foo', 'after_foo') as $action) {
+            $this->controller->calls = array();
+            $this->assertRaise("\$this->controller->perform('$action')", MissingTemplate);
+            $this->assertCalls('init', 'before');
+         }
+
+      }
+
       function test_perform_with_invalid_action() {
-         foreach (array('init', 'before', 'after', 'before_foo', 'after_foo', 'in-valid', '_invalid', '!@#$%') as $action) {
+         foreach (array('in-valid', '_invalid', '!@#$%') as $action) {
             $this->assertRaise("\$this->controller->perform('$action')", RoutingError);
          }
       }

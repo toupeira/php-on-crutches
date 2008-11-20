@@ -4,7 +4,7 @@
    function url_for_with_prefix() {
       Dispatcher::$prefix = '/sub/';
       $args = func_get_args();
-      $result = call_user_func_array(url_for, $args);
+      $result = call_user_func_array('url_for', $args);
       Dispatcher::$prefix = '/';
 
       return $result;
@@ -49,6 +49,12 @@
          $this->assertEqual($path, url_for_with_prefix($path));
       }
 
+      function test_url_for_with_relative_path() {
+         $path = "index.html";
+         $this->assertEqual($path, url_for("./$path"));
+         $this->assertEqual($path, url_for_with_prefix("./$path"));
+      }
+
       function test_url_for_with_anchor() {
          $anchor = "#foo";
          $this->assertEqual($anchor, url_for($anchor));
@@ -77,12 +83,20 @@
       }
 
       function test_url_for_with_full_url_from_relative_path() {
-         #$_SERVER['REQUEST_URI'] = '/foo/baz';
          $this->assertEqual("http://www.example.com/bar",
-            url_for('bar', array('full' => true)));
+            url_for('./bar', array('full' => true)));
          $this->assertEqual("http://www.example.com/sub/bar",
             url_for_with_prefix('bar', array('full' => true)));
-         #$_SERVER['REQUEST_URI'] = '/';
+
+         $_SERVER['REQUEST_URI'] = '/foo/baz';
+         $this->assertEqual("http://www.example.com/foo/bar",
+            url_for('./bar', array('full' => true)));
+
+         $_SERVER['REQUEST_URI'] = '/sub/foo/baz';
+         $this->assertEqual("http://www.example.com/sub/foo/bar",
+            url_for_with_prefix('./bar', array('full' => true)));
+
+         $_SERVER['REQUEST_URI'] = '/';
       }
 
       function test_url_for_with_ssl() {
