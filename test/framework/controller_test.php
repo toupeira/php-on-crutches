@@ -30,7 +30,6 @@
       }
 
       function assertCalls() {
-         print_r($this->controller->calls);
          $this->assertEqual(func_get_args(), $this->controller->calls);
       }
 
@@ -196,7 +195,7 @@
          $this->assertAssigns(array(
             'string' => 'string', 'array' => 'array', 'integer' => 'integer'
          ));
-         $this->assertCalls('init', 'before', 'after');
+         $this->assertCalls('init', 'before', 'before_render', 'after');
       }
 
       function test_perform_with_empty_action() {
@@ -206,14 +205,14 @@
          $this->assertLayout('application');
 
          $this->assertNull($this->assigns('blank'));
-         $this->assertCalls('init', 'before', 'after');
+         $this->assertCalls('init', 'before', 'before_render', 'after');
       }
 
       function test_perform_with_missing_action() {
          foreach (array('init', 'before', 'after', 'before_foo', 'after_foo') as $action) {
             $this->controller->calls = array();
             $this->assertRaise("\$this->controller->perform('$action')", MissingTemplate);
-            $this->assertCalls('init', 'before');
+            $this->assertCalls('before', 'before_render');
          }
 
       }
@@ -445,6 +444,10 @@
 
       protected function after() {
          $this->calls[] = 'after';
+      }
+
+      protected function before_render() {
+         $this->calls[] = 'before_render';
       }
 
       protected function before_filter() {
