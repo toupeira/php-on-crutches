@@ -10,6 +10,9 @@
       # Cache store (memory, file, apc, or xcache)
       'cache_store'       => 'memory',
 
+      # Enable view caching
+      'cache_views'       => true,
+
       # Send emails
       'send_mails'        => true,
 
