@@ -27,7 +27,8 @@
          $content .= "\n?>\n";
 
          if (file_put_contents($path, $content) === false) {
-            print "  error\n";
+            status('error', $path);
+            print "\n";
          }
       }
    }
@@ -44,6 +45,16 @@
       }
    }
 
+   function edit_file($path, $pattern, $replacement) {
+      if (is_file($path)) {
+         status('edit', $path);
+         run('sed -ri %s %s', "s/$pattern/$replacement/", $path);
+      } else {
+         status('error', $path);
+         print "\n";
+      }
+   }
+
    function check_class($class) {
       if (classify($class) and !$GLOBALS['force']) {
          print "Class $class already exists, use -f to force.\n";
@@ -53,69 +64,83 @@
       }
    }
 
-   function generate_model($name=null, $table=null) {
-      if ($name and check_class($class = camelize($name))) {
-         if (preg_match('/^\w+$/', $table)) {
-            create_file(MODELS.underscore($name).'.php', array(
-               "class {$class}Mapper extends DatabaseMapper",
-               "{",
-               "   protected \$_table = '$table';",
-               "}",
-               "",
-               "class {$class} extends ActiveRecord",
-               "{",
-               "}",
-            ));
-            create_file(FIXTURES.'00_'.underscore($name).'.php', array(
-               "\$fixtures = array(",
-               ");",
-            ));
-         } else {
-            create_file(MODELS.underscore($name).'.php', array(
-               "class {$class} extends Model",
-               "{",
-               "}",
-            ));
-         }
+   function generate_controller($name) {
+      $name = strtolower($name);
+      check_class($class = camelize($name).'Controller');
 
-         create_file(TEST.'models/'.underscore($name).'_test.php', array(
-            "class {$class}Test extends ModelTestCase",
-            "{",
-            "}",
-         ));
-      } else {
-         print "Usage: {$GLOBALS['argv'][0]} [-f] model NAME [TABLE]\n";
-         exit(1);
-      }
+      create_file(CONTROLLERS.underscore($name).'_controller.php', array(
+         "class {$class} extends ApplicationController",
+         "{",
+         "   function index() {",
+         "   }",
+         "}",
+      ));
+
+      create_file(TEST.'controllers/'.underscore($name).'_controller_test.php', array(
+         "class {$class}Test extends ControllerTestCase",
+         "{",
+         "}",
+      ));
+
+      create_file(HELPERS.underscore($name).'_helper.php');
+
+      create_file(TEST.'helpers/'.underscore($name).'_helper_test.php', array(
+         "class ".camelize($name)."HelperTest extends TestCase",
+         "{",
+         "}",
+      ));
+
+      create_directory(VIEWS.$name);
    }
 
-   function generate_controller($name=null) {
-      $name = strtolower($name);
-      $class = camelize($name).'Controller';
-      if ($name and check_class($class)) {
-         create_file(CONTROLLERS.underscore($name).'_controller.php', array(
-            "class {$class} extends ApplicationController",
-            "{",
-            "   function index() {",
-            "   }",
-            "}",
-         ));
-         create_file(TEST.'controllers/'.underscore($name).'_controller_test.php', array(
-            "class {$class}Test extends ControllerTestCase",
-            "{",
-            "}",
-         ));
-         create_file(HELPERS.underscore($name).'_helper.php');
-         create_file(TEST.'helpers/'.underscore($name).'_helper_test.php', array(
-            "class ".camelize($name)."HelperTest extends TestCase",
-            "{",
-            "}",
-         ));
-         create_directory(VIEWS.$name);
-      } else {
-         print "Usage: {$argv[0]} [-f] controller NAME\n";
-         exit(1);
+   function generate_model($name=null, $model='Model', $mapper='ModelMapper') {
+      check_class($class = camelize($name));
+
+      create_file(MODELS.underscore($name).'.php', array(
+         "class {$class}Mapper extends $mapper",
+         "{",
+         "}",
+         "",
+         "class {$class} extends $model",
+         "{",
+         "}",
+      ));
+
+      create_file(FIXTURES.'00_'.underscore($name).'.php', array(
+         "\$fixtures = array(",
+         ");",
+      ));
+
+      create_file(TEST.'models/'.underscore($name).'_test.php', array(
+         "class {$class}Test extends ModelTestCase",
+         "{",
+         "}",
+      ));
+   }
+
+   function generate_db_model($name) {
+      return generate_model($name, ActiveRecord, DatabaseMapper);
+   }
+
+   function generate_authentication($model_name, $controller_name) {
+      generate_db_model($model_name);
+      generate_controller($controller_name);
+
+      if (!$model = classify($model_name) or !is_subclass_of($model, Model)) {
+         status('error', "Invalid model '$model_name'");
+         print "\n";
+         return;
       }
+
+      if (!$controller = classify($controller_name.'Controller') or !is_subclass_of($controller, Controller)) {
+         status('error', "Invalid controller '$controller_name'");
+         print "\n";
+         return;
+      }
+
+      edit_file(CONTROLLERS.'application_controller.php', "^( *abstract class .* extends) Controller$", "\\1 AuthenticatedController");
+      edit_file(CONFIG.'application.php', "^( *'auth_model' *=>).*", "\\1 $model,");
+      edit_file(CONFIG.'application.php', "^( *'auth_controller' *=>).*", "\\1 $controller,");
    }
 
    $args = array_slice($argv, 1);
@@ -129,12 +154,27 @@
 
    $generator = 'generate_'.array_shift($args);
    if (function_exists($generator)) {
-      call_user_func_array($generator, $args);
-   } else {
-      print "Usage: {$argv[0]} [-f] controller NAME\n"
-          . str_repeat(' ', strlen($argv[0]))
-          . "             model NAME [TABLE]\n";
-      exit(1);
+      try {
+         call_user_func_array($generator, $args);
+         exit(0);
+      } catch (Exception $e) {}
    }
+
+   print "Usage: {$argv[0]} [-f] GENERATOR OPTIONS\n"
+         . "\n"
+         . "Available generators:\n"
+         . "\n"
+         . "  controller NAME\n"
+         . "    Generate a controller, including views folder and tests\n"
+         . "\n"
+         . "  model NAME\n"
+         . "    Generate a model, including mapper and tests\n"
+         . "\n"
+         . "  db_model NAME\n"
+         . "    Generate a database model, including mapper and tests\n"
+         . "\n"
+         . "  authentication MODEL CONTROLLER\n"
+         . "    Enable the authentication system and generate scaffold classes\n"
+         . "\n";
 
 ?>
