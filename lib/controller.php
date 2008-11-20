@@ -276,7 +276,7 @@
          }
 
          if ($error) {
-            if (config('debug')) {
+            if (config('debug') or Dispatcher::$path == '/') {
                throw new InvalidRequest($error);
             } else {
                log_warn("Invalid Request: $error");
