@@ -71,8 +71,6 @@
       create_file(CONTROLLERS.underscore($name).'_controller.php', array(
          "class {$class} extends $parent",
          "{",
-         "   function index() {",
-         "   }",
          "}",
       ));
 

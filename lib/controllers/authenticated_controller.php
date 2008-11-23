@@ -39,6 +39,10 @@
 
       # Check if the current request meets all authentication requirements
       function is_valid_request($action) {
+         if (!parent::is_valid_request($action)) {
+            return false;
+         }
+
          if (!classify(config('auth_model'))) {
             throw new ConfigurationError("Missing or invalid authentication model");
          }
@@ -58,7 +62,7 @@
          }
 
          # Check if the action requires a logged in user
-         if ($this->check_requirement($action, 'login') and !is_logged_in()) {
+         if ($this->check_requirement($action, 'login') and !self::is_logged_in()) {
             $this->session['return_to'] = Dispatcher::$path;
             $redirect = array(
                'controller' => config('auth_controller'),
@@ -67,7 +71,7 @@
          }
 
          # Check if the action requires a logged in admin
-         if ($this->check_requirement($action, 'admin') and !is_admin()) {
+         if ($this->check_requirement($action, 'admin') and !self::is_admin()) {
             if ($action == 'index' or !$this->has_action('index')) {
                $redirect = '/';
             } else {
@@ -80,7 +84,7 @@
             $this->redirect_to($redirect);
             return false;
          } else {
-            return parent::is_valid_request($action);
+            return true;
          }
       }
 

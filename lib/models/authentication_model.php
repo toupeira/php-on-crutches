@@ -11,8 +11,8 @@
    {
       static protected $_current;
 
-      static function model() {
-         return config('auth_model');
+      static protected function DB() {
+         return DB(config('auth_model'));
       }
 
       static function current() {
@@ -23,7 +23,7 @@
          if (is_null($user) or $user instanceof AuthenticationModel) {
             return self::$_current = $user;
          } elseif (is_numeric($user)) {
-            return self::login(DB(self::model())->find($user));
+            return self::login(self::DB()->find($user));
          } else {
             throw new TypeError($user);
          }
@@ -34,10 +34,15 @@
       }
 
       # Authenticate user with a password
-      static function authenticate($login, $password) {
-         $user = DB(self::model())->find_by_login($login);
+      static function authenticate($username, $password) {
+         if (is_email($username) and $column = self::DB()->attributes['email'] and $column['unique']) {
+            $find = 'find_by_email';
+         } else {
+            $find = 'find_by_username';
+         }
 
-         if ($user and $user->crypted_password == $user->encrypt($password)) {
+         if ($user = self::DB()->$find($username) and
+             $user->crypted_password == $user->encrypt($password)) {
             return $user;
          }
       }
@@ -47,7 +52,7 @@
          $id    = substr($token, 40);
          $token = substr($token, 0, 40);
 
-         if (is_numeric($id) and $user = DB(self::model())->find($id) and $user->token == $token) {
+         if (is_numeric($id) and $user = self::DB()->find($id) and $user->token == $token) {
             return $user;
          }
       }
@@ -58,24 +63,23 @@
       function validate() {
          if ($this->new_record or $this->password) {
             $this->has_length('password', 6);
+            array_delete($this->_errors, 'salt', 'crypted_password');
          }
 
          $this->is_confirmed('password');
       }
 
       function get_admin() {
-         foreach (array('admin', 'is_admin') as $key) {
-            if (array_key_exists($key, $this->_attributes)) {
-               return $this->read_attribute($key);
-            }
+         if (array_key_exists('admin', $this->_attributes)) {
+            return $this->admin;
+         } else {
+            return false;
          }
-
-         return false;
       }
 
       # Generate the cookie token
       function get_token() {
-         return sha1("--{$this->id}--{$this->login}--{$this->salt}--{$this->crypted_password}--");
+         return sha1("--{$this->id}--{$this->username}--{$this->salt}--{$this->crypted_password}--");
       }
 
       # Encrypt a password
@@ -86,7 +90,7 @@
       protected function before_validation() {
          if ($this->new_record) {
             # Generate the salt for new records
-            $this->salt = sha1("--".time()."--{$this->login}--");
+            $this->salt = sha1("--".time()."--{$this->username}--");
          }
 
          # Encrypt the password

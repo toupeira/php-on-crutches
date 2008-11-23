@@ -1,12 +1,12 @@
 <?# $Id$ ?>
 <?
-   $this->set('title', 'Login');
+   $this->set('title', _('Login'));
 ?>
 <?= form_tag() ?>
 <table>
 <tr>
-   <th><?= label('login') ?>:</th>
-   <td><?= text_field('login') ?></td>
+   <th><?= label('username') ?>:</th>
+   <td><?= text_field('username') ?></td>
 </tr>
 <tr>
    <th><?= label('password') ?>:</th>
@@ -15,12 +15,12 @@
 <tr>
    <th></th>
    <td>
-      <?= check_box('remember') ?> <?= label('remember') ?>
+      <?= check_box('remember') ?> <?= label('remember', _('Remember login')) ?>
    </td>
 </tr>
 <tr>
    <th></th>
-   <td><?= submit_button('Login') ?></td>
+   <td><?= submit_button(_('Login')) ?></td>
 </tr>
 </table>
 </form>

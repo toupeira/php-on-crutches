@@ -661,7 +661,7 @@
             array(
                'created_at',
                'updated_at',
-               $db->primary_key,
+               DB($model)->primary_key,
             )
          );
 

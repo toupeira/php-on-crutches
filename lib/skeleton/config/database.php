@@ -26,9 +26,9 @@
          'password' => '',
       
          # Specify different databases for environments
-         'production'  => array('database' => NAME.'_production'),
-         'development' => array('database' => NAME.'_development'),
-         'test'        => array('database' => NAME.'_test'),
+         'production'  => array('database' => 'NAME_production'),
+         'development' => array('database' => 'NAME_development'),
+         'test'        => array('database' => 'NAME_test'),
       ),
       */
    );

@@ -102,7 +102,7 @@
             case 'date':
                $method = 'date_field';
                break;
-            case 'datetime';
+            case 'time';
                $method = 'text_field';
                $options['size'] = $options['maxlength'] = strlen($this->$key);
                break;
@@ -119,7 +119,8 @@
 
       function is_valid() {
          $this->call_filter('before_validation');
-         parent::is_valid();
+
+         $this->_errors = array();
 
          foreach ($this->mapper->attributes as $key => $options) {
             if (!$options['key'] and !$this->_errors[$key]) {
@@ -147,6 +148,8 @@
             }
          }
 
+         $this->validate();
+
          $this->call_filter('after_validation');
          return empty($this->_errors);
       }
@@ -158,7 +161,7 @@
          }
 
          return $this->validate_attribute($key,
-            _("already exists"),
+            _("%s already exists"),
             $objects->count() == 0
          );
       }

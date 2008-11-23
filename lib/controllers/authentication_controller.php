@@ -15,10 +15,7 @@
 
       protected $_scaffold_actions = array('index', 'edit', 'destroy');
       protected $_scaffold_options = array(
-         'hide_attributes' => array(
-            'salt',
-            'crypted_password',
-         ),
+         'hide_attributes' => array( 'salt', 'crypted_password'),
       );
 
       protected function init() {
@@ -28,7 +25,7 @@
       function login() {
          if ($this->is_post()) {
             $user = self::auth('authenticate',
-               $this->params['login'],
+               $this->params['username'],
                $this->params['password']
             );
 
@@ -43,7 +40,7 @@
                return $this->redirect_back('');
             } else {
                $this->add_error(
-                  array('login', 'password'),
+                  array('username', 'password'),
                   _('Invalid user name or password')
                );
             }
@@ -60,7 +57,9 @@
       }
 
       function signup() {
-         $this->scaffold('create');
+         $this->scaffold('create', array(
+            'redirect_to' => ':/login',
+         ));
       }
 
       function edit($id) {

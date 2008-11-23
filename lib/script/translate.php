@@ -24,7 +24,7 @@ msgstr ""
 
 TXT;
 
-   $templates = array('framework', 'application', 'attributes', 'additional');
+   $templates = array('additional', 'application', 'attributes', 'framework');
    $languages = (array) config('languages');
    $domain = config('name');
 
@@ -97,6 +97,8 @@ TXT;
    foreach ($languages as $language) {
       print "  [1m$language[0m: ";
       $path = LANG.$language."/LC_MESSAGES/";
+      @mkdir($path, 0750, true);
+
       $all = $path.$domain.'.po';
       rm_f($all);
       touch($all);
@@ -110,13 +112,12 @@ TXT;
             run("msgmerge -qU '$messages' '$template'");
          } elseif (is_file($template)) {
             # Create empty translations
-            @mkdir(dirname($messages), 0750, true);
             copy($template, $messages);
          } else {
             continue;
          }
 
-         if (!run("msgcat --unique --to-code=utf-8 -o '$all' '$all' '$messages'")) {
+         if (!run("msgcat --use-first --to-code=utf-8 -o '$all' '$all' '$messages'")) {
             print "Error while running msgcat\n\n";
             exit(1);
          }
