@@ -89,6 +89,8 @@
       ));
 
       create_directory(VIEWS.$name);
+
+      return true;
    }
 
    function generate_model($name=null, $parent='Model', $mapper='ModelMapper') {
@@ -114,6 +116,8 @@
          "{",
          "}",
       ));
+
+      return true;
    }
 
    function generate_db_model($name, $parent=ActiveRecord, $mapper=DatabaseMapper) {
@@ -139,6 +143,8 @@
       edit_file(CONTROLLERS.'application_controller.php', "^( *abstract class .* extends) Controller$", "\\1 AuthenticatedController");
       edit_file(CONFIG.'application.php', "^( *'auth_model' *=>).*", "\\1 $model,");
       edit_file(CONFIG.'application.php', "^( *'auth_controller' *=>).*", "\\1 $controller,");
+
+      return true;
    }
 
    $args = array_slice($argv, 1);
@@ -153,8 +159,11 @@
    $generator = 'generate_'.array_shift($args);
    if (function_exists($generator)) {
       try {
-         call_user_func_array($generator, $args);
-         exit(0);
+         if (call_user_func_array($generator, $args)) {
+            exit;
+         } else {
+            exit(1);
+         }
       } catch (Exception $e) {}
    }
 
