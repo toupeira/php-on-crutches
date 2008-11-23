@@ -43,8 +43,13 @@ TXT;
       }
 
       if (`wc -l $file` > substr_count($GLOBALS['header'], "\n")) {
+         # Strip the root directory from paths for portability
          system("sed -ri 's| (".ROOT.")([^ ]+:[0-9]+)| \\2|g' $file");
+
+         # Split multiple paths into separate lines
+         system("sed -ri 's|#: ([^ ]+) ([^ ]+)$|#: \\1\\n#: \\2|g' $file");
       } else {
+         # Remove the file if it's empty
          unlink($file);
       }
    }
