@@ -46,6 +46,17 @@
             );
          }
 
+         $indices = $this->execute("PRAGMA index_list(`$table`)")->fetch_all();
+         foreach ($indices as $index) {
+            if ($index['unique']) {
+               if ($info = $this->execute("PRAGMA index_info(`{$index['name']}`)")->fetch()) {
+                  $attributes[$info['name']]['unique'] = true;
+               } else {
+                  throw new ApplicationError("Invalid index '{$index['name']}'");
+               }
+            }
+         }
+
          return $attributes;
       }
    }

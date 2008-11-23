@@ -117,8 +117,7 @@
    # Load all test helpers for the given path
    function load_helpers($path) {
       if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test/framework') {
-         # Don't load application test helper for framework tests
-         $root = LIB.'test/framework';
+         $root = LIB.'test/framework/';
       } else {
          $root = TEST;
       }
@@ -135,10 +134,17 @@
       }
    }
 
-   function load_fixtures() {
+   # Load all fixtures for the given path
+   function load_fixtures($path) {
+      if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test/framework') {
+         $root = LIB.'test/framework/';
+      } else {
+         $root = TEST;
+      }
+
       $models = array();
 
-      foreach (glob(TEST.'fixtures/*.php') as $fixture) {
+      foreach (glob($root.'fixtures/*.php') as $fixture) {
          $fixtures = null;
          include $fixture;
          $fixture = basename($fixture);
@@ -211,12 +217,18 @@
             ob_end_clean();
          }
 
+         # Get the current filename from the depths of SimpleTest
+         if (!$path = $this->_test_case->_runner->_scorer->_test_stack[1]) {
+            throw new ApplicationError("Can't get current filename from SimpleTest");
+         }
+
          # Load database fixtures
-         load_fixtures();
+         load_fixtures($path);
 
          # Reset sent mails
          $GLOBALS['_SENT_MAILS'] = null;
 
+         # Call before/after filters
          method_exists($this, 'before') and $this->before($method);
          $result =  parent::invoke($method);
          method_exists($this, 'after') and $this->after($method);

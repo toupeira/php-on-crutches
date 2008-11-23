@@ -9,6 +9,7 @@
 
    class TestCase extends UnitTestCase
    {
+      # Call custom invoker
       function &createInvoker() {
          return new SimpleErrorTrappingInvoker(new CustomInvoker($this));
       }
@@ -24,6 +25,7 @@
                      . "] should be in ["
                      . $dumper->describeValue($array) . "]";
          }
+
          return $this->assertTrue(
             in_array($member, $array), $message);
       }
@@ -35,6 +37,7 @@
                      . "] should have a key ["
                      . $dumper->describeValue($key) . "]";
          }
+
          return $this->assertTrue(
             isset($array[$key]), $message);
       }
@@ -47,6 +50,7 @@
                      . $dumper->describeValue($count) . "]"
                      . ", got [".$dumper->describeValue(count($value)) . "]";
          }
+
          return $this->assertEqual(
             $count, count($value), $message);
       }
@@ -78,6 +82,7 @@
          $message = "[" . $dumper->describeValue($object)
                   . "] should have an error on ["
                   . $dumper->describeValue($key) . "]";
+
          return $this->assertKey(
             $key, $object->errors, $message);
       }
@@ -87,6 +92,7 @@
          $message = "Route '$path' wasn't recognized as "
                   . array_to_str($expected_values) . ", got "
                   . array_to_str($values);
+
          return $this->assertEqual($expected_values, $values, str_replace('%', '%%', $message));
       }
 
@@ -94,12 +100,12 @@
          $path = Router::generate($values);
          $message = "Expected " . array_to_str($values) . " to "
                   . "generate '$expected_path', got '$path'";
+
          return $this->assertEqual($expected_path, $path, str_replace('%', '%%', $message));
       }
 
       function assertRouting($path, array $values) {
-         $this->assertRecognizes($values, $path);
-         $this->assertGenerates($path, $values);
+         return $this->assertRecognizes($values, $path) and $this->assertGenerates($path, $values);
       }
 
       function assertMailSent() {
@@ -109,7 +115,7 @@
 
          if (!$this->assertEqual($count_options, $count_mails,
                "Expected $count_options sent mails, got $count_mails")) {
-            return;
+            return false;
          }
 
          $i = 0;
@@ -123,14 +129,20 @@
 
                $mail_value = $GLOBALS['_SENT_MAILS'][$i][$key];
                if (is_array($mail_value) and !is_array($value)) {
-                  $this->assertInArray($value, $mail_value);
+                  if (!$this->assertInArray($value, $mail_value)) {
+                     return false;
+                  }
                } else {
-                  $this->assertEqual($value, $mail_value);
+                  if (!$this->assertEqual($value, $mail_value)) {
+                     return false;
+                  }
                }
             }
 
             $i++;
          }
+
+         return true;
       }
    }
 
@@ -201,26 +213,22 @@
          switch ($response) {
             case 200:
             case 'success':
-               $this->assertInArray($status, array(200, null),
-                  "Expected a successful response, got '$status'");
-               $this->assertFalse(is_null($this->controller->output));
+               return $this->assertInArray($status, array(200, null), "Expected a successful response, got '$status'") and
+                      $this->assertFalse(is_null($this->controller->output));
                break;
             case 301:
             case 302:
             case 'redirect':
-               $this->assertInArray($status, array(301, 302),
-                  "Expected a redirect, got '$status'");
-               $this->assertOutput(' ');
+               return $this->assertInArray($status, array(301, 302), "Expected a redirect, got '$status'") and
+                      $this->assertOutput(' ');
                break;
             case 404:
             case 'notfound':
-               $this->assertEqual(404, $status,
-                  "Expected a 404, got '$status'");
+               return $this->assertEqual(404, $status, "Expected a 404, got '$status'");
                break;
             case 500:
             case 'error':
-               $this->assertEqual(500, $status,
-                  "Expected an error response, got '$status'");
+               return $this->assertEqual(500, $status, "Expected an error response, got '$status'");
                break;
             default:
          }
@@ -228,7 +236,7 @@
 
       function assertHeader($header, $value) {
          $real_value = $this->controller->headers[$header];
-         $this->assertTrue(
+         return $this->assertTrue(
             is_null($value) ? is_null($real_value)
                             : strstr($real_value, "$value"),
             "Expected header '$header' to contain '$value', got '$real_value'");
@@ -242,21 +250,21 @@
          if ($template) {
             $parts = explode('/', "$template.thtml");
             $view_parts = explode('/', $view_template);
-            $this->assertEqual(
+            return $this->assertEqual(
                $parts,
                array_slice($view_parts, -count($parts)),
                "Expected template '$template', got '$view_template'");
          } else {
-            $this->assertEqual('', $this->controller->view->template,
+            return $this->assertEqual('', $this->controller->view->template,
                "Expected template '$template', got '$view_template'");
          }
       }
 
       function assertAssigns(array $assigns) {
          foreach ($assigns as $key => $type) {
-            $this->assertTrue(
-               array_key_exists($key, $this->assigns()),
-               "Expected assigned variable '$key'");
+            if (!$this->assertTrue(array_key_exists($key, $this->assigns()), "Expected assigned variable '$key'")) {
+               return false;
+            }
 
             if (class_exists($type)) {
                $real_type = get_class($this->assigns($key));
@@ -264,38 +272,41 @@
                $real_type = gettype($this->assigns($key));
             }
 
-            $this->assertEqual(
-               $type, $real_type,
-               "Expected assigned variable '$key' to be of type '$type', got '$real_type'");
+            if (!$this->assertEqual($type, $real_type,
+                "Expected assigned variable '$key' to be of type '$type', got '$real_type'")) {
+               return false;
+            }
          }
       }
 
       function assertLayout($layout) {
          $real_layout = substr(basename($this->controller->view->layout), 0, -6);
-         $this->assertEqual($layout, $real_layout,
+         return $this->assertEqual($layout, $real_layout,
            "Expected layout '$layout', got '$real_layout'");
       }
 
       function assertOutput($text) {
-         $this->assertEqual($text, $this->controller->output);
+         return $this->assertEqual($text, $this->controller->output);
       }
 
       function assertOutputMatch($pattern) {
-         $this->assertMatch($pattern, $this->controller->output);
+         return $this->assertMatch($pattern, $this->controller->output);
       }
 
       function assertRedirect($path) {
-         $this->assertResponse('redirect');
+         if (!$this->assertResponse('redirect')) {
+            return false;
+         }
 
          $url = url_for($path, array('full' => true));
          $real_url = $this->controller->headers['Location'];
 
-         $this->assertEqual($url, $real_url,
+         return $this->assertEqual($url, $real_url,
             "Expected redirect to '$url', got '$real_url'");
       }
 
       function assertMessage($key) {
-         $this->assertFalse(empty($this->controller->msg[$key]),
+         return $this->assertFalse(empty($this->controller->msg[$key]),
             "Expected message on key '$key'");
       }
    }

@@ -10,4 +10,15 @@
       ),
    ));
 
+   $GLOBALS['_CONFIG']['database'] = array(
+      'default' => array(
+         'driver'   => 'sqlite',
+         'database' => ':memory:',
+      ),
+   );
+
+   DB()->execute(file_get_contents(
+      LIB.'test/framework/fixtures/schema.sql'
+   ));
+
 ?>
