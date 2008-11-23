@@ -71,7 +71,7 @@
 
       function get_admin() {
          if (array_key_exists('admin', $this->_attributes)) {
-            return $this->admin;
+            return $this->read_attribute('admin');
          } else {
             return false;
          }
