@@ -32,7 +32,7 @@
          # Detect the relative path used to reach the website
          self::$prefix = rtrim(preg_replace(
             "#/+(index\.(php|fcgi)(/[^?]*)?(\?[^/]*)?/*)?(".preg_quote($path).")?(\?.*)?/*$#", '/',
-            $_SERVER['REQUEST_URI']
+            urldecode($_SERVER['REQUEST_URI'])
          ), '/').'/';
 
          # Recognize parameters in path

@@ -107,17 +107,17 @@
          }
       }
 
-      function camelize($word) {
+      static function camelize($word) {
          return str_replace(' ', '', ucwords(str_replace('_', ' ', $word)));
       }
 
-      function underscore($word) {
+      static function underscore($word) {
          return mb_strtolower(preg_replace('/[-\/\.\s]+/', '_',
                               preg_replace('/([a-z\d])([A-Z])/', '\1_\2',
                               preg_replace('/([A-Z]+)([A-Z][a-z])/', '\1_\2', $word))));
       }
 
-      function humanize($word, $translate=true) {
+      static function humanize($word, $translate=true) {
          $word = self::underscore($word);
          if (mb_substr($word, -3) == '_id') {
             $word = mb_substr($word, 0, -3);
@@ -127,48 +127,48 @@
          return $translate ? _($word) : $word;
       }
 
-      function titleize($word) {
+      static function titleize($word) {
          return ucwords(self::humanize($word));
       }
 
-      function dasherize($word) {
+      static function dasherize($word) {
          return str_replace('_', '-', underscore($word));
       }
 
-      function parameterize($string, $sep='-') {
+      static function parameterize($string, $sep='-') {
          $string = self::transliterate($string);
 
-         $string = preg_replace('/[^\w\+_]+/', $sep, $string);
+         $string = preg_replace('/[^\w_]+/', $sep, $string);
          $string = preg_replace("/^$sep|$sep$/i", '', $string);
 
          return mb_strtolower($string);
       }
 
-      function transliterate($string) {
+      static function transliterate($string) {
          return str_replace('?', ' ', iconv('utf-8', 'ascii//translit', $string));
       }
 
-      function tableize($class) {
+      static function tableize($class) {
          return self::pluralize(self::underscore($class));
       }
 
-      function classify($class) {
+      static function classify($class) {
          if (class_exists($class = self::camelize(self::singularize($class)))) {
             return $class;
          }
       }
 
-      function foreign_key($class, $sep='_') {
+      static function foreign_key($class, $sep='_') {
          return self::underscore($class).$sep.'id';
       }
 
-      function constantize($key) {
+      static function constantize($key) {
          if (defined($key)) {
             return constant($key);
          }
       }
 
-      function ordinalize($number) {
+      static function ordinalize($number) {
          $mod = $number % 100;
          if ($mod >= 11 and $mod <= 13) {
             return $number.'th';
