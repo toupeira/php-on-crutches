@@ -29,6 +29,7 @@
          }
 
          $this->headers['Status'] = $status;
+         $this->send_headers();
 
          if (config('debug') and $this->is_trusted() and $exception instanceof Exception) {
             return $this->show_debug($exception);
@@ -87,7 +88,6 @@
 
             $this->_output = null;
             $this->render('debug', '');
-            $this->send_headers();
             return $this->_output;
 
          } catch (Exception $e) {
