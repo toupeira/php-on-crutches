@@ -11,7 +11,7 @@
    $_ENV['ENVIRONMENT'] = 'test';
 
    require_once dirname(__FILE__).'/../script.php';
-   require_once LIB.'test/runner.php';
+   require_once LIB.'script/test/runner.php';
 
    if (in_array('-v', $argv)) {
       array_remove($argv, '-v');

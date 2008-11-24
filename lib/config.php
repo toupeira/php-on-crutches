@@ -177,7 +177,7 @@
 
       # Configure error reporting
       error_reporting(E_ALL ^ E_NOTICE);
-      ini_set('display_errors', (config('debug') and PHP_SAPI != 'cli'));
+      ini_set('display_errors', (config('debug') or PHP_SAPI == 'cli'));
 
       # Set global PHP error handler
       if ($handler = $config['error_handler']) {

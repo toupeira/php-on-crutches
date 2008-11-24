@@ -176,9 +176,11 @@
       }
 
       $value = $values[intval($_cycle)];
+
       if (++$_cycle >= count($values)) {
          $_cycle = 0;
       }
+
       return $value;
    }
 

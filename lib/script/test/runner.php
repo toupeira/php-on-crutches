@@ -14,7 +14,7 @@
    require 'simpletest/unit_tester.php';
    require 'simpletest/reporter.php';
 
-   require LIB.'test/cases.php';
+   require LIB.'script/test/cases.php';
 
    global $_TEST_DIRS;
    $_TEST_DIRS = array_map('basename', array_filter(glob(TEST.'*'), is_dir));
@@ -116,8 +116,8 @@
 
    # Load all test helpers for the given path
    function load_helpers($path) {
-      if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test/framework') {
-         $root = LIB.'test/framework/';
+      if (substr(str_replace(ROOT, '', realpath($path)), 0, 8) == 'lib/test') {
+         $root = LIB.'test/';
       } else {
          $root = TEST;
       }
@@ -136,8 +136,8 @@
 
    # Load all fixtures for the given path
    function load_fixtures($path) {
-      if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test/framework') {
-         $root = LIB.'test/framework/';
+      if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test') {
+         $root = LIB.'test/';
       } else {
          $root = TEST;
       }

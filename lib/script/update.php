@@ -39,7 +39,7 @@
    }
 
    function ask($question) {
-      printf("%12s  %s", '', "$question [y/n] ");
+      print str_repeat(' ', 16)."$question [y/n] ";
       return strtolower(trim(fgets(STDIN))) == 'y';
    }
 
@@ -49,15 +49,23 @@
       if (substr(basename($skel), 0, 1) == '.') {
          return;
       } elseif (is_link($skel)) {
-         if (!file_exists(ROOT.$path)) {
-            status('new', $path);
-            if ($force or ask('Link?')) {
-               status('link', $path);
-               $target = readlink($skel);
-               chdir(ROOT.dirname($path));
-               symlink($target, basename($path));
-               chdir(ROOT);
-            }
+         $target = readlink($skel);
+         if (is_link(ROOT.$path) and readlink(ROOT.$path) != $target) {
+            $status = 'changed';
+            $question = 'Update link?';
+         } elseif (!file_exists(ROOT.$path)) {
+            $status = 'new';
+            $question = 'Add link?';
+         } else {
+            status('exists', $path);
+            return;
+         }
+
+         status($status, "$path -> $target");
+         if ($force or ask($question)) {
+            rm_f($path);
+            status('link', $path);
+            symlink($target, $path);
          }
       } elseif (is_dir($skel)) {
          if (!is_dir(ROOT.$path)) {
@@ -71,7 +79,7 @@
       } elseif (is_file($skel)) {
          if (!is_file(ROOT.$path)) {
             status('new', $path);
-            if ($force or ask('Add?')) {
+            if ($force or ask('Add file?')) {
                status('create', $path);
                run("cp -p %s %s", $skel, ROOT.$path);
             }

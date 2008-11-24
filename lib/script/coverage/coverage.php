@@ -35,7 +35,7 @@
 
          $this->_exclude = (array) $exclude;
 
-         $this->_view_path = LIB.'test/coverage/';
+         $this->_view_path = LIB.'script/coverage/views/';
       }
 
       function generate($force=false) {

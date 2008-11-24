@@ -10,7 +10,7 @@
 
    require_once dirname(__FILE__).'/../script.php';
 
-   require LIB.'doc/generator.php';
+   require LIB.'script/doc/generator.php';
 
    $paths = array();
 

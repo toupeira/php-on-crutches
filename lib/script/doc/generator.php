@@ -7,8 +7,8 @@
 # $Id$
 #
 
-   require LIB.'doc/parser.php';
-   require LIB.'doc/view_helper.php';
+   require LIB.'script/doc/parser.php';
+   require LIB.'script/doc/view_helper.php';
 
    class DocGenerator extends Object
    {
@@ -26,7 +26,7 @@
 
       function __construct($paths) {
          $this->_paths = (is_array($paths) ? $paths : func_get_args());
-         $this->_view_path = LIB.'doc/views/';
+         $this->_view_path = LIB.'script/doc/views/';
       }
 
       function get_data() {

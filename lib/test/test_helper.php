@@ -18,7 +18,7 @@
    );
 
    DB()->execute(file_get_contents(
-      LIB.'test/framework/fixtures/schema.sql'
+      LIB.'test/fixtures/schema.sql'
    ));
 
 ?>

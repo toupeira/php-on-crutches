@@ -24,7 +24,7 @@
       function fetch_tables() {
          $tables = array();
          $rows = $this->execute(
-            "SELECT name FROM sqlite_master WHERE type='table'"
+            "SELECT `name` FROM `sqlite_master` WHERE type='table'"
          )->fetch_all();
          foreach ($rows as $row) {
             $tables[] = array_shift($row);

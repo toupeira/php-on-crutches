@@ -18,8 +18,8 @@
    }
 
    require_once dirname(__FILE__).'/../script.php';
-   require_once LIB.'test/runner.php';
-   require_once LIB.'test/coverage.php';
+   require_once LIB.'script/test/runner.php';
+   require_once LIB.'script/test/coverage.php';
 
    $tests = array();
 

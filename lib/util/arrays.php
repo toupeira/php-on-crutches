@@ -24,7 +24,7 @@
       } elseif (is_array($object)) {
          return $object[$key];
       } else {
-         throw new TypeError($object);
+         return null;
       }
    }
 
