@@ -17,6 +17,9 @@
          if ($exception == 400 or $exception instanceof InvalidRequest) {
             $status = 400;
             $text = 'Bad Request';
+         } elseif ($exception == 403 or $exception instanceof AccessDenied) {
+            $status = 403;
+            $text = 'Forbidden';
          } elseif ($exception == 404 or $exception instanceof NotFound) {
             $status = 404;
             $text = 'Not Found';

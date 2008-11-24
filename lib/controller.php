@@ -248,38 +248,44 @@
 
          # Check for POST requirements
          if (!$this->is_post() and $this->check_requirement($action, 'post')) {
-            $error = 'needs POST';
+            $error = InvalidRequest;
+            $message = 'needs POST';
          }
 
 
          # Check for Ajax requirements
          if (!$this->is_ajax() and $this->check_requirement($action, 'ajax')) {
-            $error = 'needs Ajax';
+            $error = InvalidRequest;
+            $message = 'needs Ajax';
          }
 
          # Check for trusted host requirements
          if ($this->check_requirement($action, 'trusted') and !$this->is_trusted($action)) {
-            $error = "untrusted host {$_SERVER['REMOTE_ADDR']}";
+            $error = AccessDenied;
+            $message = "untrusted host {$_SERVER['REMOTE_ADDR']}";
          }
 
          # Check for cross site request forgery
          if ($this->is_post() and !$this->is_ajax() and config('form_token') and $this->check_requirement($action, 'form_token')) {
             if (!$this->params['_form_token']) {
-               $error = 'missing form token';
+               $error = InvalidRequest;
+               $message = 'missing form token';
             } elseif ($this->params['_form_token'] != $this->session['form_token']) {
-               $error = 'forged form token';
-            } elseif ($max_time = config('form_token_time') and $form_time = $this->session['form_token_time']) {
-               if (time() - $form_time > $max_time) {
-                  $error = 'expired form token';
-               }
+               $error = InvalidRequest;
+               $message = 'forged form token';
+            } elseif ($max_time = config('form_token_time') and
+                      $form_time = $this->session['form_token_time'] and
+                      time() - $form_time > $max_time) {
+               $error = InvalidRequest;
+               $message = 'expired form token';
             }
          }
 
          if ($error) {
             if (config('debug') or Dispatcher::$path == '/') {
-               throw new InvalidRequest($error);
+               throw new $error($message);
             } else {
-               log_warn("Invalid Request: $error");
+               log_warn(humanize($error, false).': '.$message);
                if ($action == 'index' or !$this->has_action('index')) {
                   # Redirect to default path if the index action was request or it isn't available
                   $this->redirect_to('');
