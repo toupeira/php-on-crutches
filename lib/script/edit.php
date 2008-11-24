@@ -22,6 +22,7 @@
          HELPERS,
          VIEWS,
          WEBROOT,
+         LIB,
          TEST.'controllers',
          TEST.'models',
          TEST.'helpers',

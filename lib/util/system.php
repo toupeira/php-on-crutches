@@ -59,7 +59,13 @@
    function term_exec($command, $args=null) {
       log_info("Executing '$command'");
       $args = array_slice(func_get_args(), 1);
-      return proc_open(build_shell_command($command, $args), array(), $pipes);
+      $proc = proc_open(build_shell_command($command, $args), array(), $pipes);
+
+      while (getf(proc_get_status($proc), 'running')) {
+         usleep(100);
+      }
+
+      return getf(proc_get_Status($proc), 'exitcode');
    }
 
    # Run a shell command in the background.
