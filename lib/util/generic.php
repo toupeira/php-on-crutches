@@ -11,8 +11,12 @@
    define('N', "\n");
 
    # Require a file if it exists
-   function try_require($file) {
-      foreach (func_get_args() as $file) {
+   function try_require($files) {
+      if (!is_array($files)) {
+         $files = func_get_args();
+      }
+
+      foreach ($files as $file) {
          if (is_file($file)) {
             require_once $file;
             return true;

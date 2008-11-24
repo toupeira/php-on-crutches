@@ -169,7 +169,10 @@
    function cycle($values=null) {
       static $_cycle;
 
-      if ($values) {
+      if ($values === false) {
+         $_cycle = 0;
+         return;
+      } elseif ($values) {
          $values = func_get_args();
       } else {
          $values = array('odd', 'even');

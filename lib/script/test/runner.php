@@ -127,16 +127,23 @@
       }
 
       if ($dir = realpath($path)) {
+         $helpers = array();
          while (check_root($dir, $root)) {
-            try_require($dir.'/test_helper.php');
+            if (is_file($helper = $dir.'/test_helper.php')) {
+               $helpers[] = $helper;
+            }
             $dir = dirname($dir);
+         }
+
+         foreach (array_reverse($helpers) as $helper) {
+            require_once $helper;
          }
       }
    }
 
    # Load all fixtures for the given path
    function load_fixtures($path) {
-      if (substr(str_replace(ROOT, '', realpath($path)), 0, 18) == 'lib/test') {
+      if (substr(str_replace(ROOT, '', realpath($path)), 0, 8) == 'lib/test') {
          $root = LIB.'test/';
       } else {
          $root = TEST;
@@ -217,6 +224,15 @@
             ob_end_clean();
          }
 
+         # Reset request headers
+         fake_request();
+
+         # Reset sent mails
+         $GLOBALS['_SENT_MAILS'] = null;
+
+         # Reset the cycle() function
+         cycle(false);
+
          # Get the current filename from the depths of SimpleTest
          if (!$path = $this->_test_case->_runner->_scorer->_test_stack[1]) {
             throw new ApplicationError("Can't get current filename from SimpleTest");
@@ -224,9 +240,6 @@
 
          # Load database fixtures
          load_fixtures($path);
-
-         # Reset sent mails
-         $GLOBALS['_SENT_MAILS'] = null;
 
          # Call before/after filters
          method_exists($this, 'before') and $this->before($method);
