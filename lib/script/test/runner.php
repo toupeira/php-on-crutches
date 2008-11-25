@@ -239,7 +239,9 @@
          }
 
          # Load database fixtures
-         load_fixtures($path);
+         if ($this->_test_case->_load_fixtures) {
+            load_fixtures($path);
+         }
 
          # Call before/after filters
          method_exists($this, 'before') and $this->before($method);

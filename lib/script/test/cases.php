@@ -9,9 +9,13 @@
 
    class TestCase extends UnitTestCase
    {
+      public $_load_fixtures = true;
+
       # Call custom invoker
       function &createInvoker() {
-         return new SimpleErrorTrappingInvoker(new CustomInvoker($this));
+         return new SimpleErrorTrappingInvoker(
+            new CustomInvoker($this)
+         );
       }
 
       function assertMatch($pattern, $subject, $message="%s") {

@@ -11,11 +11,12 @@
    {
       protected $_model;
       protected $_related;
-      protected $_key;
+      protected $_options;
 
-      function __construct($model, $related) {
+      function __construct($model, $related, $options=null) {
          $this->_model = $model;
          $this->_related = $related;
+         $this->_options = (array) $options;
       }
 
       function get_model() {
@@ -26,9 +27,13 @@
          return $this->_related;
       }
 
+      function get_options() {
+         return $this->_options;
+      }
+
       function get_key() {
          $table = DB($this->_related)->table;
-         $key = underscore($this->_model).'_id';
+         $key = foreign_key($this->_model);
          return "`$table`.`$key`";
       }
 

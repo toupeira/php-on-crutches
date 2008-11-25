@@ -51,8 +51,13 @@
             if (!empty($this->{'_'.$type})) {
                require_once LIB."database/associations/{$type}_association.php";
                $association = camelize($type).'Association';
-               foreach ($this->{'_'.$type} as $key => $related) {
-                  $this->_associations[$key] = new $association($this->_model, $related);
+               foreach ($this->{'_'.$type} as $key => $options) {
+                  if (is_numeric($key)) {
+                     $key = $options;
+                     $options = null;
+                  }
+
+                  $this->_associations[$key] = new $association($this->_model, classify($key), $options);
                }
             }
          }

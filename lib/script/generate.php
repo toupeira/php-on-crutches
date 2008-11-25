@@ -106,11 +106,6 @@
          "}",
       ));
 
-      create_file(FIXTURES.'00_'.underscore($name).'.php', array(
-         "\$fixtures = array(",
-         ");",
-      ));
-
       create_file(TEST.'models/'.underscore($name).'_test.php', array(
          "class {$class}Test extends ModelTestCase",
          "{",
@@ -121,7 +116,16 @@
    }
 
    function generate_db_model($name, $parent=ActiveRecord, $mapper=DatabaseMapper) {
-      return generate_model($name, $parent, $mapper);
+      if (!generate_model($name, $parent, $mapper)) {
+         return false;
+      }
+
+      create_file(FIXTURES.'00_'.underscore($name).'.php', array(
+         "\$fixtures = array(",
+         ");",
+      ));
+
+      return true;
    }
 
    function generate_authentication($model_name, $controller_name) {

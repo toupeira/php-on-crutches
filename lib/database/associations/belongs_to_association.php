@@ -10,7 +10,7 @@
    class BelongsToAssociation extends Association
    {
       function get_key() {
-         return underscore($this->related).'_id';
+         return foreign_key($this->related);
       }
 
       protected function load_data(ActiveRecord $model) {

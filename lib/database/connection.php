@@ -84,7 +84,7 @@
          return $this->_options;
       }
 
-      function execute($sql, array $params=null) {
+      function execute($sql, $params=null) {
          if (!is_array($params)) {
             $params = array_slice(func_get_args(), 1);
          }
@@ -206,8 +206,8 @@
          return parent::columnCount();
       }
 
-      function fetch_all() {
-         return parent::fetchAll();
+      function fetch_all($fetch_style=null) {
+         return parent::fetchAll($fetch_style);
       }
 
       function fetch_column($column=0) {
