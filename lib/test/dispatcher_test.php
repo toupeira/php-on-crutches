@@ -24,7 +24,6 @@
 
          $this->assertEqual($prefix, Dispatcher::$prefix,
             "Expected prefix '$prefix', got '".Dispatcher::$prefix."'");
-
       }
 
       function test_prefix() {

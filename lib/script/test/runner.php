@@ -227,6 +227,12 @@
          # Reset request headers
          fake_request();
 
+         # Reset authentication
+         if ($model = config('auth_model')) {
+            call_user_func(array($model, 'logout'));
+            $_SESSION['auth_id'] = null;
+         }
+
          # Reset sent mails
          $GLOBALS['_SENT_MAILS'] = null;
 
