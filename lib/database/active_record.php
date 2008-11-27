@@ -71,7 +71,7 @@
             throw new ValueError("Invalid attribute '$key'");
          }
 
-         if ($column['key'] or in_array($key, $this->_readonly)) {
+         if ($column['key'] or $this->_frozen or in_array($key, $this->_readonly)) {
             return h($this->$key);
          }
 
@@ -155,6 +155,10 @@
       }
 
       protected function is_unique($key) {
+         if (!$this->changed($key)) {
+            return true;
+         }
+
          $objects = $this->mapper->where($key, $this->$key);
          if (!$this->_new_record) {
             $objects->where("`{$this->mapper->primary_key}` != ?", $this->id);

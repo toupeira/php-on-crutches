@@ -42,7 +42,11 @@
       # Helper to create and save a model
       function create(array $attributes, array $defaults=null) {
          $model = new $this->_model($attributes, $defaults);
-         return $model->save();
+         if ($model->save()) {
+            return $model;
+         } else {
+            throw new ApplicationError("Couldn't create {$this->_model} instance");
+         }
       }
 
       # Helper to find and destroy models

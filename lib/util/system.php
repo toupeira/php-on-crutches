@@ -82,13 +82,17 @@
    }
 
    # Check if path is below a given root
-   function check_root($path, $root) {
+   function check_root($path, $root, $allow_root=true) {
       if ($path[0] != '/' or $root[0] != '/') {
          throw new ApplicationError("Paths must be absolute");
       }
 
       $path = '/'.trim(($realpath = realpath($path)) ? $realpath : $path, '/');
       $root = '/'.trim($root, '/');
+
+      if (!$allow_root and $path == $root) {
+         return false;
+      }
 
       while (true) {
          if ($path == $root) {

@@ -3,9 +3,9 @@
 
 # This is just a wrapper to optionally run the console with rlwrap
 if which rlwrap &>/dev/null; then
-   exec rlwrap -c -r -s 1000 php5 -d output_buffering=On $0
+   exec rlwrap -c -r -s 1000 php5 -d output_buffering=On $0 "$@"
 else
-   exec php5 -d output_buffering=On $0
+   exec php5 -d output_buffering=On $0 "$@"
 fi
 
 <?
@@ -176,8 +176,16 @@ fi
 
          # Dump exceptions with colored backtrace
          catch (Exception $_e) {
+            while (ob_get_level() > 1) {
+               ob_end_clean();
+            }
+
             print dump_exception($_e);
             $_result = $_e;
+         }
+
+         while (ob_get_level() > 1) {
+            ob_end_clean();
          }
 
          # Show command output

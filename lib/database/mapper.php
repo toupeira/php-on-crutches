@@ -169,7 +169,7 @@
                $keys[] = 'NULL';
             } else {
                $keys[] = '?';
-               $values[] = $value;
+               $values[] = $this->convert($value);
             }
          }
 
@@ -201,7 +201,7 @@
                $keys[] = "`$key` = NULL";
             } else {
                $keys[] = "`$key` = ?";
-               $values[] = $value;
+               $values[] = $this->convert($value);
             }
          }
 

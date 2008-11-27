@@ -9,78 +9,31 @@
 
    try_require('/usr/share/php/libphp-phpmailer/class.phpmailer.php');
 
-   class Mail extends Object
+   if (class_exists(PHPMailer)) {
+      class PHPMailerWrapper extends PHPMailer
+      {
+         function GetRecipients() {
+            return (array) $this->to;
+         }
+      }
+   }
+
+   class Mail extends View
    {
-      protected $_view;
       protected $_mailer;
 
       function __construct($template=null, $layout=null, $data=null) {
-         $this->_mailer = new PHPMailer();
+         parent::__construct($template, $layout);
+         foreach ((array) $data as $key => $value) {
+            $this->set($key, $value);
+         }
+
+         $this->_mailer = new PHPMailerWrapper();
          $this->set_language('en', '/usr/share/php/libphp-phpmailer/language/');
          $this->char_set = 'utf-8';
          $this->from = config('mail_from');
          $this->from_name = config('mail_from_name');
          $this->sender = any(config('mail_sender'), config('mail_from'));
-
-         $this->_view = new View($template, $layout);
-         foreach ((array) $data as $key => $value) {
-            $this->_view->set($key, $value);
-         }
-      }
-
-      function get_template() {
-         return $this->_view->template;
-      }
-
-      function set_template($template) {
-         return $this->_view->template = $template;
-      }
-
-      function get_layout() {
-         return $this->_view->layout;
-      }
-
-      function set_layout($layout) {
-         return $this->_view->layout = $layout;
-      }
-
-      function set($key, $value=null) {
-         $this->_view->set($key, &$value);
-         return $this;
-      }
-
-      function send() {
-         if ($this->body == '') {
-            $this->body = $this->_view->render();
-            if ($this->content_type == 'text/html') {
-               $this->alt_body = strip_html($this->body);
-            }
-         }
-
-         $recipients = array_pluck($this->_mailer->to, 0);
-         log_info("Sending mail to '".implode("', '", $recipients)."'");
-
-         if (!config('send_mails')) {
-            $GLOBALS['_SENT_MAILS'][] = array(
-               'from'      => $this->from,
-               'from_name' => $this->from_name,
-               'to'        => $recipients,
-               'cc'        => array_pluck($this->_mailer->cc, 0),
-               'bcc'       => array_pluck($this->_mailer->bcc, 0),
-               'subject'   => $this->subject,
-               'template'  => $this->template,
-               'layout'    => $this->layout,
-               'body'      => $this->body,
-            );
-
-            return true;
-         }
-
-         if ($this->_mailer->send()) {
-            return true;
-         } else {
-            throw new MailerError($this->error_info);
-         }
       }
 
       function __get($key) {
@@ -112,6 +65,40 @@
             return call_user_func_array(array($this->_mailer, $method), $args);
          } else {
             throw new UndefinedMethod($this->_mailer, $method);
+         }
+      }
+
+      function send() {
+         if ($this->body == '') {
+            $this->body = $this->_view->render();
+            if ($this->content_type == 'text/html') {
+               $this->alt_body = strip_html($this->body);
+            }
+         }
+
+         $recipients = array_pluck($this->get_recipients(), 0);
+         log_info("Sending mail to '".implode("', '", $recipients)."'");
+
+         if (!config('send_mails')) {
+            $GLOBALS['_SENT_MAILS'][] = array(
+               'from'      => $this->from,
+               'from_name' => $this->from_name,
+               'to'        => $recipients,
+               'cc'        => array_pluck($this->_mailer->cc, 0),
+               'bcc'       => array_pluck($this->_mailer->bcc, 0),
+               'subject'   => $this->subject,
+               'template'  => $this->template,
+               'layout'    => $this->layout,
+               'body'      => $this->body,
+            );
+
+            return true;
+         }
+
+         if ($this->_mailer->send()) {
+            return true;
+         } else {
+            throw new MailerError($this->error_info);
          }
       }
    }

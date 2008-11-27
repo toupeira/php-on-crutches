@@ -7,10 +7,6 @@
 # $Id$
 #
 
-   while (ob_get_level()) {
-      ob_end_clean();
-   }
-
    require dirname(__FILE__).'/../config/environment.php';
 
    # Set fake request information, useful for testing and the console

@@ -61,13 +61,21 @@
    class MissingTemplate extends NotFound {}
 
    class InvalidRequest extends ApplicationError {
-      function __construct($message) {
-         parent::__construct("Invalid request for this action: $message");
+      function __construct($message=null) {
+         if ($message) {
+            $message = ": $message";
+         }
+
+         parent::__construct("Invalid request for this action$message");
       }
    }
 
    class AccessDenied extends ApplicationError {
-      function __construct($message) {
+      function __construct($message=null) {
+         if ($message) {
+            $message = ": $message";
+         }
+
          parent::__construct("Access denied for this action: $message");
       }
    }

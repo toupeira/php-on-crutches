@@ -35,6 +35,7 @@
       protected $_display_column;
 
       protected $_new_record = true;
+      protected $_frozen = false;
 
       function __construct(array $attributes=null, array $defaults=null) {
          # Add virtual attributes
@@ -109,7 +110,9 @@
       }
 
       function __set($key, $value) {
-         if (in_array($key, $this->_readonly)) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } elseif (in_array($key, $this->_readonly)) {
             throw new ApplicationError("Can't change read-only attribute '$key'");
          } else {
             if (is_string($value) and !in_array($key, $this->_skip_trim)) {
@@ -166,7 +169,9 @@
       # Create or update the model, calls the model mapper for the
       # actual implementation.
       function save($force_update=false) {
-         if (!$this->is_valid()) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } elseif (!$this->is_valid()) {
             return false;
          }
 
@@ -203,7 +208,9 @@
       }
 
       function destroy() {
-         if ($this->_new_record) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } elseif ($this->_new_record) {
             return false;
          } else {
             $this->call_filter('before_destroy');
@@ -228,6 +235,10 @@
       }
 
       function write_attribute($key, $value) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         }
+
          $old_value = $this->read_attribute($key);
          $this->_attributes[$key] = &$value;
 
@@ -238,7 +249,9 @@
       }
 
       function add_virtual($key, $value) {
-         if (array_key_exists($key, $this->_attributes)) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } elseif (array_key_exists($key, $this->_attributes)) {
             throw new ValueError($key, "Attribute '$key' already exists");
          }
 
@@ -247,7 +260,9 @@
       }
 
       function reset($key) {
-         if (!is_null($old = $this->_changed_attributes[$key])) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } elseif (!is_null($old = $this->_changed_attributes[$key])) {
             unset($this->_changed_attributes[$key]);
             return $this->_attributes[$key] = $old;
          }
@@ -256,7 +271,7 @@
       }
 
       function freeze() {
-         $this->_readonly = array_keys($this->attributes);
+         $this->_frozen = true;
       }
 
       # Merge the attributes, protected keys are skipped
@@ -279,6 +294,10 @@
 
       # Load attributes directly, adding as virtual if they don't exist yet
       function load(array $attributes) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         }
+
          foreach ($attributes as $key => $value) {
             if (!array_key_exists($key, $this->_attributes)) {
                # Add unknown attributes as virtual
@@ -296,7 +315,9 @@
 
       # Reload attributes from the mapper
       function reload() {
-         if (!$this->_new_record) {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } elseif (!$this->_new_record) {
             return $this->load($this->mapper->find($this)->attributes);
          } else {
             return false;
@@ -494,7 +515,7 @@
 
          if (!array_key_exists($key, $this->_attributes)) {
             throw new ValueError("Invalid attribute '$key'");
-         } elseif (in_array($key, $this->_readonly)) {
+         } elseif ($this->_frozen or in_array($key, $this->_readonly)) {
             return h($this->$key);
          } elseif ($key == 'text') {
             $method = 'text_area';
