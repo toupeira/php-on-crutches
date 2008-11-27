@@ -2,10 +2,10 @@
 <?
 
    function url_for_with_prefix() {
-      Dispatcher::$prefix = '/sub/';
+      config_set('prefix', '/sub/');
       $args = func_get_args();
       $result = call_user_func_array('url_for', $args);
-      Dispatcher::$prefix = '/';
+      config_set('prefix', '/');
 
       return $result;
    }

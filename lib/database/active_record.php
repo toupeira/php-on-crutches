@@ -128,8 +128,8 @@
                   continue;
                }
 
-               if (!$options['null'] and is_null($options['default']) and
-                  !$this->is_present($key)) {
+               if (!$options['null'] and !$options['has_default'] and
+                   !$this->is_present($key)) {
                   continue;
                }
 
@@ -154,12 +154,17 @@
          return empty($this->_errors);
       }
 
-      protected function is_unique($key) {
+      protected function is_unique($key, $filter=null) {
          if (!$this->changed($key)) {
             return true;
          }
 
          $objects = $this->mapper->where($key, $this->$key);
+
+         if ($filter) {
+            $objects->where($filter);
+         }
+
          if (!$this->_new_record) {
             $objects->where("`{$this->mapper->primary_key}` != ?", $this->id);
          }

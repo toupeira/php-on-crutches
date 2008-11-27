@@ -125,13 +125,23 @@
    define_default('FORMAT_DB_TIME', '%Y-%m-%d %T');
    define_default('FORMAT_DB_DATE', '%Y-%m-%d');
 
+   function format_date($date, $format=FORMAT_DATE) {
+      if (!is_numeric($date)) {
+         $date = strtotime($date);
+      }
+
+      if ($date) {
+         return strftime(_($format), $date);
+      }
+   }
+
    function format_time($time, $format=FORMAT_TIME) {
       if (!is_numeric($time)) {
          $time = strtotime($time);
       }
 
       if ($time) {
-         return strftime($format, $time);
+         return strftime(_($format), $time);
       }
    }
 
@@ -141,14 +151,19 @@
 
    function format_size($size, $format='d') {
       if ($size < KB) {
-         return "$size Bytes";
+         $text = _('%d Bytes');
       } elseif ($size < MB) {
-         return sprintf("%$format KB", $size / KB);
+         $text = _('%s KB');
+         $size = sprintf("%$format", $size / KB);
       } elseif ($size < GB) {
-         return sprintf("%$format MB", $size / MB);
+         $text = _('%s MB');
+         $size = sprintf("%$format", $size / MB);
       } else {
-         return sprintf("%$format GB", $size / GB);
+         $text = _('%s GB');
+         $size = sprintf("%$format", $size / GB);
       }
+
+      return sprintf($text, $size);
    }
 
    define_default('MINUTE', 60);

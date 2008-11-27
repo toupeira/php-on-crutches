@@ -16,7 +16,7 @@
    $framework = array(
       'Environment'      => ENVIRONMENT,
       'Framework root'   => ROOT,
-      'URL Prefix'       => Dispatcher::$prefix,
+      'URL Prefix'       => config('prefix'),
       'URL Rewriting'    => config('rewrite_urls') ? 'enabled' : 'disabled',
       'Session Store'    => config('session_store') ? config('session_store') : 'disabled',
       'Cache Store'      => config('cache_store'),

@@ -71,6 +71,7 @@
          foreach ($this->files as $i => &$file) {
             $file['name'] = basename($file['name']);
             if (!is_uploaded_file($file['tmp_name'])) {
+               log_warn("File injection attack: {$file['tmp_name']}");
                unset($this->files[$i]);
             }
          }
@@ -569,7 +570,7 @@
             );
          }
 
-         if (!$model = classify(any($options['model'], $this->_scaffold))) {
+         if (!$model = classify(any($options['model'], $this->_scaffold, pluralize($this->_name)))) {
             throw new ApplicationError("No model found");
          } elseif (!is_subclass_of($model, ActiveRecord)) {
             throw new TypeError("Invalid model '$model'");
@@ -586,7 +587,8 @@
             throw new ValueError("Invalid action '$action'");
          }
 
-         $redirect = array_delete($status, 'redirect');
+         list($object, $redirect) = array_delete($status, 'object', 'redirect');
+
          foreach ((array) $status as $key => $message) {
             if (is_array($message)) {
                $args = array_slice($message, 1);
@@ -603,6 +605,8 @@
          }
 
          if ($redirect) {
+            $redirect = any($options['redirect_to_action'], $redirect);
+
             if (!$this->has_action($redirect)) {
                $redirect = '';
             }
@@ -611,6 +615,7 @@
 
             $this->redirect_to(any(
                $options['redirect_to'],
+               $object->to_params($redirect),
                ":{$options['prefix']}/$redirect$id"
             ));
          } else {
@@ -648,6 +653,10 @@
          }
 
          $this->scaffold_assign($objects);
+
+         return array(
+            'object' => $objects,
+         );
       }
 
       protected function scaffold_show($model, $options, $id) {
@@ -673,8 +682,13 @@
 
          if ($this->is_post() and $object->save()) {
             return array(
+               'object'   => $object,
                'info'     => array(_("%s '%s' successfully created"), $object),
                'redirect' => 'show',
+            );
+         } else {
+            return array(
+               'object' => $object,
             );
          }
       }
@@ -685,8 +699,13 @@
 
             if ($this->is_post() and $object->update($params)) {
                return array(
+                  'object'   => $object,
                   'info'     => array(_("%s '%s' successfully updated"), $object),
                   'redirect' => 'show',
+               );
+            } else {
+               return array(
+                  'object' => $object,
                );
             }
          } else {
@@ -706,11 +725,13 @@
             try {
                $object->destroy();
                return array(
+                  'object'   => $object,
                   'info'     => array(_("%s '%s' successfully deleted"), $object),
                   'redirect' => 'index',
                );
             } catch (PDOException $e) {
                return array(
+                  'object'   => $object,
                   'error'    => array(_("Couldn't delete %s '%s'"), $object),
                   'redirect' => 'index',
                );

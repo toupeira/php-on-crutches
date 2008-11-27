@@ -10,7 +10,6 @@
    abstract class Dispatcher
    {
       static public $path;
-      static public $prefix = '/';
 
       static public $controller;
       static public $params;
@@ -28,12 +27,6 @@
          $path = ltrim($path, '/');
          self::$path = "/$path";
          unset($_GET['path']);
-
-         # Detect the relative path used to reach the website
-         self::$prefix = rtrim(preg_replace(
-            "#/+(index\.(php|fcgi)(/[^?]*)?(\?[^/]*)?/*)?(".preg_quote($path).")?(\?.*)?/*$#", '/',
-            urldecode($_SERVER['REQUEST_URI'])
-         ), '/').'/';
 
          # Recognize parameters in path
          $params = Router::recognize($path);

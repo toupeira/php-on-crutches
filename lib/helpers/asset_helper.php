@@ -17,7 +17,7 @@
          return substr($file, 2).$ext;
       } else {
          $path = $directory.$file.$ext;
-         $web_path = Dispatcher::$prefix.$path;
+         $web_path = config('prefix').$path;
 
          if (file_exists(WEBROOT.$path)) {
             $web_path .= '?'.filemtime(WEBROOT.$path);

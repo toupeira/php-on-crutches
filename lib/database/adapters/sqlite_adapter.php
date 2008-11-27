@@ -37,12 +37,22 @@
          $columns = $this->execute("PRAGMA table_info(`$table`)")->fetch_all();
          foreach ($columns as $column) {
             list($type, $size) = $this->parse_type($column['type']);
+
+            if ($type == 'date' or $type == 'time') {
+               $default = null;
+               $has_default = !empty($column['dflt_value']);
+            } else {
+               $default = $column['dflt_value'];
+               $has_default = !empty($default);
+            }
+
             $attributes[$column['name']] = array(
-               'key'     => (bool) $column['pk'],
-               'type'    => $type,
-               'size'    => $size,
-               'null'    => $column['notnull'] == 0,
-               'default' => $column['dflt_value'],
+               'key'         => (bool) $column['pk'],
+               'type'        => $type,
+               'size'        => $size,
+               'null'        => $column['notnull'] == 0,
+               'default'     => $default,
+               'has_default' => $has_default,
             );
          }
 

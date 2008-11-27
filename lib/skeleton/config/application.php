@@ -2,6 +2,7 @@
 
    $_CONFIG['application'] = array(
       'name'            => basename(ROOT),
+      'prefix'          => '/',
       'languages'       => array('en'),
 
       'auth_model'      => null,

@@ -281,6 +281,8 @@
             foreach ($attributes as $key => $value) {
                if (is_numeric($key)) {
                   throw new TypeError($key);
+               } elseif (!array_key_exists($key, $this->_attributes)) {
+                  $this->add_virtual($key, $value);
                } else {
                   $this->__set($key, $value);
                }

@@ -92,7 +92,7 @@
 
       # Add the site prefix for relative paths
       if ($path[0] != '/' and $path[0] != '#') {
-         $url .= Dispatcher::$prefix;
+         $url .= config('prefix');
       }
 
       if ($anchor = $options['anchor']) {
@@ -111,7 +111,8 @@
    }
 
    # Build a link tag
-   function link_to($title, $path, array $options=null, array $url_options=null) {
+   function link_to($title, $path=null, array $options=null, array $url_options=null) {
+      $path = (is_null($path) ? $title : $path);
       $confirm = add_confirm_options($options);
 
       # Send a POST request by dyamically building a form element
@@ -142,7 +143,8 @@
    }
 
    # Build a link button
-   function button_to($title, $path, array $options=null, array $url_options=null) {
+   function button_to($title, $path=null, array $options=null, array $url_options=null) {
+      $path = (is_null($path) ? $title : $path);
       add_confirm_options(&$options);
 
       $method = any($options['post'] ? 'POST' : null, $options['method'], 'GET');

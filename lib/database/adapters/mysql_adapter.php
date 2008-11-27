@@ -44,13 +44,23 @@
          $columns = $this->execute("DESCRIBE `$table`")->fetch_all();
          foreach ($columns as $column) {
             list($type, $size) = $this->parse_type($column['Type']);
+
+            if ($type == 'date' or $type == 'time') {
+               $default = null;
+               $has_default = !empty($column['Default']);
+            } else {
+               $default = $column['Default'];
+               $has_default = !empty($default);
+            }
+
             $attributes[$column['Field']] = array(
-               'key'     => $column['Key'] == 'PRI',
-               'type'    => $type,
-               'size'    => $size,
-               'null'    => $column['Null'] == 'YES',
-               'default' => $column['Default'] === '' ? null : $column['Default'],
-               'unique'  => $column['Key'] == 'UNI',
+               'key'         => $column['Key'] == 'PRI',
+               'type'        => $type,
+               'size'        => $size,
+               'null'        => $column['Null'] == 'YES',
+               'default'     => $default,
+               'has_default' => $has_default,
+               'unique'      => $column['Key'] == 'UNI',
             );
          }
 

@@ -277,17 +277,22 @@
                   #   e.g.: find(array('key LIKE ?' => $value))
                   #
                   $condition .= $key;
+
+                  # Add array value as parameter for each placeholder
+                  for ($i = 0; $i < $count; $i++) {
+                     $params[] = $value;
+                  }
+
                } else {
                   # Use array key as column name
                   #   e.g.: find(array('key' => $value))
                   #
-                  $condition .= "$key = ?";
-                  $count = 1;
-               }
-
-               # Add array value as parameter for each placeholder
-               for ($i = 0; $i < $count; $i++) {
-                  $params[] = $value;
+                  if (is_null($value)) {
+                     $condition .= "$key IS NULL";
+                  } else {
+                     $condition .= "$key = ?";
+                     $params[] = $value;
+                  }
                }
 
             } elseif (is_numeric($value) or is_numeric($value[0])) {
@@ -322,9 +327,16 @@
             } elseif (is_string($value) and !blank($value)) {
                # Use array value as column name
                #   e.g.: find('key', $value)
-               $condition .= "$operator$value = ?";
-               $params[] = $this->convert(array_shift_arg($values));
+               $key = $value;
+               $value = $this->convert(array_shift_arg($values));
                array_shift($keys);
+
+               if (is_null($value)) {
+                  $condition .= "$operator$key IS NULL";
+               } else {
+                  $condition .= "$operator$key = ?";
+                  $params[] = $value;
+               }
 
             } elseif (!is_null($value)) {
                throw new TypeError($value);

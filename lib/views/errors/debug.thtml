@@ -69,6 +69,13 @@
 <h3>in <strong><?= $file ?></strong> at line <strong><?= $line ?></strong>:</h3>
 <p><?= $message ?></p>
 
+<h3>
+   Address: <?= link_to($_SERVER['REQUEST_URI']) ?>
+<? if ($referer = $_SERVER['HTTP_REFERER']): ?>
+   <br />Referer: <?= link_to($referer) ?>
+<? endif ?>
+</h3>
+
 <? if ($code): ?>
 <? if ($expand_source): ?>
 <div>

@@ -39,13 +39,19 @@
          return $this->_defaults;
       }
 
+      function set_default($key, $value) {
+         return $this->_defaults[$key] = $value;
+      }
+
       # Helper to create and save a model
       function create(array $attributes, array $defaults=null) {
          $model = new $this->_model($attributes, $defaults);
          if ($model->save()) {
             return $model;
          } else {
-            throw new ApplicationError("Couldn't create {$this->_model} instance");
+            throw new ApplicationError(
+               "Couldn't create {$this->_model} instance (".array_to_str($model->errors).")"
+            );
          }
       }
 

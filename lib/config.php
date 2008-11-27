@@ -22,6 +22,7 @@
    #
    # |_(title). Application Settings |_. |_(title). Default |
    # | @name@              | the application name, will be used as default in some places | basename of root directory |
+   # | @prefix@            | the prefix used to reach the website | @/@ |
    # | @languages@         | an array of available languages, with the default first |
    # |_(title). General Settings  |_. |_(title). Default |
    # | @log_file@          | the path to the log file, or a file handle like STDERR | @ROOT/log/ENVIRONMENT.log@ |
@@ -67,6 +68,7 @@
    # Default framework settings
    $_CONFIG['defaults'] = array(
       'name'              => basename(ROOT),
+      'prefix'            => '/',
       'languages'         => null,
 
       'log_file'          => LOG.ENVIRONMENT.'.log',
@@ -163,6 +165,9 @@
 
    function config_init() {
       $config = config('application');
+
+      # Sanitize the prefix
+      config_set('prefix', rtrim($config['prefix'], '/').'/');
 
       # Start output buffering
       if ($config['output_buffering']) {
