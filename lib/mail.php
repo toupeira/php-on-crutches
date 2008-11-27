@@ -70,7 +70,7 @@
 
       function send() {
          if ($this->body == '') {
-            $this->body = $this->_view->render();
+            $this->body = $this->render();
             if ($this->content_type == 'text/html') {
                $this->alt_body = strip_html($this->body);
             }
