@@ -130,11 +130,28 @@
       ));
    }
 
+   define_default('ICON_WIDTH', 16);
+   define_default('ICON_HEIGHT', 16);
+
    # Build an image tag for a 16x16 PNG icon
    function icon($name, $options=null) {
+      if (strpos($name, '/') === false) {
+         $name = "icons/$name";
+      }
+
       return image_tag("$name.png", array_merge(
-         array('width' => 16, 'height' => 16, 'class' => 'icon'), (array) $options
+         array(
+            'width' => ICON_WIDTH,
+            'height' => ICON_HEIGHT,
+            'class' => 'icon'
+         ), (array) $options
       ));
+   }
+
+   function icon_link_to($icon, $title, $path=null, array $options=null, array $url_options=null) {
+      $path = any($path, $title);
+      $title = icon($icon).' '.$title;
+      return link_to($title, $path, $options, $url_options);
    }
 
 ?>

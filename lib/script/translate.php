@@ -61,7 +61,7 @@ TXT;
 
    print "Updating [1mmodel[0m messages...\n";
 
-   $attributes = array();
+   $all_attributes = array();
    $file = fopen(LANG.'attributes.pot', 'w');
    fwrite($file, $header);
 
@@ -73,17 +73,22 @@ TXT;
          $model = new $class();
          $messages = array();
 
-         $key = humanize($class, false);
-         if (!in_array($key, $attributes)) {
-            $attributes[] = $key;
-            $messages[] = "msgid \"$key\"\n"
+         $model_key = humanize($class, false);
+         if (!in_array($model_key, $all_attributes)) {
+            $all_attributes[] = $model_key;
+            $messages[] = "msgid \"$model_key\"\n"
                         . "msgstr \"\"\n\n";
          }
 
-         foreach ($model->attributes as $key => $value) {
+         $attributes = array_merge(
+            array_keys($model->attributes),
+            $model->virtual_attributes
+         );
+
+         foreach ($attributes as $key) {
             $key = humanize($key, false);
-            if (!in_array($key, $attributes)) {
-               $attributes[] = $key;
+            if (!in_array($key, $all_attributes)) {
+               $all_attributes[] = $key;
                $messages[] = "msgid \"$key\"\n"
                            . "msgstr \"\"\n\n";
             }

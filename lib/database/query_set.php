@@ -12,6 +12,7 @@
       protected $_mapper;
       protected $_statement;
       protected $_objects;
+      protected $_preload;
 
       protected $_position = 0;
       protected $_count;
@@ -73,6 +74,33 @@
          return $this->_mapper->table;
       }
 
+      protected function load() {
+         if ($object = $this->statement->fetch_load($this->model)) {
+            if (is_array($this->_preload)) {
+               $object->load($this->_preload);
+            }
+
+            return $object;
+         }
+      }
+
+      protected function load_all() {
+         if ($objects = $this->statement->fetch_all_load($this->model)) {
+            if (is_array($this->_preload)) {
+               foreach ($objects as $object) {
+                  $object->load((array) $this->_preload);
+               }
+            }
+
+            return $objects;
+         }
+      }
+
+      function preload(array $data) {
+         $this->_preload = array_merge((array) $this->_preload, $data);
+         return $this;
+      }
+
       function get_statement() {
          if (!$this->_statement) {
             $this->_statement = $this->_mapper->execute($this->sql, $this->params);
@@ -91,7 +119,7 @@
             $this->_position = $current_pos;
          } else {
             # Statement wasn't executed yet, load all objects in one run
-            $this->_objects = $this->statement->fetch_all_load($this->model);
+            $this->_objects = $this->load_all();
          }
 
          return $this->_objects;
@@ -377,6 +405,9 @@
             return $this->replace($method, $args);
          } elseif (in_array($method, array('limit', 'offset'))) {
             return $this->replace($method, $args[0]);
+         } elseif (in_array($method, array('sum', 'min', 'max'))) {
+            $this->replace_select("$method({$args[0]})");
+            return $this->statement->fetch_column();
          } else {
             return $this->merge($method, $args);
          }
@@ -559,7 +590,7 @@
       function current() {
          if ($object = $this->_objects[$this->_position]) {
             return $object;
-         } elseif ($object = $this->statement->fetch_load($this->model)) {
+         } elseif ($object = $this->load()) {
             return $this->_objects[$this->_position] = $object;
          }
       }

@@ -33,10 +33,10 @@
       protected $_order;
       protected $_page_size;
 
-      protected $_associations;
-      protected $_has_one;
-      protected $_has_many;
-      protected $_belongs_to;
+      protected $_associations = array();
+      protected $_has_one = array();
+      protected $_has_many = array();
+      protected $_belongs_to = array();
 
       function __construct() {
          parent::__construct();
@@ -45,9 +45,11 @@
             throw new ConfigurationError("No database set for model '{$this->_model}'");
          } elseif (empty($this->_table) and !($this->_table = tableize($this->_model))) {
             throw new ConfigurationError("No table set for model '{$this->_model}'");
+         } elseif (empty($this->_primary_key)) {
+            throw new ConfigurationError("No primary key set for model '{$this->_model}'");
          }
 
-         foreach (array('has_one', 'has_many', 'has_many_through', 'belongs_to') as $type) {
+         foreach (array('has_many', 'has_one', 'belongs_to') as $type) {
             if (!empty($this->{'_'.$type})) {
                require_once LIB."database/associations/{$type}_association.php";
                $association = camelize($type).'Association';
@@ -81,6 +83,10 @@
 
       function get_primary_key() {
          return $this->_primary_key;
+      }
+
+      function get_key_type() {
+         return $this->attributes[$this->_primary_key]['type'];
       }
 
       function get_connection() {
@@ -117,6 +123,21 @@
 
       function get_associations() {
          return $this->_associations;
+      }
+
+      function has_many($key=null) {
+         return $key ? in_array(tableize($key), $this->_has_many)
+                     : $this->_has_many;
+      }
+
+      function has_one($key=null) {
+         return $key ? in_array(underscore(singularize($key)), $this->_has_one)
+                     : $this->_has_one;
+      }
+
+      function belongs_to($key=null) {
+         return $key ? in_array(underscore(singularize($key)), $this->_belongs_to)
+                     : $this->_belongs_to;
       }
 
       function execute() {
@@ -248,6 +269,9 @@
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
             $conditions = func_get_args();
+         } elseif (count($conditions) == 1 and is_array($conditions[0])) {
+            # Conditions are passed as nested array
+            $conditions = $conditions[0];
          }
 
          if (empty($conditions)) {
@@ -295,15 +319,23 @@
                   }
                }
 
-            } elseif (is_numeric($value) or is_numeric($value[0])) {
+            } elseif (((is_numeric($value) or is_numeric($value[0])) and
+                        $this->key_type == 'integer') or
+                      (is_string($value) and empty($values) and
+                        $this->key_type == 'string'))
+            {
                # Use array value as ID
                #   e.g.: find($id)
                #
                $condition .= "$operator`{$this->_table}`.`{$this->_primary_key}` = ?";
-               $params[] = intval($value);
+               $params[] = $value;
 
                # Allow passing multiple IDs
                $operator = ' OR ';
+
+            } elseif ($value == 'and' or $value == 'or') {
+               # Change the operator
+               $operator = ' '.strtoupper($value).' ';
 
             } elseif ($count = substr_count($value, '?')) {
                # Use array value as condition with placeholders
@@ -314,10 +346,6 @@
                   $params[] = $this->convert(array_shift_arg($values));
                   array_shift($keys);
                }
-
-            } elseif ($value == 'and' or $value == 'or') {
-               # Change the operator
-               $operator = ' '.strtoupper($value).' ';
 
             } elseif (strstr($value, ' ') !== false) {
                # Use array value as literal condition, without placeholders

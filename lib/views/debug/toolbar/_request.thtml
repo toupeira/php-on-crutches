@@ -29,5 +29,5 @@
       }
    }
 ?>
-<a><?= icon('framework/icons/request') ?> Request: <?= h(Dispatcher::$path) ?></a>
+<a><?= icon('framework/icons/request') ?> Request: <?= truncate(Dispatcher::$path, 30, true) ?></a>
 <div><?= table_tag($request, array('escape' => false)) ?></div>

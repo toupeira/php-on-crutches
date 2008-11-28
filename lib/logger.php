@@ -47,11 +47,7 @@
       }
 
       function __construct($file=STDERR, $level=LOG_INFO) {
-         if (is_resource($file)) {
-            $this->_buffer = $file;
-         } else {
-            $this->_file = $file;
-         }
+         $this->file = $file;
 
          if (is_numeric($level)) {
             $this->_level = $level;
@@ -74,7 +70,14 @@
 
       function set_file($file) {
          $this->__destruct();
-         $this->_file = $file;
+
+         if (is_resource($file)) {
+            $this->_buffer = $file;
+            $this->_file = null;
+         } else {
+            $this->_file = $file;
+            $this->_buffer = null;
+         }
       }
 
       function get_level() {

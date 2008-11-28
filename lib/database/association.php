@@ -37,11 +37,11 @@
          return "`$table`.`$key`";
       }
 
-      function load(ActiveRecord $model) {
-         return $this->load_data($model);
+      function load(ActiveRecord $object) {
+         return $this->load_data($object);
       }
 
-      protected function load_data(ActiveRecord $model) {
+      protected function load_data(ActiveRecord $object) {
          throw new ApplicationError("Association doesn't implement 'load_data'");
       }
    }

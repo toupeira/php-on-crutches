@@ -38,11 +38,6 @@
       protected $_frozen = false;
 
       function __construct(array $attributes=null, array $defaults=null) {
-         # Add virtual attributes
-         foreach ((array) $this->_virtual_attributes as $key) {
-            $this->add_virtual($key, null);
-         }
-
          # Set default values
          $this->set_attributes(array_merge(
             (array) $attributes,
@@ -100,10 +95,13 @@
       function __get($key) {
          if (method_exists($this, $getter = "get_$key")) {
             return $this->$getter();
-         } elseif (array_key_exists($key, $this->_attributes)) {
+         } elseif (array_key_exists($key, $this->_attributes) or
+                   in_array($key, $this->_virtual_attributes)) {
             return $this->read_attribute($key);
          } elseif (method_exists($this, $key)) {
             return $this->$key();
+         } elseif (method_exists($this, $generator = "generate_$key")) {
+            return $this->add_virtual($key, $this->$generator());
          } else {
             throw new UndefinedMethod($this, $getter);
          }
@@ -121,14 +119,13 @@
 
             if (method_exists($this, $setter = "set_$key")) {
                $this->$setter(&$value);
-            } elseif (array_key_exists($key, $this->_attributes)) {
+            } elseif (array_key_exists($key, $this->_attributes) or
+                      in_array($key, $this->_virtual_attributes)) {
                $this->write_attribute($key, $value);
             } else {
                throw new UndefinedMethod($this, $setter);
             }
          }
-
-         return $this;
       }
 
       function get_mapper() {
@@ -145,6 +142,18 @@
 
       function get_attributes() {
          return $this->_attributes;
+      }
+
+      function get_virtual_attributes() {
+         return $this->_virtual_attributes;
+      }
+
+      function get_readonly() {
+         return $this->_readonly;
+      }
+
+      function get_protected() {
+         return $this->_protected;
       }
 
       function changed($key=null) {
@@ -231,7 +240,11 @@
       # Wrappers for use in custom setters and getters
 
       function read_attribute($key) {
-         return $this->_attributes[$key];
+         if ($this->mapper->attributes[$key]['type'] == 'bool') {
+            return (bool) $this->_attributes[$key];
+         } else {
+            return $this->_attributes[$key];
+         }
       }
 
       function write_attribute($key, $value) {
@@ -245,18 +258,24 @@
          if ($this->read_attribute($key) != $old_value) {
             $this->_changed_attributes[$key] = $old_value;
          }
-         return $this;
+
+         return $value;
       }
 
-      function add_virtual($key, $value) {
+      function add_virtual($key, $value=null) {
          if ($this->_frozen) {
             throw new ApplicationError("Can't change frozen object");
-         } elseif (array_key_exists($key, $this->_attributes)) {
+         } elseif (!array_key_exists($key, $this->_attributes)) {
+            $this->_virtual_attributes[] = $key;
+         } elseif (!in_array($key, $this->_virtual_attributes)) {
             throw new ValueError($key, "Attribute '$key' already exists");
          }
 
-         $this->_virtual_attributes[] = $key;
-         return $this->_attributes[$key] = $value;
+         if (is_null($value)) {
+            return true;
+         } else {
+            return $this->_attributes[$key] = $value;
+         }
       }
 
       function reset($key) {
@@ -465,11 +484,26 @@
 
       # Wrappers for URL helpers
 
-      function link_to($action='show', $title=null, $options=null, $url_options=null) {
+      function link_to($action=null, $title=null, array $options=null, array $url_options=null) {
          $this->add_url_options($options, $action);
-         $path = $this->to_params($action);
+         $action = any($action, 'show');
          $title = any($title, truncate($this, 40, true));
+         $path = $this->to_params($action);
          return link_to($title, $path, $options, $url_options);
+      }
+      
+      function icon_link_to($action=null, $title=null, array $options=null, array $url_options=null) {
+         $icon = underscore(get_class($this));
+         $action = any($action, 'show');
+
+         if ($action != 'show' and $action != 'index') {
+            $icon .= "_$action";
+         }
+
+         $title = icon($icon).' '
+                . any($title, truncate($this, 40, true));
+
+         return $this->link_to($action, $title, $options, $url_options);
       }
 
       function button_to($action='show', $title=null, $options=null, $url_options=null) {

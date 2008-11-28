@@ -9,8 +9,14 @@
 
    class HasManyAssociation extends Association
    {
-      protected function load_data(ActiveRecord $model) {
-         return DB($this->related)->where($this->key, $model->id);
+      protected function load_data(ActiveRecord $object) {
+         $objects = DB($this->related)->where($this->key, $object->id);
+         log_info("{$this->related} <=> {$this->model}");
+         if (DB($this->related)->belongs_to($this->model)) {
+            $objects->preload(array(underscore($this->model) => $object));
+         }
+
+         return $objects;
       }
    }
 

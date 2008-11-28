@@ -89,11 +89,11 @@ fi
          print "    exit, quit         Exit the console\n";
          print "    time [COUNT] CODE  Show execution time\n";
          print "    ls, cd             Shell aliases\n";
-         print "    \$var?              Dump variable\n";
          print "\n";
          print "  Helpers:\n";
          print "    get(\$path, \$params)\n";
          print "    post(\$path, \$params)\n";
+         print "    follow()\n";
          print "\n";
          continue;
       }
@@ -148,11 +148,6 @@ fi
       elseif (substr($_command, 0, 1) == '!') {
          $_shell_command = substr($_command, 1);
          $_command = 'system($_shell_command)';
-      }
-
-      # Dump variable
-      elseif (preg_match('/^\$\w+\?$/', $_command)) {
-         $_command = 'dump_value('.rtrim($_command, '?').')';
       }
 
       # Execute normal PHP code
@@ -232,9 +227,19 @@ fi
 
    # Perform a request for the given path, with the given HTTP method
    function request($method, $path) {
+      if ($GLOBALS['_path']) {
+         $GLOBALS['_previous'] = $GLOBALS['_path'];
+      }
+
       $_SERVER['REQUEST_METHOD'] = $method;
-      $_SERVER['REQUEST_URI'] = "/$path";
-      return $GLOBALS['_controller'] = Dispatcher::run($path);
+      $_SERVER['REQUEST_URI'] = $GLOBALS['_path'] = '/'.ltrim($path, '/');
+
+      $c = $GLOBALS['_controller'] = Dispatcher::run($path);
+      if ($c->msg) {
+         var_export($c->msg);
+      }
+
+      return $c;
    }
 
    # Wrapper for GET requests
@@ -243,11 +248,23 @@ fi
          $_GET = $params;
          $_POST = array();
       }
+
       return request('GET', $path);
    }
 
    # Wrapper for POST requests
    function post($path, array $params=null) {
+      if (is_array($path) and is_null($params)) {
+         if ($c = $GLOBALS['_controller'] and
+               preg_match('/<form.*? action="([^"]+)"/', $c->output, $match)) {
+            $params = $path;
+            $path = $match[1];
+         } else {
+            print "\n  Couldn't find current form\n\n";
+            return;
+         }
+      }
+
       $_GET = $_POST = (array) $params;
       return request('POST', $path);
    }
@@ -260,6 +277,34 @@ fi
       {
          $path = str_replace('http://www.example.com/', '', $location);
          return get($path);
+      }
+   }
+
+   # Follow a link
+   function click($link) {
+      if ($c = $GLOBALS['_controller'] and
+          preg_match('/<a[^>]* href="([^"]+)"[^>]*>\s*'.preg_quote($link).'/', $c->output, $match)) {
+         return get($match[1]);
+      } else {
+         print "  Couldn't find link '$link'";
+      }
+   }
+
+   # Relaod the current path
+   function refresh() {
+      if ($path = $GLOBALS['_path']) {
+         return get($path);
+      } else {
+         print "  Couldn't find current path";
+      }
+   }
+
+   # Go back to the previous path
+   function back() {
+      if ($path = $GLOBALS['_previous']) {
+         return get($path);
+      } else {
+         print "  Couldn't find previous path";
       }
    }
 

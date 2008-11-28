@@ -33,6 +33,7 @@
       protected $_require_ssl;
       protected $_require_trusted;
       protected $_require_form_token = true;
+      protected $_valid_methods = array('GET', 'POST', 'HEAD');
 
       protected $_scaffold;
       protected $_scaffold_options;
@@ -245,29 +246,29 @@
          if (!$this->is_ssl() and $this->check_requirement($action, 'ssl')) {
             $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");
             return false;
-         }
+
+         # Check for valid methods
+         } elseif ($this->_valid_methods !== true and !in_array($_SERVER['REQUEST_METHOD'], $this->_valid_methods)) {
+            $error = InvalidRequest;
+            $message = "invalid method {$_SERVER['REQUEST_METHOD']}";
 
          # Check for POST requirements
-         if (!$this->is_post() and $this->check_requirement($action, 'post')) {
+         } elseif (!$this->is_post() and $this->check_requirement($action, 'post')) {
             $error = InvalidRequest;
             $message = 'needs POST';
-         }
-
 
          # Check for Ajax requirements
-         if (!$this->is_ajax() and $this->check_requirement($action, 'ajax')) {
+         } elseif (!$this->is_ajax() and $this->check_requirement($action, 'ajax')) {
             $error = InvalidRequest;
             $message = 'needs Ajax';
-         }
 
          # Check for trusted host requirements
-         if ($this->check_requirement($action, 'trusted') and !$this->is_trusted($action)) {
+         } elseif ($this->check_requirement($action, 'trusted') and !$this->is_trusted($action)) {
             $error = AccessDenied;
             $message = "untrusted host {$_SERVER['REMOTE_ADDR']}";
-         }
 
          # Check for cross site request forgery
-         if ($this->is_post() and !$this->is_ajax() and config('form_token') and $this->check_requirement($action, 'form_token')) {
+         } elseif ($this->is_post() and !$this->is_ajax() and config('form_token') and $this->check_requirement($action, 'form_token')) {
             if (!$this->params['_form_token']) {
                $error = InvalidRequest;
                $message = 'missing form token';

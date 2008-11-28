@@ -13,8 +13,8 @@
          return foreign_key($this->related);
       }
 
-      protected function load_data(ActiveRecord $model) {
-         if ($id = $model->{$this->key}) {
+      protected function load_data(ActiveRecord $object) {
+         if ($id = $object->{$this->key}) {
             return DB($this->related)->find($id);
          }
       }

@@ -207,7 +207,7 @@
       }
 
       # Render a partial template
-      function render_partial($partial, array $locals=null) {
+      function render_partial($partial, array $locals=null, $strict=true) {
          if (strstr($partial, '/') !== false) {
             $partial = dirname($partial).'/_'.basename($partial);
          } elseif ($path = dirname(any($this->_template, $this->_partial))) {
@@ -216,12 +216,23 @@
 
          if (!$this->_partial = View::find_template($partial) and
              !$this->_partial = View::find_template(VIEWS.basename($partial))) {
-            throw new ApplicationError("Partial '$partial' not found");
+            if ($strict) {
+               throw new ApplicationError("Partial '$partial' not found");
+            } else {
+               return;
+            }
          }
 
          $this->log('Rendering partial', $this->_partial);
          $locals = array_merge((array) $this->_data, (array) $locals);
          return $this->compile($this->_partial, $locals);
+      }
+
+      function wrap_partial($partial, array $locals=null, $options=null) {
+         if ($output = $this->render_partial($partial, $locals, false)) {
+            $options['id'] = any($options['id'], basename($partial));
+            return content_tag('div', $output, $options);
+         }
       }
 
       # Render a collection of model instances using partials based on their class name

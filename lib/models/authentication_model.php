@@ -35,13 +35,15 @@
 
       # Authenticate user with a password
       static function authenticate($username, $password) {
-         if (is_email($username) and $column = self::DB()->attributes['email'] and $column['unique']) {
-            $find = 'find_by_email';
+         if (!$username or !$password) {
+            return;
+         } elseif (is_email($username) and $column = self::DB()->attributes['email'] and $column['unique']) {
+            $key = 'email';
          } else {
-            $find = 'find_by_username';
+            $key = 'username';
          }
 
-         if ($user = self::DB()->$find($username) and
+         if ($user = self::DB()->find($key, $username) and
              $user->crypted_password == $user->encrypt($password)) {
             return $user;
          }

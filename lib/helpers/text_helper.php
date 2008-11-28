@@ -65,7 +65,7 @@
    # will be added as a tooltip.
    function truncate($text, $length=40, $add_title=false, $add='...') {
       if (strlen($text) > $length) {
-         $truncated = mb_substr($text, 0, $length);
+         $truncated = rtrim(mb_substr($text, 0, $length));
          if ($add_title) {
             return '<span title="'.h($text).'">'.h($truncated).$add.'</span>';
          } else {

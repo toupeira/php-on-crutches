@@ -45,12 +45,12 @@
 
       # Helper to create and save a model
       function create(array $attributes, array $defaults=null) {
-         $model = new $this->_model($attributes, $defaults);
-         if ($model->save()) {
-            return $model;
+         $object = new $this->_model($attributes, $defaults);
+         if ($object->save()) {
+            return $object;
          } else {
             throw new ApplicationError(
-               "Couldn't create {$this->_model} instance (".array_to_str($model->errors).")"
+               "Couldn't create {$this->_model} instance (".array_to_str($object->errors).")"
             );
          }
       }

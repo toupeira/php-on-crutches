@@ -67,6 +67,7 @@ server.port = $port
 server.bind = "$ip"
 server.document-root = "$webroot"
 server.modules = ( "mod_accesslog", "mod_rewrite", "mod_fastcgi" )
+server.upload-dirs = ( "/tmp" )
 
 include_shell "/usr/share/lighttpd/create-mime.assign.pl"
 
@@ -74,7 +75,7 @@ index-file.names = ( "index.php" )
 static-file.exclude-extensions = ( ".php", ".fcgi" )
 
 fastcgi.server = ( ".php" => ( "localhost" => (
-   "socket" => "{$socket->path}",
+   "socket"   => "{$socket->path}",
    "bin-path" => "$php"
 )))
 
