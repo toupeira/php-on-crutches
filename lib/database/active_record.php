@@ -12,9 +12,6 @@
       protected $_load_attributes = true;
 
       function __construct(array $attributes=null, array $defaults=null) {
-         # Always protect the ID from mass-assignments
-         $this->_protected[] = $this->mapper->primary_key;
-
          # Load attributes from the database
          if ($this->_load_attributes and empty($this->_attributes)) {
             foreach ($this->mapper->attributes as $key => $options) {
@@ -59,6 +56,15 @@
 
       function get_id() {
          return $this->_attributes[$this->mapper->primary_key];
+      }
+
+      # Protect the ID for existing records
+      function set_attributes(array $attributes=null) {
+         if ($this->exists) {
+            unset($attributes[$this->mapper->primary_key]);
+         }
+
+         return parent::set_attributes($attributes);
       }
 
       # Generate automatic form fields based on database schema

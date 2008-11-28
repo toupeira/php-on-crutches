@@ -9,6 +9,8 @@
 
    class ErrorsController extends Controller
    {
+      protected $_valid_methods = true;
+
       function is_valid_request($action) {
          return true;
       }
