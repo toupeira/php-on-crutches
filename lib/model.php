@@ -112,19 +112,13 @@
             throw new ApplicationError("Can't change frozen object");
          } elseif (in_array($key, $this->_readonly)) {
             throw new ApplicationError("Can't change read-only attribute '$key'");
+         } elseif (method_exists($this, $setter = "set_$key")) {
+            $this->$setter(&$value);
+         } elseif (array_key_exists($key, $this->_attributes) or
+                   in_array($key, $this->_virtual_attributes)) {
+            $this->write_attribute($key, $value);
          } else {
-            if (is_string($value) and !in_array($key, $this->_skip_trim)) {
-               $value = trim($value);
-            }
-
-            if (method_exists($this, $setter = "set_$key")) {
-               $this->$setter(&$value);
-            } elseif (array_key_exists($key, $this->_attributes) or
-                      in_array($key, $this->_virtual_attributes)) {
-               $this->write_attribute($key, $value);
-            } else {
-               throw new UndefinedMethod($this, $setter);
-            }
+            throw new UndefinedMethod($this, $setter);
          }
       }
 
@@ -253,10 +247,17 @@
          }
 
          $old_value = $this->read_attribute($key);
-         $this->_attributes[$key] = &$value;
 
-         if ($this->read_attribute($key) != $old_value) {
-            $this->_changed_attributes[$key] = $old_value;
+         if (is_string($value) and !in_array($key, $this->_skip_trim)) {
+            $value = trim($value);
+         }
+
+         if ($value or $old_value) {
+            $this->_attributes[$key] = &$value;
+
+            if ($old_value != $value) {
+               $this->_changed_attributes[$key] = $old_value;
+            }
          }
 
          return $value;
@@ -271,9 +272,7 @@
             throw new ValueError($key, "Attribute '$key' already exists");
          }
 
-         if (is_null($value)) {
-            return true;
-         } else {
+         if (!is_null($value)) {
             return $this->_attributes[$key] = $value;
          }
       }
@@ -385,12 +384,15 @@
          return empty($this->_errors);
       }
 
-      protected function validate_attribute($key, $message, $valid) {
+      protected function validate_attribute($key, $valid, $message, $default_message=null) {
          if ($valid) {
             return true;
          } else {
-            if (!in_array($key, $this->_errors)) {
-               $this->add_error($key, sprintf($message, humanize($key)));
+            if (!array_key_exists($key, $this->_errors)) {
+               $this->add_error($key, sprintf(
+                  any($message, $default_message, _("%s is invalid")),
+                  humanize($key)
+               ));
             }
             return false;
          }
@@ -398,57 +400,57 @@
 
       # Validation checks
 
-      protected function is_present($key) {
+      protected function is_present($key, $message=null) {
          return $this->validate_attribute($key,
-            _("%s can't be blank"),
-            !blank($this->_attributes[$key])
+            !blank($this->_attributes[$key]),
+            $message, _("%s can't be blank")
          );
       }
 
-      protected function is_numeric($key, $allow_empty=false) {
+      protected function is_numeric($key, $allow_empty=false, $message=null) {
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
-            _("%s is not numeric"),
-            ($allow_empty and $value == '') or is_numeric($value) or is_bool($value)
+            ($allow_empty and $value == '') or is_numeric($value) or is_bool($value),
+            $message, _("%s is not numeric")
          );
       }
 
-      protected function is_alpha($key, $allow_empty=false) {
+      protected function is_alpha($key, $allow_empty=false, $message=null) {
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
-            _("%s can only contain letters"),
-            ($allow_empty and $value == '') or ctype_alpha($value)
+            ($allow_empty and $value == '') or ctype_alpha($value),
+            $message, _("%s can only contain letters")
          );
       }
 
-      protected function is_alnum($key, $allow_empty=false) {
+      protected function is_alnum($key, $allow_empty=false, $message=null) {
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
-            _("%s can only contain alphanumeric characters"),
-            ($allow_empty and $value == '') or preg_match('/^[\w\.-]*$/', $value)
+            ($allow_empty and $value == '') or preg_match('/^[\w\.-]*$/', $value),
+            $message, _("%s can only contain alphanumeric characters")
          );
       }
 
-      protected function is_email($key, $allow_empty=false) {
+      protected function is_email($key, $allow_empty=false, $message=null) {
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
-            _("%s is not valid"),
-            ($allow_empty and $value == '') or is_email($value)
+            ($allow_empty and $value == '') or is_email($value),
+            $message
          );
       }
 
-      protected function is_confirmed($key) {
+      protected function is_confirmed($key, $message=null) {
          return $this->validate_attribute("{$key}_confirmation",
-            _("%s doesn't match"),
-            $this->_attributes[$key] == $this->_attributes["{$key}_confirmation"]
+            $this->_attributes[$key] == $this->_attributes["{$key}_confirmation"],
+            $message, _("%s doesn't match")
          );
       }
 
-      protected function in_array($key, $array, $allow_empty=false) {
+      protected function in_array($key, $array, $allow_empty=false, $message=null) {
          $value = $this->_attributes[$key];
          return $this->validate_attribute($key,
-            _("%s is invalid"),
-            ($allow_empty and $value == '') or in_array($value, $array)
+            ($allow_empty and $value == '') or in_array($value, $array),
+            $message
          );
       }
 
@@ -461,24 +463,24 @@
          }
 
          if (is_null($max)) {
-            $message = sprintf(_("%%s must be at least %d characters"), $min);
+            $default = sprintf(_("%%s must be at least %d characters"), $min);
             $valid = ($length >= $min);
          } elseif ($min <= 0) {
-            $message = sprintf(_("%%s cannot be longer than %d characters"), $max);
+            $default = sprintf(_("%%s cannot be longer than %d characters"), $max);
             $valid = ($length <= $max);
          } else {
-            $message = sprintf(_("%%s must be between %d and %d characters"), $min, $max);
+            $default = sprintf(_("%%s must be between %d and %d characters"), $min, $max);
             $valid = ($length >= $min and $length <= $max);
          }
 
-         return $this->validate_attribute($key, $message , $valid);
+         return $this->validate_attribute($key, $valid, $message, $default);
       }
 
-      protected function has_format($key, $format) {
+      protected function has_format($key, $format, $message=null) {
          $length = count($this->_attributes[$key]);
          return $this->validate_attribute($key,
-            _("%s is invalid"),
-            preg_match($format, $this->_attributes[$key])
+            preg_match($format, $this->_attributes[$key]),
+            $message
          );
       }
 
@@ -492,15 +494,17 @@
          return link_to($title, $path, $options, $url_options);
       }
       
-      function icon_link_to($action=null, $title=null, array $options=null, array $url_options=null) {
-         $icon = underscore(get_class($this));
+      function icon_link_to($action=null, $title=null, $icon=null, array $options=null, array $url_options=null) {
          $action = any($action, 'show');
 
-         if ($action != 'show' and $action != 'index') {
-            $icon .= "_$action";
+         if (!$icon) {
+            $icon = underscore(get_class($this));
+            if ($action != 'show' and $action != 'index') {
+               $icon .= "_$action";
+            }
          }
 
-         $title = icon($icon).' '
+         $title = icon($icon)
                 . any($title, truncate($this, 40, true));
 
          return $this->link_to($action, $title, $options, $url_options);

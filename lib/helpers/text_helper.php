@@ -173,6 +173,36 @@
    define_default('MONTH',  30 * DAY);
    define_default('YEAR',  365 * DAY);
 
+   function to_time($time) {
+      return is_numeric($time) ? $time : strtotime($time);
+   }
+
+   function format_duration($then, $now=null) {
+      $seconds = any(to_time($now), mktime()) - to_time($then);
+
+      if ($seconds < MINUTE) {
+         $time = $seconds;
+         $text = ngettext('%d second', '%d seconds', $time);
+      } elseif ($seconds < HOUR) {
+         $time = $seconds / MINUTE;
+         $text = ngettext('%d minute', '%d minutes', $time);
+      } elseif ($seconds < DAY) {
+         $time = $seconds / HOUR;
+         $text = ngettext('%d hour', '%d hours', $time);
+      } elseif ($seconds < WEEK) {
+         $time = $seconds / DAY;
+         $text = ngettext('%d day', '%d days', $time);
+      } elseif ($seconds < MONTH) {
+         $time = $seconds / MONTH;
+         $text = ngettext('%d month', '%d months', $time);
+      } else {
+         $time = $seconds / YEAR;
+         $text = ngettext('%d year', '%d years', $time);
+      }
+
+      return sprintf($text, $time);
+   }
+
    function indent($text, $indent=2) {
       return preg_replace('/^/m', str_repeat(' ', $indent), $text);
    }

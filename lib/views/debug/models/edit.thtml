@@ -1,7 +1,10 @@
 <?# $Id$ ?>
 <p class="scaffold-links">
+   <?= icon('framework/icons/database') ?>
    <?= link_to(_('Show all'), ":$prefix") ?>
+   <?= icon('framework/icons/database_go') ?>
    <?= link_to(sprintf(_('Show %s'), humanize($model)), ":$prefix/show/{$object->id}") ?>
+   <?= icon('framework/icons/database_delete') ?>
    <?= link_to(sprintf(_('Delete %s'), humanize($model)), ":$prefix/destroy/{$object->id}",
                array('post' => true, 'confirm' => true)) ?>
 </p>

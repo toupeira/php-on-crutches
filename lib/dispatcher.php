@@ -74,18 +74,20 @@
       }
 
       static function log_header($class, $action) {
-         log_info(
-            "\nProcessing [0;36m$class#$action[0m (for {$_SERVER['REMOTE_ADDR']} "
-            . "at ".strftime("%F %T").") [{$_SERVER['REQUEST_METHOD']}]"
-         );
+         $text = "\n[1m{$_SERVER['REQUEST_METHOD']} {$_SERVER['REQUEST_URI']}[0m => "
+               . "[0;36m$class#$action[0m (for {$_SERVER['REMOTE_ADDR']} "
+               . "at ".strftime("%F %T").")\n";
+         $text .= str_repeat('-', strlen($text) - 21);
 
          # Log request parameters
-         log_info('  Parameters: '.array_to_str(Dispatcher::$params));
+         $text .= "\n  Parameters: ".array_to_str(Dispatcher::$params);
 
          # Log uploaded files, if any
          if ($_FILES) {
-            log_info('  Files: '.array_to_str($_FILES));
+            $text .= "\n  Files: ".array_to_str($_FILES);
          }
+
+         return log_info($text);
       }
 
       static function log_footer() {

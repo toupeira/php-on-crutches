@@ -67,6 +67,14 @@
          return parent::set_attributes($attributes);
       }
 
+      function write_attribute($key, $value) {
+         if (substr($key, -3) == '_id' and is_object($value)) {
+            $value = $value->id;
+         }
+
+         return parent::write_attribute($key, $value);
+      }
+
       # Generate automatic form fields based on database schema
       function auto_field($key) {
          $args = func_get_args();
@@ -135,7 +143,7 @@
                }
 
                if (!$options['null'] and !$options['has_default'] and
-                   !$this->is_present($key)) {
+                   !$options['type'] != 'bool' and !$this->is_present($key)) {
                   continue;
                }
 
@@ -160,7 +168,7 @@
          return empty($this->_errors);
       }
 
-      protected function is_unique($key, $filter=null) {
+      protected function is_unique($key, $filter=null, $message=null) {
          if (!$this->changed($key)) {
             return true;
          }
@@ -176,8 +184,8 @@
          }
 
          return $this->validate_attribute($key,
-            _("%s already exists"),
-            $objects->count() == 0
+            $objects->count() == 0,
+            any($message, _("%s already exists"))
          );
       }
    }

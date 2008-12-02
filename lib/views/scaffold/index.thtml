@@ -1,7 +1,6 @@
 <?# $Id$ ?>
 <p class="scaffold-links">
-   <?= icon('framework/icons/database_add') ?>
-   <?= link_to(sprintf(_('Create %s'), humanize($model)), ":$prefix/create") ?>
+   <?= link_to(sprintf(_('Create new %s'), humanize($model)), ":$prefix/create") ?>
 </p>
 <table class="scaffold-list">
 <tr>

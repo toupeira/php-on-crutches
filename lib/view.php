@@ -22,6 +22,11 @@
          static $_paths;
          static $_extensions;
 
+         # Expand arrays
+         if (is_array($template)) {
+            $template = '{'.implode(',', $template).'}';
+         }
+
          # Look in /app/views first, then in /lib/views
          if (!$_paths) {
             $_paths = '{'.VIEWS.','.LIB.'views/}';

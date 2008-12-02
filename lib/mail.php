@@ -9,31 +9,30 @@
 
    try_require('/usr/share/php/libphp-phpmailer/class.phpmailer.php');
 
-   if (class_exists(PHPMailer)) {
-      class PHPMailerWrapper extends PHPMailer
-      {
-         function GetRecipients() {
-            return (array) $this->to;
-         }
-      }
-   }
-
    class Mail extends View
    {
       protected $_mailer;
+      protected $_to;
+      protected $_cc;
+      protected $_bcc;
 
-      function __construct($template=null, $layout=null, $data=null) {
-         parent::__construct($template, $layout);
+      function __construct($template=null, $data=null) {
+         $this->template = $template;
+
          foreach ((array) $data as $key => $value) {
             $this->set($key, $value);
          }
 
-         $this->_mailer = new PHPMailerWrapper();
+         $this->_mailer = new PHPMailer();
          $this->set_language('en', '/usr/share/php/libphp-phpmailer/language/');
          $this->char_set = 'utf-8';
          $this->from = config('mail_from');
          $this->from_name = config('mail_from_name');
          $this->sender = any(config('mail_sender'), config('mail_from'));
+      }
+
+      function set_template($template) {
+         return $this->_template = array($template, "emails/$template");
       }
 
       function __get($key) {
@@ -68,24 +67,43 @@
          }
       }
 
+      function add_address($address, $name=null) {
+         $this->_to[] = $address;
+         return $this->_mailer->AddAddress($address, $name);
+      }
+
+      function add_cc($address, $name=null) {
+         $this->_cc[] = $address;
+         return $this->_mailer->AddCC($address, $name);
+      }
+
+      function add_bcc($address, $name=null) {
+         $this->_bcc[] = $address;
+         return $this->_mailer->AddBCC($address, $name);
+      }
+
       function send() {
+         foreach (func_get_args() as $address) {
+            $this->add_address($address);
+         }
+
          if ($this->body == '') {
             $this->body = $this->render();
+            print $this->body."\n";
             if ($this->content_type == 'text/html') {
                $this->alt_body = strip_html($this->body);
             }
          }
 
-         $recipients = array_pluck($this->get_recipients(), 0);
-         log_info("Sending mail to '".implode("', '", $recipients)."'");
+         log_info("Sending mail to '".implode("', '", $this->_to)."'");
 
          if (!config('send_mails')) {
             $GLOBALS['_SENT_MAILS'][] = array(
                'from'      => $this->from,
                'from_name' => $this->from_name,
-               'to'        => $recipients,
-               'cc'        => array_pluck($this->_mailer->cc, 0),
-               'bcc'       => array_pluck($this->_mailer->bcc, 0),
+               'to'        => $this->_to,
+               'cc'        => $this->_cc,
+               'bcc'       => $this->_bcc,
                'subject'   => $this->subject,
                'template'  => $this->template,
                'layout'    => $this->layout,

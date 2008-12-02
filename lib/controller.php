@@ -325,7 +325,10 @@
 
             # Call the action itself if it's defined
             if (in_array($action, $this->_actions)) {
-               call_user_func_array(array($this, $action), (array) $args);
+               $output = call_user_func_array(array($this, $action), (array) $args);
+               if ($output and blank($this->_output)) {
+                  $this->_output = $output;
+               }
             } elseif ($this->has_action($action)) {
                array_unshift($args, $action);
                call_user_func_array(array($this, 'scaffold'), $args);
@@ -354,12 +357,10 @@
       # Render an action
       function render($action, $layout=null) {
          if ($this->_output === null) {
-            if (is_array($action)) {
-               $template = '{'.implode(',', $action).'}';
-            } elseif (strstr($action, '/') === false) {
-               $template = $this->_name.'/'.$action;
-            } else {
+            if (is_array($action) or strstr($action, '/') !== false) {
                $template = $action;
+            } else {
+               $template = $this->_name.'/'.$action;
             }
 
             $this->set_model_errors();
@@ -402,8 +403,7 @@
             $this->render_text("Redirecting to ".link_to(h($url), $url));
          } else {
             $this->headers['Location'] = $url;
-            $this->headers['Status'] = $code;
-            $this->render_text(' ');
+            $this->head($code);
          }
 
          return true;
@@ -443,6 +443,12 @@
             # Make sure the session handler can clean up
             register_shutdown_function('session_write_close');
          }
+      }
+
+      function head($code) {
+         $this->headers['Status'] = $code;
+         $this->send_headers();
+         $this->render_text(' ');
       }
 
       # Send the configured headers
@@ -520,13 +526,22 @@
          $this->render_text('');
 
          if ($command) {
+            # Execute a command and send the output
             log_info("Sending output of '$command'");
             passthru("$command 2>/dev/null");
             return true;
-         } elseif (@readfile($file)) {
+         } elseif ($options['xsendfile']) {
+            # Use mod_xsendfile, insert the X-Sendfile header first to
+            # make sure our own Content-* headers aren't overwritten
+            $this->headers = array_merge(
+               array('X-Sendfile' => $file),
+               $this->headers
+            );
+            $this->output = '';
             return true;
          } else {
-            throw new ApplicationError("Can't read file $file");
+            # Output the file normally
+            return readfile($file);
          }
       }
 
@@ -606,20 +621,28 @@
          }
 
          if ($redirect) {
-            $redirect = any($options['redirect_to_action'], $redirect);
+            if ($this->is_ajax) {
+               $this->head(200);
+            } else {
+               $redirect = any($options['redirect_to_action'], $redirect);
 
-            if (!$this->has_action($redirect)) {
-               $redirect = '';
+               if (!$this->has_action($redirect)) {
+                  $redirect = '';
+               }
+
+               $id = ($redirect == 'show' or $redirect == 'edit') ? "/$id" : '';
+
+               $this->redirect_to(any(
+                  $options['redirect_to'],
+                  $object->to_params($redirect),
+                  ":{$options['prefix']}/$redirect$id"
+               ));
+            }
+         } else {
+            if ($this->is_post and $this->is_ajax) {
+               $this->headers['Status'] = 500;
             }
 
-            $id = ($redirect == 'show' or $redirect == 'edit') ? "/$id" : '';
-
-            $this->redirect_to(any(
-               $options['redirect_to'],
-               $object->to_params($redirect),
-               ":{$options['prefix']}/$redirect$id"
-            ));
-         } else {
             $this->set('model', underscore($model));
             $this->set('options', $options);
             $this->set('prefix', $options['prefix']);

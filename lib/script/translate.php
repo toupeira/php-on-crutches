@@ -24,7 +24,7 @@ msgstr ""
 
 TXT;
 
-   $templates = array('additional', 'application', 'attributes', 'framework');
+   $templates = array('additional', 'application', 'models', 'attributes', 'framework');
    $languages = (array) config('languages');
    $domain = config('name');
 
@@ -61,9 +61,10 @@ TXT;
 
    print "Updating [1mmodel[0m messages...\n";
 
-   $all_attributes = array();
-   $file = fopen(LANG.'attributes.pot', 'w');
-   fwrite($file, $header);
+   $models = array();
+   $models_messages = array();
+   $attributes = array();
+   $attributes_messages = array();
 
    foreach (glob(MODELS.'*.php') as $model) {
       require_once $model;
@@ -71,36 +72,48 @@ TXT;
       $class = camelize(substr(basename($model), 0, -4));
       if (is_subclass_of($class, Model)) {
          $model = new $class();
-         $messages = array();
 
-         $model_key = humanize($class, false);
-         if (!in_array($model_key, $all_attributes)) {
-            $all_attributes[] = $model_key;
-            $messages[] = "msgid \"$model_key\"\n"
-                        . "msgstr \"\"\n\n";
+         $model_singular = humanize($class, false);
+         $model_plural   = humanize(pluralize($class), false);
+         if (!in_array($class, $models)) {
+            $models[] = $class;
+            $models_messages[] = "# Model $class:\n"
+                               . "msgid \"$model_singular\"\n"
+                               . "msgid_plural \"$model_plural\"\n"
+                               . "msgstr[0] \"\"\n"
+                               . "msgstr[1] \"\"\n\n";
          }
 
-         $attributes = array_merge(
+         if ($all_attributes = array_merge(
             array_keys($model->attributes),
             $model->virtual_attributes
-         );
-
-         foreach ($attributes as $key) {
-            $key = humanize($key, false);
-            if (!in_array($key, $all_attributes)) {
-               $all_attributes[] = $key;
-               $messages[] = "msgid \"$key\"\n"
-                           . "msgstr \"\"\n\n";
+         )) {
+            $attributes_messages[] = "# $class attributes:\n";
+            foreach ($all_attributes as $key) {
+               $key = humanize($key, false);
+               if (!in_array($key, $attributes)) {
+                  $attributes[] = $key;
+                  $attributes_messages[] = "msgid \"$key\"\n"
+                                       . "msgstr \"\"\n\n";
+               }
             }
-         }
-
-         if ($messages) {
-            fwrite($file, "# $class attributes: \n");
-            fwrite($file, implode('', $messages));
          }
       }
    }
-   fclose($file);
+
+   if ($models_messages) {
+      $file = fopen(LANG.'models.pot', 'w');
+      fwrite($file, $header);
+      fwrite($file, implode('', $models_messages));
+      fclose($file);
+   }
+
+   if ($attributes_messages) {
+      $file = fopen(LANG.'attributes.pot', 'w');
+      fwrite($file, $header);
+      fwrite($file, implode('', $attributes_messages));
+      fclose($file);
+   }
 
    print "\nUpdating translations...\n";
 

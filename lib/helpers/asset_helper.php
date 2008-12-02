@@ -145,12 +145,12 @@
             'height' => ICON_HEIGHT,
             'class' => 'icon'
          ), (array) $options
-      ));
+      )).' ';
    }
 
    function icon_link_to($icon, $title, $path=null, array $options=null, array $url_options=null) {
       $path = any($path, $title);
-      $title = icon($icon).' '.$title;
+      $title = icon($icon).$title;
       return link_to($title, $path, $options, $url_options);
    }
 

@@ -6,8 +6,11 @@
    }
 ?>
 <p class="scaffold-links">
+   <?= icon('framework/icons/database') ?>
    <?= link_to(_('Show all'), ":$prefix") ?>
+   <?= icon('framework/icons/database_edit') ?>
    <?= link_to(sprintf(_('Edit %s'), humanize($model)), ":$prefix/edit/{$object->id}") ?>
+   <?= icon('framework/icons/database_delete') ?>
    <?= link_to(sprintf(_('Delete %s'), humanize($model)), ":$prefix/destroy/{$object->id}",
                array('post' => true, 'confirm' => true)) ?>
 </p>

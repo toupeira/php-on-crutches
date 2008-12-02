@@ -142,7 +142,7 @@
          }
 
          # Set default action
-         if (!in_array('action', $this->_required)) {
+         if (!$this->_params['action'] or !in_array('action', $this->_required)) {
             $this->_defaults['action'] = 'index';
          }
 
@@ -225,6 +225,10 @@
             $params['controller'] = underscore(substr($controller, 0, -10));
          }
 
+         if (!$params['action']) {
+            $params['action'] = 'index';
+         }
+
          # Expand object parameters
          foreach ($params as $key => $value) {
             if (is_object($value)) {
@@ -283,7 +287,7 @@
             $query = array();
 
             foreach ($params as $key => $value) {
-               if (!is_null($value)) {
+               if (!is_null($value) and $value != $this->_defaults[$key]) {
                   if (is_numeric($key)) {
                      $query[] = urlencode($value);
                   } elseif (is_array($value)) {
