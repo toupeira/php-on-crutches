@@ -221,7 +221,7 @@ TXT;
             }
 
             file_put_contents($target,
-               "Translation = {\n".implode(",\n", $lines)."\n};\n"
+               "var Translations = {\n".implode(",\n", $lines)."\n};\n"
             );
 
             print "created\n";
