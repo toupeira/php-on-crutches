@@ -64,7 +64,8 @@
 
       # Combine multiple assets
       if (config('merge_assets') and count($assets) > 1) {
-         $all = WEBROOT.$dir.any($options['name'], 'all').$ext;
+         $name = any($options['name'], 'all');
+         $all = WEBROOT.$dir.$name.$ext;
 
          # Build the file paths and get the last modification time
          $paths = array();
@@ -78,19 +79,28 @@
 
          # Create the combined file when necessary
          if (!is_file($all) or $mtime > filemtime($all)) {
-            if ($target = @fopen($all, 'w')) {
-               foreach ($paths as $asset => $path) {
-                  $depth = substr_count($asset, '/');
-                  $source = fopen($path, 'r');
-                  while ($input = fgets($source)) {
-                     if ($ext == '.css' and $depth) {
-                        $input = preg_replace('#url\(((\.\./){'.$depth.'})#', 'url(', $input);
-                     }
-                     fputs($target, $input);
+            $output = '';
+            foreach ($paths as $asset => $path) {
+               $depth = substr_count($asset, '/');
+               $source = fopen($path, 'r');
+               while ($input = fgets($source)) {
+                  if ($ext == '.css' and $depth) {
+                     # Add folder name for relative URL references
+                     $input = preg_replace('#url\(([^\./].*)\)#', 'url('.substr($asset, 0, strrpos($asset, '/')).'/\1)', $input);
+                     # Strip '../' in URL references
+                     $input = preg_replace('#url\(((\.\./){'.$depth.'})#', 'url(', $input);
                   }
-                  fclose($source);
+                  $output .= $input;
                }
-               fclose($target);
+            }
+
+            if ($ext == '.js') {
+               # Minify JavaScript
+               require_once LIB.'vendor/jsmin.php';
+               $output = JSMin::minify($output);
+            }
+
+            if (@file_put_contents($all, $output)) {
                log_info("Created merged asset: $all");
             } else {
                log_error("Couldn't create merged asset: $all");
@@ -98,7 +108,7 @@
          }
 
          if (is_file($all)) {
-            return $tag('all').N;
+            return $tag($name).N;
          }
 
          # If the file couldn't be created,
