@@ -242,12 +242,7 @@
       # Setup mbstring
       mb_internal_encoding('UTF-8');
 
-      # Configure gettext domain
-      textdomain($config['name']);
-      bindtextdomain($config['name'], LANG);
-      bind_textdomain_codeset($config['name'], 'UTF-8');
-
-      # Set a locale, so $LANGUAGE will be respected
+      # Set a valid locale to make sure $LANGUAGE will be respected
       if (!setlocale(LC_MESSAGES, 'en_US.UTF-8') or !setlocale(LC_CTYPE, 'en_US.UTF-8')) {
          log_warn("Couldn't load UTF-8 locale");
       }
@@ -267,11 +262,26 @@
    # Change the current language used for gettext and templates
    function set_language($lang) {
       if ($lang == 'C' or in_array($lang, config('languages'))) {
-         config_set('language', $lang);
+         # Configure gettext domain
+         $domain = config('name');
+         if (is_file($template = LANG.$lang.'/LC_MESSAGES/'.config('name').'.mo')) {
+            # Add the modification time of the message template to the domain so
+            # Gettext will clear its cache and pick up changes without crashing
+            $domain .= '-'.filemtime($template);
+         }
+
+         bindtextdomain($domain, LANG);
+         bind_textdomain_codeset($domain, 'UTF-8');
+         textdomain($domain);
+
          # Using $LANGUAGE allows arbitrary locale names
          putenv("LANGUAGE=$lang");
+         config_set('language', $lang);
+
+         return true;
       } else {
          log_warn("Invalid language '$lang'");
+         return false;
       }
    }
 

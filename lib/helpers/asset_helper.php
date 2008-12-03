@@ -43,6 +43,12 @@
 
    # Merge multiple assets into one file and return a tag
    function merge_assets($tag, $dir, $ext, $assets) {
+      if (is_array($assets[count($assets) - 1])) {
+         $options = array_pop($assets);
+      } else {
+         $options = null;
+      }
+
       if (config('debug_toolbar')) {
          if ($ext == '.js') {
             $assets[] = 'framework/prototype';
@@ -58,7 +64,7 @@
 
       # Combine multiple assets
       if (config('merge_assets') and count($assets) > 1) {
-         $all = WEBROOT.$dir.'all'.$ext;
+         $all = WEBROOT.$dir.any($options['name'], 'all').$ext;
 
          # Build the file paths and get the last modification time
          $paths = array();

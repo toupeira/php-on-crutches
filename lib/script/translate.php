@@ -24,12 +24,19 @@ msgstr ""
 
 TXT;
 
-   $templates = array('additional', 'application', 'models', 'attributes', 'framework');
    $languages = (array) config('languages');
    $domain = config('name');
 
-   function xgettext($template, $dir=null) {
-      $files = find_files($dir, '-name "*.php" -o -name "*.thtml"');
+   $application = LANG.'application.pot';
+   $javascript = LANG.'javascript.pot';
+
+   function xgettext($template, $dir=null, $type='php') {
+      $extensions = array('php', 'thtml', 'js');
+      $exclude = WEBROOT.JAVASCRIPTS.'all*';
+
+      $filter = "\( -iname '*.".implode("' -o -iname '*.", $extensions)."' \) -not -iname $exclude";
+
+      $files = find_files($dir, $filter);
       $files = implode(' ', array_map('escapeshellarg', $files));
 
       print "Updating [1m$template[0m messages...\n";
@@ -37,7 +44,13 @@ TXT;
       file_put_contents($file, $GLOBALS['header']);
       $command = "";
 
-      if (!run("xgettext -j --omit-header --from-code=utf-8 -L php -o '$file' $files")) {
+      if ($type != 'php') {
+         $silent = '2>/dev/null';
+      } else {
+         $silent = '';
+      }
+
+      if (!run("xgettext -j --omit-header --from-code=utf-8 -L $type -o '$file' $files $silent")) {
          print "Error while running xgettext\n\n";
          exit(1);
       }
@@ -54,10 +67,26 @@ TXT;
       }
    }
 
+   function merge($target, $source) {
+      if (!is_file($source)) {
+         return false;
+      } elseif (run("msgcat --use-first --to-code=utf-8 -o '%s' '%s' '%s'", $target, $target, $source)) {
+         return true;
+      } else {
+         print "Error while running msgcat\n\n";
+         exit(1);
+      }
+   }
+
    print "\n";
 
    xgettext('framework', LIB);
    xgettext('application', APP);
+
+   xgettext('javascript', WEBROOT.JAVASCRIPTS, 'python');
+   merge($application, $javascript);
+
+   merge($application, LANG.'additional.pot');
 
    print "Updating [1mmodel[0m messages...\n";
 
@@ -106,6 +135,7 @@ TXT;
       fwrite($file, $header);
       fwrite($file, implode('', $models_messages));
       fclose($file);
+      merge($application, LANG.'models.pot');
    }
 
    if ($attributes_messages) {
@@ -113,6 +143,7 @@ TXT;
       fwrite($file, $header);
       fwrite($file, implode('', $attributes_messages));
       fclose($file);
+      merge($application, LANG.'attributes.pot');
    }
 
    print "\nUpdating translations...\n";
@@ -122,11 +153,11 @@ TXT;
       $path = LANG.$language."/LC_MESSAGES/";
       @mkdir($path, 0750, true);
 
-      $all = $path.$domain.'.po';
+      $all = "$path$domain.po";
       rm_f($all);
       touch($all);
-      
-      foreach ($templates as $template) {
+
+      foreach (array('application', 'framework') as $template) {
          $messages = "$path$template.po";
          $template = LANG.$template.'.pot';
 
@@ -140,14 +171,64 @@ TXT;
             continue;
          }
 
-         if (!run("msgcat --use-first --to-code=utf-8 -o '$all' '$all' '$messages'")) {
-            print "Error while running msgcat\n\n";
-            exit(1);
-         }
+         merge($all, $messages);
       }
 
       # Compile translated message catalog
-      run("msgfmt -vo '$path$domain.mo' '$all'");
+      if (run("msgfmt -vo '$path$domain.mo' '$all'")) {
+         #touch("$path$domain.mo");
+      } else {
+         print "Error while running msgfmt\n\n";
+         exit(1);
+      }
+
+      # Create link to the merged template with the modification time
+      array_map(rm_f, array_filter(glob("$path*.mo"), is_link));
+      symlink("$domain.mo", "$path$domain-".filemtime($application).'.mo');
+   }
+
+   if (is_file($javascript)) {
+      print "\nUpdating JavaScript translations...\n";
+      foreach ($languages as $language) {
+         print "  [1m$language[0m: ";
+         $template = LANG.$language."/LC_MESSAGES/";
+
+         set_language($language);
+
+         $messages = array();
+         $file = fopen($javascript, 'r');
+         while (!feof($file)) {
+            if (preg_match('/^msgid(?:_plural)? "(.+)"$/', fgets($file), $match)) {
+               $key = $match[1];
+               if (!$messages[$key] and $translation = _($key)) {
+                  $messages[$key] = $translation;
+               }
+            }
+         }
+         fclose($file);
+
+         if ($messages) {
+            $target = WEBROOT.JAVASCRIPTS."translations/$language.js";
+
+            $file = fopen($target, 'w');
+            fputs($file, "Translation = {\n");
+
+            $lines = array();
+            foreach ($messages as $key => $translation) {
+               $key = str_replace('"', '&quot;', $key);
+               $translation = str_replace('"', '&quot;', $translation);
+               $lines[] = "  \"$key\": \"$translation\"";
+            }
+
+            file_put_contents($target,
+               "Translation = {\n".implode(",\n", $lines)."\n};\n"
+            );
+
+            print "created\n";
+         } else {
+            print "no translations\n";
+         }
+      }
    }
 
    print "\n";
