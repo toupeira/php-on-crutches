@@ -99,7 +99,7 @@ TXT;
       require_once $model;
 
       $class = camelize(substr(basename($model), 0, -4));
-      if (is_subclass_of($class, Model)) {
+      if (is_subclass_of($class, Model) and $ref = new ReflectionClass($class) and $ref->isInstantiable()) {
          $model = new $class();
 
          $model_singular = humanize($class, false);
@@ -197,6 +197,7 @@ TXT;
 
          $messages = array();
          $file = fopen($javascript, 'r');
+         $untranslated = 0;
          while (!feof($file)) {
             if (preg_match('/^msgid(?:_plural)? "(.*)"$/', fgets($file), $match)) {
                $key = $match[1];
@@ -212,8 +213,12 @@ TXT;
                   }
                }
 
-               if (!$messages[$key] and $translation = _($key)) {
+               if ($messages[$key]) {
+                  continue;
+               } elseif ($translation = _($key)) {
                   $messages[$key] = $translation;
+               } else {
+                  $untranslated++;
                }
             }
          }
@@ -235,10 +240,21 @@ TXT;
             file_put_contents($target,
                "var Translations = {\n".implode(",\n", $lines)."\n};\n"
             );
+         }
 
-            print "created\n";
+         $texts = array();
+         if ($translated = count($messages)) {
+            $texts[] = pluralize($translated, 'translated message');
+         }
+
+         if ($untranslated) {
+            $texts[] = pluralize($untranslated, 'untranslated message');
+         }
+
+         if ($texts) {
+            print implode(', ', $texts).".\n";
          } else {
-            print "no translations\n";
+            print "no messages.\n";
          }
       }
    }
