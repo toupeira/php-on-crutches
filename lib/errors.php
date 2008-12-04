@@ -55,6 +55,7 @@
    class NotImplemented extends ApplicationError {}
    class ConfigurationError extends ApplicationError {}
    class MailerError extends ApplicationError {}
+   class FilterError extends ApplicationError {}
 
    class NotFound extends ApplicationError {}
    class RoutingError extends NotFound {}
@@ -128,23 +129,34 @@
             Dispatcher::log_footer();
          }
 
-         if ($notify = config('notify_exceptions') and !$exception instanceof NotFound) {
-            $mail = new Mail();
-            $mail->subject = get_class($exception);
-            $mail->alt_body = dump_exception($exception);
-            $mail->body = Dispatcher::$controller->show_debug($exception, true);
-            $mail->content_type = 'text/html';
-
-            foreach ((array) $notify as $address) {
-               $mail->add_address($address);
-            }
-
-            $mail->send();
-         }
+         send_error_notification($exception);
       }
 
       exit(1);
    }
 
+   # Send an error notification mail to the specified recipients,
+   # or the currently configured default recipients
+   function send_error_notification($exception, $recipients=null) {
+      $recipients = any(
+         $recipients, config('notify_errors')
+      );
+
+      if ($recipients and !$exception instanceof NotFound) {
+         $controller = new ErrorsController();
+
+         $mail = new Mail();
+         $mail->subject = get_class($exception);
+         $mail->alt_body = dump_exception($exception);
+         $mail->body = $controller->show_debug($exception, true);
+         $mail->content_type = 'text/html';
+
+         foreach ((array) $recipients as $address) {
+            $mail->add_address($address);
+         }
+
+         $mail->send();
+      }
+   }
 
 ?>

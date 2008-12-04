@@ -70,7 +70,7 @@
       function call_filter($filter, $args=null) {
          $args = array_slice(func_get_args(), 1);
          if ($this->call_if_defined($filter, $args) === false) {
-            throw new ApplicationError("Filter '$filter' returned false");
+            throw new FilterError("Filter '$filter' returned false");
          }
       }
    }

@@ -54,7 +54,7 @@
    # | @debug_toolbar@     | show the debug toolbar | @false@ |
    # | @debug_redirects@   | show links on redirects | @false@ |
    # | @debug_queries@     | analyze database queries | @false@ |
-   # | @notify_exceptions@ | addresses to send exception notifications to |
+   # | @notify_errors@     | addresses to send error notifications to |
    #
 
    require CONFIG.'application.php';
@@ -107,7 +107,7 @@
       'debug_redirects'   => false,
       'debug_queries'     => false,
 
-      'notify_exceptions' => null,
+      'notify_errors'     => null,
    );
 
    # Merge application settings

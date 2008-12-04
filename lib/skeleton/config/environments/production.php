@@ -22,8 +22,8 @@
       # Merge CSS and JS files
       'merge_assets'      => true,
 
-      # Email addresses to notify on exceptions
-      'notify_exceptions' => '',
+      # Email addresses to notify on errors
+      'notify_errors'     => '',
    );
 
 ?>

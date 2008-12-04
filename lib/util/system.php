@@ -105,7 +105,7 @@
       }
    }
 
-   # Safely delete files
+   # Silently delete files
    function rm_f($files) {
       if (!is_array($files)) {
          $files = func_get_args();
@@ -119,7 +119,7 @@
       return $status;
    }
 
-   # Safely delete directories
+   # Silently delete directories
    function rm_rf($paths) {
       if (!is_array($paths)) {
          $paths = func_get_args();

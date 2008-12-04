@@ -202,6 +202,7 @@
          }
 
          $this->_new_record = false;
+
          $this->call_filter("after_save");
          $this->call_filter("after_$action");
 

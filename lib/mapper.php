@@ -23,7 +23,7 @@
 
       function inspect() {
          return parent::inspect(array(
-            'model'    => $this->_model,
+            'model' => $this->_model,
          ));
       }
 
@@ -46,6 +46,7 @@
       # Helper to create and save a model
       function create(array $attributes, array $defaults=null) {
          $object = new $this->_model($attributes, $defaults);
+
          if ($object->save()) {
             return $object;
          } else {
@@ -66,7 +67,7 @@
          return $status;
       }
 
-      # Stubs for mapper specific actions
+      # Stubs for mapper implementations
 
       function find($conditions) {
          throw new NotImplemented("Model mapper doesn't implement 'find'");
