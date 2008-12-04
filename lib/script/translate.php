@@ -198,8 +198,20 @@ TXT;
          $messages = array();
          $file = fopen($javascript, 'r');
          while (!feof($file)) {
-            if (preg_match('/^msgid(?:_plural)? "(.+)"$/', fgets($file), $match)) {
+            if (preg_match('/^msgid(?:_plural)? "(.*)"$/', fgets($file), $match)) {
                $key = $match[1];
+
+               if (empty($key)) {
+                  # Look for a multi-line msgid
+                  while (preg_match('/^"(.+)"$/', fgets($file), $match)) {
+                     $key .= $match[1];
+                  }
+
+                  if (empty($key)) {
+                     continue;
+                  }
+               }
+
                if (!$messages[$key] and $translation = _($key)) {
                   $messages[$key] = $translation;
                }
