@@ -12,7 +12,9 @@
 <div id="debug-toolbar-shadow">
 <div id="debug-toolbar">
 <? foreach ($panels as $panel): ?>
-<div id="debug-toolbar-<?= $panel ?>"><?= $this->render_partial($panel) ?></div>
+<div id="debug-toolbar-<?= $panel ?>">
+   <?= $this->render_partial($panel) ?>
+</div>
 <? endforeach ?>
 </div>
 </div>

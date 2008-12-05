@@ -111,8 +111,7 @@
    }
 
    # Build a link tag
-   function link_to($title, $path=null, array $options=null, array $url_options=null) {
-      $path = (is_null($path) ? $title : $path);
+   function link_to($title, $path, array $options=null, array $url_options=null) {
       $confirm = add_confirm_options($options);
 
       # Send a POST request by dyamically building a form element
