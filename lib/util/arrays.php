@@ -209,4 +209,20 @@
       return $array;
    }
 
+   function sort_by(array &$array, $key, $reverse=false) {
+      $mul = ($reverse ? -1 : 1);
+      return usort($array,
+         proc("$mul * compare(getf(\$a, '$key'), getf(\$b, '$key'))", 2));
+   }
+
+   function compare($a, $b) {
+      if ($a == $b) {
+         return 0;
+      } elseif (is_numeric($a) and is_numeric($b)) {
+         return ($a < $b ? -1 : 1);
+      } else {
+         return strcmp($a, $b);
+      }
+   }
+
 ?>
