@@ -133,6 +133,19 @@
       return $status == 0;
    }
 
+   # Detect the MIME-type of a file correctly (mime_content_type() likes to get it wrong)
+   function mimetype($path) {
+      if (is_file($path)) {
+         $path = escapeshellarg($path);
+         return any(
+            trim(`file --brief --mime-type $path`),
+            'application/octet-stream'
+         );
+      } else {
+         throw new ApplicationError("Invalid path '$path'");
+      }
+   }
+
    # Create a temporary file which will be automatically deleted when
    # the object instance goes out of scope.
    class Tempfile extends Object
