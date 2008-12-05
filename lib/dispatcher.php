@@ -105,7 +105,7 @@
          }
 
          $text .= ' | Status: %s';
-         if ($status == 200) {
+         if ($status[0] == 2) {
             $args[] = "[0;32m$status[0m";
          } else {
             $args[] = "[1;31m$status[0m";
