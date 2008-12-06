@@ -311,13 +311,17 @@
                   # Use array key as column name
                   #   e.g.: find(array('key' => $value))
                   #
-                  if (is_null($value)) {
-                     $condition .= "$key IS NULL";
-                  } else {
-                     $condition .= "$key = ?";
-                     $params[] = $value;
-                  }
+                  $condition .= $this->add_condition($key, $value, $params);
                }
+
+            } elseif (is_array($value)) {
+               # Use array value as list of ID values
+               #   e.g.: find(array(1,2,3))
+               #
+               $condition .= $operator.$this->add_condition(
+                  "`{$this->_table}`.`{$this->_primary_key}`",
+                  $value, $params
+               );
 
             } elseif (((is_numeric($value) or is_numeric($value[0])) and
                         $this->key_type == 'integer') or
@@ -359,12 +363,7 @@
                $value = $this->convert(array_shift_arg($values));
                array_shift($keys);
 
-               if (is_null($value)) {
-                  $condition .= "$operator$key IS NULL";
-               } else {
-                  $condition .= "$operator$key = ?";
-                  $params[] = $value;
-               }
+               $condition .= $operator.$this->add_condition($key, $value, $params);
 
             } elseif (!is_null($value)) {
                throw new TypeError($value);
@@ -386,6 +385,25 @@
          } else {
             return $value;
          }
+      }
+
+      protected function add_condition($key, $value, &$params) {
+         if (is_null($value) or (is_array($value) and !$value)) {
+            $condition = "$key IS NULL";
+         } elseif (is_array($value)) {
+            $values = array();
+            foreach ($value as $value) {
+               $values[] = '?';
+               $params[] = $value;
+            }
+
+            $condition = "$key IN (".implode(', ', $values).")";
+         } else {
+            $condition = "$key = ?";
+            $params[] = $value;
+         }
+
+         return $condition;
       }
    }
 

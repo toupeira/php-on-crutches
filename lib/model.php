@@ -134,6 +134,10 @@
          return $this->_new_record;
       }
 
+      function get_frozen() {
+         return $this->_frozen;
+      }
+
       function get_attributes() {
          return $this->_attributes;
       }

@@ -70,9 +70,9 @@
 <p><?= $message ?></p>
 
 <h3>
-   Address: <?= link_to($_SERVER['REQUEST_URI']) ?>
+   Address: <?= link_to($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_URI']) ?>
 <? if ($referer = $_SERVER['HTTP_REFERER']): ?>
-   <br />Referer: <?= link_to($referer) ?>
+   <br />Referer: <?= link_to($referer, $referer) ?>
 <? endif ?>
 </h3>
 
