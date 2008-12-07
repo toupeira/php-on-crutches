@@ -72,7 +72,11 @@
             return $truncated.$add;
          }
       } else {
-         return ($add_title ? h($text) : $text);
+         if ($add_title) {
+            return '<span>'.h($text).'</span>';
+         } else {
+            return $text;
+         }
       }
    }
 

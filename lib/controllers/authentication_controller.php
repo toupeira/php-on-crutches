@@ -37,7 +37,8 @@
                   $this->send_auth_token();
                }
 
-               return $this->redirect_back('');
+               $this->redirect_back('');
+               return $user;
             } else {
                $this->add_error(
                   array('username', 'password'),
@@ -68,7 +69,6 @@
          } else {
             $this->msg['error'] = _('Access denied');
             $this->redirect_to(':');
-            return;
          }
       }
 
@@ -81,7 +81,6 @@
          } else {
             $this->msg['error'] = _('Access denied');
             $this->redirect_to(':');
-            return;
          }
       }
    }

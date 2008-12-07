@@ -43,9 +43,8 @@
             $key = 'username';
          }
 
-         if ($user = self::DB()->find($key, $username) and
-             $user->crypted_password == $user->encrypt($password)) {
-            return $user;
+         if ($user = self::DB()->find($key, $username)) {
+            return $user->authenticate_password($password);
          }
       }
 
@@ -87,6 +86,15 @@
       # Encrypt a password
       function encrypt($password) {
          return sha1("--{$this->salt}--{$password}--");
+      }
+
+      # Compare the password to the encrypted password
+      function authenticate_password($password) {
+         if ($this->crypted_password == $this->encrypt($password)) {
+            return $this;
+         } else {
+            return false;
+         }
       }
 
       protected function before_validation() {

@@ -74,7 +74,7 @@
          return $this->_mapper->table;
       }
 
-      protected function load() {
+      function fetch() {
          if ($object = $this->statement->fetch_load($this->model)) {
             if (is_array($this->_preload)) {
                $object->load($this->_preload);
@@ -84,7 +84,7 @@
          }
       }
 
-      protected function load_all() {
+      function fetch_all() {
          if ($objects = $this->statement->fetch_all_load($this->model)) {
             if (is_array($this->_preload)) {
                foreach ($objects as $object) {
@@ -93,6 +93,12 @@
             }
 
             return $objects;
+         }
+      }
+
+      function fetch_column($key) {
+         if ($object = $this->fetch()) {
+            return $object->$key;
          }
       }
 
@@ -111,7 +117,7 @@
 
       function get_objects() {
          if ($this->_statement) {
-            # Statement was already executed, fetch all remaining objects
+            # Statement was already executed, load all remaining objects
             $current_pos = $this->_position;
             while ($this->valid()) {
                $this->next();
@@ -119,7 +125,7 @@
             $this->_position = $current_pos;
          } else {
             # Statement wasn't executed yet, load all objects in one run
-            $this->_objects = $this->load_all();
+            $this->_objects = $this->fetch_all();
          }
 
          return $this->_objects;
@@ -398,17 +404,28 @@
             return $this->where($conditions)->$finder;
 
          } elseif (substr($method, 0, 8) == 'replace_') {
+            # replace_* calls replace the given SQL options
             return $this->replace(substr($method, 8), $args);
+
          } elseif (substr($method, 0, 6) == 'merge_') {
+            # merge_* calls merge the given SQL options
             return $this->merge(substr($method, 6), $args);
-         } elseif (in_array($method, array('group', 'order'))) {
+
+         } elseif (in_array($method, array('order', 'group'))) {
+            # order() and group() replace by default
             return $this->replace($method, $args);
+
          } elseif (in_array($method, array('limit', 'offset'))) {
+            # limit() and offset() replace by default, and only have one argument
             return $this->replace($method, $args[0]);
+
          } elseif (in_array($method, array('sum', 'min', 'max'))) {
+            # sum(), min() and max() shortcuts
             $this->replace_select("$method({$args[0]})");
             return $this->statement->fetch_column();
+
          } else {
+            # Merge by default
             return $this->merge($method, $args);
          }
       }
@@ -590,7 +607,7 @@
       function current() {
          if ($object = $this->_objects[$this->_position]) {
             return $object;
-         } elseif ($object = $this->load()) {
+         } elseif ($object = $this->fetch()) {
             return $this->_objects[$this->_position] = $object;
          }
       }

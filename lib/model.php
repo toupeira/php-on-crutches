@@ -38,6 +38,11 @@
       protected $_frozen = false;
 
       function __construct(array $attributes=null, array $defaults=null) {
+         # Add virtual attributes
+         foreach ($this->_virtual_attributes as $key) {
+            $this->_attributes[$key] = null;
+         }
+
          # Set default values
          $this->set_attributes(array_merge(
             (array) $attributes,
@@ -95,8 +100,7 @@
       function __get($key) {
          if (method_exists($this, $getter = "get_$key")) {
             return $this->$getter();
-         } elseif (array_key_exists($key, $this->_attributes) or
-                   in_array($key, $this->_virtual_attributes)) {
+         } elseif (array_key_exists($key, $this->_attributes)) {
             return $this->read_attribute($key);
          } elseif (method_exists($this, $key)) {
             return $this->$key();
@@ -114,8 +118,7 @@
             throw new ApplicationError("Can't change read-only attribute '$key'");
          } elseif (method_exists($this, $setter = "set_$key")) {
             $this->$setter(&$value);
-         } elseif (array_key_exists($key, $this->_attributes) or
-                   in_array($key, $this->_virtual_attributes)) {
+         } elseif (array_key_exists($key, $this->_attributes)) {
             $this->write_attribute($key, $value);
          } else {
             throw new UndefinedMethod($this, $setter);
@@ -156,7 +159,12 @@
 
       function changed($key=null) {
          if ($key) {
-            return array_key_exists($key, $this->_changed_attributes);
+            foreach (func_get_args() as $key) {
+               if (array_key_exists($key, $this->_changed_attributes)) {
+                  return true;
+               }
+            }
+            return false;
          } else {
             return !empty($this->_changed_attributes);
          }
@@ -175,10 +183,10 @@
 
       # Create or update the model, calls the model mapper for the
       # actual implementation.
-      function save($force_update=false) {
+      function save($force_update=false, $skip_validation=false) {
          if ($this->_frozen) {
             throw new ApplicationError("Can't change frozen object");
-         } elseif (!$this->is_valid()) {
+         } elseif (!$skip_validation and !$this->is_valid()) {
             return false;
          }
 
@@ -239,11 +247,7 @@
       # Wrappers for use in custom setters and getters
 
       function read_attribute($key) {
-         if ($this->mapper->attributes[$key]['type'] == 'bool') {
-            return (bool) $this->_attributes[$key];
-         } else {
-            return $this->_attributes[$key];
-         }
+         return $this->_attributes[$key];
       }
 
       function write_attribute($key, $value) {
@@ -282,12 +286,25 @@
          }
       }
 
-      function reset($key) {
+      function reset($key=null) {
          if ($this->_frozen) {
             throw new ApplicationError("Can't change frozen object");
-         } elseif (!is_null($old = $this->_changed_attributes[$key])) {
-            unset($this->_changed_attributes[$key]);
-            return $this->_attributes[$key] = $old;
+         } elseif (is_null($key)) {
+            foreach ($this->_changed_attributes as $key => $old) {
+               $this->_attributes[$key] = $old;
+            }
+            $this->_changed_attributes = array();
+
+            return true;
+         } else {
+            foreach (func_get_args() as $key) {
+               if (!is_null($old = $this->_changed_attributes[$key])) {
+                  unset($this->_changed_attributes[$key]);
+                  $this->_attributes[$key] = $old;
+               }
+            }
+
+            return true;
          }
 
          return false;
@@ -379,6 +396,11 @@
          return $this->_errors;
       }
 
+      function get_first_error() {
+         $errors = $this->_errors;
+         return array_shift(array_shift($errors));
+      }
+
       function is_valid() {
          $this->call_filter('before_validation');
 
@@ -389,16 +411,22 @@
          return empty($this->_errors);
       }
 
-      protected function validate_attribute($key, $valid, $message, $default_message=null) {
+      protected function validate_attribute($keys, $valid, $message, $default_message=null) {
          if ($valid) {
             return true;
          } else {
-            if (!array_key_exists($key, $this->_errors)) {
-               $this->add_error($key, sprintf(
-                  any($message, $default_message, _("%s is invalid")),
-                  humanize($key)
-               ));
+            $keys = (array) $keys;
+            $message = sprintf(
+               any($message, $default_message, _("%s is invalid")),
+               humanize($keys[0])
+            );
+
+            foreach ($keys as $key) {
+               if (!array_key_exists($key, $this->_errors)) {
+                  $this->add_error($key, $message);
+               }
             }
+
             return false;
          }
       }

@@ -189,6 +189,27 @@ TXT;
 
    if (is_file($javascript)) {
       print "\nUpdating JavaScript translations...\n";
+
+      $keys = array();
+      $file = fopen($javascript, 'r');
+      while (!feof($file)) {
+         if (preg_match('/^msgid(?:_plural)? "(.*)"$/', fgets($file), $match)) {
+            $key = $match[1];
+
+            if (empty($key)) {
+               # Look for a multi-line msgid
+               while (preg_match('/^"(.+)"$/', fgets($file), $match)) {
+                  $key .= $match[1];
+               }
+            }
+
+            if ($key) {
+               $keys[] = $key;
+            }
+         }
+      }
+      fclose($file);
+
       foreach ($languages as $language) {
          print "  [1m$language[0m: ";
          $template = LANG.$language."/LC_MESSAGES/";
@@ -196,33 +217,17 @@ TXT;
          set_language($language);
 
          $messages = array();
-         $file = fopen($javascript, 'r');
          $untranslated = 0;
-         while (!feof($file)) {
-            if (preg_match('/^msgid(?:_plural)? "(.*)"$/', fgets($file), $match)) {
-               $key = $match[1];
 
-               if (empty($key)) {
-                  # Look for a multi-line msgid
-                  while (preg_match('/^"(.+)"$/', fgets($file), $match)) {
-                     $key .= $match[1];
-                  }
-
-                  if (empty($key)) {
-                     continue;
-                  }
-               }
-
-               if ($messages[$key]) {
-                  continue;
-               } elseif ($translation = _($key)) {
-                  $messages[$key] = $translation;
-               } else {
-                  $untranslated++;
-               }
+         foreach ($keys as $key) {
+            if ($messages[$key]) {
+               continue;
+            } elseif ($translation = _($key)) {
+               $messages[$key] = $translation;
+            } else {
+               $untranslated++;
             }
          }
-         fclose($file);
 
          if ($messages) {
             $target = WEBROOT.JAVASCRIPTS."translations/$language.js";
@@ -238,17 +243,18 @@ TXT;
             }
 
             file_put_contents($target,
+               "var Language = '$language';\n" .
                "var Translations = {\n".implode(",\n", $lines)."\n};\n"
             );
          }
 
          $texts = array();
          if ($translated = count($messages)) {
-            $texts[] = pluralize($translated, 'translated message');
+            $texts[] = pluralize($translated, 'translated message', null, false);
          }
 
          if ($untranslated) {
-            $texts[] = pluralize($untranslated, 'untranslated message');
+            $texts[] = pluralize($untranslated, 'untranslated message', null, false);
          }
 
          if ($texts) {

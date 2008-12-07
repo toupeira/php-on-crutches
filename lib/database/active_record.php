@@ -10,6 +10,7 @@
    abstract class ActiveRecord extends Model
    {
       protected $_load_attributes = true;
+      protected $_booleans = array();
 
       function __construct(array $attributes=null, array $defaults=null) {
          # Load attributes from the database
@@ -19,6 +20,10 @@
 
                if ($default = $options['default']) {
                   $this->_attributes[$key] = $default;
+               }
+
+               if ($options['type'] == 'bool') {
+                  $this->_booleans[] = $key;
                }
             }
          }
@@ -40,7 +45,9 @@
          if (!array_key_exists($key, $this->_attributes) and
             $association = $this->mapper->associations[$key])
          {
-            return $this->add_virtual($key, $association->load($this));
+            if ($data = $association->load($this)) {
+               return $this->add_virtual($key, $data);
+            }
          } else {
             return parent::__get($key);
          }
@@ -56,6 +63,14 @@
 
       function get_id() {
          return $this->_attributes[$this->mapper->primary_key];
+      }
+
+      function read_attribute($key) {
+         if (in_array($key, $this->_booleans)) {
+            return (bool) $this->_attributes[$key];
+         } else {
+            return $this->_attributes[$key];
+         }
       }
 
       # Protect the ID for existing records

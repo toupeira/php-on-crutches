@@ -326,7 +326,7 @@
             # Call the action itself if it's defined
             if (in_array($action, $this->_actions)) {
                $output = call_user_func_array(array($this, $action), (array) $args);
-               if ($output and blank($this->_output)) {
+               if (is_string($output) and blank($this->_output)) {
                   $this->_output = $output;
                }
             } elseif ($this->has_action($action)) {
@@ -389,6 +389,28 @@
          return $this->_output = $text;
       }
 
+      function render_json($object, $status=200) {
+         if (method_exists($object, 'to_json')) {
+            $json = $object->to_json();
+         } else {
+            $json = to_json($object);
+         }
+
+         $this->headers['Content-Type'] = 'application/json';
+         return $this->head($status, $json);
+      }
+
+      function render_xml($object, $status=200) {
+         if (method_exists($object, 'to_xml')) {
+            $xml = $object->to_xml();
+         } else {
+            $xml = to_xml($object);
+         }
+
+         $this->headers['Content-Type'] = 'text/xml';
+         return $this->head($status, $xml);
+      }
+
       # Redirect to a path
       function redirect_to($path, $code=302) {
          $url = url_for($path, array('full' => true));
@@ -445,10 +467,10 @@
          }
       }
 
-      function head($code) {
+      function head($code, $text=' ') {
          $this->headers['Status'] = $code;
          $this->send_headers();
-         $this->render_text(' ');
+         $this->render_text($text);
       }
 
       # Send the configured headers

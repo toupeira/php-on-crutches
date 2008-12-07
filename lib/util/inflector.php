@@ -85,7 +85,7 @@
             }
             return sprintf("%d %s", $count, $word);
          } elseif ($singular) {
-            return self::pluralize($word, $singular, self::pluralize($singular));
+            return self::pluralize($word, $singular, self::pluralize($singular), $translate);
          } elseif (blank($word) or in_array(mb_strtolower($word), self::$_uncountables)) {
             return $word;
          } else {
