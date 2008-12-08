@@ -73,6 +73,11 @@
          return parent::inspect($this->attributes);
       }
 
+      function serialize() {
+         $this->_mapper = null;
+         return serialize($this);
+      }
+
       function to_param() {
          return $this->slug;
       }
