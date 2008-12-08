@@ -14,7 +14,9 @@
       protected $_defaults;
 
       function __construct() {
-         $this->_model = substr(get_class($this), 0, -6);
+         if (!$this->_model) {
+            $this->_model = substr(get_class($this), 0, -6);
+         }
       }
 
       function __toString() {

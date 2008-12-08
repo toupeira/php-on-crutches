@@ -33,7 +33,11 @@
          (array) $options
       );
 
-      if ($name == 'input' and isset($options['type']) and $options['type'] != 'hidden') {
+      if (!array_delete($options, 'force_class')
+            and $name == 'input'
+            and isset($options['type'])
+            and $options['type'] != 'hidden')
+      {
          $options['class'] .= ' '.$options['type'];
          if (in_array($options['type'], array('submit', 'reset'))) {
             $options['class'] .= ' button';

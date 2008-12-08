@@ -211,7 +211,8 @@
    }
 
    function cancel_button($path=null, $title=null, array $options=null) {
-      $options['class'] = $options['class'].' cancel';
+      $options['class'] = $options['class'].' cancel button';
+      $options['force_class'] = true;
       return button_to(any($title, _('Cancel')), any($path, ':'), $options);
    }
 

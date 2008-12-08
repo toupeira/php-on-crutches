@@ -24,6 +24,7 @@
    # | @name@              | the application name, will be used as default in some places | basename of root directory |
    # | @prefix@            | the prefix used to reach the website | @/@ |
    # | @languages@         | an array of available languages, with the default first |
+   # | @locale@            | the internal locale, must be a valid and installed locale name | en_US.UTF-8 |
    # |_(title). General Settings  |_. |_(title). Default |
    # | @log_file@          | the path to the log file, or a file handle like STDERR | @ROOT/log/ENVIRONMENT.log@ |
    # | @log_level@         | the log level | @LOG_INFO@ |
@@ -70,6 +71,7 @@
       'name'              => basename(ROOT),
       'prefix'            => '/',
       'languages'         => null,
+      'locale'            => 'en_US.UTF-8',
 
       'log_file'          => LOG.ENVIRONMENT.'.log',
       'log_level'         => LOG_INFO,
@@ -243,7 +245,9 @@
       mb_internal_encoding('UTF-8');
 
       # Set a valid locale to make sure $LANGUAGE will be respected
-      if (!setlocale(LC_MESSAGES, 'en_US.UTF-8') or !setlocale(LC_CTYPE, 'en_US.UTF-8')) {
+      if (!setlocale(LC_MESSAGES, $config['locale']) or
+          !setlocale(LC_CTYPE, $config['locale']))
+      {
          log_warn("Couldn't load UTF-8 locale");
       }
 
