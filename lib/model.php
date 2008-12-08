@@ -427,7 +427,9 @@
             );
 
             foreach ($keys as $key) {
-               if (!array_key_exists($key, $this->_errors)) {
+               if (!array_key_exists($key, $this->_attributes)) {
+                  throw new ValueError($key, "Invalid attribute '%s'");
+               } elseif (!array_key_exists($key, $this->_errors)) {
                   $this->add_error($key, $message);
                }
             }
