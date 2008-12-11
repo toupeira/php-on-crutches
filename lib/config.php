@@ -254,8 +254,8 @@
       # Set C as global locale, to avoid subprocesses inheriting our locale
       putenv("LANG=C");
 
-      # Set the default language if set
-      if ($lang = $config['languages'][0]) {
+      # Set the default language if necessary
+      if (!config('language') and $lang = $config['languages'][0]) {
          set_language($lang);
       }
 
@@ -284,7 +284,6 @@
 
          return true;
       } else {
-         log_warn("Invalid language '$lang'");
          return false;
       }
    }
