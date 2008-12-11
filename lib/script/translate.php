@@ -181,10 +181,6 @@ TXT;
          print "Error while running msgfmt\n\n";
          exit(1);
       }
-
-      # Create link to the merged template with the modification time
-      array_map(rm_f, array_filter(glob("$path*.mo"), is_link));
-      symlink("$domain.mo", "$path$domain-".filemtime($application).'.mo');
    }
 
    if (is_file($javascript)) {

@@ -268,10 +268,22 @@
       if ($lang == 'C' or in_array($lang, config('languages'))) {
          # Configure gettext domain
          $domain = config('name');
-         if (is_file($template = LANG.$lang.'/LC_MESSAGES/'.config('name').'.mo')) {
+         $template = LANG.$lang.'/LC_MESSAGES/'.config('name').'.mo';
+         $path = LANG.$lang.'/LC_MESSAGES';
+
+         if (is_file($template = "$path/$domain.mo")) {
             # Add the modification time of the message template to the domain so
             # Gettext will clear its cache and pick up changes without crashing
-            $domain .= '-'.filemtime($template);
+            $time = filemtime($template);
+
+            # Create the link to the template if necessary
+            if (!is_link($link = "$path/$domain-$time.mo")) {
+               # Remove old links
+               array_map(rm_f, array_filter(glob("$path/$domain-*.mo"), is_link));
+               symlink("$domain.mo", $link);
+            }
+
+            $domain .= "-$time";
          }
 
          bindtextdomain($domain, LANG);
