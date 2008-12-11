@@ -59,10 +59,18 @@
       # Merge tag options
       $options = array_merge(
          array('name' => $key),
-         array('id'   => $key),
          (array) $defaults,
          (array) $options
       );
+
+      # Set a default id
+      if (!$options['id'] and ($tag != 'input' or !in_array($options['type'], array('checkbox', 'radio', 'hidden'))))
+      {
+         $options['id'] = preg_replace(
+            '/\[([^\]]+)\]/', '_\1',
+            str_replace('[]', '', $key)
+         );
+      }
 
       # Use request value if set, else use default value
       if (!array_delete($options, 'force') and $request_value = form_element_value($key)) {
@@ -213,7 +221,13 @@
    function cancel_button($path=null, $title=null, array $options=null) {
       $options['class'] = $options['class'].' cancel button';
       $options['force_class'] = true;
-      return button_to(any($title, _('Cancel')), any($path, ':'), $options);
+      if ($path) {
+         $options['onclick'] = $path
+            ? "location.href = '$path'; return false"
+            : "history.back(); return false";
+      }
+
+      return button_tag(any($title, _("Cancel")), $options);
    }
 
 ?>

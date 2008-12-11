@@ -162,6 +162,7 @@
             }
          }
 
+         # Use the template path as default cache key
          if ($this->_cache_key === true) {
             $this->_cache_key = "view_".urlencode($this->_template);
          }
@@ -212,25 +213,22 @@
       }
 
       # Render a partial template
-      function render_partial($partial, array $locals=null, $strict=true) {
-         if (strstr($partial, '/') !== false) {
-            $partial = dirname($partial).'/_'.basename($partial);
-         } elseif ($path = dirname(any($this->_template, $this->_partial))) {
-            $partial = str_replace(VIEWS, '', $path).'/_'.$partial;
+      function render_partial($path, array $locals=null, $strict=true) {
+         if (strstr($path, '/') !== false) {
+            $partial = dirname($path).'/{_,}'.ltrim(basename($path), '_');
+         } elseif ($current = dirname(any($this->_template, $this->_partial))) {
+            $partial = str_replace(VIEWS, '', $current).'/{_,}'.ltrim($path, '_');
          }
 
-         if (!$this->_partial = View::find_template($partial) and
-             !$this->_partial = View::find_template(VIEWS.basename($partial))) {
-            if ($strict) {
-               throw new ApplicationError("Partial '$partial' not found");
-            } else {
-               return;
-            }
+         if ($this->_partial = View::find_template($partial) or
+             $this->_partial = View::find_template(VIEWS.basename($partial)))
+         {
+            $this->log('Rendering partial', $this->_partial);
+            $locals = array_merge((array) $this->_data, (array) $locals);
+            return $this->compile($this->_partial, $locals);
+         } elseif ($strict) {
+            throw new ApplicationError("Partial '$path' not found");
          }
-
-         $this->log('Rendering partial', $this->_partial);
-         $locals = array_merge((array) $this->_data, (array) $locals);
-         return $this->compile($this->_partial, $locals);
       }
 
       function wrap_partial($partial, array $locals=null, $options=null) {

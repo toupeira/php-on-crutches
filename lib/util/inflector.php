@@ -205,8 +205,8 @@
       return Inflector::underscore($word);
    }
 
-   function humanize($word) {
-      return Inflector::humanize($word);
+   function humanize($word, $translate=true) {
+      return Inflector::humanize($word, $translate);
    }
 
    function titleize($word) {

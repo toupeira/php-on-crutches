@@ -89,7 +89,6 @@
 
          if ($this->body == '') {
             $this->body = $this->render();
-            print $this->body."\n";
             if ($this->content_type == 'text/html') {
                $this->alt_body = strip_html($this->body);
             }

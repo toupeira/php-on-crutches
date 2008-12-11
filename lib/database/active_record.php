@@ -73,6 +73,14 @@
          }
       }
 
+      function write_attribute($key, $value) {
+         if (substr($key, -3) == '_id' and is_object($value)) {
+            $value = $value->id;
+         }
+
+         return parent::write_attribute($key, $value);
+      }
+
       # Protect the ID for existing records
       function set_attributes(array $attributes=null) {
          if ($this->exists) {
@@ -82,12 +90,16 @@
          return parent::set_attributes($attributes);
       }
 
-      function write_attribute($key, $value) {
-         if (substr($key, -3) == '_id' and is_object($value)) {
-            $value = $value->id;
-         }
+      # Increase an attribute
+      function grow($key, $step=1) {
+         $this->$key += $step;
+         return $this->mapper->update($this, array("`$key` = `$key` + ?" => $step));
+      }
 
-         return parent::write_attribute($key, $value);
+      # Decrease an attribute
+      function shrink($key, $step=1) {
+         $this->$key -= $step;
+         return $this->mapper->update($this, array("`$key` = `$key` - ?" => $step));
       }
 
       # Generate automatic form fields based on database schema

@@ -15,7 +15,15 @@
 
       protected function load_data(ActiveRecord $object) {
          if ($id = $object->{$this->key}) {
-            return DB($this->related)->find($id);
+            $parent = DB($this->related)->find($id);
+            if (DB($this->related)->has_one($this->model) or DB($this->related)->has_many($this->model)) {
+               $key = underscore($this->model);
+               if (!$parent->attributes[$key]) {
+                  $parent->add_virtual($key, $object);
+               }
+            }
+
+            return $parent;
          }
       }
    }

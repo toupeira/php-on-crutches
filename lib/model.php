@@ -278,9 +278,7 @@
       }
 
       function add_virtual($key, $value=null) {
-         if ($this->_frozen) {
-            throw new ApplicationError("Can't change frozen object");
-         } elseif (!array_key_exists($key, $this->_attributes)) {
+         if (!array_key_exists($key, $this->_attributes)) {
             $this->_virtual_attributes[] = $key;
          } elseif (!in_array($key, $this->_virtual_attributes)) {
             throw new ValueError($key, "Attribute '$key' already exists");
@@ -379,12 +377,9 @@
       }
 
       # Update attributes and save
-      function update(array $attributes) {
-         if ($this->set_attributes($attributes) and $this->is_valid()) {
-            return $this->save();
-         } else {
-            return false;
-         }
+      function update(array $attributes=null) {
+         $this->set_attributes($attributes);
+         return $this->save();
       }
 
       # Error handling and validation
@@ -402,8 +397,9 @@
       }
 
       function get_first_error() {
-         $errors = $this->_errors;
-         return array_shift(array_shift($errors));
+         if ($errors = $this->_errors) {
+            return array_shift(array_shift($errors));
+         }
       }
 
       function is_valid() {
@@ -572,7 +568,9 @@
          $key = underscore(get_class($this))."[$attribute]";
          $value = any(array_delete($options, 'value'), $this->_attributes[$attribute]);
 
-         $options['id'] = $this->get_dom_id($attribute);
+         if ($tag != 'check_box' and $tag != 'hidden_field') {
+            $options['id'] = $this->get_dom_id($attribute);
+         }
          $options['force'] = true;
          if ($this->_errors[$attribute]) {
             $options['errors'] = true;

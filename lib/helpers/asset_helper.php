@@ -7,26 +7,34 @@
 # $Id$
 #
 
-   # Build the path for an asset, append the last modification time for local files
-   function asset_path($directory, $file, $ext='') {
-      if ($file[0] == '/' or preg_match('#^\w+://.#', $file)) {
-         # Leave absolute paths and fully-qualified URLs alone
-         return $file;
-      } elseif (substr($file, 0, 2) == './') {
-         # Convert relative paths
-         return substr($file, 2).$ext;
-      } else {
-         $path = $directory.$file.$ext;
-         $web_path = config('prefix').$path;
+   # Build a stylesheet tag
+   function stylesheet_tag($name, array $options=null) {
+      return tag('link', $options, array(
+         'rel' => 'stylesheet', 'type' => 'text/css',
+         'href' => asset_path(STYLESHEETS, $name, '.css')
+      )).N;
+   }
 
-         if (file_exists(WEBROOT.$path)) {
-            $web_path .= '?'.filemtime(WEBROOT.$path);
-         } else {
-            log_error("Asset not found: /$path");
-         }
+   # Build a javascript tag
+   function javascript_tag($name, array $options=null) {
+      return content_tag('script', null, $options, array(
+         'type' => 'text/javascript',
+         'src' => asset_path(JAVASCRIPTS, $name, '.js')
+      )).N;
+   }
 
-         return $web_path;
-      }
+   # Add stylesheets from a template
+   function add_stylesheets($name) {
+      return $GLOBALS['_ASSETS']['.css'] = array_merge(
+         (array) $GLOBALS['_ASSETS']['.css'], func_get_args()
+      );
+   }
+
+   # Add javascripts from a template
+   function add_javascripts($name) {
+      return $GLOBALS['_ASSETS']['.js'] = array_merge(
+         (array) $GLOBALS['_ASSETS']['.js'], func_get_args()
+      );
    }
 
    # Include multiple stylesheets
@@ -54,6 +62,10 @@
             $assets[] = 'framework/prototype';
          }
          $assets[] = 'framework/toolbar';
+      }
+
+      if ($add = $GLOBALS['_ASSETS'][$ext]) {
+         $assets = array_merge($assets, $add);
       }
 
       if ($assets) {
@@ -123,20 +135,26 @@
       return $html;
    }
 
-   # Build a stylesheet tag
-   function stylesheet_tag($file, array $options=null) {
-      return tag('link', $options, array(
-         'rel' => 'stylesheet', 'type' => 'text/css',
-         'href' => asset_path(STYLESHEETS, $file, '.css')
-      )).N;
-   }
+   # Build the path for an asset, append the last modification time for local files
+   function asset_path($directory, $file, $ext='') {
+      if ($file[0] == '/' or preg_match('#^\w+://.#', $file)) {
+         # Leave absolute paths and fully-qualified URLs alone
+         return $file;
+      } elseif (substr($file, 0, 2) == './') {
+         # Convert relative paths
+         return substr($file, 2).$ext;
+      } else {
+         $path = $directory.$file.$ext;
+         $web_path = config('prefix').$path;
 
-   # Build a javascript tag
-   function javascript_tag($file, array $options=null) {
-      return content_tag('script', null, $options, array(
-         'type' => 'text/javascript',
-         'src' => asset_path(JAVASCRIPTS, $file, '.js')
-      )).N;
+         if (file_exists(WEBROOT.$path)) {
+            $web_path .= '?'.filemtime(WEBROOT.$path);
+         } else {
+            log_error("Asset not found: /$path");
+         }
+
+         return $web_path;
+      }
    }
 
    # Build an image tag

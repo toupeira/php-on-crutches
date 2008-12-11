@@ -209,7 +209,7 @@
          }
       }
 
-      function update($conditions, array $attributes, $force=false) {
+      function update($conditions, $attributes, $force=false) {
          if (empty($attributes) and !$force) {
             return true;
          }
@@ -217,8 +217,15 @@
          $keys = array();
          $values = array();
 
-         foreach ($attributes as $key => $value) {
-            if ($value === '') {
+         foreach ((array) $attributes as $key => $value) {
+            if (is_numeric($key)) {
+               $keys[] = $value;
+            } elseif ($count = substr_count($key, '?')) {
+               $keys[] = $key;
+               for ($i = 0; $i < $count; $i++) {
+                  $values[] = $this->convert($value);
+               }
+            } elseif ($value === '') {
                $keys[] = "`$key` = NULL";
             } else {
                $keys[] = "`$key` = ?";

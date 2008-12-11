@@ -79,7 +79,7 @@
 
          # Set default headers
          $this->headers = array(
-            'Content-Type' => 'text/html; charset=utf-8',
+            'Content-Type' => 'text/html',
          );
 
          # Load messages stored in the session
@@ -469,6 +469,7 @@
 
       function head($code, $text=' ') {
          $this->headers['Status'] = $code;
+         $this->headers['Content-Type'] = 'text/plain';
          $this->send_headers();
          $this->render_text($text);
       }
@@ -477,7 +478,17 @@
       function send_headers() {
          foreach ((array) $this->headers as $header => $value) {
             if ($value !== null) {
-               $header = ($header == 'Status' ? "HTTP/1.x $value" : "$header: $value");
+               if ($header == 'Status') {
+                  $header = "HTTP/1.x $value";
+               } elseif ($header == 'Content-Type'
+                           and substr($value, 0, 5) == 'text/'
+                           and strstr($value, '; charset') === false)
+               {
+                  $header = "$header: $value; charset=utf-8";
+               } else {
+                  $header = "$header: $value";
+               }
+
                if (PHP_SAPI == 'cli') {
                   # Ignore errors in console
                   @header($header);
