@@ -221,11 +221,9 @@
    function cancel_button($path=null, $title=null, array $options=null) {
       $options['class'] = $options['class'].' cancel button';
       $options['force_class'] = true;
-      if ($path) {
-         $options['onclick'] = $path
-            ? "location.href = '$path'; return false"
-            : "history.back(); return false";
-      }
+      $options['onclick'] = is_null($path)
+         ? "history.back(); return false"
+         : "location.href = '".url_for($path)."'; return false";
 
       return button_tag(any($title, _("Cancel")), $options);
    }

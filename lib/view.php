@@ -296,7 +296,7 @@
 
          # Extract assigned values as local variables
          if (extract((array) $_locals, EXTR_SKIP) != count($_locals)) {
-            #throw new ApplicationError("Couldn't extract all template variables");
+            throw new ApplicationError("Couldn't extract all template variables");
          }
 
          ob_start();

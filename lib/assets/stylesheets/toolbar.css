@@ -52,6 +52,8 @@
   text-decoration: underline;
 }
 
+#debug-toolbar a:hover span { color: black; }
+
 #debug-toolbar > div {
   display: inline;
 }
