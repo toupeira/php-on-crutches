@@ -568,9 +568,10 @@
          $key = underscore(get_class($this))."[$attribute]";
          $value = any(array_delete($options, 'value'), $this->_attributes[$attribute]);
 
-         if ($tag != 'check_box' and $tag != 'hidden_field') {
+         if (!array_key_exists('id', (array) $options)) {
             $options['id'] = $this->get_dom_id($attribute);
          }
+
          $options['force'] = true;
          if ($this->_errors[$attribute]) {
             $options['errors'] = true;

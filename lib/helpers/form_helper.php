@@ -64,8 +64,7 @@
       );
 
       # Set a default id
-      if (!$options['id'] and ($tag != 'input' or !in_array($options['type'], array('checkbox', 'radio', 'hidden'))))
-      {
+      if (!array_key_exists('id', (array) $options)) {
          $options['id'] = preg_replace(
             '/\[([^\]]+)\]/', '_\1',
             str_replace('[]', '', $key)
