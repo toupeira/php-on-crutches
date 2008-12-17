@@ -187,20 +187,26 @@ TXT;
       print "\nUpdating JavaScript translations...\n";
 
       $keys = array();
+      $plurals = array();
+
       $file = fopen($javascript, 'r');
       while (!feof($file)) {
-         if (preg_match('/^msgid(?:_plural)? "(.*)"$/', fgets($file), $match)) {
-            $key = $match[1];
+         if (preg_match('/^msgid(_plural)? "(.*)"$/', fgets($file), $match)) {
+            $key = $match[2];
 
             if (empty($key)) {
                # Look for a multi-line msgid
                while (preg_match('/^"(.+)"$/', fgets($file), $match)) {
-                  $key .= $match[1];
+                  $key .= $match[2];
                }
             }
 
             if ($key) {
-               $keys[] = $key;
+               if ($match[1]) {
+                  $plurals[] = $key;
+               } else {
+                  $keys[] = $key;
+               }
             }
          }
       }
@@ -219,6 +225,16 @@ TXT;
             if ($messages[$key]) {
                continue;
             } elseif ($translation = _($key)) {
+               $messages[$key] = $translation;
+            } else {
+               $untranslated++;
+            }
+         }
+
+         foreach ($plurals as $key) {
+            if ($messages[$key]) {
+               continue;
+            } elseif ($translation = ngettext(singularize($key), $key, 2)) {
                $messages[$key] = $translation;
             } else {
                $untranslated++;
