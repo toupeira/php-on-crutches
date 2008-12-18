@@ -525,7 +525,11 @@
       function link_to($action=null, $title=null, array $options=null, array $url_options=null) {
          $this->add_url_options($options, $action);
          $action = any($action, 'show');
-         $title = any($title, truncate($this, 40, true));
+
+         if (is_null($title)) {
+            $title = truncate($this, 40, true);
+         }
+
          $path = $this->to_params($action);
          return link_to($title, $path, $options, $url_options);
       }

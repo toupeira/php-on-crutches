@@ -49,27 +49,33 @@
    # Returns true if the command was successful.
    #
    function run($command, $args=null) {
-      log_info("Running '$command'");
       $args = array_slice(func_get_args(), 1);
-      exec(build_shell_command($command, $args), $output, $status);
+      $command = build_shell_command($command, $args);
+
+      log_info("Running '$command'");
+      exec($command, $output, $status);
+
       return ($status === 0);
    }
 
    # Execute a terminal application.
    function term_exec($command, $args=null) {
-      log_info("Executing '$command'");
       $args = array_slice(func_get_args(), 1);
-      $proc = proc_open(build_shell_command($command, $args), array(), $pipes);
+      $command = build_shell_command($command, $args);
+
+      log_info("Executing '$command'");
+      $proc = proc_open($command, array(), $pipes);
 
       while (getf(proc_get_status($proc), 'running')) {
          usleep(100);
       }
 
-      return getf(proc_get_Status($proc), 'exitcode');
+      return getf(proc_get_status($proc), 'exitcode');
    }
 
    # Run a shell command in the background.
    function spawn($command) {
+      $args = func_get_args();
       return run("$command &>/dev/null &", $args);
    }
 
