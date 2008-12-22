@@ -10,7 +10,7 @@
       'PHP Version'      => PHP_VERSION,
       'PHP SAPI'         => PHP_SAPI,
       'Load Average'     => implode(' / ', sys_getloadavg()),
-      'Memory Usage'     => format_size(memory_get_usage(), '.2f').' (Peak '.format_size(memory_get_peak_usage(), '.2f').')',
+      'Memory Usage'     => format_size(memory_get_usage()).' (Peak '.format_size(memory_get_peak_usage()).')',
    );
 
    $framework = array(

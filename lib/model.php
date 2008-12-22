@@ -544,7 +544,11 @@
             }
          }
 
-         $title = icon($icon)
+         if (!$icon_title = array_delete($options, 'icon_title')) {
+            $icon_title = strip_html($title);
+         }
+
+         $title = icon($icon, array('title' => $icon_title))
                 . any($title, truncate($this, 40, true));
 
          return $this->link_to($action, $title, $options, $url_options);
