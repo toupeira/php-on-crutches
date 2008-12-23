@@ -42,6 +42,18 @@
       }
 
       function __get($key) {
+         try {
+            return parent::__get($key);
+         } catch (UndefinedMethod $e) {
+            if ($data = $this->load_association($key)) {
+               return $data;
+            } else {
+               throw $e;
+            }
+         }
+      }
+
+      function load_association($key) {
          if (!array_key_exists($key, $this->_attributes) and
             $association = $this->mapper->associations[$key])
          {
@@ -49,7 +61,7 @@
                return $this->add_virtual($key, $data);
             }
          } else {
-            return parent::__get($key);
+            return false;
          }
       }
 
