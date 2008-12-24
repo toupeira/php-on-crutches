@@ -555,27 +555,39 @@
             $this->headers['Content-Type'] = $type;
          }
 
-         $this->send_headers();
-         $this->render_text('');
-
+         $status = false;
          if ($command) {
             # Execute a command and send the output
-            log_info("Sending output of '$command'");
+            $message = "Sending output of '$command'";
+            $this->send_headers();
             passthru("$command 2>/dev/null");
-            return true;
+            $status = true;
          } elseif ($options['xsendfile']) {
             # Use mod_xsendfile, insert the X-Sendfile header first to
             # make sure our own Content-* headers aren't overwritten
+            $message = "Sending file '$file' with X-Sendfile";
+            log_info("  Path: '$file'");
             $this->headers = array_merge(
                array('X-Sendfile' => $file),
                $this->headers
             );
-            $this->output = '';
-            return true;
+            $this->send_headers();
+            $status = true;
          } else {
             # Output the file normally
-            return readfile($file);
+            $message = "Sending file '$file'";
+            log_info("  Path: '$file'");
+            $this->send_headers();
+            $status = readfile($file);
          }
+
+         if ($options['inline']) { $message .= " inline"; }
+         if ($name) { $message .= " as '$name'"; }
+         if ($type) { $message .= " with type '$type'"; }
+         log_info($message);
+
+         $this->render_text('');
+         return $status;
       }
 
       # Add invalid fields and an error message
