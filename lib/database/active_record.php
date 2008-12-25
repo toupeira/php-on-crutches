@@ -45,8 +45,8 @@
          try {
             return parent::__get($key);
          } catch (UndefinedMethod $e) {
-            if ($data = $this->load_association($key)) {
-               return $data;
+            if ($this->mapper->associations[$key]) {
+               return $this->load_association($key);
             } else {
                throw $e;
             }
