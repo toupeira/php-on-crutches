@@ -207,20 +207,18 @@
             $sql .= ' '.implode(' ', (array) $join);
          }
 
-         if ($conditions = $options['where']) {
-            list($conditions, $where_params) = $this->_mapper->build_condition($conditions);
-            if (!blank($conditions)) {
-               $sql .= " WHERE $conditions";
-               $params = array_merge($params, $where_params);
-            }
+         list($conditions, $where_params) = $this->_mapper->build_condition($options['where']);
+         if (!blank($conditions)) {
+            $sql .= " WHERE $conditions";
+            $params = array_merge($params, $where_params);
          }
 
          if ($group = $options['group']) {
-            $sql .= ' GROUP BY '.implode(', ', (array) $group);
+            $sql .= ' GROUP BY '.$this->format_columns((array) $group);
          }
 
          if ($conditions = $options['having']) {
-            list($conditions, $having_params) = $this->_mapper->build_condition($conditions);
+            list($conditions, $having_params) = $this->_mapper->build_condition_without_scope($conditions);
             if (!blank($conditions)) {
                $sql .= " HAVING $conditions";
                $params = array_merge($params, $having_params);
@@ -228,7 +226,7 @@
          }
 
          if ($order = $options['order']) {
-            $sql .= ' ORDER BY '.implode(', ', (array) $order);
+            $sql .= ' ORDER BY '.$this->format_columns((array) $order, 'order');
          }
 
          if ($this->_paginate and $size = $this->page_size) {
@@ -250,6 +248,26 @@
          $this->_params = $params;
 
          return $sql;
+      }
+
+      protected function format_columns($columns, $method=null) {
+         foreach ($columns as $key => $column) {
+            if ($method == 'order') {
+               list($column, $order) = explode(' ', $column, 2);
+            }
+
+            if ($this->_mapper->attributes[$column]) {
+               $column = "`{$this->_mapper->table}`.`$column`";
+            }
+
+            if ($method == 'order' and $order) {
+               $column .= " $order";
+            }
+
+            $columns[$key] = $column;
+         }
+
+         return implode(', ', $columns);
       }
 
       function get_params() {
@@ -457,7 +475,9 @@
 
       # Exclude the given keys from the query
       function without($keys) {
-         if (!is_array($keys)) {
+         if (!$keys) {
+            return $this;
+         } elseif (!is_array($keys)) {
             $keys = func_get_args();
          }
 

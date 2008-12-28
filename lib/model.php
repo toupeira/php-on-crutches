@@ -315,6 +315,12 @@
 
       function freeze() {
          $this->_frozen = true;
+         return $this;
+      }
+
+      function thaw() {
+         $this->_frozen = false;
+         return $this;
       }
 
       # Merge the attributes, protected keys are skipped

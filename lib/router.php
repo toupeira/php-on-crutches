@@ -93,6 +93,21 @@
 
    class Route extends Object
    {
+      static protected $_request_filters = array(
+         'accept',
+         'accept_language',
+         'cookie',
+         'host',
+         'user_agent',
+
+         'remote_addr',
+         'request_method',
+         'request_uri',
+         'server_addr',
+         'server_port',
+         'https',
+      );
+
       protected $_route = '';
       protected $_pattern = '';
 
@@ -101,6 +116,7 @@
       protected $_fixed = array();
       protected $_required = array();
       protected $_formats = array();
+      protected $_request = array();
 
       function __construct($route, array $defaults=null) {
          $this->_route = $route;
@@ -148,7 +164,10 @@
 
          # Get default/fixed arguments and format specifications
          foreach ((array) $defaults as $key => $value) {
-            if ($value[0] == '/' and substr($value, -1) == '/') {
+            if ($this->is_request_filter($key)) {
+               # Use as request filter
+               $this->_request[$key] = $value;
+            } elseif ($value[0] == '/' and substr($value, -1) == '/') {
                # Use as format specification
                $this->_formats[$key] = '/^'.substr($value, 1, -1).'$/';
             } else {
@@ -177,10 +196,32 @@
          return $this->_pattern;
       }
 
+      function is_request_filter($key) {
+         $key = strtolower($key);
+         return in_array($key, self::$_request_filters)
+             or in_array("http_$key", self::$_request_filters);
+      }
+
+      function get_request_value($key) {
+         $key = strtoupper($key);
+         if (array_key_exists($key, $_SERVER) or
+             array_key_exists($key = "HTTP_$key", $_SERVER))
+         {
+            return $_SERVER[$key];
+         }
+      }
+
       # Check if the path matches this route
       function recognize($path, array $defaults=null) {
          if (preg_match("#^{$this->_pattern}$#", $path, $match)) {
             $params = array_merge($this->_defaults, (array) $defaults);
+
+            # Check request filters
+            foreach ($this->_request as $key => $pattern) {
+               if (!match($pattern, $this->get_request_value($key))) {
+                  return;
+               }
+            }
 
             $i = 1;
             foreach ($this->_params as $key => $symbol) {

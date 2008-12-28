@@ -40,10 +40,25 @@
       }
    }
 
-   # Check if a string is empty or only contains whitespace
-   function blank($text) {
-      $text = trim($text);
-      return empty($text);
+   # Check if a value is empty
+   function blank($value) {
+      if ($value instanceof QuerySet) {
+         return $value->empty;
+      } elseif (is_string($value)) {
+         $value = trim($value);
+         return empty($value);
+      } else {
+         return empty($value);
+      }
+   }
+
+   # Match a literal string or a regex
+   function match($pattern, $value) {
+      if ($pattern[0] == '/' and mb_substr($pattern, mb_strlen($pattern) - 1) == '/') {
+         return preg_match($pattern, $value);
+      } else {
+         return $value === $pattern;
+      }
    }
 
    # A wrapper around create_function()'s horrible syntax

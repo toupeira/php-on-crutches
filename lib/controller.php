@@ -501,6 +501,12 @@
          return true;
       }
 
+      # Send an Expires header
+      function expires($duration) {
+         $this->headers['Expires'] = strftime('%a, %d %b %Y %H:%M:%S %z', time() + $duration);
+         return true;
+      }
+
       # Send a cookie
       function send_cookie($name, $value, array $options=null) {
          $options = array_merge((array) config('cookie_defaults'), (array) $options);
@@ -566,7 +572,6 @@
             # Use mod_xsendfile, insert the X-Sendfile header first to
             # make sure our own Content-* headers aren't overwritten
             $message = "Sending file '$file' with X-Sendfile";
-            log_info("  Path: '$file'");
             $this->headers = array_merge(
                array('X-Sendfile' => $file),
                $this->headers
@@ -576,7 +581,6 @@
          } else {
             # Output the file normally
             $message = "Sending file '$file'";
-            log_info("  Path: '$file'");
             $this->send_headers();
             $status = readfile($file);
          }

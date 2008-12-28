@@ -38,6 +38,8 @@
       protected $_has_many = array();
       protected $_belongs_to = array();
 
+      protected $_scope = array();
+
       function __construct() {
          parent::__construct();
 
@@ -272,6 +274,20 @@
          }
       }
 
+      function scope($conditions) {
+         if (!is_array($conditions)) {
+            $conditions = func_get_args();
+         }
+
+         $this->_scope[] = $conditions;
+         return count($this->_scope);
+      }
+
+      function end_scope() {
+         array_pop($this->_scope);
+         return count($this->_scope);
+      }
+
       function build_condition($conditions) {
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
@@ -279,6 +295,13 @@
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
             # Conditions are passed as nested array
             $conditions = $conditions[0];
+         }
+
+         if ($this->_scope) {
+            $conditions = array_merge(
+               call_user_func_array(array_merge, $this->_scope),
+               $conditions
+            );
          }
 
          if (empty($conditions)) {
@@ -380,6 +403,20 @@
          return array($condition, $params);
       }
 
+      function build_condition_without_scope($conditions) {
+         $scope = $this->_scope;
+         $this->_scope = null;
+
+         $conditions = func_get_args();
+         list($condition, $params) = call_user_func_array(
+            array($this, build_condition), $conditions
+         );
+
+         $this->_scope = $scope;
+
+         return array($condition, $params);
+      }
+
       protected function convert($value) {
          if (is_object($value)) {
             if (!$value instanceof ActiveRecord) {
@@ -395,6 +432,10 @@
       }
 
       protected function add_condition($key, $value, &$params) {
+         if ($this->attributes[$key]) {
+            $key = "`{$this->table}`.`$key`";
+         }
+
          if (is_null($value) or (is_array($value) and !$value)) {
             $condition = "$key IS NULL";
          } elseif (is_array($value)) {
