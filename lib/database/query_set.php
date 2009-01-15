@@ -437,8 +437,8 @@
             # limit() and offset() replace by default, and only have one argument
             return $this->replace($method, $args[0]);
 
-         } elseif (in_array($method, array('sum', 'min', 'max'))) {
-            # sum(), min() and max() shortcuts
+         } elseif (in_array($method, array('sum', 'avg', 'min', 'max'))) {
+            # shortcuts for aggregate functions
             $this->replace_select("$method({$args[0]})");
             return $this->statement->fetch_column();
 
