@@ -81,9 +81,14 @@
       }
    }
 
+   # Global variable to track if an exception was caught
+   $_EXCEPTION_CAUGHT = false;
+
    # Handler for PHP errors
    function error_handler($errno, $errstr, $errfile, $errline) {
-      if (error_reporting()) {
+      # Don't throw exceptions for PHP errors after an exception was already caught,
+      # to avoid "Exception thrown without a stack frame" errors
+      if (error_reporting() and !$GLOBALS['_EXCEPTION_CAUGHT']) {
          throw new RuntimeError($errstr, 0, $errno, $errfile, $errline);
       }
    }
@@ -111,6 +116,8 @@
 
    # Handler for uncaught exceptions
    function exception_handler($exception) {
+      $GLOBALS['_EXCEPTION_CAUGHT'] = true;
+
       while (ob_get_level()) {
          ob_end_clean();
       }

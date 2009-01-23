@@ -278,9 +278,15 @@
 
             # Create the link to the template if necessary
             if (!is_link($link = "$path/$domain-$time.mo")) {
-               # Remove old links
-               array_map(rm_f, array_filter(glob("$path/$domain-*.mo"), is_link));
-               symlink("$domain.mo", $link);
+               if (is_writable($path)) {
+                  # Remove old links
+                  array_map(rm_f, array_filter(glob("$path/$domain-*.mo"), is_link));
+
+                  symlink("$domain.mo", $link);
+               } else {
+                  print "<p><b>Warning:</b> the directory <tt>{$path}</tt> is not writable</p>";
+                  return false;
+               }
             }
 
             $domain .= "-$time";
