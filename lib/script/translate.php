@@ -61,9 +61,6 @@ TXT;
 
          # Split multiple paths into separate lines
          system("sed -ri 's|#: ([^ ]+) ([^ ]+)$|#: \\1\\n#: \\2|g' $file");
-      } else {
-         # Remove the file if it's empty
-         unlink($file);
       }
    }
 

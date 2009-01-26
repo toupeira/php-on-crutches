@@ -652,7 +652,8 @@
             throw new ValueError("Invalid action '$action'");
          }
 
-         list($object, $redirect) = array_delete($status, 'object', 'redirect');
+         $object = array_delete($status, 'object');
+         $redirect = array_delete($status, 'redirect');
 
          foreach ((array) $status as $key => $message) {
             if (is_array($message)) {
@@ -683,7 +684,6 @@
 
                $this->redirect_to(any(
                   $options['redirect_to'],
-                  $object->to_params($redirect),
                   ":{$options['prefix']}/$redirect$id"
                ));
             }

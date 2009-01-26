@@ -166,11 +166,12 @@
 
    define_default('ICON_WIDTH', 16);
    define_default('ICON_HEIGHT', 16);
+   define_default('ICON_PREFIX', 'icons/');
 
    # Build an image tag for a 16x16 PNG icon
    function icon($name, $options=null) {
       if (strpos($name, '/') === false) {
-         $name = "icons/$name";
+         $name = ICON_PREFIX.$name;
       }
 
       return image_tag("$name.png", array_merge(

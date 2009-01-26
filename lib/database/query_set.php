@@ -128,7 +128,7 @@
             $this->_objects = $this->fetch_all();
          }
 
-         return $this->_objects;
+         return (array) $this->_objects;
       }
 
       function get_count() {

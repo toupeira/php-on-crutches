@@ -284,9 +284,7 @@
             throw new ValueError($key, "Attribute '$key' already exists");
          }
 
-         if (!is_null($value)) {
-            return $this->_attributes[$key] = $value;
-         }
+         return $this->_attributes[$key] = $value;
       }
 
       function reset($key=null) {
