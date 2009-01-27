@@ -211,7 +211,7 @@
 
    function sort_by(array &$array, $key, $reverse=false) {
       $mul = ($reverse ? -1 : 1);
-      return usort($array,
+      return uasort($array,
          proc("$mul * compare(getf(\$a, '$key'), getf(\$b, '$key'))", 2));
    }
 
