@@ -11,6 +11,7 @@
    {
       protected $_load_attributes = true;
       protected $_booleans = array();
+      protected $_conflicts = array();
 
       function __construct(array $attributes=null, array $defaults=null) {
          # Load attributes from the database
@@ -75,6 +76,10 @@
 
       function get_id() {
          return $this->_attributes[$this->mapper->primary_key];
+      }
+
+      function get_conflicts() {
+         return $this->_conflicts;
       }
 
       function read_attribute($key) {
@@ -222,8 +227,10 @@
             $objects->where("`{$this->mapper->primary_key}` != ?", $this->id);
          }
 
+         $this->_conflicts[$key] = $objects->collect($this->mapper->primary_key);
+
          return $this->validate_attribute($key,
-            $objects->count() == 0,
+            empty($this->_conflicts[$key]),
             any($message, _("%s already exists"))
          );
       }
