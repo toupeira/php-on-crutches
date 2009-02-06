@@ -396,8 +396,7 @@
             $json = to_json($object);
          }
 
-         $this->headers['Content-Type'] = 'application/json';
-         return $this->head($status, $json);
+         return $this->head($status, $json, 'application/json');
       }
 
       function render_xml($object, $status=200) {
@@ -407,8 +406,7 @@
             $xml = to_xml($object);
          }
 
-         $this->headers['Content-Type'] = 'text/xml';
-         return $this->head($status, $xml);
+         return $this->head($status, $xml, 'text/xml');
       }
 
       # Redirect to a path
@@ -467,9 +465,9 @@
          }
       }
 
-      function head($code, $text=' ') {
+      function head($code, $text=' ', $type='text/plain') {
          $this->headers['Status'] = $code;
-         $this->headers['Content-Type'] = 'text/plain';
+         $this->headers['Content-Type'] = $type;
          $this->send_headers();
          $this->render_text($text);
       }
