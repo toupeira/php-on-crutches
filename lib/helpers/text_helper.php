@@ -269,4 +269,12 @@
       ));
    }
 
+   function hexencode($text) {
+      for ($i = 0; $i < mb_strlen($text); $i++) {
+         $encoded .= '&#'.ord($text[$i]).';';
+      }
+
+      return $encoded;
+   }
+
 ?>

@@ -65,7 +65,7 @@
             return substr($path, 2);
          }
 
-      } elseif (preg_match('#^(\w+://|mailto:).#', $path)) {
+      } elseif (preg_match('#^(\w+://|mailto:|\&).#', $path)) {
          # Return fully-qualified URLs unchanged
          return $path;
       }
