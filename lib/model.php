@@ -266,7 +266,7 @@
             $value = trim($value);
          }
 
-         if ($value or $old_value) {
+         if (!is_null($value) or $old_value) {
             $this->_attributes[$key] = &$value;
 
             if ($old_value != $value) {

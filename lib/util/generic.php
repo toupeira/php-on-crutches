@@ -46,9 +46,9 @@
          return $value->empty;
       } elseif (is_string($value)) {
          $value = trim($value);
-         return empty($value);
+         return empty($value) and $value !== '0';
       } else {
-         return empty($value);
+         return empty($value) and $value !== 0;
       }
    }
 
