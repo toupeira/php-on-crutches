@@ -416,7 +416,7 @@
          return empty($this->_errors);
       }
 
-      protected function validate_attribute($keys, $valid, $message, $default_message=null) {
+      protected function validate_attribute($keys, $valid, $message=null, $default_message=null) {
          if ($valid) {
             return true;
          } else {
@@ -476,6 +476,13 @@
          return $this->validate_attribute($key,
             ($allow_empty and $value == '') or is_email($value),
             $message
+         );
+      }
+
+      protected function is_reachable_email($key, $allow_empty=false, $message=null) {
+         return $this->validate_attribute($key,
+            dns_get_mx($domain = array_pop(explode('@', $this->_attributes[$key], 2)), $mx),
+            sprintf(_("%s doesn't look like a valid email domain"), $domain)
          );
       }
 
