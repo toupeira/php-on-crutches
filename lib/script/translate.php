@@ -96,7 +96,7 @@ TXT;
       require_once $model;
 
       $class = camelize(substr(basename($model), 0, -4));
-      if (is_subclass_of($class, Model) and $ref = new ReflectionClass($class) and $ref->isInstantiable()) {
+      if (class_exists($class) and is_subclass_of($class, Model) and $ref = new ReflectionClass($class) and $ref->isInstantiable()) {
          $model = new $class();
 
          $model_singular = humanize($class, false);
