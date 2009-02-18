@@ -67,7 +67,7 @@
          if (is_admin() or self::auth('current')->id == intval($id)) {
             $this->scaffold('edit', $id);
          } else {
-            $this->msg['error'] = _('Access denied');
+            $this->msg['error'] = _("Access denied");
             $this->redirect_to(':');
          }
       }
@@ -79,7 +79,7 @@
                $this->logout();
             }
          } else {
-            $this->msg['error'] = _('Access denied');
+            $this->msg['error'] = _("Access denied");
             $this->redirect_to(':');
          }
       }

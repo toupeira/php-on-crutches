@@ -82,7 +82,7 @@
          }
 
          if ($redirect) {
-            $this->msg['error'] = _('Access denied');
+            $this->msg['error'] = _("Access denied, please login");
             $this->redirect_to($redirect);
             return false;
          } else {

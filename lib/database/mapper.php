@@ -188,7 +188,7 @@
 
          foreach ($attributes as $key => $value) {
             $columns[] = "`$key`";
-            if ($value === '') {
+            if (is_null($value) or $value === '') {
                $keys[] = 'NULL';
             } else {
                $keys[] = '?';
@@ -227,7 +227,7 @@
                for ($i = 0; $i < $count; $i++) {
                   $values[] = $this->convert($value);
                }
-            } elseif ($value === '') {
+            } elseif (is_null($value) or $value === '') {
                $keys[] = "`$key` = NULL";
             } else {
                $keys[] = "`$key` = ?";
@@ -426,6 +426,8 @@
             } else {
                return $value->id;
             }
+         } elseif (is_bool($value)) {
+            return intval($value);
          } else {
             return $value;
          }
