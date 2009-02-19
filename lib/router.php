@@ -97,13 +97,13 @@
          'accept',
          'accept_language',
          'cookie',
-         'host',
          'user_agent',
 
          'remote_addr',
          'request_method',
          'request_uri',
          'server_addr',
+         'server_name',
          'server_port',
          'https',
       );
