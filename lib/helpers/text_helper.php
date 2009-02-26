@@ -155,16 +155,16 @@
 
    function format_size($size, $format=null) {
       if ($size < KB) {
-         $text = _('%d Bytes');
+         $text = _("1 KB");
       } elseif ($size < MB) {
-         $text = _('%s KB');
+         $text = _("%s KB");
          $size = sprintf(any($format, '%d'), $size / KB);
       } elseif ($size < GB) {
-         $text = _('%s MB');
+         $text = _("%s MB");
          $size = sprintf(any($format, '%.1f'), $size / MB);
       } else {
-         $text = _('%s GB');
-         $size = sprintf(any($format, '%.1f'), $size / GB);
+         $text = _("%s GB");
+         $size = sprintf(any($format, '%.2f'), $size / GB);
       }
 
       return sprintf($text, $size);
