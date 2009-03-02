@@ -1,0 +1,19 @@
+<?# $Id$ ?>
+<?= form_tag() ?>
+<table class="scaffold-form">
+<? foreach ($attributes as $key => $column): ?>
+<tr>
+   <th><?= $object->label($key) ?></th>
+   <td><?= $object->auto_field($key) ?></td>
+</tr>
+<? endforeach ?>
+<tr>
+   <th></th>
+   <td>
+      <?= submit_button() ?>
+      <?= cancel_button(any($options['redirect_to'],
+             $object->exists ? ":$prefix/show/{$object->id}" : ":$prefix")) ?>
+   </td>
+</tr>
+</table>
+<?= form_end() ?>
