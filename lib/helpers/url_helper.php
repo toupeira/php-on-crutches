@@ -56,7 +56,7 @@
          $path = Router::generate($params);
 
       } elseif (substr($path, 0, 2) == './') {
-         if ($options['full'] or $options['ssl']) {
+         if ($options['full'] or isset($options['ssl'])) {
             $path = substr($path, 1);
             if ($request = trim(dirname($_SERVER['REQUEST_URI']), '/')) {
                $path = "/$request$path";
@@ -71,17 +71,12 @@
       }
 
       # Build a fully-qualified URL
-      if ($options['full'] or $options['ssl']) {
+      if ($options['full'] or isset($options['ssl'])) {
          unset($options['full']);
-
-         #if ($path and $path[0] != '/') {
-            # If the path is relative, use the directory name from the currently requested URI
-            #$path = substr(dirname($_SERVER['REQUEST_URI']), 1)."/$path";
-         #}
 
          # Use HTTPS if specified or the current site is already HTTPS
          if ($options['ssl']
-            or (Dispatcher::$controller and Dispatcher::$controller->is_ssl())) {
+            or (Dispatcher::$controller and Dispatcher::$controller->is_ssl() and $options['ssl'] !== false)) {
             unset($options['ssl']);
             $url = 'https';
          } else {

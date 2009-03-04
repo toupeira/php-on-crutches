@@ -430,7 +430,7 @@
       }
 
       # Redirect to the previous page
-      function redirect_back($default=null) {
+      function redirect_back($default=null, $options=null) {
          if ($path = $this->session['return_to']) {
             # Use path stored in session
             unset($this->session['return_to']);
@@ -447,7 +447,7 @@
             $path = '';
          }
 
-         return $this->redirect_to($path);
+         return $this->redirect_to(url_for($path, $options));
       }
 
       # Start the session if necessary
