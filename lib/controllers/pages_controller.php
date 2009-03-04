@@ -15,6 +15,7 @@
 
          if ($template = View::find_template("pages/$path") or
              $template = View::find_template("pages/$path/index")) {
+            $this->set('page', $path);
             $this->set('title', str_replace('/', ' - ', $path));
             $this->render($template);
          } else {
