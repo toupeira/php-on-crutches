@@ -77,7 +77,7 @@
             $message = ": $message";
          }
 
-         parent::__construct("Access denied for this action: $message");
+         parent::__construct("Access denied for this action$message");
       }
    }
 
