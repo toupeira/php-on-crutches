@@ -85,7 +85,7 @@
    }
 
    function is_email($text) {
-      return preg_match("/^[\w.!#$%&'*+\/=?^_`{|}~-]+@([\w.-]+\.)+[a-z]{2,6}$/i", $text) > 0;
+      return preg_match("/^.+@.+\.[a-z]{2,6}$/i", $text) > 0;
    }
 
    function auto_link($text) {
