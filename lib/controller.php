@@ -284,22 +284,11 @@
          }
 
          if ($error) {
-            if (config('debug') or Dispatcher::$path == '/') {
-               throw new $error($message);
-            } else {
-               log_warn(humanize($error, false).': '.$message);
-               if ($action == 'index' or !$this->has_action('index')) {
-                  # Redirect to default path if the index action was request or it isn't available
-                  $this->redirect_to('');
-               } else {
-                  $this->redirect_to(':');
-               }
-            }
-
+            throw new $error($message);
             return false;
+         } else {
+            return true;
          }
-
-         return true;
       }
 
       # Perform an action

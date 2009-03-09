@@ -73,7 +73,7 @@
          return self::$controller;;
       }
 
-      static function log_header($class, $action) {
+      static function log_header($class, $action, $force=false) {
          $text = "\n[1m{$_SERVER['REQUEST_METHOD']} {$_SERVER['REQUEST_URI']}[0m => "
                . "[0;36m$class#$action[0m (for {$_SERVER['REMOTE_ADDR']} "
                . "at ".strftime("%F %T").")\n";
@@ -87,7 +87,11 @@
             $text .= "\n  Files: ".array_to_str($_FILES);
          }
 
-         return log_info($text);
+         if ($force) {
+            return log_error($text);
+         } else {
+            return log_info($text);
+         }
       }
 
       static function log_footer() {

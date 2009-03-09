@@ -9,7 +9,7 @@
 
    require LIB.'vendor/textile.php';
 
-   function h($text, $double_encode=true) {
+   function h($text, $double_encode=false) {
       try {
          return htmlspecialchars($text, ENT_COMPAT, 'UTF-8', $double_encode);
       } catch (StandardError $e) {

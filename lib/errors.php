@@ -126,13 +126,21 @@
          print dump_exception($exception)."\n";
       } else {
          if (log_running()) {
+            if (!log_level(LOG_INFO)) {
+               Dispatcher::log_header(
+                  get_class(Dispatcher::$controller),
+                  Dispatcher::$params['action'],
+                  true
+               );
+            }
+
             log_msg("\n".dump_exception($exception), $exception instanceof NotFound ? LOG_INFO : LOG_ERROR);
          }
 
          Dispatcher::$controller = new ErrorsController();
          print Dispatcher::$controller->show($exception);
 
-         if (log_level(LOG_INFO)) {
+         if (log_running() and log_level(LOG_INFO)) {
             Dispatcher::log_footer();
          }
 
