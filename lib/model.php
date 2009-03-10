@@ -178,7 +178,7 @@
       function changes() {
          $changes = array();
          foreach ($this->_changed_attributes as $key => $old) {
-            if (($new = $this->$key) != $old) {
+            if (($new = $this->$key) !== $old) {
                $changes[$key] = array($old, $new);
             }
          }
@@ -269,7 +269,7 @@
          if (!is_null($value) or $old_value) {
             $this->_attributes[$key] = &$value;
 
-            if ($old_value != $value) {
+            if ($old_value !== $value) {
                $this->_changed_attributes[$key] = $old_value;
             }
          }

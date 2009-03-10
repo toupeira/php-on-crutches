@@ -182,7 +182,7 @@
    }
 
    function format_duration($then, $now=null) {
-      $seconds = any(to_time($now), mktime()) - to_time($then);
+      $seconds = any(to_time($now), time()) - to_time($then);
 
       if ($seconds < MINUTE) {
          $time = $seconds;
