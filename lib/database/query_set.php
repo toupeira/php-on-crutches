@@ -351,7 +351,7 @@
       }
 
       function find($conditions) {
-         if (!is_null($conditions)) {
+         if (!is_null($conditions) and !blank($conditions)) {
             return $this->where(func_get_args())->order()->first;
          }
       }
