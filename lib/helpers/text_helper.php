@@ -277,4 +277,33 @@
       return $encoded;
    }
 
+   function generate_password($vowels=3, $consonants=2, $uppercase=1, $numbers=1, $dots=1) {
+      $password = '';
+
+      $v = array('a', 'e', 'i', 'o', 'u');
+      $c = array('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x');
+
+      for ($i = 0; $i < $vowels; $i++) {
+         $password .= $v[mt_rand(0, count($v) - 1)];
+      }
+
+      for ($i = 0; $i < $consonants; $i++) {
+         $password .= $c[mt_rand(0, count($c) - 1)];
+      }
+
+      for ($i = 0; $i < $uppercase; $i++) {
+         $password .= chr(mt_rand(65, 90));
+      }
+
+      for ($i = 0; $i < $numbers; $i++) {
+         $password .= mt_rand(0, 9);
+      }
+
+      for ($i = 0; $i < $dots; $i++) {
+         $password .= '.';
+      }
+
+      return str_shuffle($password);
+   }
+
 ?>

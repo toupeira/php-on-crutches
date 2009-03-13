@@ -45,7 +45,7 @@ fi
             # Execute given command and exit
             if ($command = array_shift($args)) {
                $quiet = ($log_level == LOG_DISABLED ? '-q' : '');
-               system("echo '$command' | php5 {$argv[0]} -s $quiet", $status);
+               system("echo '$command' | php5 -d output_buffering=On {$argv[0]} -s $quiet", $status);
                exit($status);
             } else {
                usage();
