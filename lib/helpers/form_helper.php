@@ -84,7 +84,12 @@
                and !in_array($options['type'], array('checkbox', 'radio')))
       {
          $options['class'] .= ' error';
-         $options['onchange'] = "$(this).removeClassName('error')";
+
+         if ($onchange = $options['onchange']) {
+            $onchange .= '; ';
+         }
+
+         $options['onchange'] = "$onchange$(this).removeClassName('error')";
       }
 
       # Build the actual tag

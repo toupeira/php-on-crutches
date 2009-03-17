@@ -599,7 +599,7 @@
 
          switch ($tag) {
             case 'check_box':
-               return hidden_field($key, '0')
+               return hidden_field($key, '0', array('id' => null))
                     . check_box($key, '1', $value, $options);
             case 'select_tag':
                return select_tag($key, array_delete($options, 'values'), $value, $options);
