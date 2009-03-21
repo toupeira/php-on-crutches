@@ -19,9 +19,6 @@
 
       function get_attributes() {
          return array(
-            # enable strict SQL mode
-            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode=STRICT_ALL_TABLES',
-
             # emulate prepared statements because poor MySQL can't
             # use its query cache with prepared statements
             # (will be fixed in MySQL 5.1)
