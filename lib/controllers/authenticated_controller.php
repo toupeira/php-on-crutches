@@ -58,8 +58,6 @@
                log_info("Logged in user from cookie");
                $this->session['auth_id'] = self::auth('current')->id;
                $this->send_auth_token();
-            } else {
-               log_warn("Invalid cookie token");
             }
          }
 
