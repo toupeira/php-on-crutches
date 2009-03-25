@@ -556,13 +556,9 @@
             passthru("$command 2>/dev/null");
             $status = true;
          } elseif ($options['xsendfile']) {
-            # Use mod_xsendfile, insert the X-Sendfile header first to
-            # make sure our own Content-* headers aren't overwritten
+            # Use mod_xsendfile with the X-Sendfile header
             $message = "Sending file '$file' with X-Sendfile";
-            $this->headers = array_merge(
-               array('X-Sendfile' => $file),
-               $this->headers
-            );
+            $this->headers['X-Sendfile'] = $file;
             $this->send_headers();
             $status = true;
          } else {
