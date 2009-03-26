@@ -72,7 +72,9 @@
          foreach ($this->files as $i => &$file) {
             $file['name'] = basename($file['name']);
             if (!is_uploaded_file($file['tmp_name'])) {
-               log_warn("File injection attack: {$file['tmp_name']}");
+               if ($file['tmp_name']) {
+                  log_warn("File injection attack: {$file['tmp_name']}");
+               }
                unset($this->files[$i]);
             }
          }
