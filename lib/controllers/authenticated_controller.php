@@ -50,7 +50,7 @@
          if ($id = $this->session['auth_id']) {
             # Login user from session
             if (!self::auth('login', $id)) {
-               $this->session['auth_id'] = null;
+               unset($this->session['auth_id']);
             }
          } elseif ($token = $this->cookies['auth_token'] or $token = $this->params['_auth_token']) {
             # Login user from cookie

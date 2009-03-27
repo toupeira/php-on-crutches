@@ -52,7 +52,7 @@
 
       function logout() {
          self::auth('logout');
-         $this->session['auth_id'] = null;
+         unset($this->session['auth_id']);
          $this->delete_cookie('auth_token');
          $this->redirect_to(':/login');
       }

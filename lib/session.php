@@ -9,29 +9,75 @@
 
    abstract class SessionStore
    {
-      function setup() { return true; }
-      function open($save_path, $session_name) { return true; }
-      function close() { return true; }
-      function expire($maxlifetime) { }
+      static function setup() { return true; }
+      static function open($save_path, $session_name) { return true; }
+      static function close() { return true; }
+      static function expire($maxlifetime) { }
 
-      abstract function read($id);
-      abstract function write($id, $data);
-      abstract function destroy($id);
+      abstract static function read($id);
+      abstract static function write($id, $data);
+      abstract static function destroy($id);
    }
 
    class SessionStoreCache extends SessionStore
    {
-      function read($id) {
+      static function read($id) {
          return (string) cache("session_$id");
       }
 
-      function write($id, $data) {
+      static function write($id, $data) {
          cache_set("session_$id", $data);
          return true;
       }
 
-      function destroy($id) {
+      static function destroy($id) {
          return cache_expire("session_$id");
+      }
+   }
+
+   class SessionStoreMysql extends SessionStore
+   {
+      static protected $_id;
+      static protected $_data;
+
+      static function read($id) {
+         self::$_id = $id;
+
+         return self::$_data = (string) DB()->execute(
+            'SELECT data FROM sessions WHERE id = ?', $id
+         )->fetch_column();
+      }
+
+      static function write($id, $data) {
+         if ($id == self::$_id and $data == self::$_data) {
+            return;
+         }
+
+         if ($model = config('auth_model')) {
+            if ($user = call_user_func(array($model, 'current'))) {
+               $user = $user->id;
+            }
+
+            DB()->execute(
+               'INSERT INTO sessions (id, user_id, data)'
+               . ' VALUES (?, ?, ?)'
+               . ' ON DUPLICATE KEY UPDATE user_id = ?, data = ?',
+               $id, $user, $data, $user, $data
+            );
+         } else {
+            DB()->execute(
+               'INSERT INTO sessions (id, data)'
+               . ' VALUES (?, ?)'
+               . ' ON DUPLICATE KEY UPDATE data = ?',
+               $id, $data, $data
+            );
+         }
+      }
+
+      static function destroy($id) {
+         DB()->execute(
+            'DELETE FROM sessions WHERE id = ?', $id
+         );
       }
    }
 

@@ -27,7 +27,7 @@
       }
 
       function get_timestamp() {
-         return "now()";
+         return 'now()';
       }
 
       function fetch_tables() {

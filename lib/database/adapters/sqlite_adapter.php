@@ -18,7 +18,7 @@
       }
 
       function get_timestamp() {
-         return "current_timestamp";
+         return 'current_timestamp';
       }
 
       function fetch_tables() {

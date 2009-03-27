@@ -406,7 +406,9 @@
 
          # Save messages so they can be displayed in the next request
          $this->set_model_errors();
-         $this->session['msg'] = $this->msg;
+         if ($this->msg) {
+            $this->session['msg'] = $this->msg;
+         }
 
          log_info("Redirecting to $url");
 
