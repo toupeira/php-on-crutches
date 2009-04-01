@@ -34,7 +34,7 @@ TXT;
       $extensions = array('php', 'thtml', 'js');
       $exclude = WEBROOT.JAVASCRIPTS.'all*';
 
-      $filter = "\( -iname '*.".implode("' -o -iname '*.", $extensions)."' \) -not -iname $exclude";
+      $filter = "\( -iname '*.".implode("' -o -iname '*.", $extensions)."' \) -not -iname '$exclude'";
 
       $files = find_files($dir, $filter);
       $files = implode(' ', array_map('escapeshellarg', $files));
