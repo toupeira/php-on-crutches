@@ -14,9 +14,9 @@
       }
    }
 
-   function cache_set($key, $value) {
+   function cache_set($key, $value, $ttl=0) {
       log_debug("Writing cache fragment '$key'");
-      return $GLOBALS['_CACHE_STORE']->set($key, $value);
+      return $GLOBALS['_CACHE_STORE']->set($key, $value, $ttl);
    }
 
    function cache_expire($key) {
@@ -29,11 +29,11 @@
       return $GLOBALS['_CACHE_STORE']->clear();
    }
 
-   function cache_eval($key, $code) {
+   function cache_eval($key, $code, $ttl=0) {
       if ($data = cache($key)) {
          return $data;
       } else {
-         return cache_set($key, eval("return $code;"));
+         return cache_set($key, eval("return $code;"), $ttl);
       }
    }
 
@@ -41,7 +41,7 @@
    {
       function setup() { return true; }
       abstract function get($key);
-      abstract function set($key, $value);
+      abstract function set($key, $value, $ttl=0);
       abstract function expire($key);
       abstract function clear();
    }
@@ -50,10 +50,10 @@
    {
       protected $data = array();
 
-      function get($key)          { return $this->data[$key]; }
-      function set($key, $value)  { return $this->data[$key] = $value; }
-      function expire($key)       { unset($this->data[$key]); return true; }
-      function clear()            { $this->data = array(); return true; }
+      function get($key)                 { return $this->data[$key]; }
+      function set($key, $value, $ttl=0) { return $this->data[$key] = $value; }
+      function expire($key)              { unset($this->data[$key]); return true; }
+      function clear()                   { $this->data = array(); return true; }
    }
 
    class CacheStoreApc extends CacheStore
@@ -62,10 +62,10 @@
          return function_exists('apc_store');
       }
 
-      function get($key)          { return apc_fetch($key); }
-      function set($key, $value)  { apc_store($key, $value); return $value; }
-      function expire($key)       { return apc_delete($key); }
-      function clear()            { return apc_clear_cache(); }
+      function get($key)                 { return apc_fetch($key); }
+      function set($key, $value, $ttl=0) { apc_store($key, $value, $ttl); return $value; }
+      function expire($key)              { return apc_delete($key); }
+      function clear()                   { return apc_clear_cache(); }
    }
 
    class CacheStoreXcache extends CacheStore
@@ -81,10 +81,10 @@
          }
       }
 
-      function get($key)          { return xcache_get($key); }
-      function set($key, $value)  { xcache_set($key, $value); return $value; }
-      function expire($key)       { return xcache_unset($key); }
-      function clear()            { return xcache_clear_cache(); }
+      function get($key)                 { return xcache_get($key); }
+      function set($key, $value, $ttl=0) { xcache_set($key, $value, $ttl); return $value; }
+      function expire($key)              { return xcache_unset($key); }
+      function clear()                   { return xcache_clear_cache(); }
    }
 
    class CacheStoreFile extends CacheStore
@@ -109,7 +109,7 @@
          }
       }
 
-      function set($key, $value) {
+      function set($key, $value, $ttl=0) {
          file_put_contents($this->build_path($key), serialize($value));
          return $value;
       }
