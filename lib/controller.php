@@ -449,9 +449,11 @@
             session_start();
             log_info('  Session ID: '.session_id());
 
-            # Override default no-cache headers
-            header('Cache-Control: private');
-            header('Pragma: cache');
+            # Override default no-cache headers, except for Ajax requests
+            if (!$this->is_ajax) {
+               header('Cache-Control: private');
+               header('Pragma: cache');
+            }
 
             # Make sure the session handler can clean up
             register_shutdown_function('session_write_close');
