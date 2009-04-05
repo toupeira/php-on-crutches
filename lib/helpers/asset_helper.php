@@ -76,7 +76,12 @@
 
       # Combine multiple assets
       if (config('merge_assets') and count($assets) > 1) {
-         $name = any($options['name'], 'all');
+         if ($name = $options['name']) {
+            unset($options['name']);
+         } else {
+            $name = 'all';
+         }
+
          $all = WEBROOT.$dir.$name.$ext;
 
          # Build the file paths and get the last modification time
@@ -120,7 +125,7 @@
          }
 
          if (is_file($all)) {
-            return $tag($name).N;
+            return $tag($name, $options);
          }
 
          # If the file couldn't be created,
@@ -129,7 +134,7 @@
       
       $html = '';
       foreach ($assets as $asset) {
-         $html .= $tag($asset);
+         $html .= $tag($asset, $options);
       }
 
       return $html;
