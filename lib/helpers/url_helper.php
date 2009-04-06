@@ -71,18 +71,16 @@
       }
 
       # Build a fully-qualified URL
-      if ($options['full'] or isset($options['ssl'])) {
-         unset($options['full']);
-
+      if ($options['full'] or $options['host'] or isset($options['ssl'])) {
          # Use HTTPS if specified or the current site is already HTTPS
          if ($options['ssl']
             or (Dispatcher::$controller and Dispatcher::$controller->is_ssl() and $options['ssl'] !== false)) {
-            unset($options['ssl']);
             $url = 'https';
          } else {
             $url = 'http';
          }
-         $url .= '://'.$_SERVER['HTTP_HOST'];
+
+         $url .= '://'.any($options['host'], $_SERVER['HTTP_HOST']);
       } 
 
       # Add the site prefix for relative paths

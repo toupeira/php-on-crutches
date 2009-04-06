@@ -158,6 +158,10 @@
             log_error("Asset not found: /$path");
          }
 
+         if ($host = config('asset_host')) {
+            $web_path = url_for($web_path, array('host' => $host));
+         }
+
          return $web_path;
       }
    }
