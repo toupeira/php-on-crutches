@@ -74,14 +74,14 @@
          return;
       }
 
+      if ($name = $options['name']) {
+         unset($options['name']);
+      } else {
+         $name = 'all';
+      }
+
       # Combine multiple assets
       if (config('merge_assets') and count($assets) > 1) {
-         if ($name = $options['name']) {
-            unset($options['name']);
-         } else {
-            $name = 'all';
-         }
-
          $all = WEBROOT.$dir.$name.$ext;
 
          # Build the file paths and get the last modification time
