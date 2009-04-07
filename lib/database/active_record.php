@@ -29,9 +29,6 @@
             }
          }
 
-         # Protected the primary key
-         $this->_protected[] = $this->mapper->primary_key;
-
          # Set the default values
          parent::__construct(array_merge(
             (array) $this->mapper->defaults,
