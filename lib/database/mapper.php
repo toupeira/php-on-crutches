@@ -355,7 +355,7 @@
 
             } elseif (((is_numeric($value) or is_numeric($value[0])) and
                         $this->key_type == 'integer') or
-                      (is_string($value) and empty($values) and
+                      (is_string($value) and empty($values) and strpos($value, ' ') === false and
                         $this->key_type == 'string'))
             {
                # Use array value as ID
