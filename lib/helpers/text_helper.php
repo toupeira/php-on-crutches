@@ -130,21 +130,13 @@
    define_default('FORMAT_DB_DATE', '%Y-%m-%d');
 
    function format_date($date, $format=FORMAT_DATE) {
-      if (!is_numeric($date)) {
-         $date = strtotime($date);
-      }
-
-      if ($date) {
+      if ($date = to_time($date)) {
          return strftime(_($format), $date);
       }
    }
 
    function format_time($time, $format=FORMAT_TIME) {
-      if (!is_numeric($time)) {
-         $time = strtotime($time);
-      }
-
-      if ($time) {
+      if ($time = to_time($time)) {
          return strftime(_($format), $time);
       }
    }
