@@ -134,7 +134,8 @@
                );
             }
 
-            log_msg("\n".dump_exception($exception), $exception instanceof NotFound ? LOG_INFO : LOG_ERROR);
+            $log_level = in_array(get_class($exception), (array) config('ignore_errors')) ? LOG_INFO : LOG_ERROR;
+            log_msg("\n".dump_exception($exception), $log_level);
          }
 
          Dispatcher::$controller = new ErrorsController();
@@ -157,7 +158,7 @@
          $recipients, config('notify_errors')
       );
 
-      if ($recipients and !$exception instanceof NotFound) {
+      if ($recipients and !in_array(get_class($exception), (array) config('ignore_errors'))) {
          $controller = new ErrorsController();
 
          $mail = new Mail();

@@ -38,6 +38,7 @@
    # | @cache_path@        | the cache directory for CacheStoreFile | @ROOT/tmp/cache@ |
    # | @cache_views@       | enable view caching | @false@ |
    # | @merge_assets@      | automatically combine stylesheets and scripts | @false@ |
+   # | @asset_host@        | hostname to use for all assets |
    # |_(title). Mail Settings |_. |_(title). Default |
    # | @send_mails@        | enable sending mails | @true@ |
    # | @mail_from@         | the default sender address |
@@ -56,6 +57,7 @@
    # | @debug_redirects@   | show links on redirects | @false@ |
    # | @debug_queries@     | analyze database queries | @false@ |
    # | @notify_errors@     | addresses to send error notifications to |
+   # | @ignore_errors@     | exceptions to ignore |
    #
 
    require CONFIG.'application.php';
@@ -87,6 +89,7 @@
       'cache_path'        => TMP.'cache',
       'cache_views'       => false,
       'merge_assets'      => false,
+      'asset_host'        => null,
 
       'send_mails'        => true,
       'mail_from'         => '',
@@ -110,6 +113,7 @@
       'debug_queries'     => false,
 
       'notify_errors'     => null,
+      'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied'),
    );
 
    # Merge application settings
