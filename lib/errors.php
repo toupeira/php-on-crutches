@@ -134,8 +134,7 @@
                );
             }
 
-            $log_level = in_array(get_class($exception), (array) config('ignore_errors')) ? LOG_INFO : LOG_ERROR;
-            log_msg("\n".dump_exception($exception), $log_level);
+            log_msg("\n".dump_exception($exception), ignore_exception($exception) ? LOG_INFO : LOG_ERROR);
          }
 
          Dispatcher::$controller = new ErrorsController();
@@ -158,7 +157,7 @@
          $recipients, config('notify_errors')
       );
 
-      if ($recipients and !in_array(get_class($exception), (array) config('ignore_errors'))) {
+      if ($recipients and !ignore_exception($exception)) {
          $controller = new ErrorsController();
 
          $mail = new Mail();
@@ -173,6 +172,17 @@
 
          $mail->send();
       }
+   }
+
+   # Check if an exception should be ignored
+   function ignore_exception($exception) {
+      foreach (config('ignore_errors') as $class) {
+         if ($exception instanceof $class) {
+            return true;
+         }
+      }
+
+      return false;
    }
 
 ?>
