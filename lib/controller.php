@@ -554,6 +554,10 @@
             $this->headers['Content-Type'] = $type;
          }
 
+         while (ob_get_level()) {
+            ob_end_clean();
+         }
+
          $status = false;
          if ($command) {
             # Execute a command and send the output
