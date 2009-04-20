@@ -58,10 +58,12 @@
                $user = $user->id;
             }
 
+            $key = foreign_key($model);
+
             DB()->execute(
-               'INSERT INTO sessions (id, user_id, data)'
-               . ' VALUES (?, ?, ?)'
-               . ' ON DUPLICATE KEY UPDATE user_id = ?, data = ?',
+               "INSERT INTO sessions (id, $key, data)"
+               . " VALUES (?, ?, ?)"
+               . " ON DUPLICATE KEY UPDATE $key = ?, data = ?",
                $id, $user, $data, $user, $data
             );
          } else {
