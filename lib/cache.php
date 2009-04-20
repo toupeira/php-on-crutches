@@ -19,6 +19,10 @@
       return $GLOBALS['_CACHE_STORE']->set($key, $value, $ttl);
    }
 
+   function cache_exists($key) {
+      return $GLOBALS['_CACHE_STORE']->exists($key);
+   }
+
    function cache_expire($key) {
       log_debug("Expiring cache fragment '$key'");
       return $GLOBALS['_CACHE_STORE']->expire($key);
@@ -42,6 +46,7 @@
       function setup() { return true; }
       abstract function get($key);
       abstract function set($key, $value, $ttl=0);
+      abstract function exists($key);
       abstract function expire($key);
       abstract function clear();
    }
@@ -52,6 +57,7 @@
 
       function get($key)                 { return $this->data[$key]; }
       function set($key, $value, $ttl=0) { return $this->data[$key] = $value; }
+      function exists($key)              { return isset($this->data[$key]); }
       function expire($key)              { unset($this->data[$key]); return true; }
       function clear()                   { $this->data = array(); return true; }
    }
@@ -64,6 +70,7 @@
 
       function get($key)                 { return apc_fetch($key); }
       function set($key, $value, $ttl=0) { apc_store($key, $value, $ttl); return $value; }
+      function exists($key)              { return apc_fetch($key) !== false; }
       function expire($key)              { return apc_delete($key); }
       function clear()                   { return apc_clear_cache(); }
    }
@@ -83,6 +90,7 @@
 
       function get($key)                 { return xcache_get($key); }
       function set($key, $value, $ttl=0) { xcache_set($key, $value, $ttl); return $value; }
+      function exists($key)               { return xcache_isset($key); }
       function expire($key)              { return xcache_unset($key); }
       function clear()                   { return xcache_clear_cache(); }
    }
@@ -112,6 +120,10 @@
       function set($key, $value, $ttl=0) {
          file_put_contents($this->build_path($key), serialize($value));
          return $value;
+      }
+
+      function exists($key) {
+         return is_file($this->build_path($key));
       }
 
       function expire($key) {

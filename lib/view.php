@@ -60,6 +60,7 @@
 
       protected $_cache_key;
       protected $_cache_full;
+      protected $_cache_expire;
 
       function __construct($template=null, $layout=null) {
          $this->_template = $template;
@@ -189,7 +190,7 @@
 
             if ($this->_cache_key and !$this->_cache_full) {
                log_info("Caching content as '{$this->_cache_key}'");
-               cache_set($this->_cache_key, $output);
+               cache_set($this->_cache_key, $output, $this->_cache_expire);
             }
          }
 
@@ -203,7 +204,7 @@
 
          if ($this->_cache_key and $this->_cache_full) {
             log_info("Caching page as '{$this->_cache_key}'");
-            cache_set($this->_cache_key, $output);
+            cache_set($this->_cache_key, $output, $this->_cache_expire);
          }
 
          # Remove the reference to the view so it can get cleaned up
@@ -256,10 +257,11 @@
       }
 
       # Enable view caching
-      function cache($key=true, $full=false) {
+      function cache($key=true, $full=false, $expire=0) {
          if (config('cache_views')) {
             $this->_cache_key = $key;
             $this->_cache_full = $full;
+            $this->_cache_expire = $expire;
             return true;
          } else {
             return false;

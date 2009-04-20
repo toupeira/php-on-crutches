@@ -365,9 +365,9 @@
          }
       }
 
-      function cache_render($key=null, $full=false) {
+      function cache_render($key=null, $full=false, $expire=0) {
          $key = any($key, "view_".urlencode(Dispatcher::$path));
-         if ($this->view->cache($key, $full) and cache($key)) {
+         if ($this->view->cache($key, $full, $expire) and cache_exists($key)) {
             $this->_cached = true;
             return true;
          } else {
