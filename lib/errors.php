@@ -126,15 +126,21 @@
          print dump_exception($exception)."\n";
       } else {
          if (log_running()) {
-            if (!log_level(LOG_INFO)) {
-               Dispatcher::log_header(
-                  get_class(Dispatcher::$controller),
-                  Dispatcher::$params['action'],
-                  true
-               );
-            }
+            $dump = "\n".dump_exception($exception);
 
-            log_msg("\n".dump_exception($exception), ignore_exception($exception) ? LOG_INFO : LOG_ERROR);
+            if (ignore_exception($exception)) {
+               log_info($dump);
+            } else {
+               if (!log_level(LOG_INFO)) {
+                  Dispatcher::log_header(
+                     get_class(Dispatcher::$controller),
+                     Dispatcher::$params['action'],
+                     true
+                  );
+               }
+
+               log_error($dump);
+            }
          }
 
          Dispatcher::$controller = new ErrorsController();
