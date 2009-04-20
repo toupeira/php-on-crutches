@@ -152,7 +152,7 @@
          $path = $directory.$file.$ext;
          $web_path = config('prefix').$path;
 
-         if (file_exists(WEBROOT.$path)) {
+         if (is_file(WEBROOT.$path)) {
             $web_path .= '?'.filemtime(WEBROOT.$path);
          } else {
             log_error("Asset not found: /$path");
