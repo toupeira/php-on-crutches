@@ -583,6 +583,7 @@
          if ($type) { $message .= " with type '$type'"; }
          log_info($message);
 
+         $this->headers = array();
          $this->render_text('');
          return $status;
       }
