@@ -311,6 +311,19 @@
          return false;
       }
 
+      function clear() {
+         if ($this->_frozen) {
+            throw new ApplicationError("Can't change frozen object");
+         } else {
+            $this->_mapper = null;
+            $this->_attributes = array();
+            $this->_changed_attributes = array();
+            $this->_errors = array();
+            $this->_new_record = true;
+            return true;
+         }
+      }
+
       function freeze() {
          $this->_frozen = true;
          return $this;
