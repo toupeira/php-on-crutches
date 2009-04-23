@@ -34,7 +34,7 @@
          $this->send_headers();
 
          if (config('debug') and $this->is_trusted() and $exception instanceof Exception) {
-            $this->show_debug($exception);
+            $this->debug($exception);
          } else {
             if (View::find_template("errors/$status")) {
                $this->render($status);
@@ -49,7 +49,7 @@
          return $this->_output;
       }
 
-      function show_debug($exception, $expand=false) {
+      function debug($exception=null, $expand=false) {
          if (!$exception instanceof Exception) {
             throw new NotFound();
          }
@@ -71,7 +71,6 @@
             $this->set('line', $line);
             $this->set('trace', $trace);
 
-            $this->set('params', Dispatcher::$params);
             $this->set('expand', $expand);
 
             # Get source code where the error occurred

@@ -169,7 +169,7 @@
          $mail = new Mail();
          $mail->subject = get_class($exception);
          $mail->alt_body = dump_exception($exception);
-         $mail->body = $controller->show_debug($exception, true);
+         $mail->body = $controller->debug($exception, true);
          $mail->content_type = 'text/html';
 
          foreach ((array) $recipients as $address) {

@@ -93,9 +93,14 @@
 <pre><?= $trace ?></pre>
 <? endif ?>
 
-<? if ($params): ?>
-<h3>Request Parameters:</h3>
-<?= dump($params) ?>
+<? if ($_GET): ?>
+<h3>GET Parameters:</h3>
+<?= dump($_GET) ?>
+<? endif ?>
+
+<? if ($_POST): ?>
+<h3>POST Parameters:</h3>
+<?= dump($_POST) ?>
 <? endif ?>
 
 <? if ($_COOKIE): ?>
