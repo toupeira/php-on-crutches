@@ -199,20 +199,24 @@
    }
 
    # Return a sorted array
-   function sorted(array $array) {
+   function sorted(array $array, $reverse=false) {
       if (isset($array[0])) {
          sort($array);
       } elseif (!empty($array)) {
          ksort($array);
       }
 
-      return $array;
+      return $reverse ? array_reverse($array) : $array;
    }
 
    function sort_by(array &$array, $key, $reverse=false) {
-      $mul = ($reverse ? -1 : 1);
+      if (!preg_match('/^\w+$/i', $key)) {
+         throw new ValueError("Invalid key '$key'");
+      }
+
+      $reverse = ($reverse ? -1 : 1);
       return uasort($array,
-         proc("$mul * compare(getf(\$a, '$key'), getf(\$b, '$key'))", 2));
+         proc("$reverse * compare(getf(\$a, '$key'), getf(\$b, '$key'))", 2));
    }
 
    function compare($a, $b) {

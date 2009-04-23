@@ -451,6 +451,10 @@
       # Replace given options
       function replace($key, $options) {
          if (array_key_exists($key, $this->_options)) {
+            if ($options === array(null) or $options === array('')) {
+               $options = null;
+            }
+
             $this->_sql = null;
             $this->_options[$key] = $options;
             return $this;

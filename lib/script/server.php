@@ -97,7 +97,8 @@ CONF
    }
 
    # Ignore interrupt signal
-   pcntl_signal(2, proc(''));
+   function ignore_interrupt() {};
+   pcntl_signal(2, ignore_interrupt);
 
    system("lighttpd -D -f {$config->path}");
 
