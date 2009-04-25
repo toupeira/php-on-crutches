@@ -143,10 +143,11 @@
    function mimetype($path) {
       if (is_file($path)) {
          $path = escapeshellarg($path);
-         return any(
-            trim(`file --brief --mime-type $path`),
-            'application/octet-stream'
-         );
+         if ($type = trim(`file --brief --mime-type $path`) and preg_match('|^[-+\w\./]+$|i', $type)) {
+            return $type;
+         } else {
+            return 'application/octet-stream';
+         }
       } else {
          throw new ApplicationError("Invalid path '$path'");
       }

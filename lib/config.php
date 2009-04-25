@@ -111,6 +111,7 @@
       'debug_toolbar'     => false,
       'debug_redirects'   => false,
       'debug_queries'     => false,
+      'debug_controller'  => false,
 
       'notify_errors'     => null,
       'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied'),

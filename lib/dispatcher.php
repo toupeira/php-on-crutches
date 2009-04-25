@@ -118,6 +118,14 @@
          array_unshift($args, $text);
 
          log_info(call_user_func_array('sprintf', $args));
+
+         if (log_level(LOG_DEBUG)) {
+            log_debug(sprintf(
+               'Memory usage: %s / Peak: %s',
+               format_size(memory_get_usage(true)),
+               format_size(memory_get_peak_usage(true))
+            ));
+         }
       }
    }
 

@@ -1,29 +1,17 @@
 <?
 
    $_CONFIG['production'] = array(
-      # Log level
-      'log_level'         => LOG_WARN,
+      'log_level'          => LOG_WARN,
 
-      # Session store (php, cookie, cache, database)
-      'session_store'     => 'php',
+      'session_store'      => 'php',
+      'cache_store'        => 'memory',
 
-      # Cache store (memory, file, apc, or xcache)
-      'cache_store'       => 'memory',
+      'send_mails'         => true,
+      'form_token'         => true,
+      'merge_assets'       => true,
+      'cache_views'        => true,
 
-      # Enable view caching
-      'cache_views'       => true,
-
-      # Send emails
-      'send_mails'        => true,
-
-      # Request forgery protection
-      'form_token'        => true,
-
-      # Merge CSS and JS files
-      'merge_assets'      => true,
-
-      # Email addresses to notify on errors
-      'notify_errors'     => '',
+      'notify_errors'      => '',
    );
 
 ?>

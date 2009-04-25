@@ -323,6 +323,7 @@
       }
 
       function get_first() {
+         $this->limit(1);
          $this->_position = 0;
          if ($this->valid()) {
             return $this->current();

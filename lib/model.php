@@ -60,7 +60,7 @@
                   array_key_exists($key, $this->_attributes)
                );
 
-               if ($getter and $value = $this->$key) {
+               if ($getter and !blank($value = $this->$key)) {
                   return $value;
                }
             }

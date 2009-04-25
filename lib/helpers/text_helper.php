@@ -146,11 +146,15 @@
    define_default('GB', 1024 * MB);
 
    function format_size($size, $format=null) {
-      if ($size < KB) {
-         $text = _("1 KB");
-      } elseif ($size < MB) {
+      if ($size < MB) {
          $text = _("%s KB");
-         $size = sprintf(any($format, '%d'), $size / KB);
+         if ($size <= 0) {
+            $size = 0;
+         } elseif ($size < KB) {
+            $size = 1;
+         } else {
+            $size = sprintf(any($format, '%d'), $size / KB);
+         }
       } elseif ($size < GB) {
          $text = _("%s MB");
          $size = sprintf(any($format, '%.1f'), $size / MB);
