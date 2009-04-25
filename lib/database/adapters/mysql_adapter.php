@@ -36,6 +36,7 @@
          foreach ($rows as $row) {
             $tables[] = array_shift($row);
          }
+
          return $tables;
       }
 

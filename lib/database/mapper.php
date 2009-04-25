@@ -10,7 +10,7 @@
    require LIB.'database/query_set.php';
    require LIB.'database/association.php';
 
-   abstract class DatabaseMapper extends ModelMapper
+   class DatabaseMapper extends ModelMapper
    {
       static function load($model) {
          static $_cache;
@@ -40,8 +40,12 @@
 
       protected $_scope = array();
 
-      function __construct() {
+      function __construct($table=null, $model=null, $connection=null) {
          parent::__construct();
+
+         if (!is_null($table))      $this->_table      = $table;
+         if (!is_null($model))      $this->_model      = $model;
+         if (!is_null($connection)) $this->_connection = $connection;
 
          if (empty($this->_database)) {
             throw new ConfigurationError("No database set for model '{$this->_model}'");

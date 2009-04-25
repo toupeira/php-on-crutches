@@ -17,12 +17,15 @@
          }
 
          $config = config('database');
-         $names = array_keys($config);
+         $default = array_shift(array_keys($config));
 
          if ($name == 'default' and !isset($config[$name])) {
-            $real_name = array_shift($names);
+            $real_name = $default;
          } else {
             $real_name = $name;
+            if ($name == $default) {
+               $name = 'default';
+            }
          }
 
          while (is_string($options = $config[$real_name])) {
@@ -42,7 +45,7 @@
                }
 
                $connection = new $adapter($real_name, $options);
-               return $_cache[$name] = $connection;
+               return $_cache[$name] = $_cache[$real_name] = $connection;
             } else {
                throw new ConfigurationError("No driver set for database '$real_name'");
             }
@@ -125,9 +128,23 @@
       function get_tables() {
          $key = "db-{$this->_name}-tables";
          if ($tables = cache($key)) {
-            return $tables;
+            return (array) $tables;
          } else {
-            return cache_set($key, $this->fetch_tables());
+            return cache_set($key, (array) $this->fetch_tables());
+         }
+      }
+
+      function __get($key) {
+         if ($table = $this->table($key) and !method_exists($this, "get_$key")) {
+            return $table;
+         } else {
+            return parent::__get($key);
+         }
+      }
+
+      function table($table) {
+         if (in_array($table, (array) $this->tables)) {
+            return new DatabaseMapper($table, '', $this);
          }
       }
 

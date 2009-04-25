@@ -311,25 +311,22 @@
          return false;
       }
 
-      function clear($recurse=1) {
-         if ($this->_frozen) {
-            throw new ApplicationError("Can't change frozen object");
-         } else {
-            if ($recurse) {
-               foreach ($this->_attributes as $key => $value) {
-                  if ($value instanceof Model and $value != $this) {
-                     $value->clear(max(0, $recurse - 1));
-                  }
+      function dispose($recurse=1, $parent=null) {
+         if ($recurse) {
+            foreach ($this->_attributes as $value) {
+               if ($value instanceof Model and $value != $parent) {
+                  $value->dispose(max(0, $recurse - 1), any($parent, $this));
                }
             }
-
-            $this->_mapper = null;
-            $this->_attributes = array();
-            $this->_changed_attributes = array();
-            $this->_errors = array();
-            $this->_new_record = true;
-            return true;
          }
+
+         $this->_mapper = null;
+         $this->_attributes = array();
+         $this->_changed_attributes = array();
+         $this->_errors = array();
+         $this->_new_record = true;
+
+         return true;
       }
 
       function freeze() {

@@ -33,7 +33,7 @@
          if ($message) {
             $message = sprintf($message, $type);
          } else {
-            $message = "Invalid argument of type '$type'";
+            $message = "Invalid argument '$value' of type '$type'";
          }
 
          parent::__construct($message);

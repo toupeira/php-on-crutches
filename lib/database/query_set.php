@@ -75,24 +75,32 @@
       }
 
       function fetch() {
-         if ($object = $this->statement->fetch_load($this->model)) {
-            if (is_array($this->_preload)) {
-               $object->load($this->_preload);
-            }
+         if ($this->model) {
+            if ($object = $this->statement->fetch_load($this->model)) {
+               if (is_array($this->_preload)) {
+                  $object->load($this->_preload);
+               }
 
-            return $object;
+               return $object;
+            }
+         } else {
+            return $this->statement->fetch();
          }
       }
 
       function fetch_all() {
-         if ($objects = $this->statement->fetch_all_load($this->model)) {
-            if (is_array($this->_preload)) {
-               foreach ($objects as $object) {
-                  $object->load((array) $this->_preload);
+         if ($this->model) {
+            if ($objects = $this->statement->fetch_all_load($this->model)) {
+               if (is_array($this->_preload)) {
+                  foreach ($objects as $object) {
+                     $object->load((array) $this->_preload);
+                  }
                }
-            }
 
-            return $objects;
+               return $objects;
+            }
+         } else {
+            return $this->statement->fetch_all();
          }
       }
 
@@ -646,7 +654,7 @@
       }
 
       function valid() {
-         return is_object($this->current());
+         return !is_null($this->current());
       }
 
       # ArrayAccess implementation
