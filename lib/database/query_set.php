@@ -391,6 +391,22 @@
          return $status;
       }
 
+      protected function __get_custom($key) {
+         if (substr($key, 0, 4) == 'not_') {
+            $key = substr($key, 4);
+            $enabled = false;
+         } else {
+            $enabled = true;
+         }
+
+         if ($column = $this->_mapper->attributes[$key]
+             and $column['type'] == 'bool') {
+            return $this->where($key, $enabled);
+         } else {
+            return false;
+         }
+      }
+
       # Handle automatic methods
       function __call($method, $args) {
          if (count($args) == 1 and is_array($args[0])) {
@@ -468,6 +484,7 @@
 
             $this->_sql = null;
             $this->_options[$key] = $options;
+
             return $this;
          } else {
             throw new UndefinedMethod($this, $key);
@@ -482,6 +499,7 @@
                (array) $this->_options[$key],
                (array) $options
             );
+
             return $this;
          } else {
             throw new UndefinedMethod($this, $key);

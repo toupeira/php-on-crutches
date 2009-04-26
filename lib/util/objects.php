@@ -41,6 +41,9 @@
             return $this->$getter();
          } elseif (method_exists($this, $key)) {
             return $this->$key();
+         } elseif (method_exists($this, '__get_custom') and
+                  ($value = $this->__get_custom($key)) !== false) {
+            return $value;
          } else {
             throw new UndefinedMethod($this, $key);
          }
