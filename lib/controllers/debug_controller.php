@@ -75,7 +75,7 @@
             foreach (get_declared_classes() as $model) {
                $class = new ReflectionClass($model);
                if ($class->isSubclassOf(ActiveRecord) and $class->isInstantiable()) {
-                  $models[DB($model)->connection->name][$model] = DB($model)->count;
+                  $models[DB($model)->connection->display_name][$model] = DB($model)->count;
                }
             }
 

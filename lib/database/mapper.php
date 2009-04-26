@@ -40,17 +40,28 @@
 
       protected $_scope = array();
 
-      function __construct($table=null, $model=null, $connection=null) {
+      function __construct($connection=null, $table=null, $model=null) {
          parent::__construct();
 
-         if (!is_null($table))      $this->_table      = $table;
-         if (!is_null($model))      $this->_model      = $model;
-         if (!is_null($connection)) $this->_connection = $connection;
+         if ($connection instanceof DatabaseConnection) {
+            $this->_connection = $connection;
+            $this->_database = $connection->name;
+            $this->_model = null;
+         }
+
+         if (is_string($table)) {
+            $this->_table = $table;
+            $this->_model = null;
+         }
+
+         if ($model) {
+            $this->_model = classify($model);
+         }
 
          if (empty($this->_database)) {
-            throw new ConfigurationError("No database set for model '{$this->_model}'");
+            throw new ValueError(get_class($this), "No database set for '%s'");
          } elseif (empty($this->_table) and !($this->_table = tableize($this->_model))) {
-            throw new ConfigurationError("No table set for model '{$this->_model}'");
+            throw new ValueError(get_class($this), "No table set for '%s'");
          }
 
          $key = $this->_primary_key;
@@ -65,27 +76,29 @@
             }
          }
 
-         foreach (array('has_many', 'has_one', 'belongs_to') as $type) {
-            if (!empty($this->{'_'.$type})) {
-               require_once LIB."database/associations/{$type}_association.php";
-               $association = camelize($type).'Association';
-               foreach ($this->{'_'.$type} as $key => $options) {
-                  if (is_numeric($key)) {
-                     $key = $options;
-                     $options = null;
-                  }
+         if ($this->_model) {
+            foreach (array('has_many', 'has_one', 'belongs_to') as $type) {
+               if (!empty($this->{'_'.$type})) {
+                  require_once LIB."database/associations/{$type}_association.php";
+                  $association = camelize($type).'Association';
+                  foreach ($this->{'_'.$type} as $key => $options) {
+                     if (is_numeric($key)) {
+                        $key = $options;
+                        $options = null;
+                     }
 
-                  $this->_associations[$key] = new $association($this->_model, classify($key), $options);
+                     $this->_associations[$key] = new $association($this->_model, classify($key), $options);
+                  }
                }
             }
          }
       }
 
       function inspect() {
-         return parent::inspect(array(
-            'model'    => $this->_model,
+         return Object::inspect(array(
             'database' => $this->_database,
             'table'    => $this->_table,
+            'model'    => $this->_model,
          ));
       }
 

@@ -9,7 +9,7 @@
 
    class SqliteAdapter extends DatabaseConnection
    {
-      function get_name() {
+      function get_display_name() {
          return basename($this->options['database']);
       }
 

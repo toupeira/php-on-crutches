@@ -83,6 +83,10 @@
          return $this->_name;
       }
 
+      function get_display_name() {
+         return $this->_name;
+      }
+
       function get_options() {
          return $this->_options;
       }
@@ -144,7 +148,7 @@
 
       function table($table) {
          if (in_array($table, (array) $this->tables)) {
-            return new DatabaseMapper($table, '', $this);
+            return new DatabaseMapper($this, $table);
          }
       }
 

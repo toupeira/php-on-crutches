@@ -9,7 +9,7 @@
 
    class MysqlAdapter extends DatabaseConnection
    {
-      function get_name() {
+      function get_display_name() {
          return "{$this->_options['database']}@{$this->_options['hostname']}";
       }
 
