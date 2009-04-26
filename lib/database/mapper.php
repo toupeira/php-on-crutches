@@ -54,12 +54,13 @@
          }
 
          $key = $this->_primary_key;
-         $columns = $this->attributes;
-         if (!array_key_exists($key, $columns) or !$columns[$key]['key']) {
-            foreach ($columns as $key => $options) {
-               if ($options['key']) {
-                  $this->_primary_key = $key;
-                  break;
+         if ($columns = $this->attributes) {
+            if (!array_key_exists($key, $columns) or !$columns[$key]['key']) {
+               foreach ($columns as $key => $options) {
+                  if ($options['key']) {
+                     $this->_primary_key = $key;
+                     break;
+                  }
                }
             }
          }

@@ -152,7 +152,7 @@
          $key = "db-{$this->_name}-attributes-$table";
          if ($attributes = cache($key)) {
             return $attributes;
-         } else {
+         } elseif (in_array($table, $this->tables)) {
             return cache_set($key, $this->fetch_attributes($table));
          }
       }
