@@ -210,6 +210,14 @@
 
    class DatabaseStatement extends PDOStatement
    {
+      function __get($key) {
+         if (method_exists($this, $key)) {
+            return $this->$key();
+         } else {
+            throw new UndefinedMethod($this, $key);
+         }
+      }
+
       function execute(array $params=null) {
          parent::execute((array) $params);
          return $this;

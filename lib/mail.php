@@ -96,7 +96,13 @@
 
          log_info("Sending mail to '".implode("', '", $this->_to)."'");
 
-         if (!config('send_mails')) {
+         if (config('send_mails')) {
+            if ($this->_mailer->send()) {
+               return true;
+            } else {
+               throw new MailerError($this->error_info);
+            }
+         } else {
             $GLOBALS['_SENT_MAILS'][] = array(
                'from'      => $this->from,
                'from_name' => $this->from_name,
@@ -110,12 +116,6 @@
             );
 
             return true;
-         }
-
-         if ($this->_mailer->send()) {
-            return true;
-         } else {
-            throw new MailerError($this->error_info);
          }
       }
    }

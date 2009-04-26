@@ -7,6 +7,19 @@
 # $Id$
 #
 
+   # Size constants
+   define('KB', 1024);
+   define('MB', 1024 * KB);
+   define('GB', 1024 * MB);
+
+   # Time constants
+   define('MINUTE', 60);
+   define('HOUR',   60 * MINUTE);
+   define('DAY',    24 * HOUR);
+   define('WEEK',    7 * DAY);
+   define('MONTH',  30 * DAY);
+   define('YEAR',  365 * DAY);
+
    # Shorthand for newlines
    define('N', "\n");
 

@@ -51,8 +51,17 @@
             throw new ConfigurationError("No database set for model '{$this->_model}'");
          } elseif (empty($this->_table) and !($this->_table = tableize($this->_model))) {
             throw new ConfigurationError("No table set for model '{$this->_model}'");
-         } elseif (empty($this->_primary_key)) {
-            throw new ConfigurationError("No primary key set for model '{$this->_model}'");
+         }
+
+         $key = $this->_primary_key;
+         $columns = $this->attributes;
+         if (!array_key_exists($key, $columns) or !$columns[$key]['key']) {
+            foreach ($columns as $key => $options) {
+               if ($options['key']) {
+                  $this->_primary_key = $key;
+                  break;
+               }
+            }
          }
 
          foreach (array('has_many', 'has_one', 'belongs_to') as $type) {

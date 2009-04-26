@@ -35,10 +35,6 @@
          $class = classify($controller.'_controller');
          self::$params = array_merge($_GET, $_POST, $params);
 
-         if (log_level(LOG_INFO)) {
-            self::log_header($class, $action);
-         }
-
          # Collect the arguments for the action
          $args = $params;
          unset($args['controller']);
@@ -48,12 +44,13 @@
          }
 
          # Load the controller and perform the action
+         self::log_header($class, $action);
+
          self::$controller = new $class(self::$params);
          self::$controller->perform($action, $args);
 
-         if (log_level(LOG_INFO)) {
-            self::log_footer();
-         }
+         self::log_footer();
+         self::log_memory();
 
          # Print the output
          if (config('debug_toolbar')) {
@@ -74,6 +71,10 @@
       }
 
       static function log_header($class, $action, $force=false) {
+         if (!$force and !log_level(LOG_INFO)) {
+            return;
+         }
+
          $text = "\n[1m{$_SERVER['REQUEST_METHOD']} {$_SERVER['REQUEST_URI']}[0m => "
                . "[0;36m$class#$action[0m (for {$_SERVER['REMOTE_ADDR']} "
                . "at ".strftime("%F %T").")\n";
@@ -95,6 +96,10 @@
       }
 
       static function log_footer() {
+         if (!log_level(LOG_INFO)) {
+            return;
+         }
+
          $time = microtime(true) - Dispatcher::$start_time;
          $status = any(Dispatcher::$controller->headers['Status'], 200);
          
@@ -118,13 +123,18 @@
          array_unshift($args, $text);
 
          log_info(call_user_func_array('sprintf', $args));
+      }
 
-         if (log_level(LOG_DEBUG)) {
-            log_debug(sprintf(
-               'Memory usage: %s / Peak: %s',
-               format_size(memory_get_usage(true)),
-               format_size(memory_get_peak_usage(true))
-            ));
+      function log_memory() {
+         if (log_level(LOG_DEBUG) or $limit = config('notify_memory')) {
+            $memory = memory_get_usage(true);
+            $peak = memory_get_peak_usage(true);
+            if ($peak > $limit) {
+               log_warn(sprintf(
+                  'Memory usage: %s / Peak: %s',
+                  format_size($memory), format_size($peak)
+               ));
+            }
          }
       }
    }

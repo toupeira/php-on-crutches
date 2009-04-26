@@ -63,9 +63,28 @@
 
    # Truncate text to a given length. If $add_title is set, the full text
    # will be added as a tooltip.
-   function truncate($text, $length=40, $add_title=false, $add='...') {
-      if (strlen($text) > $length) {
-         $truncated = rtrim(mb_substr($text, 0, $length));
+   function truncate($text, $max_length=40, $add_title=false, $add='...') {
+      $length = mb_strlen($text);
+      $lowercase = mb_strtolower($text);
+      for ($i = 0; $i < $length; $i++) {
+         $char = mb_substr($lowercase, $i, 1);
+         switch ($char) {
+            case 'm':
+            case 'w':
+               $max_length -= 1;
+               break;
+            case ' ':
+            case 'i':
+            case 'l':
+            case 't':
+            case '1':
+               $max_length += 1;
+               break;
+         }
+      }
+
+      if ($length > $max_length) {
+         $truncated = rtrim(mb_substr($text, 0, $max_length));
          if ($add_title) {
             return '<span title="'.h($text).'">'.h($truncated).$add.'</span>';
          } else {
@@ -78,6 +97,11 @@
             return $text;
          }
       }
+   }
+
+   function highlight($text, $pattern) {
+      $pattern = preg_quote($pattern);
+      return preg_replace("/($pattern)/", '<strong>\1</strong>', $text);
    }
 
    function simple_format($text) {
@@ -141,10 +165,6 @@
       }
    }
 
-   define_default('KB', 1024);
-   define_default('MB', 1024 * KB);
-   define_default('GB', 1024 * MB);
-
    function format_size($size, $format=null) {
       if ($size < MB) {
          $text = _("%s KB");
@@ -165,13 +185,6 @@
 
       return sprintf($text, $size);
    }
-
-   define_default('MINUTE', 60);
-   define_default('HOUR',   60 * MINUTE);
-   define_default('DAY',    24 * HOUR);
-   define_default('WEEK',    7 * DAY);
-   define_default('MONTH',  30 * DAY);
-   define_default('YEAR',  365 * DAY);
 
    function to_time($time) {
       return is_numeric($time) ? $time : strtotime($time);
