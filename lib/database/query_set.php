@@ -106,7 +106,7 @@
 
       function fetch_column($key) {
          if ($object = $this->fetch()) {
-            return $object->$key;
+            return getf($object, $key);
          }
       }
 
@@ -149,7 +149,7 @@
 
                $this->order();
 
-               if ($this->_paginate or $this->_options['having'] or is_numeric($this->_options['limit']) or is_numeric($this->_options['offset'])) {
+               if ($this->_paginate or $this->_options['group'] or $this->_options['having'] or is_numeric($this->_options['limit']) or is_numeric($this->_options['offset'])) {
                   $this->_sql = "SELECT count(*) FROM ({$this->sql}) internal_count_alias";
                } else {
                   $this->replace_select('count(*)');
@@ -545,9 +545,12 @@
          $values = array();
          foreach ($this->objects as $object) {
             if (count($keys) == 1) {
-               $values[] = $object->$key;
+               $values[] = getf($object, $key);
             } else {
-               $values[] = array_get($object->attributes, $keys);
+               $values[] = array_get(
+                  is_array($object) ? $object : $object->attributes,
+                  $keys
+               );
             }
          }
 
@@ -566,7 +569,7 @@
          }
 
          foreach ($this->objects as $object) {
-            $map[$object->$key] = $object->$value;
+            $map[getf($object, $key)] = getf($object, $value);
          }
 
          return $map;
