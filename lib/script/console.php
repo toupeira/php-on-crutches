@@ -84,11 +84,12 @@ fi
       if (in_array($_command, array('?', 'help'))) {
          print "\n";
          print "  Special commands:\n";
-         print "    help, ?            Show this help\n";
-         print "    help FUNCTION      Show function signature\n";
-         print "    exit, quit         Exit the console\n";
-         print "    time [COUNT] CODE  Show execution time\n";
-         print "    ls, cd             Shell aliases\n";
+         print "    help, ?               Show this help\n";
+         print "    help FUNCTION         Show function signature\n";
+         print "    exit, quit            Exit the console\n";
+         print "    time [COUNT] CODE     Show execution time\n";
+         print "    sql [DATABASE] QUERY  Execute SQL query\n";
+         print "    ls, cd                Shell aliases\n";
          print "\n";
          print "  Helpers:\n";
          print "    get(\$path, \$params)\n";
@@ -122,6 +123,93 @@ fi
             $_command = 'print ""; $_start = microtime(true); '.$_command
                      . '; printf("\n%.5f seconds\n", microtime(true) - $_start)';
          }
+      }
+
+      # Execute SQL query
+      elseif (substr($_command, 0, 4) == 'sql ') {
+         $_command = substr($_command, 4);
+         print "$_command\n";
+
+         list($db, $query) = explode(' ', $_command, 2);
+         if (config('database', $db)) {
+            $db = DB($db);
+         } else {
+            $db = DB();
+            $query = $_command;
+         }
+
+         $start = microtime(true);
+
+         try {
+            $result = $db->execute($query);
+         } catch (Exception $e) {
+            print dump_exception($e);
+            continue;
+         }
+
+         $columns = array();
+         $strings = array();
+         for ($i = 0; $i < $result->columnCount(); $i++) {
+            $column = $result->getColumnMeta($i);
+            $columns[$column['name']] = mb_strlen($column['name']);
+
+            if ($column['native_type'] == 'VAR_STRING') {
+               $strings[] = $column['name'];
+            }
+         }
+
+         $rows = $result->fetch_all();
+         foreach ($rows as $row) {
+            foreach ($row as $key => $value) {
+               $columns[$key] = max(is_null($value) ? 4 : mb_strlen($value), $columns[$key]);
+            }
+         }
+
+         $time = microtime(true) - $start;
+
+         print "\n";
+         if ($rows) {
+            print "+";
+            foreach ($columns as $key => $length) {
+               printf("-%{$length}s-+", str_repeat('-', $length));
+            }
+            print "\n";
+
+            print "|";
+            foreach ($columns as $key => $length) {
+               printf(" %-{$length}s |", $key);
+            }
+            print "\n";
+
+            print "+";
+            foreach ($columns as $key => $length) {
+               printf("-%{$length}s-+", str_repeat('-', $length));
+            }
+            print "\n";
+
+            foreach ($rows as $row) {
+               print "|";
+               foreach ($row as $key => $value) {
+                  $align = (in_array($key, $strings) ? '-' : '');
+                  printf(" %$align{$columns[$key]}s |", is_null($value) ? 'NULL' : $value);
+               }
+               print "\n";
+            }
+
+            print "+";
+            foreach ($columns as $key => $length) {
+               printf("-%{$length}s-+", str_repeat('-', $length));
+            }
+            print "\n";
+
+            printf("%s in set", pluralize(count($rows), 'row'));
+         } else {
+            print "Empty set";
+         }
+
+         printf(" (%.2f sec)\n\n", $time);
+
+         continue;
       }
 
       # 'ls' wrapper
