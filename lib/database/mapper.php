@@ -406,7 +406,9 @@
                #
                $condition .= "$operator$value";
                for ($i = 0; $i < $count; $i++) {
-                  $params[] = $this->convert(array_shift_arg($values));
+                  $params[] = $this->convert(
+                     array_shift_arg($values, "Missing value at '$condition'")
+                  );
                   array_shift($keys);
                }
 
@@ -419,7 +421,9 @@
                # Use array value as column name
                #   e.g.: find('key', $value)
                $key = $value;
-               $value = $this->convert(array_shift_arg($values));
+               $value = $this->convert(
+                  array_shift_arg($values, "Missing value at '$condition'")
+               );
                array_shift($keys);
 
                $condition .= $operator.$this->add_condition($key, $value, $params);

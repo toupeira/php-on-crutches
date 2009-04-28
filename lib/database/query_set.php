@@ -211,8 +211,10 @@
 
          $sql .= ' FROM '.implode(', ', $from);
 
-         if ($join = $options['join']) {
-            $sql .= ' '.implode(' ', (array) $join);
+         list($conditions, $join_params) = $this->_mapper->build_condition($options['join']);
+         if (!blank($conditions)) {
+            $sql .= " $conditions";
+            $params = array_merge($params, $join_params);
          }
 
          list($conditions, $where_params) = $this->_mapper->build_condition($options['where']);

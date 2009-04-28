@@ -105,7 +105,9 @@
                str_replace('%', '%%', $sql)
             ));
 
-            $query = call_user_func_array('sprintf', $args);
+            if (!$query = @call_user_func_array('sprintf', $args)) {
+               $query = $sql;
+            }
             log_info("  SQL [{$this->name}] [1m$query[0m");
             Dispatcher::$db_queries++;
 
