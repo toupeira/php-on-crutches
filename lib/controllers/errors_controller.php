@@ -31,7 +31,7 @@
          }
 
          $this->headers['Status'] = $status;
-         $this->send_headers();
+         $this->send_headers(true);
 
          if (config('debug') and $this->is_trusted() and $exception instanceof Exception) {
             $this->debug($exception);

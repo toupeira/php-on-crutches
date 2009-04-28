@@ -468,26 +468,31 @@
       }
 
       # Send the configured headers
-      function send_headers() {
-         foreach ((array) $this->headers as $header => $value) {
+      function send_headers($ignore_errors=false) {
+         foreach ((array) $this->headers as $key => $value) {
             if ($value !== null) {
-               if ($header == 'Status') {
+               if ($key == 'Status') {
                   $header = "HTTP/1.x $value";
-               } elseif ($header == 'Content-Type'
+               } elseif ($key == 'Content-Type'
                            and substr($value, 0, 5) == 'text/'
                            and strstr($value, '; charset') === false)
                {
-                  $header = "$header: $value; charset=utf-8";
+                  $header = "$key: $value; charset=utf-8";
                } else {
-                  $header = "$header: $value";
+                  $header = "$key: $value";
                }
 
-               if (PHP_SAPI == 'cli') {
+               log_debug("Sending header '$header'");
+
+               if (PHP_SAPI == 'cli' or $ignore_errors) {
                   # Ignore errors in console
                   @header($header);
                } else {
                   header($header);
-                  unset($this->headers[$header]);
+               }
+
+               if (PHP_SAPI != 'cli') {
+                  unset($this->headers[$key]);
                }
             }
          }
