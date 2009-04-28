@@ -95,22 +95,22 @@
 
 <? if ($_GET): ?>
 <h3>GET Parameters:</h3>
-<?= dump($_GET) ?>
+<?= dump(sorted($_GET)) ?>
 <? endif ?>
 
 <? if ($_POST): ?>
 <h3>POST Parameters:</h3>
-<?= dump($_POST) ?>
+<?= dump(sorted($_POST)) ?>
 <? endif ?>
 
 <? if ($_COOKIE): ?>
 <h3>Cookies</h3>
-<?= dump($_COOKIE) ?>
+<?= dump(sorted($_COOKIE)) ?>
 <? endif ?>
 
 <? if ($_SESSION): ?>
 <h3>Session Variables:</h3>
-<?= dump($_SESSION) ?>
+<?= dump(sorted($_SESSION)) ?>
 <? endif ?>
 
 <? if ($expand_server): ?>
@@ -120,7 +120,7 @@
 <div style="display:none">
 <? endif ?>
    <h3>Server Information:</h3>
-   <?= dump($_SERVER) ?>
+   <?= dump(sorted($_SERVER)) ?>
 </div>
 
 </body>
