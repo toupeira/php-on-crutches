@@ -348,8 +348,12 @@
             $key = array_shift($keys);
             $value = $this->convert(array_shift($values));
 
-            if ($condition and $operator == '') {
-               $operator = ' AND ';
+            if ($operator == '' and $condition) {
+               if (preg_match('/\b(left|right|inner|outer|natural)\s+join\b/i', $condition)) {
+                  $operator = ' ';
+               } else {
+                  $operator = ' AND ';
+               }
             }
 
             if (is_string($key)) {
@@ -415,11 +419,13 @@
             } elseif (strstr($value, ' ') !== false) {
                # Use array value as literal condition, without placeholders
                #   e.g.: find('key LIKE "%value%"')
+               #
                $condition .= "$operator$value";
 
             } elseif (is_string($value) and !blank($value)) {
                # Use array value as column name
                #   e.g.: find('key', $value)
+               #
                $key = $value;
                $value = $this->convert(
                   array_shift_arg($values, "Missing value at '$condition'")

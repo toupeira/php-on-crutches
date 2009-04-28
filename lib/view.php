@@ -117,6 +117,12 @@
             } else {
                $key = underscore(get_class($value));
             }
+         } elseif (is_array($key)) {
+            foreach ($key as $key => $value) {
+               $this->set($key, $value);
+            }
+
+            return $this;
          }
 
          $this->_data[$key] = &$value;

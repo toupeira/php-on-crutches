@@ -165,6 +165,10 @@
       }
    }
 
+   function format_number($number, $decimals=0, $dec_point='.', $thousands_sep="'") {
+      return number_format($number, $decimals, $dec_point, $thousands_sep);
+   }
+
    function format_size($size, $format=null) {
       if ($size < MB) {
          $text = _("%s KB");
