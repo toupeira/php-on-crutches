@@ -11,6 +11,10 @@
    {
       protected $_load_attributes = true;
       protected $_booleans = array();
+
+      protected $_primary_key;
+      protected $_key_type;
+
       protected $_conflicts = array();
 
       function __construct(array $attributes=null, array $defaults=null) {
@@ -27,6 +31,9 @@
                   $this->_booleans[] = $key;
                }
             }
+
+            $this->_primary_key = $this->mapper->primary_key;
+            $this->_key_type = $this->mapper->key_type;
          }
 
          # Set the default values
@@ -75,7 +82,8 @@
       }
 
       function get_id() {
-         return $this->_attributes[$this->mapper->primary_key];
+         $id = $this->_attributes[$this->_primary_key];
+         return ($id and $this->_key_type == 'integer') ? intval($id) : $id;
       }
 
       function get_conflicts() {

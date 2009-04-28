@@ -29,17 +29,17 @@
 
    # Dump a raw value
    function dump_value($value) {
-      if (is_numeric($value)) {
+      if (is_string($value)) {
+         return "'$value'";
+      } elseif (is_numeric($value)) {
          return $value;
       } elseif (is_array($value)) {
          return trim(print_r($value, true));
       } elseif (is_object($value)) {
          if (method_exists($value, 'inspect')) {
             return $value->inspect();
-         } elseif (method_exists($value, '__toString') and !$value instanceof Exception) {
-            return $value->__toString();
          } else {
-            return get_class($value);
+            return Object::inspect(get_object_vars($value), get_class($value));
          }
       } elseif (is_resource($value)) {
          ob_start();

@@ -18,7 +18,7 @@
          return parameterize($this->__toString());
       }
 
-      function inspect($data=null) {
+      function inspect($data=null, $name=null) {
          if (is_array($data) and $data) {
             foreach ($data as $key => $value) {
                if ($value and !is_array($value) and $key != 'password') {
@@ -32,7 +32,11 @@
             $data = ($values ? ' '.implode(', ', $values) : null);
          }
 
-         return '#<'.get_class($this).($data ? $data : '').'>';
+         if (is_null($name)) {
+            $name = get_class($this);
+         }
+
+         return '#<'.$name.($data ? $data : '').'>';
       }
 
       # Automatic getters

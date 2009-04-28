@@ -3,6 +3,8 @@
 
    set_language('C');
 
+   config_set('debug_controller', true);
+
    Router::clear();
    Router::add(array(
       ':controller/:action/*id' => array(

@@ -487,6 +487,7 @@
                   @header($header);
                } else {
                   header($header);
+                  unset($this->headers[$header]);
                }
             }
          }
@@ -554,7 +555,7 @@
             $this->headers['Content-Type'] = $type;
          }
 
-         while (ob_get_level()) {
+         if (config('output_buffering')) {
             ob_end_clean();
          }
 
@@ -583,7 +584,6 @@
          if ($type) { $message .= " with type '$type'"; }
          log_info($message);
 
-         $this->headers = array();
          $this->render_text('');
          return $status;
       }

@@ -18,6 +18,14 @@
          );
       }
 
+      function assert($value, $message="%s") {
+         return $this->assertTrue($value, $message);
+      }
+
+      function assertSame($first, $second, $message="%s") {
+         return $this->assertIdentical($first, $second, $message);
+      }
+
       function assertMatch($pattern, $subject, $message="%s") {
          return $this->assertWantedPattern($pattern, $subject, $message);
       }
@@ -55,8 +63,8 @@
                      . ", got [".$dumper->describeValue(count($value)) . "]";
          }
 
-         return $this->assertEqual(
-            $count, count($value), $message);
+         return $this->assertSame(
+            intval($count), intval(count($value)), $message);
       }
 
       function assertRaise($code, $class=ApplicationError) {
@@ -74,7 +82,7 @@
       }
 
       function assertFileContents($text, $file, $message="%s") {
-         return $this->assertEqual($text, trim(file_get_contents($file)), $message);
+         return $this->assertSame($text, trim(file_get_contents($file)), $message);
       }
 
       function assertFileMatch($pattern, $file, $message="%s") {
@@ -93,11 +101,14 @@
 
       function assertRecognizes(array $expected_values, $path) {
          $values = Router::recognize($path);
+         sort($values);
+         sort($expected_values);
+
          $message = "Route '$path' wasn't recognized as "
                   . array_to_str($expected_values) . ", got "
                   . array_to_str($values);
 
-         return $this->assertEqual($expected_values, $values, str_replace('%', '%%', $message));
+         return $this->assertSame($expected_values, $values, str_replace('%', '%%', $message));
       }
 
       function assertGenerates($expected_path, array $values) {
@@ -105,7 +116,7 @@
          $message = "Expected " . array_to_str($values) . " to "
                   . "generate '$expected_path', got '$path'";
 
-         return $this->assertEqual($expected_path, $path, str_replace('%', '%%', $message));
+         return $this->assertSame($expected_path, $path, str_replace('%', '%%', $message));
       }
 
       function assertRouting($path, array $values) {
@@ -117,7 +128,7 @@
          $count_options = count($all_options);
          $count_mails = count($GLOBALS['_SENT_MAILS']);
 
-         if (!$this->assertEqual($count_options, $count_mails,
+         if (!$this->assertSame($count_options, $count_mails,
                "Expected $count_options sent mails, got $count_mails")) {
             return false;
          }
@@ -137,7 +148,7 @@
                      return false;
                   }
                } else {
-                  if (!$this->assertEqual($value, $mail_value)) {
+                  if (!$this->assertSame($value, $mail_value)) {
                      return false;
                   }
                }
@@ -193,7 +204,7 @@
 
          ob_start();
          $this->controller = Dispatcher::run($path);
-         $this->stdout = ob_end_clean();
+         $this->stdout = ob_get_clean();
          $this->action = Dispatcher::$params['action'];
       }
 
@@ -228,11 +239,11 @@
                break;
             case 404:
             case 'notfound':
-               return $this->assertEqual(404, $status, "Expected a 404, got '$status'");
+               return $this->assertSame(404, $status, "Expected a 404, got '$status'");
                break;
             case 500:
             case 'error':
-               return $this->assertEqual(500, $status, "Expected an error response, got '$status'");
+               return $this->assertSame(500, $status, "Expected an error response, got '$status'");
                break;
             default:
          }
@@ -249,17 +260,17 @@
       function assertTemplate($template) {
          $this->assertResponse('success');
 
-         $view_template = $this->controller->view->template;
+         $view_template = (string) $this->controller->view->template;
 
          if ($template) {
             $parts = explode('/', "$template.thtml");
             $view_parts = explode('/', $view_template);
-            return $this->assertEqual(
+            return $this->assertSame(
                $parts,
                array_slice($view_parts, -count($parts)),
                "Expected template '$template', got '$view_template'");
          } else {
-            return $this->assertEqual('', $this->controller->view->template,
+            return $this->assertSame('', $view_template,
                "Expected template '$template', got '$view_template'");
          }
       }
@@ -276,7 +287,7 @@
                $real_type = gettype($this->assigns($key));
             }
 
-            if (!$this->assertEqual($type, $real_type,
+            if (!$this->assertSame($type, $real_type,
                 "Expected assigned variable '$key' to be of type '$type', got '$real_type'")) {
                return false;
             }
@@ -284,13 +295,13 @@
       }
 
       function assertLayout($layout) {
-         $real_layout = substr(basename($this->controller->view->layout), 0, -6);
-         return $this->assertEqual($layout, $real_layout,
+         $real_layout = (string) substr(basename($this->controller->view->layout), 0, -6);
+         return $this->assertSame($layout, $real_layout,
            "Expected layout '$layout', got '$real_layout'");
       }
 
       function assertOutput($text) {
-         return $this->assertEqual($text, $this->controller->output);
+         return $this->assertSame($text, $this->controller->output);
       }
 
       function assertOutputMatch($pattern) {
@@ -305,7 +316,7 @@
          $url = url_for($path, array('full' => true));
          $real_url = $this->controller->headers['Location'];
 
-         return $this->assertEqual($url, $real_url,
+         return $this->assertSame($url, $real_url,
             "Expected redirect to '$url', got '$real_url'");
       }
 

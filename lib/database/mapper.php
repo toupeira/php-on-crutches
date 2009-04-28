@@ -195,7 +195,7 @@
 
       # Forward calls to non-existent methods to a QuerySet
       function __call($method, $args) {
-         return call_user_func_array(array($this->get_query_set(), $method), $args);
+         return call_user_func_array(array($this->query_set, $method), $args);
       }
 
       function find($conditions) {
@@ -319,9 +319,11 @@
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
             $conditions = func_get_args();
+            /*
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
             # Conditions are passed as nested array
             $conditions = $conditions[0];
+            */
          }
 
          if ($this->_scope) {
@@ -470,8 +472,12 @@
          } elseif (is_array($value)) {
             $values = array();
             foreach ($value as $value) {
+               if (is_array($value)) {
+                  throw new TypeError($value, "Can't use array as parameter");
+               }
+
                $values[] = '?';
-               $params[] = $value;
+               $params[] = $this->convert($value);
             }
 
             $condition = "$key IN (".implode(', ', $values).")";

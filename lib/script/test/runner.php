@@ -227,6 +227,9 @@
          # Reset request headers
          fake_request();
 
+         # Reset PHP's file cache
+         clearstatcache();
+
          # Reset authentication
          if ($model = config('auth_model')) {
             call_user_func(array($model, 'logout'));

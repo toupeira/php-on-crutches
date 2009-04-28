@@ -155,7 +155,7 @@
                   $this->replace_select('count(*)');
                }
 
-               $this->_count = $this->statement->fetch_column();
+               $this->_count = intval($this->statement->fetch_column());
 
                $this->_options = $current_options;
                $this->_sql = $current_sql;
@@ -538,14 +538,16 @@
 
       # Return an array with all values for the given key,
       # or an array of hashes if multiple keys are passed
-      function collect($key) {
-         $keys = func_get_args();
+      function collect($keys) {
+         if (!is_array($keys)) {
+            $keys = func_get_args();
+         }
          $this->replace_select($keys);
 
          $values = array();
          foreach ($this->objects as $object) {
             if (count($keys) == 1) {
-               $values[] = getf($object, $key);
+               $values[] = getf($object, $keys[0]);
             } else {
                $values[] = array_get(
                   is_array($object) ? $object : $object->attributes,

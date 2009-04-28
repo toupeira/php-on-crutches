@@ -13,7 +13,7 @@
             'debug/:action/:id' => array('controller' => 'debug'),
 
             # Route with required parameters
-            'errors/required/:action!/:id' => array('controller' => 'errors'),
+            'errors/required/:type!/:id' => array('controller' => 'errors', 'action' => 'show'),
 
             # Wildcard route
             'browse/*path' => array('controller' => 'pages', 'action' => 'browse'),
@@ -32,7 +32,7 @@
 
          $this->assertGenerates('pages/edit', array('action' => 'edit'));
          $this->assertRouting('pages/edit', array('controller' => 'pages', 'action' => 'edit'));
-         $this->assertRouting('pages/bar/3', array('controller' => 'pages', 'action' => 'bar', 'id' => 3));
+         $this->assertRouting('pages/bar/3', array('controller' => 'pages', 'action' => 'bar', 'id' => '3'));
          $this->assertRouting('debug/bar/3/9/81/6561', array('controller' => 'debug', 'action' => 'bar', 'id' => '3/9/81/6561'));
       }
 
@@ -47,9 +47,9 @@
 
       function test_route_with_required_parameter() {
          $this->assertGenerates('errors', array('controller' => 'errors'));
-         $this->assertRouting('errors/required/index', array('controller' => 'errors', 'action' => 'index'));
-         $this->assertRouting('errors/required/login', array('controller' => 'errors', 'action' => 'login'));
-         $this->assertRouting('errors/required/edit/3', array('controller' => 'errors', 'action' => 'edit', 'id' => 3));
+         $this->assertRouting('errors/required/index', array('controller' => 'errors', 'type' => 'index', 'action' => 'show'));
+         $this->assertRouting('errors/required/login', array('controller' => 'errors', 'type' => 'login', 'action' => 'show'));
+         $this->assertRouting('errors/required/edit/3', array('controller' => 'errors', 'type' => 'edit', 'action' => 'show', 'id' => '3'));
       }
 
       function test_route_with_wildcard_parameter() {
@@ -66,7 +66,7 @@
 
       function test_route_with_query_string() {
          $this->assertRouting('debug?foo%3Dbar=foo+bar', array('controller' => 'debug', 'action' => 'index', 'foo=bar' => 'foo bar'));
-         $this->assertRouting('pages/bar/23?foo%3Dbar=foo+bar', array('controller' => 'pages', 'action' => 'bar', 'id' => 23, 'foo=bar' => 'foo bar'));
+         $this->assertRouting('pages/bar/23?foo%3Dbar=foo+bar', array('controller' => 'pages', 'action' => 'bar', 'id' => '23', 'foo=bar' => 'foo bar'));
          $this->assertRouting('browse?foo%3Dbar=foo+bar', array('controller' => 'pages', 'action' => 'browse', 'foo=bar' => 'foo bar'));
       }
    }

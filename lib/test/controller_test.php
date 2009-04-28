@@ -143,14 +143,12 @@
 
          foreach (array(true, 'index') as $require) {
             $this->controller->_require_post = $require;
-            $this->assertFalse($this->controller->is_valid_request('index'));
-            $this->assertRedirect('/');
+            $this->assertRaise('$this->controller->is_valid_request("index")', InvalidRequest);
          }
 
          foreach (array(true, 'edit') as $require) {
             $this->controller->_require_post = $require;
-            $this->assertFalse($this->controller->is_valid_request('edit'));
-            $this->assertRedirect(':');
+            $this->assertRaise('$this->controller->is_valid_request("edit")', InvalidRequest);
          }
       }
 
@@ -161,14 +159,12 @@
 
          foreach (array(true, 'index') as $require) {
             $this->controller->_require_ajax = $require;
-            $this->assertFalse($this->controller->is_valid_request('index'));
-            $this->assertRedirect('/');
+            $this->assertRaise('$this->controller->is_valid_request("index")', InvalidRequest);
          }
 
          foreach (array(true, 'edit') as $require) {
             $this->controller->_require_ajax = $require;
-            $this->assertFalse($this->controller->is_valid_request('edit'));
-            $this->assertRedirect(':');
+            $this->assertRaise('$this->controller->is_valid_request("edit")', InvalidRequest);
          }
       }
 
@@ -227,8 +223,7 @@
          config_set('debug', false);
 
          $this->controller->_require_post[] = 'index';
-         $this->controller->perform('index');
-         $this->assertRedirect('/');
+         $this->assertRaise('$this->controller->perform("index")', InvalidRequest);
       }
 
       function test_perform_with_missing_template() {
@@ -252,7 +247,7 @@
 
       function test_render_with_action_and_missing_template() {
          $this->assertRaise('$this->controller->render("edit")', MissingTemplate);
-         $this->assertOutput(null);
+         $this->assertOutput('');
       }
 
       function test_render_with_layout() {
@@ -272,7 +267,7 @@
 
       function test_render_with_missing_template() {
          $this->assertRaise('$this->controller->render("/invalid/template")', MissingTemplate);
-         $this->assertOutput(null);
+         $this->assertOutput('');
       }
 
       function test_render_twice() {
@@ -333,7 +328,7 @@
 
       function test_send_file_with_missing_file() {
          $this->assertRaise('$this->send_file("/invalid/file")');
-         $this->assertOutput(null);
+         $this->assertOutput('');
          $this->assertEqual(array(), $this->controller->headers);
          $this->assertNull($this->send_file_output);
       }

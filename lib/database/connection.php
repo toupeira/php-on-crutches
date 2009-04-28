@@ -139,7 +139,7 @@
       }
 
       function __get($key) {
-         if ($table = $this->table($key) and !method_exists($this, "get_$key")) {
+         if ($this->_connection and $table = $this->table($key) and !method_exists($this, "get_$key")) {
             return $table;
          } else {
             return parent::__get($key);
