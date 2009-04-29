@@ -49,7 +49,7 @@
          return $this->_output;
       }
 
-      function debug($exception=null, $expand=false) {
+      function debug($exception=null) {
          if (!$exception instanceof Exception) {
             throw new NotFound();
          }
@@ -65,20 +65,12 @@
          $trace = $exception->getTraceAsString();
 
          try {
-            $this->set('exception', $class);
-            $this->set('message', $message);
-            $this->set('file', str_replace(ROOT, '', $file));
-            $this->set('line', $line);
-            $this->set('trace', $trace);
-
-            $this->set('expand', $expand);
-
             # Get source code where the error occurred
             if (is_file($file)) {
                $code = '';
-               $start = max(0, $line - 12);
-               $lines = array_slice(file($file), $start, 23);
-               $width = strlen($line + 23);
+               $start = max(0, $line - 4);
+               $lines = array_slice(file($file), $start, 7);
+               $width = strlen($line + 7);
 
                foreach ($lines as $i => $text) {
                   $i += $start + 1;
@@ -89,8 +81,24 @@
                   }
                   $code .= $text;
                }
-               $this->set('code', $code);
             }
+
+            $title = $class;
+            $params = Dispatcher::$params;
+            if ($controller = camelize($params['controller']) and $action = $params['action']) {
+               $title .= " in $controller#$action";
+            }
+
+            $this->set(array(
+               'title'     => $title,
+               'exception' => $class,
+               'message'   => $message,
+               'file'      => str_replace(ROOT, '', $file),
+               'line'      => $line,
+
+               'trace'     => $trace,
+               'code'      => $code,
+            ));
 
             $this->_output = null;
             $this->render('debug', '');

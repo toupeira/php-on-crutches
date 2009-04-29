@@ -6,122 +6,116 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><?= h($exception) ?>: <?= h(strip_tags($message)) ?></title>
-  <style type="text/css">
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <title><?= h($title) ?></title>
+   <style type="text/css">
 
-    body {
+   body {
+      margin: 1em;
+      padding: 0;
+      color: black;
+      background: white;
+      font-family: "Verdana", sans-serif;
       font-size: 9pt;
-      font-family: sans-serif;
-      color: #bbb;
-      background: #333;
-    }
+      line-height: 12pt;
+   }
 
-    a {
-      color: #ccc;
-      font-size: smaller;
-    }
+   a { color: black; }
+   a:hover { color: white; background: black; }
 
-    h1 {
+   h1 {
+      letter-spacing: -1px;
       font-size: 17pt;
       margin: 0 0 -0.5em;
-    }
+   }
 
-    p {
-      margin: 0.8em 0 1.2em;
-      padding: 1em;
-      background: #666;
-      color: white;
-      -moz-border-radius: 0.5em;
-    }
-
-    h3 {
-      font-size: 9pt;
+   h3 {
       margin: 1.5em 0 0.6em;
-    }
+      color: black;
+      font-size: 9pt;
+      border-bottom: 1px solid #ddd;
+   }
 
-    h3 strong {
-      color: white;
-    }
+   h3 strong { color: #3870b6; }
 
-    pre {
-      margin-top: 0;
-      padding: 0.6em 0.6em 0.6em 1.2em;
-      background: #444;
-      color: #ddd;
+   p, pre {
+      border-radius: 0.5em;
       -moz-border-radius: 0.5em;
-    }
+      -webkit-border-radius: 0.5em;
+   }
 
-  </style>
-  <script type="text/javascript">
+   p {
+      padding: 1em;
+      font-weight: bold;
+      color: #d55;
+      background: #ffeaea;
+      border: 1px solid #fcc;
+   }
 
-    function toggle(link) {
-      link.nextSibling.style.display = 'block';
-      link.parentNode.removeChild(link);
-      return false;
-    }
+   div pre {
+      margin: 0.8em 0 1.2em;
+      padding: 0.6em 0.6em 0.6em 1.2em;
+      color: black;
+      background: #eee;
+      border: 1px solid #ddd;
+   }
 
-  </script>
+   table { width: 100%; border-spacing: 0.4em; }
+   table pre { margin: 0; padding: 0; }
+
+   th, td { padding: 0.4em; vertical-align: top; }
+   td {
+      background: #eee;
+      border-radius: 0.2em;
+      -moz-border-radius: 0.2em;
+      -webkit-border-radius: 0.2em;
+   }
+
+   th {
+      width: 7em;
+      color: #555;
+      font-weight: normal;
+      text-align: right;
+      padding-right: 0.5em;
+   }
+
+   </style>
 </head>
 <body>
 
-<h1>Exception caught: <?= $exception ?></h1>
+<h1><?= $title ?></h1>
 <h3>in <strong><?= $file ?></strong> at line <strong><?= $line ?></strong>:</h3>
+
 <p><?= $message ?></p>
 
-<h3>
-   Address: <?= link_to($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_URI']) ?>
-<? if ($referer = $_SERVER['HTTP_REFERER']): ?>
-   <br />Referer: <?= link_to($referer, $referer) ?>
-<? endif ?>
-</h3>
-
 <? if ($code): ?>
-<? if ($expand_source): ?>
-<div>
-<? else: ?>
-<?= link_to('Show source', '#', array('onclick' => 'return toggle(this)')) ?>
-<div style="display:none">
-<? endif ?>
-   <h3>Extracted source from <strong><?= $file ?></strong> (around line <strong>#<?= $line ?></strong>):</h3>
-   <pre><?= $code ?></pre>
-</div>
+<h3>Extracted source (around line <strong>#<?= $line ?></strong>):</h3>
+<div><pre><?= $code ?></pre></div>
 <? endif ?>
 
 <? if ($trace): ?>
 <h3>Stack Trace:</h3>
-<pre><?= $trace ?></pre>
+<div><pre><?= $trace ?></pre></div>
 <? endif ?>
 
-<? if ($_GET): ?>
-<h3>GET Parameters:</h3>
-<?= dump(sorted($_GET)) ?>
-<? endif ?>
+<h3>Request</h3>
+<?= table_tag(array(
+       'Method'     => $_SERVER['REQUEST_METHOD'],
+       'URL'        => link_to($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_URI']),
+       'Referer'    => any($_SERVER['HTTP_REFERER'], '-'),
+       'User Agent' => $_SERVER['HTTP_USER_AGENT'],
+       'IP Address' => $_SERVER['REMOTE_ADDR'],
+    ), array('escape' => false)) ?>
+<h3>Parameters</h3>
+<?= table_tag(array(
+       'GET'        => dump(sorted($_GET)),
+       'POST'       => dump(sorted($_POST)),
+       'Session'    => dump(sorted($_SESSION)),
+       'Cookies'    => dump(sorted($_COOKIE)),
+    ), array('escape' => false)) ?>
 
-<? if ($_POST): ?>
-<h3>POST Parameters:</h3>
-<?= dump(sorted($_POST)) ?>
-<? endif ?>
-
-<? if ($_COOKIE): ?>
-<h3>Cookies</h3>
-<?= dump(sorted($_COOKIE)) ?>
-<? endif ?>
-
-<? if ($_SESSION): ?>
-<h3>Session Variables:</h3>
-<?= dump(sorted($_SESSION)) ?>
-<? endif ?>
-
-<? if ($expand_server): ?>
-<div>
-<? else: ?>
-<?= link_to('Show server information', '#', array('onclick' => 'return toggle(this)')) ?>
-<div style="display:none">
-<? endif ?>
-   <h3>Server Information:</h3>
-   <?= dump(sorted($_SERVER)) ?>
-</div>
+<h3>Server Environment</h3>
+<?= table_tag(sorted($_SERVER)) ?>
 
 </body>
 </html>

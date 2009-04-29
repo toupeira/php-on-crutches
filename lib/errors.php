@@ -167,10 +167,10 @@
          $controller = new ErrorsController();
 
          $mail = new Mail();
-         $mail->subject = get_class($exception);
-         $mail->alt_body = dump_exception($exception);
-         $mail->body = $controller->debug($exception, true);
          $mail->content_type = 'text/html';
+         $mail->body = $controller->debug($exception);
+         $mail->alt_body = dump_exception($exception);
+         $mail->subject = $controller->get('title');
 
          foreach ((array) $recipients as $address) {
             $mail->add_address($address);
