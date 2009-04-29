@@ -37,7 +37,7 @@
          $this->_options = array_merge(array(
             'select' => "`{$this->table}`.*",
             'from'   => "`{$this->table}`",
-            'join'   => null,
+            'joins'  => null,
             'where'  => null,
             'group'  => null,
             'having' => null,
@@ -211,10 +211,34 @@
 
          $sql .= ' FROM '.implode(', ', $from);
 
-         list($conditions, $join_params) = $this->_mapper->build_condition($options['join']);
-         if (!blank($conditions)) {
-            $sql .= " $conditions";
-            $params = array_merge($params, $join_params);
+         if ($joins = $options['joins']) {
+            $tables = $this->_mapper->connection->tables;
+
+            foreach ($joins as $join) {
+               if (is_array($join)) {
+                  $type = strtoupper($join['type']);
+                  $table = $join['table'];
+                  $conditions = $join['conditions'];
+                  $mode = strtoupper($join['mode']);
+
+                  if (strstr($table, ' ') === false) {
+                     $table = "`$table`";
+                  }
+
+                  $sql .= " $type JOIN $table";
+
+                  if (is_null($conditions)) {
+                     continue;
+                  } elseif (is_array($conditions)) {
+                     list($conditions, $join_params) = $this->_mapper->build_condition($conditions);
+                     $params = array_merge($params, $join_params);
+                  }
+
+                  $sql .= " $mode ($conditions)";
+               } else {
+                  $sql .= " $join";
+               }
+            }
          }
 
          list($conditions, $where_params) = $this->_mapper->build_condition($options['where']);
@@ -282,7 +306,7 @@
 
       function get_params() {
          if (is_null($this->_sql)) {
-            $this->sql;
+            $this->get_sql();
          }
 
          return $this->_params;
@@ -362,7 +386,7 @@
       }
 
       function find($conditions) {
-         if (!is_null($conditions) and !blank($conditions)) {
+         if (!blank($conditions)) {
             return $this->where(func_get_args())->order()->first;
          }
       }
@@ -379,7 +403,7 @@
       }
 
       function destroy_all($conditions=null) {
-         if (is_null($conditions)) {
+         if (blank($conditions)) {
             throw new ApplicationError("Not unless you really want to");
          } elseif ($conditions and $conditions !== true) {
             $this->where(func_get_args());
@@ -393,6 +417,10 @@
          return $status;
       }
 
+      # Automatic getters for boolean filters
+      #   e.g.: DB(User)->activated
+      #         DB(User)->not_activated
+      #
       protected function __get_custom($key) {
          if (substr($key, 0, 4) == 'not_') {
             $key = substr($key, 4);
@@ -470,6 +498,26 @@
             $value = $this->statement->fetch_column();
             $this->reset();
             return $value;
+
+         } elseif (array_key_exists($method, $this->_mapper->attributes)) {
+            # Filter by key
+            array_unshift($args, $method);
+            return $this->merge('where', $args);
+
+         } elseif (preg_match('/^(?:(left|right|inner|outer|natural)_)?join(_using)?$/', $method, $match)) {
+            # Add a join
+            if (count($args) > 1) {
+               $this->_options['joins'][] = array(
+                  'type'       => any($match[1], 'left'),
+                  'table'      => array_shift($args),
+                  'conditions' => count($args) > 1 ? $args : $args[0],
+                  'mode'       => $match[2] ? 'using' : 'on',
+               );
+            } else {
+               $this->_options['joins'][] = $args[0];
+            }
+
+            return $this;
 
          } else {
             # Merge by default

@@ -349,11 +349,7 @@
             $value = $this->convert(array_shift($values));
 
             if ($operator == '' and $condition) {
-               if (preg_match('/\b(left|right|inner|outer|natural)\s+join\b/i', $condition)) {
-                  $operator = ' ';
-               } else {
-                  $operator = ' AND ';
-               }
+               $operator = ' AND ';
             }
 
             if (is_string($key)) {
