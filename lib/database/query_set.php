@@ -447,9 +447,9 @@
          if (preg_match('/^(find(?:_all)?)_(by|like)_(\w+?)(?:_(and|or)_(\w+))?$/', $method, $match)) {
             list($method, $finder, $equality, $key, $operator, $keys) = $match;
 
-            $finder = ($finder == 'find' ? 'first' : 'all');
-
-            $argc = count($args);
+            if ($finder == 'find_all') {
+               $finder = 'where';
+            }
 
             $equality = ($equality == 'by') ? '=' : 'LIKE';
 
@@ -464,8 +464,10 @@
             $op = '';
             foreach ($keys as $key) {
                $where .= "$op`$key` $equality ?";
-               $conditions[] = array_shift_arg($args);
-               $op = ' '.strtoupper($operator).' ';
+               $conditions[] = array_shift_arg($args, "Missing value at '$where'");
+               if ($op == '') {
+                  $op = ' '.strtoupper($operator).' ';
+               }
             }
 
             array_unshift($conditions, "($where)");
@@ -474,7 +476,7 @@
                throw new ApplicationError('Too many arguments');
             }
 
-            return $this->where($conditions)->$finder;
+            return call_user_func_array(array($this, $finder), $conditions);
 
          } elseif (substr($method, 0, 8) == 'replace_') {
             # replace_* calls replace the given SQL options
