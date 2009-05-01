@@ -319,11 +319,9 @@
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
             $conditions = func_get_args();
-            /*
          } elseif (count($conditions) == 1 and is_array($conditions[0])) {
             # Conditions are passed as nested array
             $conditions = $conditions[0];
-            */
          }
 
          if ($this->_scope) {
