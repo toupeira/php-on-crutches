@@ -50,6 +50,10 @@
          ));
       }
 
+      function __destruct() {
+         $this->dispose(0);
+      }
+
       function __toString() {
          if ($key = $this->_display_column) {
             return $this->$key;
