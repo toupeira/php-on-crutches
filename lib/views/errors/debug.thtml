@@ -63,7 +63,12 @@
    table { width: 100%; border-spacing: 0.4em; }
    table pre { margin: 0; padding: 0; }
 
-   th, td { padding: 0.4em; vertical-align: top; }
+   th, td {
+      padding: 0.4em;
+      vertical-align: top;
+      white-space: nowrap;
+   }
+
    td {
       background: #eee;
       border-radius: 0.2em;
@@ -106,6 +111,7 @@
        'User Agent' => $_SERVER['HTTP_USER_AGENT'],
        'IP Address' => $_SERVER['REMOTE_ADDR'],
     ), array('escape' => false)) ?>
+
 <h3>Parameters</h3>
 <?= table_tag(array(
        'GET'        => dump(sorted($_GET)),
@@ -113,6 +119,11 @@
        'Session'    => dump(sorted($_SESSION)),
        'Cookies'    => dump(sorted($_COOKIE)),
     ), array('escape' => false)) ?>
+
+<? if ($user): ?>
+<h3>Authenticated User</h3>
+<?= table_tag($user->attributes) ?>
+<? endif ?>
 
 <h3>Server Environment</h3>
 <?= table_tag(sorted($_SERVER)) ?>

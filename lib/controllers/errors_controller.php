@@ -65,7 +65,18 @@
          $trace = $exception->getTraceAsString();
 
          try {
-            # Get source code where the error occurred
+            $title = $class;
+            $params = Dispatcher::$params;
+            if ($controller = camelize($params['controller']) and $action = $params['action']) {
+               $title .= " in $controller#$action";
+            }
+
+            # Get the current user
+            if ($model = config('auth_model')) {
+               $user = call_user_func(array($model, 'current'));
+            }
+
+            # Get the source code where the error occurred
             if (is_file($file)) {
                $code = '';
                $start = max(0, $line - 4);
@@ -83,12 +94,6 @@
                }
             }
 
-            $title = $class;
-            $params = Dispatcher::$params;
-            if ($controller = camelize($params['controller']) and $action = $params['action']) {
-               $title .= " in $controller#$action";
-            }
-
             $this->set(array(
                'title'     => $title,
                'exception' => $class,
@@ -96,6 +101,7 @@
                'file'      => str_replace(ROOT, '', $file),
                'line'      => $line,
 
+               'user'      => $user,
                'trace'     => $trace,
                'code'      => $code,
             ));
