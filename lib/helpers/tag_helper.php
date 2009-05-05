@@ -41,7 +41,7 @@
          $options['class'] .= ' '.$options['type'];
          if (in_array($options['type'], array('submit', 'reset'))) {
             $options['class'] .= ' button';
-         } elseif (in_array($options['type'], array('password', 'file'))) {
+         } elseif ($options['type'] == 'password') {
             $options['class'] .= ' text';
          }
       } elseif ($name == 'textarea') {
