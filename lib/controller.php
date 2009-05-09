@@ -26,13 +26,12 @@
       protected $_actions;
       protected $_errors;
 
-      protected $_start_session = true;
-
       protected $_require_post;
       protected $_require_ajax;
       protected $_require_ssl;
       protected $_require_trusted;
       protected $_require_form_token = true;
+      protected $_require_session = true;
       protected $_valid_methods = array('GET', 'POST', 'HEAD');
 
       protected $_scaffold;
@@ -57,16 +56,10 @@
          # Load controller helper
          try_require(HELPERS."{$this->_name}_helper.php");
 
-         # Start session if enabled
-         if ($this->_start_session and config('session_store')) {
-            $this->start_session();
-         }
-
          # Shortcuts for request data
          $this->params = &$params;
          $this->cookies = &$_COOKIE;
          $this->files = &$_FILES;
-         $this->session = &$_SESSION;
 
          # Sanitize uploaded files
          foreach ($this->files as $i => &$file) {
@@ -83,12 +76,6 @@
          $this->headers = array(
             'Content-Type' => 'text/html',
          );
-
-         # Load messages stored in the session
-         if (is_array($this->session['msg'])) {
-            $this->msg = $this->session['msg'];
-            unset($this->session['msg']);
-         }
 
          # Create the view
          $this->_view = new View();
@@ -300,6 +287,11 @@
             throw new RoutingError("Invalid action '$action'");
          }
 
+         # Start session if required
+         if ($this->check_requirement($action, 'session')) {
+            $this->start_session();
+         }
+
          if ($this->is_valid_request($action)) {
             $this->_action = $action;
             $this->set('action', $action);
@@ -447,6 +439,7 @@
       function start_session() {
          if (!session_id() and PHP_SAPI != 'cli') {
             session_start();
+            $this->session = &$_SESSION;
             log_info('  Session ID: '.session_id());
 
             # Override default no-cache headers, except for Ajax requests
@@ -457,6 +450,12 @@
 
             # Make sure the session handler can clean up
             register_shutdown_function('session_write_close');
+
+            # Load messages stored in the session
+            if (is_array($this->session['msg'])) {
+               $this->msg = $this->session['msg'];
+               unset($this->session['msg']);
+            }
          }
       }
 
