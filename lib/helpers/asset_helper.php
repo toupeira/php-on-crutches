@@ -84,27 +84,27 @@
       if (config('merge_assets') and count($assets) > 1) {
          $all = WEBROOT.$dir.$name.$ext;
 
-         # Build the file paths and get the last modification time
-         $paths = array();
-         $mtime = 0;
-         foreach ($assets as $asset) {
-            if (is_file($path = WEBROOT.$dir.$asset.$ext)) {
-               $paths[$asset] = $path;
-               $mtime = max($mtime, filemtime($path));
+         # Create the combined file if necessary
+         if (!is_file($all)) {
+            # Build the file paths
+            $paths = array();
+            foreach ($assets as $asset) {
+               if (is_file($path = WEBROOT.$dir.$asset.$ext)) {
+                  $paths[$asset] = $path;
+               }
             }
-         }
 
-         # Create the combined file when necessary
-         if (!is_file($all) or $mtime > filemtime($all)) {
+            # Combine the contents
             $output = '';
             foreach ($paths as $asset => $path) {
                $depth = substr_count($asset, '/');
                $source = fopen($path, 'r');
                while ($input = fgets($source)) {
+                  # Tweak URL references in CSS files
                   if ($ext == '.css' and $depth) {
-                     # Add folder name for relative URL references
+                     # Add folder name for relative paths
                      $input = preg_replace('#url\(([^\./].*)\)#', 'url('.substr($asset, 0, strrpos($asset, '/')).'/\1)', $input);
-                     # Strip '../' in URL references
+                     # Strip '../' in paths
                      $input = preg_replace('#url\(((\.\./){'.$depth.'})#', 'url(', $input);
                   }
                   $output .= $input;
