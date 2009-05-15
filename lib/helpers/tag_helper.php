@@ -12,11 +12,9 @@
    }
 
    function content_tag($name, $content=null, array $options=null, array $defaults=null) {
-      if ($options['open']) {
+      if ($content === false or $options['open'] or $defaults['open']) {
          $open = true;
          unset($options['open']);
-      } elseif ($defaults['open']) {
-         $open = true;
          unset($defaults['open']);
       }
 
@@ -24,6 +22,7 @@
       if (!$open) {
          $html .= "</$name>";
       }
+
       return $html;
    }
 

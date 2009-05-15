@@ -689,10 +689,14 @@
 
       function get_dom_id($key=null) {
          if ($key) {
-            return underscore(get_class($this)).($key ? "_$key" : '');
+            return $this->dom_class.($key ? "_$key" : '');
          } else {
-            return underscore(get_class($this)).'-'.$this->id;
+            return $this->dom_class.'-'.$this->id;
          }
+      }
+
+      function get_dom_class() {
+         return underscore(get_class($this));
       }
    }
 

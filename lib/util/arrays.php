@@ -121,7 +121,7 @@
       return $values;
    }
 
-   # Delete one or more keys from an array
+   # Delete one or more keys from an array and return the values
    function array_delete(array &$array=null, $keys) {
       if (!is_array($array)) {
          return;
