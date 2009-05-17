@@ -419,7 +419,7 @@
          if ($path = $this->session['return_to']) {
             # Use path stored in session
             unset($this->session['return_to']);
-         } elseif ($url = $_SERVER['HTTP_REFERER']) {
+         } elseif ($url = $_SERVER['HTTP_REFERER'] and $options['referer'] !== false) {
             # Use the HTTP referer if it points to the current host, and doesn't point to the current path
             $url = parse_url($url);
             if ((!$url['host'] or $url['host'] == $_SERVER['HTTP_HOST']) and stristr($url['path'], Dispatcher::$path) === false) {
