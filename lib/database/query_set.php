@@ -212,28 +212,35 @@
          $sql .= ' FROM '.implode(', ', $from);
 
          if ($joins = $options['joins']) {
-            $tables = $this->_mapper->connection->tables;
-
             foreach ($joins as $join) {
                if (is_array($join)) {
-                  $type = strtoupper($join['type']);
-                  $table = $join['table'];
-                  $conditions = $join['conditions'];
-                  $mode = strtoupper($join['mode']);
+                  $sql .= " {$join['type']} JOIN";
 
-                  if (strstr($table, ' ') === false) {
-                     $table = "`$table`";
+                  $table = $join['table'];
+                  $spaces = substr_count($table, ' ');
+                  if ($spaces == 1) {
+                     list($table, $alias) = explode(' ', $table, 2);
+                     $sql .= " `$table` AS `$alias`";
+                  } elseif ($spaces == 0) {
+                     $sql .= " `$table`";
+                  } else {
+                     $sql .= " $table";
                   }
 
-                  $sql .= " $type JOIN $table";
-
+                  $conditions = $join['conditions'];
                   if (is_null($conditions)) {
                      continue;
-                  } elseif (is_array($conditions)) {
-                     list($conditions, $join_params) = $this->_mapper->build_condition($conditions);
+                  } else {
+                     if ($model = classify($table) and is_subclass_of($model, ActiveRecord)) {
+                        list($conditions, $join_params) = DB($model)->build_condition($conditions);
+                     } else {
+                        list($conditions, $join_params) = $this->_mapper->build_condition_without_scope($conditions);
+                     }
+
                      $params = array_merge($params, $join_params);
                   }
 
+                  $mode = strtoupper($join['mode']);
                   $sql .= " $mode ($conditions)";
                } else {
                   $sql .= " $join";
@@ -509,6 +516,7 @@
          } elseif (preg_match('/^(?:(left|right|inner|outer|natural)_)?join(_using)?$/', $method, $match)) {
             # Add a join
             if (count($args) > 1) {
+               # Add join with custom syntax
                $this->_options['joins'][] = array(
                   'type'       => any($match[1], 'left'),
                   'table'      => array_shift($args),
@@ -516,6 +524,7 @@
                   'mode'       => $match[2] ? 'using' : 'on',
                );
             } else {
+               # Add literal JOIN
                $this->_options['joins'][] = $args[0];
             }
 
