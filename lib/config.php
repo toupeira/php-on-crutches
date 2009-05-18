@@ -59,6 +59,7 @@
    # | @notify_errors@     | addresses to send error notifications to |
    # | @notify_memory@     | log memory usage if it exceeds this limit |
    # | @ignore_errors@     | exceptions to ignore |
+   # | @custom_mimetypes@  | custom MIME mappings for the mimetype() function |
    #
 
    require CONFIG.'application.php';
@@ -117,6 +118,27 @@
       'notify_errors'     => null,
       'notify_memory'     => null,
       'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied'),
+
+      'custom_mimetypes'  => array(
+         # PowerPoint and Excel files aren't recognized by file
+         'pps' => 'application/vnd.ms-powerpoint',
+         'ppt' => 'application/vnd.ms-powerpoint',
+         'xls' => 'application/vnd.ms-excel',
+         'xlt' => 'application/vnd.ms-excel',
+         # OOXML files are actually Zip files...
+         'docm' => 'application/vnd.ms-word.document.macroEnabled.12',
+         'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+         'dotm' => 'application/vnd.ms-word.template.macroEnabled.12',
+         'dotx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+         'potm' => 'application/vnd.ms-powerpoint.template.macroEnabled.12',
+         'potx' => 'application/vnd.openxmlformats-officedocument.presentationml.template',
+         'pptm' => 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+         'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+         'xlsm' => 'application/vnd.ms-excel.sheet.macroEnabled.12',
+         'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+         'xltm' => 'application/vnd.ms-excel.template.macroEnabled.12',
+         'xltx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+      ),
    );
 
    # Merge application settings

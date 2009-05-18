@@ -142,11 +142,16 @@
    # Detect the MIME-type of a file correctly (mime_content_type() likes to get it wrong)
    function mimetype($path) {
       if (is_file($path)) {
-         $path = escapeshellarg($path);
-         if ($type = trim(`file --brief --mime-type -- $path`) and preg_match('|^[-+\w\./]+$|i', $type)) {
+         $extension = strtolower(array_pop(explode('.', $path, 2)));
+         if ($type = getf(config('custom_mimetypes'), $extension)) {
             return $type;
          } else {
-            return 'application/octet-stream';
+            $path = escapeshellarg($path);
+            if ($type = trim(`file --brief --mime-type -- $path`) and preg_match('|^[-+\w\./]+$|i', $type)) {
+               return $type;
+            } else {
+               return 'application/octet-stream';
+            }
          }
       } else {
          throw new ApplicationError("Invalid path '$path'");
