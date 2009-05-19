@@ -96,15 +96,6 @@
             $params = array_slice(func_get_args(), 1);
          }
 
-         if (preg_match('/^SELECT `(files|folders)`\.\* FROM `(files|folders)` ORDER BY `(files|folders)`\.`name` ASC/', $sql)) {
-            Dispatcher::log_header(
-               get_class(Dispatcher::$controller),
-               Dispatcher::$params['action'],
-               true
-            );
-            log_error($sql);
-         }
-
          if (log_level(LOG_INFO)) {
             $args = array();
             foreach ($params as $param) {
