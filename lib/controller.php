@@ -546,7 +546,7 @@
 
          $this->headers['Content-Disposition'] = ($options['inline'] ? 'inline' : 'attachment');
 
-         if (!ctype_cntrl($name = $options['name'])) {
+         if ($name = $options['name'] and !ctype_cntrl($name)) {
             $name = str_replace('"', '\"', $name);
             $this->headers['Content-Disposition'] .= "; filename=\"$name\"";
          }
