@@ -120,7 +120,9 @@
       'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied'),
 
       'custom_mimetypes'  => array(
-         # PowerPoint and Excel files aren't recognized by file
+         # icons are detected as image/x-ico, which nobody seems to use...
+         'ico' => 'image/x-icon',
+         # PowerPoint and Excel files are detected as Word documents...
          'pps' => 'application/vnd.ms-powerpoint',
          'ppt' => 'application/vnd.ms-powerpoint',
          'xls' => 'application/vnd.ms-excel',
