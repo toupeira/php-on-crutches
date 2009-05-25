@@ -246,8 +246,8 @@ TXT;
 
             $lines = array();
             foreach ($messages as $key => $translation) {
-               $key = str_replace('"', '&quot;', $key);
-               $translation = str_replace('"', '&quot;', $translation);
+               #$key = str_replace('"', '\"', $key);
+               #$translation = str_replace('"', '\"', $translation);
                $lines[] = "  \"$key\": \"$translation\"";
             }
 
