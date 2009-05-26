@@ -217,6 +217,8 @@
                   $sql .= " {$join['type']} JOIN";
 
                   $table = $join['table'];
+                  $alias = null;
+
                   $spaces = substr_count($table, ' ');
                   if ($spaces == 1) {
                      list($table, $alias) = explode(' ', $table, 2);
@@ -232,9 +234,22 @@
                      continue;
                   } else {
                      if ($model = classify($table) and is_subclass_of($model, ActiveRecord)) {
-                        list($conditions, $join_params) = DB($model)->build_condition($conditions);
+                        $mapper = DB($model);
+                        $builder = 'build_condition';
                      } else {
-                        list($conditions, $join_params) = $this->_mapper->build_condition_without_scope($conditions);
+                        $mapper = $this->_mapper;
+                        $builder = 'build_condition_without_scope';
+                     }
+
+                     if ($alias) {
+                        $table = $mapper->table;
+                        $mapper->table = $alias;
+                     }
+
+                     list($conditions, $join_params) = call_user_func(array($mapper, $builder), $conditions);
+
+                     if ($alias) {
+                        $mapper->table = $table;
                      }
 
                      $params = array_merge($params, $join_params);

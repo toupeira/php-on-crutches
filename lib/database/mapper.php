@@ -110,6 +110,10 @@
          return $this->_table;
       }
 
+      function set_table($table) {
+         return $this->_table = $table;
+      }
+
       function get_primary_key() {
          return $this->_primary_key;
       }
