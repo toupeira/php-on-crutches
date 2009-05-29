@@ -127,11 +127,11 @@ fi
 
       # Execute SQL query
       elseif (substr($_command, 0, 4) == 'sql ') {
-         $_command = substr($_command, 4);
+         $_command = trim(substr($_command, 4));
          print "$_command\n";
 
          list($db, $query) = explode(' ', $_command, 2);
-         if (config('database', $db)) {
+         if ($db and config('database', $db)) {
             $db = DB($db);
          } else {
             $db = DB();
