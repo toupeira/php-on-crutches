@@ -451,9 +451,11 @@
             $enabled = true;
          }
 
-         if ($column = $this->_mapper->attributes[$key]
-             and $column['type'] == 'bool') {
-            return $this->where($key, $enabled);
+         if ($column = $this->_mapper->attributes[$key] and $column['type'] == 'bool') {
+            return $this->where($enabled
+               ? "$key = 1"
+               : "(`$key` = 0 OR `$key` IS NULL)"
+            );
          } else {
             return false;
          }
