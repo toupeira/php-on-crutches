@@ -234,7 +234,7 @@
       if ($values === false) {
          $_cycle = 0;
          return;
-      } elseif ($values) {
+      } elseif (func_num_args()) {
          $values = func_get_args();
       } else {
          $values = array('odd', 'even');
