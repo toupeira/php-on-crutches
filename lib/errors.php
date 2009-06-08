@@ -81,6 +81,16 @@
       }
    }
 
+   class ServiceUnavailable extends ApplicationError {
+      function __construct($message=null) {
+         if ($message) {
+            $message = ": $message";
+         }
+
+         parent::__construct("Service currently not available$message");
+      }
+   }
+
    # Global variable to track if an exception was caught
    $_EXCEPTION_CAUGHT = false;
 

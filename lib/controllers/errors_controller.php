@@ -25,6 +25,9 @@
          } elseif ($exception == 404 or $exception instanceof NotFound) {
             $status = 404;
             $text = 'Not Found';
+         } elseif ($exception == 503 or $exception instanceof ServiceUnavailable) {
+            $status = 503;
+            $text = 'Service Unavailable';
          } else {
             $status = 500;
             $text = 'Internal Server Error';
@@ -37,6 +40,7 @@
             $this->debug($exception);
          } else {
             if (View::find_template("errors/$status")) {
+               $this->set('exception', $exception);
                $this->render($status);
 
                # Pad the output to at least 512 bytes so IE will always display the custom error page
