@@ -119,7 +119,9 @@
 
       $status = null;
       foreach ($files as $file) {
-         $status = @unlink($file);
+         if (file_exists($file)) {
+            $status = @unlink($file);
+         }
       }
 
       return $status;
@@ -133,7 +135,9 @@
 
       $status = null;
       foreach ($paths as $path) {
-         system('rm -rf '.escapeshellarg($path), $status);
+         if (file_exists($path)) {
+            system('rm -rf '.escapeshellarg($path), $status);
+         }
       }
 
       return $status == 0;
