@@ -437,7 +437,11 @@
 
       # Start the session if necessary
       function start_session() {
-         if (!session_id() and PHP_SAPI != 'cli') {
+         if (session_id()) {
+            return;
+         } elseif (PHP_SAPI == 'cli') {
+            $this->session = &$_SESSION;
+         } else {
             session_start();
             $this->session = &$_SESSION;
             log_info('  Session ID: '.session_id());
