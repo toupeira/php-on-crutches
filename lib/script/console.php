@@ -1,7 +1,7 @@
 #!/bin/sh
 # vim: ft=php
 
-# This is just a wrapper to optionally run the console with rlwrap
+# Wrap the console with rlwrap if it's available
 if which rlwrap &>/dev/null; then
    exec rlwrap -c -r -s 1000 php5 -d output_buffering=On $0 "$@"
 else
