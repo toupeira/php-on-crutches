@@ -629,7 +629,7 @@
                return hidden_field($key, '0', array('id' => null))
                     . check_box($key, '1', $value, $options);
             case 'select_tag':
-               return select_tag($key, array_delete($options, 'values'), $value, $options);
+               return select_tag($key, array_delete($options, 'values'), any(array_delete($options, 'selected'), $value), $options);
             default:
                return $tag($key, $value, $options);
          }
