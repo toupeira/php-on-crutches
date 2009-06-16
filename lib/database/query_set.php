@@ -525,11 +525,6 @@
             $this->reset();
             return $value;
 
-         } elseif (array_key_exists($method, $this->_mapper->attributes)) {
-            # Filter by key
-            array_unshift($args, $method);
-            return $this->merge('where', $args);
-
          } elseif (preg_match('/^(?:(left|right|inner|outer|natural)_)?join(_using)?$/', $method, $match)) {
             # Add a join
             if (count($args) > 1) {
@@ -547,9 +542,16 @@
 
             return $this;
 
-         } else {
+         } elseif (array_key_exists($key, $this->_options)) {
             # Merge by default
             return $this->merge($method, $args);
+
+         } elseif (array_key_exists($method, $this->_mapper->attributes)) {
+            # Filter by key
+            array_unshift($args, $method);
+            return $this->merge('where', $args);
+         } else {
+            throw new UndefinedMethod($this, $method);
          }
       }
 
