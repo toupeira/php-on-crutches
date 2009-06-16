@@ -542,7 +542,7 @@
 
             return $this;
 
-         } elseif (array_key_exists($key, $this->_options)) {
+         } elseif (array_key_exists($method, $this->_options)) {
             # Merge by default
             return $this->merge($method, $args);
 
@@ -550,6 +550,7 @@
             # Filter by key
             array_unshift($args, $method);
             return $this->merge('where', $args);
+
          } else {
             throw new UndefinedMethod($this, $method);
          }
