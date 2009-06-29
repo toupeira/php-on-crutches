@@ -34,7 +34,7 @@ TXT;
       $extensions = array('php', 'thtml', 'js');
       $exclude = WEBROOT.JAVASCRIPTS.'all*';
 
-      $filter = "\( -iname '*.".implode("' -o -iname '*.", $extensions)."' \) -not -iname '$exclude'";
+      $filter = "\( -iname '*.".implode("' -o -iname '*.", $extensions)."' \) -not -iwholename '$exclude'";
 
       $files = find_files($dir, $filter);
       $files = implode(' ', array_map('escapeshellarg', $files));
@@ -194,7 +194,7 @@ TXT;
             if (empty($key)) {
                # Look for a multi-line msgid
                while (preg_match('/^"(.+)"$/', fgets($file), $match)) {
-                  $key .= $match[2];
+                  $key .= $match[1];
                }
             }
 
