@@ -108,8 +108,13 @@
       return str_replace("\n", "<br />\n", h($text));
    }
 
-   function is_email($text) {
-      return preg_match("/^.+@[^\.].+\.[a-z]{2,6}$/i", $text) > 0;
+   function is_email($email) {
+      return preg_match("/^.+@[^\.].+\.[a-z]{2,6}$/i", $email) > 0;
+   }
+
+   function is_reachable_email($email) {
+      return @dns_get_mx($domain = array_pop(explode('@', $email, 2)), $mx) or
+             @dns_get_record($domain, DNS_A);
    }
 
    function auto_link($text) {

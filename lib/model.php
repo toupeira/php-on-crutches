@@ -507,9 +507,11 @@
       }
 
       protected function is_reachable_email($key, $allow_empty=false, $message=null) {
+         $value = $this->_attributes[$key];
+         $domain = array_pop(explode('@', $email, 2));
+
          return $this->validate_attribute($key,
-            @dns_get_mx($domain = array_pop(explode('@', $this->_attributes[$key], 2)), $mx) or
-            @dns_get_record($domain, DNS_A),
+            ($allow_empty and $value == '') or is_reachable_email($value),
             sprintf(_("%s is not a valid email domain"), $domain)
          );
       }
