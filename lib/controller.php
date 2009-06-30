@@ -643,7 +643,7 @@
             throw new TypeError("Invalid model '$model'");
          }
 
-         $id = intval($args[0]);
+         $id = round($args[0]);
          $params = $this->params[underscore($model)];
 
          if (method_exists($this, $method = "scaffold_$action")) {

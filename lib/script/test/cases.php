@@ -64,7 +64,7 @@
          }
 
          return $this->assertSame(
-            intval($count), intval(count($value)), $message);
+            round($count), round(count($value)), $message);
       }
 
       function assertRaise($code, $class=ApplicationError) {

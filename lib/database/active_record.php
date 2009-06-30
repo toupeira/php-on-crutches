@@ -46,7 +46,7 @@
 
       function get_slug() {
          $slug = parent::get_slug();
-         return intval($this->id).($slug ? "-$slug" : '');
+         return round($this->id).($slug ? "-$slug" : '');
       }
 
       function __get($key) {
@@ -83,7 +83,7 @@
 
       function get_id() {
          $id = $this->_attributes[$this->_primary_key];
-         return ($id and $this->_key_type == 'integer') ? intval($id) : $id;
+         return ($id and $this->_key_type == 'integer') ? round($id) : $id;
       }
 
       function get_conflicts() {

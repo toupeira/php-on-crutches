@@ -114,7 +114,7 @@
          }
 
          $text .= ' | Status: %s';
-         if (intval($status / 100) == 2) {
+         if (round($status / 100) == 2) {
             $args[] = "[0;32m$status[0m";
          } else {
             $args[] = "[1;31m$status[0m";

@@ -155,7 +155,7 @@
                   $this->replace_select('count(*)');
                }
 
-               $this->_count = intval($this->statement->fetch_column());
+               $this->_count = round($this->statement->fetch_column());
 
                $this->_options = $current_options;
                $this->_sql = $current_sql;
@@ -291,7 +291,7 @@
 
             if ($count > $size) {
                $this->_pages = ceil($count / $size);
-               $this->_page = max(1, min($this->_pages, intval(Dispatcher::$params['page'])));
+               $this->_page = max(1, min($this->_pages, round(Dispatcher::$params['page'])));
                $options['limit'] = $size;
                $options['offset'] = ($this->_page - 1) * $size;
             }

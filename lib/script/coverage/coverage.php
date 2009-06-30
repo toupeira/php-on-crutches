@@ -251,8 +251,8 @@
    }
 
    function coverage_graph($percentage) {
-      $a = intval($percentage);
-      $b = intval(100 - $a);
+      $a = round($percentage);
+      $b = round(100 - $a);
       return "<td class=\"rightnb right\">$percentage%</td>\n"
            . "<td class=\"leftnb\"><table class=\"graph\"><tr>\n"
            . "  <td class=\"tested\" style=\"width: ${a}px\"></td>\n"

@@ -2266,9 +2266,9 @@ class Textile {
         // image size determined, but only width or height specified
         if ($w && !$h) {
           // width defined, scale down height proportionately
-          $h = intval($image_h * ($w / $image_w));
+          $h = round($image_h * ($w / $image_w));
         } elseif ($h && !$w) {
-          $w = intval($image_w * ($h / $image_h));
+          $w = round($image_w * ($h / $image_h));
         }
       } else {
         $w = $image_w;
@@ -2276,8 +2276,8 @@ class Textile {
       }
       if ($w && $h) {
         if ($pctw || $pcth) {
-          $w = intval($w * $pctw / 100);
-          $h = intval($h * $pcth / 100);
+          $w = round($w * $pctw / 100);
+          $h = round($h * $pcth / 100);
         }
         if (!preg_match('/^xhtml2/', $this->options['flavor'])) {
           $tag .= " height=\"$h\" width=\"$w\"";

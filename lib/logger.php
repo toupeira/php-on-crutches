@@ -85,7 +85,7 @@
       }
 
       function set_level($level) {
-         $this->_level = intval($level);
+         $this->_level = round($level);
       }
 
       function log($msg, $level=LOG_INFO) {

@@ -245,7 +245,7 @@
          $values = array('odd', 'even');
       }
 
-      $value = $values[intval($_cycle)];
+      $value = $values[round($_cycle)];
 
       if (++$_cycle >= count($values)) {
          $_cycle = 0;

@@ -464,7 +464,7 @@
                return $value->id;
             }
          } elseif (is_bool($value)) {
-            return intval($value);
+            return round($value);
          } else {
             return $value;
          }

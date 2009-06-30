@@ -64,7 +64,7 @@
       }
 
       function edit($id) {
-         if (is_admin() or self::auth('current')->id == intval($id)) {
+         if (is_admin() or self::auth('current')->id == round($id)) {
             $this->scaffold('edit', $id);
          } else {
             $this->msg['error'] = _("Access denied");
@@ -73,7 +73,7 @@
       }
 
       function destroy($id) {
-         if (is_admin() or self::auth('current')->id == intval($id)) {
+         if (is_admin() or self::auth('current')->id == round($id)) {
             $this->scaffold('destroy', $id);
             if (!self::auth('current')->exists) {
                $this->logout();
