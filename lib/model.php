@@ -508,7 +508,7 @@
 
       protected function is_reachable_email($key, $allow_empty=false, $message=null) {
          $value = $this->_attributes[$key];
-         $domain = array_pop(explode('@', $email, 2));
+         $domain = array_pop(explode('@', $value, 2));
 
          return $this->validate_attribute($key,
             ($allow_empty and $value == '') or is_reachable_email($value),
