@@ -13,6 +13,7 @@
    define('LOG',          ROOT.'log/');
    define('TEST',         ROOT.'test/');
    define('TMP',          ROOT.'tmp/');
+   define('VENDOR',       ROOT.'vendor/');
 
    # Application directories
    define('CONTROLLERS',  APP.'controllers/');
