@@ -324,4 +324,12 @@
       return str_shuffle($password);
    }
 
+   function starts_with($text, $search) {
+      return substr($text, 0, mb_strlen($search)) === $search;
+   }
+
+   function ends_with($text, $search) {
+      return substr($text, mb_strlen($text) - mb_strlen($search)) === $search;
+   }
+
 ?>
