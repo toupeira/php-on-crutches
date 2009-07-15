@@ -117,7 +117,7 @@
 
       'notify_errors'     => null,
       'notify_memory'     => null,
-      'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied'),
+      'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied', 'ServiceUnavailable'),
 
       'custom_mimetypes'  => array(
          # icons are detected as image/x-ico, which nobody seems to use...
