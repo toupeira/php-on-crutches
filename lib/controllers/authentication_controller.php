@@ -50,11 +50,14 @@
          $this->render(array($this->name.'/login', 'authentication/login'));
       }
 
-      function logout() {
+      function logout($redirect=true) {
          self::auth('logout');
          unset($this->session['auth_id']);
          $this->delete_cookie('auth_token');
-         $this->redirect_to(':/login');
+
+         if ($redirect !== false) {
+            $this->redirect_to(':/login');
+         }
       }
 
       function signup() {
