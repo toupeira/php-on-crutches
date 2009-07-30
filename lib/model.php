@@ -204,6 +204,10 @@
          $this->call_filter("before_$action");
          $this->call_filter("before_save");
 
+         if (!$skip_validation and !empty($this->_errors)) {
+            return false;
+         }
+
          # Get the changed values
          $attributes = array_get(
             $this->_attributes, array_keys($this->_changed_attributes)
@@ -512,7 +516,7 @@
 
          return $this->validate_attribute($key,
             ($allow_empty and $value == '') or is_reachable_email($value),
-            sprintf(_("%s is not a valid email domain"), $domain)
+            sprintf(_("%s is not a valid email domain"), h($domain))
          );
       }
 
