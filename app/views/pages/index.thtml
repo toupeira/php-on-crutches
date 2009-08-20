@@ -88,7 +88,7 @@
 </tr>
 <tr>
    <th>URL Prefix</th>
-   <td><?= Dispatcher::$prefix ?></td>
+   <td><?= config('prefix') ?></td>
 </tr>
 <tr>
    <th>URL Rewriting</th>
