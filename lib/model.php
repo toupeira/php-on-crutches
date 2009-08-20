@@ -45,8 +45,8 @@
 
          # Set default values
          $this->set_attributes(array_merge(
-            (array) $attributes,
-            (array) $defaults
+            (array) $defaults,
+            (array) $attributes
          ));
       }
 
