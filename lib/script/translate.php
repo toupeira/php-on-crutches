@@ -36,7 +36,9 @@ TXT;
 
       $filter = "\( -iname '*.".implode("' -o -iname '*.", $extensions)."' \) -not -iwholename '$exclude'";
 
-      $files = find_files($dir, $filter);
+      if (!$files = find_files($dir, $filter)) {
+         return;
+      }
       $files = implode(' ', array_map('escapeshellarg', $files));
 
       print "Updating [1m$template[0m messages...\n";
