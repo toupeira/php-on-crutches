@@ -230,7 +230,10 @@
    }
 
    function br2nl($text) {
-      return str_replace("<br />", "\n", $text);
+      return strtr($text, array(
+         '<br />' => "\n",
+         '<br>'   => "\n",
+      ));
    }
 
    function cycle($values=null) {
