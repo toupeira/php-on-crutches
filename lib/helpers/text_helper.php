@@ -73,7 +73,6 @@
             case 'w':
                $max_length -= 1;
                break;
-            case ' ':
             case 'i':
             case 'l':
             case 't':
