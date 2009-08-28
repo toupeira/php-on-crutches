@@ -319,6 +319,12 @@
          return count($this->_scope);
       }
 
+      function replace_scope($new_scope=null) {
+         $old_scope = $this->_scope;
+         $this->_scope = $new_scope;
+         return $old_scope;
+      }
+
       function build_condition($conditions) {
          if (!is_array($conditions)) {
             # Conditions are passed directly as arguments
