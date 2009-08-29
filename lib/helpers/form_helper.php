@@ -55,6 +55,13 @@
       return $_token;
    }
 
+   function form_element_id($key) {
+      return preg_replace(
+         '/\[([^\]]+)\]/', '_\1',
+         str_replace('[]', '', $key)
+      );
+   }
+
    function form_element($tag, $key, $default_value=null, array $options=null, array $defaults=null) {
       # Merge tag options
       $options = array_merge(
@@ -65,10 +72,7 @@
 
       # Set a default id
       if (!array_key_exists('id', (array) $options)) {
-         $options['id'] = preg_replace(
-            '/\[([^\]]+)\]/', '_\1',
-            str_replace('[]', '', $key)
-         );
+         $options['id'] = form_element_id($key);
       }
 
       # Use request value if set, else use default value
@@ -126,7 +130,7 @@
 
    function label($key, $label=null, array $options=null) {
       return content_tag('label', any($label, humanize($key)), array_merge(
-         (array) $options, array('for' => $key,)
+         (array) $options, array('for' => form_element_id($key))
       ));
    }
 
