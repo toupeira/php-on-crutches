@@ -216,6 +216,8 @@
 
    class DatabaseStatement extends PDOStatement
    {
+      protected $_fetch = false;
+
       function __get($key) {
          if (method_exists($this, $key)) {
             return $this->$key();
@@ -226,6 +228,7 @@
 
       function execute(array $params=null) {
          parent::execute((array) $params);
+         $this->_fetch = (parent::columnCount() > 0);
          return $this;
       }
 
@@ -238,11 +241,17 @@
       }
 
       function fetch_all($fetch_style=null) {
-         return parent::fetchAll($fetch_style);
+         if ($this->_fetch) {
+            return parent::fetchAll($fetch_style);
+         } else {
+            return array();
+         }
       }
 
       function fetch_column($column=0) {
-         if (is_numeric($column)) {
+         if (!$this->_fetch) {
+            return;
+         } elseif (is_numeric($column)) {
             return parent::fetchColumn($column);
          } else {
             $record = $this->fetch();
@@ -252,15 +261,18 @@
 
       function fetch_list($column=0) {
          $list = array();
-         while (($value = $this->fetch_column($column))) {
-            $list[] = $value;
+
+         if ($this->_fetch) {
+            while (($value = $this->fetch_column($column))) {
+               $list[] = $value;
+            }
          }
 
          return $list;
       }
 
       function fetch_load($class) {
-         if ($data = $this->fetch()) {
+         if ($this->_fetch and $data = $this->fetch()) {
             $object = new $class();
             $object->load($data);
             return $object;
@@ -268,13 +280,18 @@
       }
 
       function fetch_all_load($class) {
-         $objects = array();
-         while ($data = $this->fetch()) {
-            $object = new $class();
-            $object->load($data);
-            $objects[] = $object;
+         if ($this->_fetch) {
+            $objects = array();
+            while ($data = $this->fetch()) {
+               $object = new $class();
+               $object->load($data);
+               $objects[] = $object;
+            }
+
+            return $objects;
+         } else {
+            return array();
          }
-         return $objects;
       }
    }
 

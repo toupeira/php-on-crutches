@@ -52,9 +52,7 @@
          if ($object->save()) {
             return $object;
          } else {
-            throw new ApplicationError(
-               "Couldn't create {$this->_model} instance (".array_to_str($object->errors).")"
-            );
+            throw new ModelError($object);
          }
       }
 

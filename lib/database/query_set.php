@@ -148,9 +148,9 @@
          return (array) $this->_objects;
       }
 
-      function get_count() {
-         if (is_null($this->_count)) {
-            if ($this->_statement) {
+      function get_count($conditions=null) {
+         if (is_null($this->_count) or $conditions) {
+            if ($this->_statement and !$conditions) {
                $this->_count = count($this->objects);
             } else {
                $current_options = $this->_options;
@@ -164,11 +164,21 @@
                   $this->replace_select('count(*)');
                }
 
-               $this->_count = round($this->statement->fetch_column());
+               if ($conditions) {
+                  $this->where(func_get_args());
+               }
+
+               $count = round($this->statement->fetch_column());
 
                $this->_options = $current_options;
                $this->_sql = $current_sql;
                $this->_statement = null;
+
+               if ($conditions) {
+                  return $count;
+               } else {
+                  $this->_count = $count;
+               }
             }
          }
 
@@ -443,6 +453,7 @@
          $status = false;
          foreach ($this->objects as $object) {
             $status = $object->destroy();
+            $object->dispose(0);
          }
 
          return $status;
@@ -793,11 +804,7 @@
       # Countable implementation
 
       function count($conditions=null) {
-         if ($conditions) {
-            $this->where(func_get_args());
-         }
-
-         return $this->count;
+         return $this->get_count(func_get_args());
       }
    }
 

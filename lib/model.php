@@ -119,6 +119,8 @@
             return $this->$key();
          } elseif (method_exists($this, $generator = "generate_$key")) {
             return $this->add_virtual($key, $this->$generator());
+         } elseif (method_exists($this, '__get_custom')) {
+            return $this->__get_custom($key);
          } else {
             throw new UndefinedMethod($this, $getter);
          }

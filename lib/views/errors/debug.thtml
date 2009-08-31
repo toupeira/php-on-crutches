@@ -91,7 +91,7 @@
 <h1><?= $title ?></h1>
 <h3>in <strong><?= $file ?></strong> at line <strong><?= $line ?></strong>:</h3>
 
-<p><?= $message ?></p>
+<p><?= nl2br($message) ?></p>
 
 <? if ($code): ?>
 <h3>Extracted source (around line <strong>#<?= $line ?></strong>):</h3>

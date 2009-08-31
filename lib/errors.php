@@ -91,6 +91,22 @@
       }
    }
 
+   class ModelError extends ApplicationError {
+      function __construct($object, $message=null) {
+         $model = get_class($object);
+         parent::__construct(sprintf(
+            any($message, 
+               "Couldn't create %s instance\n"
+               . "  Errors: %s\n"
+               . "  Attributes: %s\n"
+            ),
+            get_class($object),
+            array_to_str($object->errors),
+            array_to_str($object->attributes)
+         ));
+      }
+   }
+
    # Global variable to track if an exception was caught
    $_EXCEPTION_CAUGHT = false;
 

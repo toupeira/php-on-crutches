@@ -60,8 +60,8 @@
 
          $class = get_class($exception);
          $message = preg_replace(
-            "/('[^']+'|[^ ]+\(\))/",
-            '<code>$1</code>',
+            "/([^a-z])('[^']+'|[^ ]+\(\))/",
+            '$1<code>$2</code>',
             $exception->getMessage()
          );
          $file = $exception->getFile();
