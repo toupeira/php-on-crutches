@@ -81,7 +81,7 @@
                if (!empty($this->{'_'.$type})) {
                   require_once LIB."database/associations/{$type}_association.php";
                   $association = camelize($type).'Association';
-                  foreach ($this->{'_'.$type} as $key => $options) {
+                  foreach ((array) $this->{'_'.$type} as $key => $options) {
                      if (is_numeric($key)) {
                         $key = $options;
                         $options = null;
@@ -159,17 +159,17 @@
       }
 
       function has_many($key=null) {
-         return $key ? in_array(tableize($key), $this->_has_many)
+         return $key ? in_array(tableize($key), (array) $this->_has_many)
                      : $this->_has_many;
       }
 
       function has_one($key=null) {
-         return $key ? in_array(underscore(singularize($key)), $this->_has_one)
+         return $key ? in_array(underscore(singularize($key)), (array) $this->_has_one)
                      : $this->_has_one;
       }
 
       function belongs_to($key=null) {
-         return $key ? in_array(underscore(singularize($key)), $this->_belongs_to)
+         return $key ? in_array(underscore(singularize($key)), (array) $this->_belongs_to)
                      : $this->_belongs_to;
       }
 

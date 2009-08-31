@@ -195,7 +195,11 @@
    }
 
    function to_time($time) {
-      return is_numeric($time) ? $time : strtotime($time);
+      if (is_numeric($time)) {
+         return $time;
+      } elseif (!in_array($time, array('0000-00-00', '0000-00-00 00:00:00'))) {
+         return strtotime($time);
+      }
    }
 
    function format_duration($then, $now=null) {

@@ -31,7 +31,7 @@
       protected $_next_page;
       protected $_prev_page;
 
-      function __construct(DatabaseMapper $mapper, array $options=null) {
+      function __construct(DatabaseMapper $mapper, array $options=null, array $params=null) {
          $this->_mapper = $mapper;
 
          $this->_options = array_merge(array(
@@ -45,6 +45,10 @@
             'limit'  => null,
             'offset' => null,
          ), (array) $options);
+
+         if (is_array($params)) {
+            $this->_params = $params;
+         }
       }
 
       function __toString() {
@@ -64,6 +68,11 @@
 
       function to_xml() {
          return implode("\n", array_collect($this->objects, 'to_xml'));
+      }
+
+      function copy() {
+         $class = get_class($this);
+         return new $class($this->_mapper, $this->_options, $this->_params);
       }
 
       function get_model() {

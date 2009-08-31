@@ -55,8 +55,12 @@
       }
 
       function __toString() {
-         if ($key = $this->_display_column) {
-            return $this->$key;
+         if ($keys = $this->_display_column) {
+            foreach ((array) $keys as $key) {
+               if (!blank($value = $this->$key)) {
+                  return $value;
+               }
+            }
          } else {
             foreach (array('title', 'name', 'username', 'filename', 'key', 'id') as $key) {
                $getter = any(
@@ -423,7 +427,7 @@
          if ($message) {
             $this->_errors[$key][] = $message;
          } else {
-            $this->_errors['generic'][] = $message;
+            $this->_errors['generic'][] = $key;
          }
       }
 
