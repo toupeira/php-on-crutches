@@ -21,4 +21,8 @@
    log_level_set(LOG_DISABLED);
    fake_request();
 
+   ini_set('max_execution_time', 0);
+   ini_set('max_input_time', 0);
+   set_time_limit(0);
+
 ?>

@@ -152,6 +152,7 @@
 
    if (PHP_SAPI == 'cli') {
       # Force custom settings when running in a console
+      $_CONFIG['application_default'] = $_CONFIG['application'];
       array_update($_CONFIG['application'], array(
          'log_file'          => STDERR,
          'session_store'     => 'none',

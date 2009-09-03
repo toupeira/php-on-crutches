@@ -34,6 +34,10 @@
       return $GLOBALS['_LOGGER']->level = $level;
    }
 
+   function log_file_set($file) {
+      return $GLOBALS['_LOGGER']->file = $file;
+   }
+
    class Logger extends Object
    {
       static protected $_messages;

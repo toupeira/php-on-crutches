@@ -101,7 +101,7 @@
          $options['value'] = $default_value;
          if ($request_value) {
             $options['checked'] = ($value == $default_value);
-         } elseif (substr($key, -2) == '[]' and $values = $_REQUEST[substr($key, 0, -2)]) {
+         } elseif (substr($key, -2) == '[]' and is_array($values = $_REQUEST[substr($key, 0, -2)])) {
             $options['checked'] = in_array($default_value, (array) $values);
          }
       } elseif ($tag == 'input') {

@@ -113,6 +113,14 @@
          }
       }
 
+      function fetch_raw() {
+         return $this->statement->fetch();
+      }
+
+      function fetch_all_raw() {
+         return $this->statement->fetch_all();
+      }
+
       function fetch_column($key) {
          if ($object = $this->fetch()) {
             return getf($object, $key);
@@ -165,7 +173,8 @@
                }
 
                if ($conditions) {
-                  $this->where(func_get_args());
+                  $conditions = func_get_args();
+                  call_user_func_array(array($this, 'where'), $conditions);
                }
 
                $count = round($this->statement->fetch_column());
@@ -239,7 +248,9 @@
                   $alias = null;
 
                   $spaces = substr_count($table, ' ');
-                  if ($spaces == 1) {
+                  if (substr_count($table, '.') > 0) {
+                     $sql .= " $table";
+                  } elseif ($spaces == 1) {
                      list($table, $alias) = explode(' ', $table, 2);
                      $sql .= " `$table` AS `$alias`";
                   } elseif ($spaces == 0) {
@@ -398,10 +409,13 @@
       }
 
       function get_first() {
-         $this->limit(1);
-         $this->_position = 0;
-         if ($this->valid()) {
-            return $this->current();
+         if ($this->_objects) {
+            return $this->_objects[0];
+         } else {
+            $copy = $this->copy()->limit(1);
+            if ($copy->valid()) {
+               return $copy->current();
+            }
          }
       }
 
@@ -428,7 +442,7 @@
 
       function find($conditions) {
          if (!blank($conditions)) {
-            return $this->where(func_get_args())->order()->first;
+            return $this->copy()->where(func_get_args())->order()->first;
          }
       }
 
@@ -645,15 +659,29 @@
          }
          $this->replace_select($keys);
 
+         $attributes = array();
+         foreach ($keys as $i => $key) {
+            if (is_array($key)) {
+               $attributes[] = array_shift(array_values($key));
+            } else {
+               $key = trim($key);
+               if (strtoupper(substr($key, 0, 9)) == 'DISTINCT ') {
+                  $attributes[] = substr($key, 9);
+               } else {
+                  $attributes[] = $key;
+               }
+            }
+         }
+
          $values = array();
          foreach ($this->objects as $object) {
-            if (count($keys) == 1) {
-               $values[] = getf($object, $keys[0]);
-            } else {
+            if (count($attributes) > 1) {
                $values[] = array_get(
                   is_array($object) ? $object : $object->attributes,
-                  $keys
+                  $attributes
                );
+            } else {
+               $values[] = getf($object, $attributes[0]);
             }
          }
 

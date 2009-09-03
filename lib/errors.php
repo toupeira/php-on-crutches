@@ -151,23 +151,7 @@
       if (PHP_SAPI == 'cli') {
          print dump_exception($exception)."\n";
       } else {
-         if (log_running()) {
-            $dump = "\n".dump_exception($exception);
-
-            if (ignore_exception($exception)) {
-               log_info($dump);
-            } else {
-               if (!log_level(LOG_INFO)) {
-                  Dispatcher::log_header(
-                     get_class(Dispatcher::$controller),
-                     Dispatcher::$params['action'],
-                     true
-                  );
-               }
-
-               log_error($dump);
-            }
-         }
+         log_exception($exception);
 
          Dispatcher::$controller = new ErrorsController();
          print Dispatcher::$controller->show($exception);
@@ -180,6 +164,27 @@
       }
 
       exit(1);
+   }
+
+   # Log an exception, with request header if necessary
+   function log_exception($exception) {
+      if (log_running()) {
+         $dump = "\n".dump_exception($exception);
+
+         if (ignore_exception($exception)) {
+            log_info($dump);
+         } else {
+            if (!log_level(LOG_INFO)) {
+               Dispatcher::log_header(
+                  get_class(Dispatcher::$controller),
+                  Dispatcher::$params['action'],
+                  true
+               );
+            }
+
+            log_error($dump);
+         }
+      }
    }
 
    # Send an error notification mail to the specified recipients,

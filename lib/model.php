@@ -58,7 +58,7 @@
          if ($keys = $this->_display_column) {
             foreach ((array) $keys as $key) {
                if (!blank($value = $this->$key)) {
-                  return $value;
+                  return (string) $value;
                }
             }
          } else {
@@ -69,7 +69,7 @@
                );
 
                if ($getter and !blank($value = $this->$key)) {
-                  return $value;
+                  return (string) $value;
                }
             }
          }
@@ -119,6 +119,12 @@
             return $this->$key();
          } elseif (method_exists($this, $generator = "generate_$key")) {
             return $this->add_virtual($key, $this->$generator());
+         } elseif (method_exists($this, $cache = "cache_$key")) {
+            $key = $this->get_cache_key($key);
+            if (is_null($value = cache($key))) {
+               $value = cache_set($key, $this->$cache());
+            }
+            return $this->add_virtual($key, $value);
          } elseif (method_exists($this, '__get_custom')) {
             return $this->__get_custom($key);
          } else {
@@ -699,12 +705,25 @@
          return $this->form_element($key, 'date_field', $options);
       }
 
-      function get_dom_id($key=null) {
-         if ($key) {
-            return $this->dom_class.($key ? "_$key" : '');
-         } else {
-            return $this->dom_class.'-'.$this->id;
+      function expire_attribute($attribute=null) {
+         foreach (func_get_args() as $attribute) {
+            cache_expire($this->get_cache_key($attribute));
          }
+
+         return true;
+      }
+
+      function get_cache_key($attribute=null) {
+         $key = underscore(get_class($this)).'-'.intval($this->id);
+         if ($attribute) {
+            $key .= '-'.$attribute;
+         }
+
+         return $key;
+      }
+
+      function get_dom_id($attribute=null) {
+         return $this->dom_class.($attribute ? "_$attribute" : '-'.intval($this->id));
       }
 
       function get_dom_class() {

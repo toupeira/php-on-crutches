@@ -14,6 +14,7 @@
    require LIB.'util/hash.php';
    require LIB.'util/inflector.php';
    require LIB.'util/system.php';
+   require LIB.'util/jobs.php';
 
    require LIB.'util/magic_quotes.php';
 

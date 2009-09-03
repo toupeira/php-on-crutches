@@ -72,6 +72,10 @@
          return $this->_mailer->AddAddress($address, $name);
       }
 
+      function clear() {
+         $this->_mailer->ClearAllRecipients();
+      }
+
       function add_cc($address, $name=null) {
          $this->_cc[] = $address;
          return $this->_mailer->AddCC($address, $name);
@@ -83,8 +87,11 @@
       }
 
       function send() {
-         foreach (func_get_args() as $address) {
-            $this->add_address($address);
+         if ($emails = func_get_args()) {
+            $this->clear();
+            foreach ($emails as $email) {
+               $this->add_address($email);
+            }
          }
 
          if ($this->body == '') {

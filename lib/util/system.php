@@ -24,10 +24,6 @@
    }
 
    function build_shell_command($command, $args=null) {
-      if (!is_command($command)) {
-         throw new ApplicationError("Command '$command' not found");
-      }
-
       if (count($args) == 1 and is_array($args[0])) {
          $args = $args[0];
       }
@@ -36,6 +32,10 @@
          $args = array_map('escapeshellarg', $args);
          array_unshift($args, $command);
          $command = call_user_func_array('sprintf', $args);
+      }
+
+      if (!is_command($command)) {
+         throw new ApplicationError("Command '$command' not found");
       }
 
       return $command;
@@ -65,12 +65,7 @@
 
       log_info("Executing '$command'");
       $proc = proc_open($command, array(), $pipes);
-
-      while (getf(proc_get_status($proc), 'running')) {
-         usleep(100);
-      }
-
-      return getf(proc_get_status($proc), 'exitcode');
+      return proc_close($proc);
    }
 
    # Run a shell command in the background.
@@ -170,13 +165,13 @@
    {
       protected $_path;
 
-      function __construct($name=null) {
+      function __construct($name=null, $suffix='XXXXXX') {
          if (function_exists(config)) {
             $name = any($name, config('name'));
          }
 
          $tmpdir = sys_get_temp_dir();
-         $this->_path = trim(`mktemp -p $tmpdir $name.XXXXXX`);
+         $this->_path = trim(`mktemp -p $tmpdir $name.$suffix`);
       }
 
       function __destruct() { rm_f($this->_path); }
