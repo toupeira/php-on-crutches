@@ -39,15 +39,15 @@
 
       function __construct(array $attributes=null, array $defaults=null) {
          # Add virtual attributes
-         foreach ($this->_virtual_attributes as $key) {
-            $this->_attributes[$key] = null;
-         }
+         array_map(array($this, 'add_virtual'), $this->_virtual_attributes);
 
          # Set default values
          $this->set_attributes(array_merge(
             (array) $defaults,
             (array) $attributes
          ));
+
+         $this->call_if_defined('init');
       }
 
       function __destruct() {
@@ -298,13 +298,21 @@
       }
 
       function add_virtual($key, $value=null) {
-         if (!array_key_exists($key, $this->_attributes)) {
-            $this->_virtual_attributes[] = $key;
-         } elseif (!in_array($key, $this->_virtual_attributes)) {
-            throw new ValueError($key, "Attribute '$key' already exists");
+         $exists = array_key_exists($key, $this->_attributes);
+
+         if (!in_array($key, $this->_virtual_attributes)) {
+            if ($exists) {
+               throw new ValueError($key, "Attribute '$key' already exists");
+            } else {
+               $this->_virtual_attributes[] = $key;
+            }
          }
 
-         return $this->_attributes[$key] = $value;
+         if (func_num_args() > 1 or !$exists) {
+            return $this->_attributes[$key] = $value;
+         } else {
+            return $this->_attributes[$key];
+         }
       }
 
       function reset($key=null) {
