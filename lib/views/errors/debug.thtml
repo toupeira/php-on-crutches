@@ -114,10 +114,10 @@
 
 <h3>Parameters</h3>
 <?= table_tag(array(
-       'GET'        => dump(sorted($_GET)),
-       'POST'       => dump(sorted($_POST)),
-       'Session'    => dump(sorted($_SESSION)),
-       'Cookies'    => dump(sorted($_COOKIE)),
+       'GET'        => dump(sorted((array) $_GET)),
+       'POST'       => dump(sorted((array) $_POST)),
+       'Session'    => dump(sorted((array) $_SESSION)),
+       'Cookies'    => dump(sorted((array) $_COOKIE)),
     ), array('escape' => false)) ?>
 
 <? if ($user): ?>
