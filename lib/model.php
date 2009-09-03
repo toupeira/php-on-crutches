@@ -354,7 +354,7 @@
          $this->_errors = array();
          $this->_new_record = true;
 
-         return true;
+         return $this->freeze();
       }
 
       function freeze() {
