@@ -214,6 +214,7 @@
    # Check if an exception should be ignored
    function ignore_exception($exception) {
       foreach (config('ignore_errors') as $class) {
+         # Use instanceof to also catch inherited classes
          if ($exception instanceof $class) {
             return true;
          }
