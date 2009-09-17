@@ -217,6 +217,10 @@
    }
 
    function submit_button($title=null, array $options=null) {
+      if (array_delete($options, 'block')) {
+         $options['onclick'] = 'this.onclick = function() { return false; }';
+      }
+
       return tag('input', $options, array(
          'type' => 'submit', 'value' => any($title, _('Save'))
       ));
