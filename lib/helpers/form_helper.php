@@ -242,4 +242,19 @@
       return button_tag(any($title, _("Cancel")), $options);
    }
 
+   function timezone_list() {
+      $codes = array();
+      $locations = array();
+
+      foreach (timezone_identifiers_list() as $zone) {
+         if (preg_match('|^(Etc/)?([-+A-Z0-9]+)$|', $zone, $match)) {
+            $codes[] = $match[2];
+         } elseif ($zone != 'localtime' and substr($zone, 0, 8) != 'SystemV/') {
+            $locations[] = $zone;
+         }
+      }
+
+      return array_merge(sorted($codes), sorted($locations));
+   }
+
 ?>
