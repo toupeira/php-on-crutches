@@ -198,12 +198,17 @@
    }
 
    function icon_link_to($icon, $title, $path, array $options=null, array $url_options=null) {
-      if (!$icon_title = array_delete($options, 'icon_title')) {
+      if (is_null($options['title']) and !$icon_title = array_delete($options, 'icon_title')) {
          $icon_title = strip_html($title);
       }
 
       $title = icon($icon, array('title' => $icon_title)).$title;
       return link_to($title, $path, $options, $url_options);
+   }
+
+   function icon_link_to_function($icon, $title, $code, array $options=null) {
+      $options['onclick'] = "$code; return false";
+      return icon_link_to($icon, $title, '#', $options);
    }
 
 ?>

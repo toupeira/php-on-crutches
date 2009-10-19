@@ -66,24 +66,25 @@
    function truncate($text, $max_length=40, $add_title=false, $add='...') {
       $length = mb_strlen($text);
       $lowercase = mb_strtolower($text);
-      for ($i = 0; $i < $length; $i++) {
+
+      for ($i = 0; $i < $max_length; $i++) {
          $char = mb_substr($lowercase, $i, 1);
          switch ($char) {
             case 'm':
             case 'w':
-               $max_length -= 1;
+               $max_length -= 0.7;
                break;
             case 'i':
             case 'l':
             case 't':
             case '1':
-               $max_length += 1;
+               $max_length += 0.5;
                break;
          }
       }
 
       if ($length > $max_length) {
-         $truncated = rtrim(mb_substr($text, 0, $max_length));
+         $truncated = rtrim(mb_substr($text, 0, round($max_length)));
          if ($add_title) {
             return '<span title="'.h($text).'">'.h($truncated).$add.'</span>';
          } else {

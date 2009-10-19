@@ -10,7 +10,7 @@
    class HasManyAssociation extends Association
    {
       protected function load_data(ActiveRecord $object) {
-         $children = DB($this->related)->where($this->key, $object->id);
+         $children = DB($this->related)->find_all($this->key, $object->id);
          if (DB($this->related)->belongs_to($this->model)) {
             $children->preload(array(underscore($this->model) => $object));
          }

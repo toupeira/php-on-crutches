@@ -31,7 +31,7 @@
       protected $_next_page;
       protected $_prev_page;
 
-      function __construct(DatabaseMapper $mapper, array $options=null, array $params=null) {
+      function __construct(DatabaseMapper $mapper, array $options=null, array $params=null, array $preload=null) {
          $this->_mapper = $mapper;
 
          $this->_options = array_merge(array(
@@ -48,6 +48,10 @@
 
          if (is_array($params)) {
             $this->_params = $params;
+         }
+
+         if (is_array($preload)) {
+            $this->_preload = $preload;
          }
       }
 
@@ -72,7 +76,7 @@
 
       function copy() {
          $class = get_class($this);
-         return new $class($this->_mapper, $this->_options, $this->_params);
+         return new $class($this->_mapper, $this->_options, $this->_params, $this->_preload);
       }
 
       function get_model() {
@@ -242,7 +246,7 @@
          if ($joins = $options['joins']) {
             foreach ($joins as $join) {
                if (is_array($join)) {
-                  $sql .= " {$join['type']} JOIN";
+                  $sql .= ' '.strtoupper($join['type']).' JOIN';
 
                   $table = $join['table'];
                   $alias = null;
@@ -446,7 +450,7 @@
          }
       }
 
-      function find_by_sql($sql, array $params=null) {
+      function find_by_sql($sql, $params=null) {
          if (!is_array($params)) {
             $params = array_slice(func_get_args(), 1);
          }

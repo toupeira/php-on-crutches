@@ -83,7 +83,7 @@
 
       function get_id() {
          $id = $this->_attributes[$this->_primary_key];
-         return ($id and $this->_key_type == 'integer') ? round($id) : $id;
+         return ($id and $this->_key_type == 'integer') ? (int) $id : $id;
       }
 
       function get_conflicts() {
@@ -190,7 +190,7 @@
 
          foreach ($this->mapper->attributes as $key => $options) {
             if (!$options['key'] and !$this->_errors[$key]) {
-               if ($key == 'email' and !$this->is_email($key)) {
+               if ($key == 'email' and !$this->is_email($key, $options['null'])) {
                   continue;
                }
 

@@ -41,7 +41,8 @@
                   $message = h($message);
                }
 
-               $message = preg_replace('/\[\[([^]]+)\]\]/', '<code>$1</code>', $message);
+               $message = preg_replace('/\*([^]\s][^]]*[^]\s]?)\*/', '<strong>$1</strong>', $message);
+               $message = preg_replace('/\[\[([^]\s][^]]*[^]\s]?)\]\]/', '<code>$1</code>', $message);
                $messages .= content_tag('div', $message, array(
                   'class' => "message $key"
                ));

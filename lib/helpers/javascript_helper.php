@@ -10,14 +10,14 @@
    }
 
    # Generate a link which executes JavaScript code
-   function link_to_function($title, $function, $options=null) {
-      $options['onclick'] = "$function; return false";
+   function link_to_function($title, $code, $options=null) {
+      $options['onclick'] = "$code; return false";
       return link_to($title, '#', $options);
    }
 
    # Genenerate a button which executes JavaScript code
-   function button_to_function($title, $function, $options=null) {
-      $options['onclick'] = "$function; return false";
+   function button_to_function($title, $code, $options=null) {
+      $options['onclick'] = "$code; return false";
       return button_tag($title, $options);
    }
 
