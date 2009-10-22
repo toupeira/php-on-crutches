@@ -464,7 +464,7 @@
          if (is_object($value)) {
             if (!$value instanceof ActiveRecord) {
                throw new TypeError($value, "Invalid class '%s'");
-            } elseif ($value->changed) {
+            } elseif ($value->new_record) {
                throw new ApplicationError("Can't use unsaved model as parameter");
             } else {
                return $value->id;
