@@ -80,6 +80,9 @@
                . "at ".strftime("%F %T").")\n";
          $text .= str_repeat('-', strlen($text) - 21);
 
+         # Log User-Agent
+         $text .= "\n  User-Agent: {$_SERVER['HTTP_USER_AGENT']}";
+
          # Log request parameters
          $text .= "\n  Parameters: ".array_to_str(Dispatcher::$params);
 
