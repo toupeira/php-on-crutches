@@ -111,7 +111,11 @@
                }
             }
 
-            if ($ext == '.js') {
+            if ($ext == '.css') {
+               # Minify CSS
+               require_once LIB.'vendor/cssmin.php';
+               $output = cssmin::minify($output);
+            } elseif ($ext == '.js') {
                # Minify JavaScript
                require_once LIB.'vendor/jsmin.php';
                $output = JSMin::minify($output);
