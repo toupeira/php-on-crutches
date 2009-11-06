@@ -44,7 +44,7 @@ class cssmin
 	 * 										following spaces.
 	 * @return	string			Minified stylesheet definitions
 	 */
-	public static function minify($css, $options = "remove-last-semicolon")
+	public static function minify($css, $options = 'remove-last-semicolon')
 		{
 		$options = ($options == "") ? array() : (is_array($options) ? $options : explode(",", $options));
 		if (in_array("preserve-urls", $options))
@@ -52,14 +52,16 @@ class cssmin
 			// Encode url() to base64
 			$css = preg_replace_callback("/url\s*\((.*)\)/siU", "cssmin_encode_url", $css);
 			}
+
 		// Remove comments
-		$css = preg_replace("/\/\*[\d\D]*?\*\/|\t+/", " ", $css);
-		// Replace CR, LF and TAB to spaces
-		$css = str_replace(array("\n", "\r", "\t"), " ", $css);
-		// Replace multiple to single space
-		$css = preg_replace("/\s\s+/", " ", $css);
-		// Remove unneeded spaces
-		$css = preg_replace("/\s*({|}|\[|\]|=|~|\+|>|\||;|:|,)\s*/", "$1", $css);
+		$css = preg_replace("/\/\*[\d\D]*?\*\//", " ", $css);
+
+		// Combine all lines within each style definition
+		$css = preg_replace_callback("/({[^}]+)/", "cssmin_string_minify", $css);
+
+		// Remove unneeded whitespace
+		$css = preg_replace("/[ \t]*({|}|\[|\]|=|~|\+|>|\||;|:|,)[ \t]*|(\n)\s*\n/m", "$1$2", $css);
+
 		if (in_array("remove-last-semicolon", $options))
 			{
 			// Removes the last semicolon of every style definition
@@ -135,6 +137,10 @@ class cssmin
 		return $r;
 		}
 	}
+
+function cssmin_string_minify($match) {
+   return preg_replace('/\n\s*/', '', $match[1]);
+}
 
 /**
  * Trims all elements of the array and removes empty elements. 
