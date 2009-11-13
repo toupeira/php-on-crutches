@@ -74,6 +74,11 @@
       }
    }
 
+   # Check if a string is UTF8-encoded
+   function is_utf8($string) {
+      return mb_detect_encoding($string, "UTF-8, ISO-8859-15, ASCII") == "UTF-8";
+   }
+
    # A wrapper around create_function()'s horrible syntax
    #
    # $code is a string with the function body, and $argc is the number of
