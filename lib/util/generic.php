@@ -75,8 +75,17 @@
    }
 
    # Check if a string is UTF8-encoded
-   function is_utf8($string) {
-      return mb_detect_encoding($string, "UTF-8, ISO-8859-15, ASCII") == "UTF-8";
+   function is_utf8($string, $charsets="ISO-8859-15") {
+      return mb_detect_encoding($string, "UTF-8, $charsets, ASCII") == "UTF-8";
+   }
+
+   # Convert a string to UTF8 if necessary
+   function to_utf8($string, $charset="ISO-8859-15") {
+      if (is_utf8($string)) {
+         return $string;
+      } else {
+         return iconv($charset, "UTF-8//TRANSLIT//IGNORE", $string);
+      }
    }
 
    # A wrapper around create_function()'s horrible syntax
