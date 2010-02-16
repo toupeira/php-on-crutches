@@ -64,6 +64,10 @@
 
    # Find an object by property value
    function array_find($array, $key, $value) {
+      if ($array instanceof QuerySet) {
+         $array = $array->objects;
+      }
+
       foreach ((array) $array as $object) {
          if (getf($object, $key) == $value) {
             return $object;
@@ -73,6 +77,10 @@
 
    # Find all matching values
    function array_find_all($array, $key, $value) {
+      if ($array instanceof QuerySet) {
+         $array = $array->objects;
+      }
+
       $objects = array();
       foreach ((array) $array as $object) {
          if (getf($object, $key) == $value) {
@@ -85,6 +93,10 @@
 
    # Find all matching values by regular expression
    function array_grep($array, $key, $pattern=null) {
+      if ($array instanceof QuerySet) {
+         $array = $array->objects;
+      }
+
       if (is_null($pattern)) {
          $pattern = $key;
          $key = null;
@@ -108,6 +120,10 @@
 
    # Collect the given array keys or object properties from each value
    function array_pluck($array, $key, $hash=false) {
+      if ($array instanceof QuerySet) {
+         $array = $array->objects;
+      }
+
       $values = array();
       foreach ($array as $object) {
          $value = getf($object, $key);
