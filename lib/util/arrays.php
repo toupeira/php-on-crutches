@@ -168,21 +168,35 @@
 
    # Delete one or more values from an array
    function array_remove(array &$array, $values) {
-      $values = (array) $values;
       $removed = false;
 
-      foreach ((array) $array as $key => $value) {
-         if (in_array($value, $values)) {
-            unset($array[$key]);
-            array_shift($values);
-            if (empty($values)) {
+      if (is_array($values)) {
+         foreach ((array) $array as $key => $value) {
+            if (in_array($value, $values)) {
+               unset($array[$key]);
+               array_shift($values);
+               if (empty($values)) {
+                  return true;
+               }
+               $removed = true;
+            }
+         }
+      } else {
+         foreach ((array) $array as $key => $value) {
+            if ($value == $values) {
+               unset($array[$key]);
                return true;
             }
-            $removed = true;
          }
       }
 
       return $removed;
+   }
+
+   # Return an array without one or more values
+   function array_without(array $array, $values) {
+      array_remove($array, $values);
+      return $array;
    }
 
    function array_update(array &$array) {
