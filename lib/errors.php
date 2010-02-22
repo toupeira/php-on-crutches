@@ -55,7 +55,6 @@
    class NotImplemented extends ApplicationError {}
    class ConfigurationError extends ApplicationError {}
    class MailerError extends ApplicationError {}
-   class FilterError extends ApplicationError {}
 
    class NotFound extends ApplicationError {}
    class RoutingError extends NotFound {}
