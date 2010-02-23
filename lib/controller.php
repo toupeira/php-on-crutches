@@ -467,7 +467,7 @@
          $this->headers['Status'] = $code;
          $this->headers['Content-Type'] = $type;
          $this->send_headers();
-         $this->render_text($text);
+         $this->render_text((string) $text);
       }
 
       # Send the configured headers
