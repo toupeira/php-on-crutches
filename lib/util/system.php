@@ -141,7 +141,11 @@
    # Detect the MIME-type of a file correctly (mime_content_type() likes to get it wrong)
    # $target_name is an optional filename, for use with temporary files which need a custom mimetype
    function mimetype($path, $target_name=null) {
-      if (is_file($path)) {
+      if (!file_exists($path)) {
+         throw new ApplicationError("Path '$path' doesn't exist");
+      } elseif (!is_file($path)) {
+         throw new ApplicationError("Path '$path' is not a file");
+      } else {
          $extension = strtolower(array_pop(explode('.', any($target_name, $path), 2)));
 
          if ($type = getf(config('custom_mimetypes'), $extension)) {
@@ -154,8 +158,6 @@
                return 'application/octet-stream';
             }
          }
-      } else {
-         throw new ApplicationError("Invalid path '$path'");
       }
    }
 
