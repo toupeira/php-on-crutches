@@ -475,6 +475,7 @@
          foreach ((array) $this->headers as $key => $value) {
             if ($value !== null) {
                if ($key == 'Status') {
+                  Dispatcher::$status = $value;
                   $header = "HTTP/1.x $value";
                } elseif ($key == 'Content-Type'
                            and substr($value, 0, 5) == 'text/'

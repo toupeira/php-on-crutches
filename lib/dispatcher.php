@@ -13,6 +13,7 @@
 
       static public $controller;
       static public $params;
+      static public $status;
 
       static public $start_time = 0;
       static public $db_queries = 0;
@@ -104,7 +105,7 @@
          }
 
          $time = microtime(true) - Dispatcher::$start_time;
-         $status = any(Dispatcher::$controller->headers['Status'], 200);
+         $status = any(Dispatcher::$status, Dispatcher::$controller->headers['Status'], 200);
          
          $text = 'Completed in %.5f (%d reqs/sec)';
          $args = array($time, 1/ $time);
