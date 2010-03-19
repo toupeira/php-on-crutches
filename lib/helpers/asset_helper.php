@@ -146,6 +146,10 @@
 
    # Build the path for an asset, append the last modification time for local files
    function asset_path($directory, $file, $ext='') {
+      if ($file instanceof Model) {
+         $file = url_for($file->to_params('show'));
+      }
+
       if ($file[0] == '/' or preg_match('#^\w+://.#', $file)) {
          # Leave absolute paths and fully-qualified URLs alone
          return $file;
