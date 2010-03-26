@@ -2,13 +2,23 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><?= titleize(config('name')) ?></title>
-  <?= include_stylesheets(config('name')) ?>
-  <?= include_javascripts('framework/prototype', config('name')) ?>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <title><?= titleize(config('name')) ?></title>
+   <?= include_stylesheets(config('name')) ?>
+   <?= include_javascripts('framework/prototype', config('name')) ?>
 </head>
 <body>
-<?= messages() ?>
-<?= $content_for_layout ?>
+
+<div id="header">
+</div>
+
+<div id="content">
+   <?= messages() ?>
+   <?= $content_for_layout ?>
+</div>
+
+<div id="footer">
+</div>
+
 </body>
 </html>
