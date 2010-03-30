@@ -140,6 +140,30 @@
          return (array) $this->_errors;
       }
 
+      # Get shortcuts for request headers
+      function get_request() {
+         static $_request;
+
+         if (is_null($_request)) {
+            $_request = array(
+               'host'     => $_SERVER['HTTP_HOST'],
+               'method'   => $_SERVER['REQUEST_METHOD'],
+               'uri'      => $_SERVER['REQUEST_URI'],
+               'query'    => $_SERVER['QUERY_STRING'],
+               'referer'  => $_SERVER['HTTP_REFERER'],
+               'ip'       => $_SERVER['REMOTE_ADDR'],
+               'browser'  => $_SERVER['HTTP_USER_AGENT'],
+               'charset'  => $_SERVER['HTTP_ACCEPT_CHARSET'],
+               'encoding' => $_SERVER['HTTP_ACCEPT_ENCODING'],
+               'language' => $_SERVER['HTTP_ACCEPT_LANGUAGE'],
+               'username' => $_SERVER['PHP_AUTH_USER'],
+               'password' => $_SERVER['PHP_AUTH_PW'],
+            );
+         }
+
+         return $_request;
+      }
+
       # Get and set template values
       function get($key) {
          return $this->_view->get($key);
