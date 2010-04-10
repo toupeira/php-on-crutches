@@ -38,16 +38,14 @@
 
          if (config('debug') and $this->is_trusted() and $exception instanceof Exception) {
             $this->debug($exception);
-         } else {
-            if (View::find_template("errors/$status")) {
-               $this->set('exception', $exception);
-               $this->render($status);
+         } elseif (config('custom_errors') and View::find_template("errors/$status")) {
+            $this->set('exception', $exception);
+            $this->render($status);
 
-               # Pad the output to at least 512 bytes so IE will always display the custom error page
-               $this->_output = str_pad($this->_output, 512, ' ');
-            } else {
-               $this->render_text("<h1>$status $text</h1>");
-            }
+            # Pad the output to at least 512 bytes so IE will always display the custom error page
+            $this->_output = str_pad($this->_output, 512, ' ');
+         } else {
+            $this->render_text("<h1>$status $text</h1>");
          }
 
          return $this->_output;

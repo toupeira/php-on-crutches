@@ -56,6 +56,7 @@
    # | @debug_toolbar@     | show the debug toolbar | @false@ |
    # | @debug_redirects@   | show links on redirects | @false@ |
    # | @debug_queries@     | analyze database queries | @false@ |
+   # | @custom_errors@     | use custom error pages |
    # | @notify_errors@     | addresses to send error notifications to |
    # | @notify_memory@     | log memory usage if it exceeds this limit |
    # | @ignore_errors@     | exceptions to ignore |
@@ -115,6 +116,7 @@
       'debug_queries'     => false,
       'debug_controller'  => false,
 
+      'custom_errors'     => true,
       'notify_errors'     => null,
       'notify_memory'     => null,
       'ignore_errors'     => array('NotFound', 'InvalidRequest', 'AccessDenied', 'ServiceUnavailable'),
