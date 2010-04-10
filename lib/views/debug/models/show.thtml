@@ -2,7 +2,7 @@
 <?
    $data = array();
    foreach ($attributes as $key => $options) {
-      $data[h(humanize($key))] = '<div>'.nl2br(h($object->$key)).'<div>';
+      $data[h(humanize($key))] = '<div>'.nl2br(h($object->read_attribute($key))).'<div>';
    }
 ?>
 <p class="scaffold-links">

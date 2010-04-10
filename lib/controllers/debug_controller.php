@@ -60,6 +60,7 @@
                $this->scaffold($action, $id, array(
                   'model'     => $model,
                   'paginate'  => 25,
+                  'order'     => false,
                   'prefix'    => "/models/$model",
                   'template'  => array("debug/models/$template", "scaffold/$template"),
                ));

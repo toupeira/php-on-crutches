@@ -17,7 +17,7 @@
 <?
       foreach ($attributes as $key => $column):
          $right = null;
-         $value = $object->$key;
+         $value = $object->read_attribute($key);
 
          if ($column['type'] == 'bool') {
             $value = ($value ? 'true' : 'false');

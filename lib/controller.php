@@ -743,7 +743,15 @@
       }
 
       protected function scaffold_index($model, $options) {
-         $objects = DB($model)->sorted;
+         $objects = DB($model)->all;
+
+         if ($options['order'] === false) {
+            $objects->order();
+         }
+
+         if ($options['sorted'] !== false) {
+            $objects = $objects->sorted;
+         }
 
          if ($paginate = $options['paginate']) {
             if (is_numeric($paginate)) {
