@@ -160,6 +160,8 @@
             return $attributes;
          } elseif (in_array($table, $this->tables)) {
             return cache_set($key, $this->fetch_attributes($table));
+         } else {
+            throw new ConfigurationError("Table '{$this->options['database']}.$table' doesn't exist");
          }
       }
 

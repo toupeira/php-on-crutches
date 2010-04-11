@@ -131,11 +131,11 @@
       }
 
       function get_attributes() {
-         if ($this->_attributes) {
-            return $this->_attributes;
-         } else {
-            return $this->_attributes = $this->connection->table_attributes($this->_table);
+         if (is_null($this->_attributes)) {
+            $this->_attributes = $this->connection->table_attributes($this->_table);
          }
+
+         return $this->_attributes;
       }
 
       function get_order() {
