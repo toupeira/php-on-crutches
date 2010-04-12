@@ -364,10 +364,14 @@
       # Render an action
       function render($action, $layout=null) {
          if ($this->_output === null) {
-            if (is_array($action) or strstr($action, '/') !== false) {
+            if (is_object($action)) {
+               $class = underscore(get_class($action));
+               $this->set($class, $action);
+               $template = "{$this->_name}/_$class";
+            } elseif (is_array($action) or strstr($action, '/') !== false) {
                $template = $action;
             } else {
-               $template = $this->_name.'/'.$action;
+               $template = "{$this->_name}/$action";
             }
 
             $this->set_model_errors();
