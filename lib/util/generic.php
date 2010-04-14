@@ -88,6 +88,24 @@
       }
    }
 
+   # Apply a callback with multiple argument values, and collect the return values in an array
+   function apply($callback, $values=null) {
+      $values = array_slice(func_get_args(), 1);
+      $count = max(array_map(count, $values));
+
+      $return = array();
+      for ($i = 0; $i < $count; $i++) {
+         $args = array();
+         foreach ($values as $value) {
+            $args[] = is_array($value) ? $value[$i] : $value;
+         }
+
+         $return[] = call_user_func_array($callback, $args);
+      }
+
+      return $return;
+   }
+
    # A wrapper around create_function()'s horrible syntax
    #
    # $code is a string with the function body, and $argc is the number of
