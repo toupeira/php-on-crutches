@@ -640,7 +640,9 @@
             }
          }
 
-         return $this->replace('select', $new_keys);
+         return $this->replace('select', array_unique(array_merge(
+            $new_keys, array_without((array) $this->_options['select'], "`{$this->table}`.*")
+         )));
       }
 
       # Exclude all TEXT and BLOB columns
