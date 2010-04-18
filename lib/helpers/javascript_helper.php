@@ -11,7 +11,17 @@
 
    # Generate a link which executes JavaScript code
    function link_to_function($title, $code, $options=null) {
-      $options['onclick'] = "$code; return false";
+      $event = any(array_delete($options, 'event'), 'click');
+
+      if (array_delete($options, 'contextmenu') === false) {
+         $options['oncontextmenu'] = 'return false';
+      }
+
+      $options["on$event"] = "$code; return false";
+      if ($event != 'click') {
+         $options['onclick'] = 'return false';
+      }
+
       return link_to($title, '#', $options);
    }
 
