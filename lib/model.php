@@ -235,7 +235,7 @@
          }
 
          if (is_array($result)) {
-            $this->load($result);
+            $this->load($result, false);
          }
 
          $this->_new_record = false;
@@ -388,7 +388,7 @@
       }
 
       # Load attributes directly, adding as virtual if they don't exist yet
-      function load(array $attributes) {
+      function load(array $attributes, $reset=true) {
          if ($this->_frozen) {
             throw new ApplicationError("Can't change frozen object");
          }
@@ -402,8 +402,10 @@
             }
          }
 
-         $this->_new_record = false;
-         $this->_changed_attributes = array();
+         if ($reset) {
+            $this->_new_record = false;
+            $this->_changed_attributes = array();
+         }
 
          return $this;
       }
