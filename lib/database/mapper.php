@@ -132,7 +132,11 @@
 
       function get_attributes() {
          if (is_null($this->_attributes)) {
-            $this->_attributes = $this->connection->table_attributes($this->_table);
+            if (in_array($this->_table, $this->connection->tables)) {
+               $this->_attributes = $this->connection->table_attributes($this->_table);
+            } else {
+               $this->_attributes = array();
+            }
          }
 
          return $this->_attributes;
