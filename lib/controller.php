@@ -81,7 +81,7 @@
          $this->_view = new View();
 
          # Standard variables for the view
-         $this->set('controller', $this->_name);
+         $this->set('controller', $this);
          $this->set('msg', &$this->msg);
 
          # Collect all public methods defined in this controller
@@ -98,6 +98,10 @@
 
          # Call custom initializer
          $this->call_if_defined('init');
+      }
+
+      function __toString() {
+         return $this->name;
       }
 
       function inspect() {
