@@ -216,7 +216,7 @@
          return $this->__call('where', $args);
       }
 
-      function insert(array $attributes) {
+      function insert(array $attributes, $auto_update=true) {
          $columns = array();
          $keys = array();
          $values = array();
@@ -231,7 +231,7 @@
             }
          }
 
-         if ($this->attributes['created_at'] and !isset($attributes['created_at'])) {
+         if ($auto_update and $this->attributes['created_at'] and !isset($attributes['created_at'])) {
             $columns[] = "`created_at`";
             $keys[] = $this->connection->timestamp;
          }
@@ -246,7 +246,7 @@
          }
       }
 
-      function update($conditions, $attributes, $force=false) {
+      function update($conditions, $attributes, $force=false, $auto_update=true) {
          if (empty($attributes) and !$force) {
             return true;
          }
@@ -270,7 +270,7 @@
             }
          }
 
-         if ($this->attributes['updated_at'] and !isset($attributes['updated_at'])) {
+         if ($auto_update and $this->attributes['updated_at'] and !isset($attributes['updated_at'])) {
             $keys[] = "`updated_at` = ".$this->connection->timestamp;
          } elseif (empty($attributes)) {
             return true;
