@@ -126,6 +126,7 @@
       }
 
       function fetch_column($key) {
+         $this->replace_select($key);
          if ($object = $this->fetch()) {
             return getf($object, $key);
          }
