@@ -10,6 +10,7 @@
    require LIB.'util/generic.php';
    require LIB.'util/objects.php';
 
+   require LIB.'util/strings.php';
    require LIB.'util/arrays.php';
    require LIB.'util/hash.php';
    require LIB.'util/inflector.php';

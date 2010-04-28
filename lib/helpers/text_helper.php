@@ -18,45 +18,6 @@
       }
    }
 
-   function to_string($value) {
-      if (is_object($value)) {
-         if (method_exists($value, '__toString') and !$value instanceof Exception) {
-            return $value->__toString();
-         } else {
-            return get_class($value);
-         }
-      } elseif (is_array($value)) {
-         return trim(print_r($value, true));
-      } elseif (is_resource($value)) {
-         ob_start();
-         var_dump($value);
-         return trim(ob_get_clean());
-      } else {
-         return var_export($value, true);
-      }
-   }
-
-   function to_json($data) {
-      return json_encode($data);
-   }
-
-   function to_xml($data=null) {
-      $data = is_array($data) ? $data : func_get_args();
-
-      $xml = '';
-      foreach ($data as $key => $value) {
-         if (is_array($value)) {
-            $value = to_xml($value);
-         } else {
-            $value = h(to_string($value));
-         }
-
-         $xml .= content_tag($key, $value);
-      }
-
-      return $xml;
-   }
-
    function strip_html($text) {
       return html_entity_decode(strip_tags($text), ENT_COMPAT, 'UTF-8');
    }
@@ -150,87 +111,6 @@
       } else {
          return "$a<a href=\"".h(($b == 'www.' ? 'http://www.' : $b).$c)."\">".h($b.$c)."</a>$d";
       }
-   }
-
-   define_default('FORMAT_TIME', '%Y-%m-%d %T');
-   define_default('FORMAT_DATE', '%Y-%m-%d');
-
-   define_default('FORMAT_DB_TIME', '%Y-%m-%d %T');
-   define_default('FORMAT_DB_DATE', '%Y-%m-%d');
-
-   function format_date($date, $format=FORMAT_DATE) {
-      if ($date = to_time($date)) {
-         return strftime(_($format), $date);
-      }
-   }
-
-   function format_time($time, $format=FORMAT_TIME) {
-      if ($time = to_time($time)) {
-         return strftime(_($format), $time);
-      }
-   }
-
-   function format_number($number, $decimals=0, $dec_point='.', $thousands_sep="'") {
-      return number_format($number, $decimals, $dec_point, $thousands_sep);
-   }
-
-   function format_size($size, $format=null) {
-      if ($size < MB) {
-         $text = _("%s KB");
-         if ($size <= 0) {
-            $size = 0;
-         } elseif ($size < KB) {
-            $size = 1;
-         } else {
-            $size = sprintf(any($format, '%d'), $size / KB);
-         }
-      } elseif ($size < GB) {
-         $text = _("%s MB");
-         $size = sprintf(any($format, '%.1f'), $size / MB);
-      } else {
-         $text = _("%s GB");
-         $size = sprintf(any($format, '%.2f'), $size / GB);
-      }
-
-      return sprintf($text, $size);
-   }
-
-   function to_time($time) {
-      if (is_numeric($time)) {
-         return $time;
-      } elseif (!in_array($time, array('0000-00-00', '0000-00-00 00:00:00'))) {
-         return strtotime($time);
-      }
-   }
-
-   function format_duration($then, $now=null) {
-      $seconds = any(to_time($now), time()) - to_time($then);
-
-      if ($seconds < MINUTE) {
-         $time = $seconds;
-         $text = ngettext("%d second", "%d seconds", $time);
-      } elseif ($seconds < HOUR) {
-         $time = $seconds / MINUTE;
-         $text = ngettext("%d minute", "%d minutes", $time);
-      } elseif ($seconds < DAY) {
-         $time = $seconds / HOUR;
-         $text = ngettext("%d hour", "%d hours", $time);
-      } elseif ($seconds < WEEK) {
-         $time = $seconds / DAY;
-         $text = ngettext("%d day", "%d days", $time);
-      } elseif ($seconds < MONTH) {
-         $time = $seconds / MONTH;
-         $text = ngettext("%d month", "%d months", $time);
-      } else {
-         $time = $seconds / YEAR;
-         $text = ngettext("%d year", "%d years", $time);
-      }
-
-      return sprintf($text, $time);
-   }
-
-   function indent($text, $indent=2) {
-      return preg_replace('/^/m', str_repeat(' ', $indent), $text);
    }
 
    function br2nl($text) {
@@ -329,14 +209,6 @@
       }
 
       return str_shuffle($password);
-   }
-
-   function starts_with($text, $search) {
-      return substr($text, 0, mb_strlen($search)) === $search;
-   }
-
-   function ends_with($text, $search) {
-      return substr($text, mb_strlen($text) - mb_strlen($search)) === $search;
    }
 
 ?>
