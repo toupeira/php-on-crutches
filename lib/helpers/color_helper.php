@@ -23,25 +23,24 @@
       return $colors;
    }
 
-   # Generate a random color for a given string which always stays the same for the given input
+   # Generate a random hex color for a given string which always stays the same for the given input
    function random_color($string, $count=10, $saturation=50, $value=80) {
       static $_colors;
+      static $_hexcolors;
       static $_count;
 
       if (is_null($_colors) or (!is_null($_count) and $_count != $count)) {
          $_count = $count;
          $_colors = random_colors($count, $saturation, $value);
+         $_hexcolors = array();
       }
 
-      $seed = 0;
-      $length = mb_strlen($string);
-      for ($i = 0; $i < $length; $i++) {
-         $seed += ord(mb_substr($string, $i, 1));
+      if (!array_key_exists($string, $_hexcolors)) {
+         srand(crc32($string));
+         $_hexcolors[$string] = $_colors[rand(0, $_count)];
       }
-      srand($seed);
 
-
-      return $_colors[rand(0, $_count)];
+      return $_hexcolors[$string];
    }
 
    # Convert RGB colors (array(0-255, 0-255, 0-255)) to hex string ("#xxxxxx")
