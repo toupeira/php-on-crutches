@@ -131,7 +131,7 @@
       $status = null;
       foreach ($paths as $path) {
          if (file_exists($path)) {
-            system('rm -rf '.escapeshellarg($path), $status);
+            system('rm -rf '.escapeshellarg($path).' &>/dev/null', $status);
          }
       }
 
