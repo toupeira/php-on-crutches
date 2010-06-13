@@ -10,6 +10,10 @@
    # Build a form for the current path, or the given action.
    # Use `$options['multipart'] = true` for upload forms.
    function form_tag($action=null, array $options=null) {
+      if ($action instanceof Model) {
+         $action = $action->to_params($action->new_record ? 'create' : 'edit');
+      }
+
       $options = array_merge(array(
          'action' => url_for(any($action, Dispatcher::$path)),
          'method' => 'post', 'open' => true,

@@ -60,6 +60,94 @@
       }
    }
 
+   define_default('FORMAT_DATE', '%Y-%m-%d');
+   define_default('FORMAT_DB_DATE', '%Y-%m-%d');
+
+   function format_date($date, $format=FORMAT_DATE) {
+      if ($date = to_time($date)) {
+         return strftime(_($format), $date);
+      }
+   }
+
+   define_default('FORMAT_TIME', '%Y-%m-%d %T');
+   define_default('FORMAT_DB_TIME', '%Y-%m-%d %T');
+
+   function format_time($time, $format=FORMAT_TIME) {
+      if ($time = to_time($time)) {
+         return strftime(_($format), $time);
+      }
+   }
+
+   function format_number($number, $decimals=0, $dec_point='.', $thousands_sep="'") {
+      return number_format($number, $decimals, $dec_point, $thousands_sep);
+   }
+
+   define('KB', 1024);
+   define('MB', 1024 * KB);
+   define('GB', 1024 * MB);
+
+   function format_size($size, $format=null) {
+      if ($size < MB) {
+         $text = _("%s KB");
+         if ($size <= 0) {
+            $size = 0;
+         } elseif ($size < KB) {
+            $size = 1;
+         } else {
+            $size = sprintf(any($format, '%d'), $size / KB);
+         }
+      } elseif ($size < GB) {
+         $text = _("%s MB");
+         $size = sprintf(any($format, '%.1f'), $size / MB);
+      } else {
+         $text = _("%s GB");
+         $size = sprintf(any($format, '%.2f'), $size / GB);
+      }
+
+      return sprintf($text, $size);
+   }
+
+   function to_time($time) {
+      if (is_numeric($time)) {
+         return $time;
+      } elseif (!in_array($time, array('0000-00-00', '0000-00-00 00:00:00'))) {
+         return strtotime($time);
+      }
+   }
+
+   define('MINUTE', 60);
+   define('HOUR',   60 * MINUTE);
+   define('DAY',    24 * HOUR);
+   define('WEEK',    7 * DAY);
+   define('MONTH',  30 * DAY);
+   define('YEAR',  365 * DAY);
+
+   function format_duration($then, $now=null) {
+      $seconds = any(to_time($now), time()) - to_time($then);
+
+      if ($seconds < MINUTE) {
+         $time = $seconds;
+         $text = ngettext("%d second", "%d seconds", $time);
+      } elseif ($seconds < HOUR) {
+         $time = $seconds / MINUTE;
+         $text = ngettext("%d minute", "%d minutes", $time);
+      } elseif ($seconds < DAY) {
+         $time = $seconds / HOUR;
+         $text = ngettext("%d hour", "%d hours", $time);
+      } elseif ($seconds < WEEK) {
+         $time = $seconds / DAY;
+         $text = ngettext("%d day", "%d days", $time);
+      } elseif ($seconds < MONTH) {
+         $time = $seconds / MONTH;
+         $text = ngettext("%d month", "%d months", $time);
+      } else {
+         $time = $seconds / YEAR;
+         $text = ngettext("%d year", "%d years", $time);
+      }
+
+      return sprintf($text, $time);
+   }
+
    function highlight($text, $pattern) {
       $pattern = preg_quote($pattern);
       return preg_replace("/($pattern)/", '<strong>\1</strong>', $text);

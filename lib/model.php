@@ -94,7 +94,7 @@
          return array(
             'controller' => tableize(get_class($this)),
             'action'     => any($action, 'show'),
-            'id'         => $this->to_param(),
+            'id'         => ($this->exists ? $this->to_param() : null),
          );
       }
 
