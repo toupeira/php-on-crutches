@@ -752,6 +752,8 @@
       function filtered() {
          if (is_array($filter = Dispatcher::$params['filter'])) {
             foreach ($filter as $key => $value) {
+               $value = urldecode($value);
+
                if (substr($key, -5) == '_like') {
                   $key = substr($key, 0, -5);
                   $like = true;
