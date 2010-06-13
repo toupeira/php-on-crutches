@@ -44,7 +44,7 @@
          }
       }
 
-      if ($length > $max_length) {
+      if ($length > ceil($max_length)) {
          $truncated = rtrim(mb_substr($text, 0, round($max_length)));
          if ($add_title) {
             return '<span title="'.h($text).'">'.h($truncated).$add.'</span>';
