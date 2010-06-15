@@ -751,6 +751,8 @@
       # Filter the query set by the current request parameters
       function filtered() {
          if (is_array($filter = Dispatcher::$params['filter'])) {
+            $keys = array();
+
             foreach ($filter as $key => $value) {
                $value = urldecode($value);
 
