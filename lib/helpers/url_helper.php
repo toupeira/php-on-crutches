@@ -88,9 +88,6 @@
          $url .= config('prefix');
       }
 
-      # Escape percent characters
-      $path = str_replace('%', '%25', $path);
-
       if ($anchor = $options['anchor']) {
          $path .= "#$anchor";
       }
