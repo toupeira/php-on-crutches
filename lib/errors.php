@@ -95,7 +95,7 @@
          $model = get_class($object);
          parent::__construct(sprintf(
             any($message, 
-               "Couldn't create %s instance\n"
+               "Couldn't save %s instance\n"
                . "  Errors: %s\n"
                . "  Attributes: %s\n"
             ),
