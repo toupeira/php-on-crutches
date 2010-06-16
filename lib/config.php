@@ -24,6 +24,7 @@
    # | @name@              | the application name, will be used as default in some places | basename of root directory |
    # | @prefix@            | the prefix used to reach the website | @/@ |
    # | @languages@         | an array of available languages, with the default first |
+   # | @default_language@  | specify the default language explicitly |
    # | @locale@            | the internal locale, must be a valid and installed locale name | en_US.UTF-8 |
    # |_(title). General Settings  |_. |_(title). Default |
    # | @log_file@          | the path to the log file, or a file handle like STDERR | @ROOT/log/ENVIRONMENT.log@ |
@@ -63,19 +64,12 @@
    # | @custom_mimetypes@  | custom MIME mappings for the mimetype() function |
    #
 
-   require CONFIG.'application.php';
-   require CONFIG.'routes.php';
-   require CONFIG.'database.php';
-
-   if (is_file($config = CONFIG.'environments/'.ENVIRONMENT.'.php')) {
-      require $config;
-   }
-
    # Default framework settings
    $_CONFIG['defaults'] = array(
       'name'              => basename(ROOT),
       'prefix'            => '/',
       'languages'         => null,
+      'default_language'  => null,
       'locale'            => 'en_US.UTF-8',
 
       'log_file'          => LOG.ENVIRONMENT.'.log',
@@ -145,25 +139,6 @@
       ),
    );
 
-   # Merge application settings
-   $_CONFIG['application'] = array_merge(
-      $_CONFIG['defaults'],
-      $_CONFIG['application'],
-      (array) $_CONFIG[ENVIRONMENT]
-   );
-
-   if (PHP_SAPI == 'cli') {
-      # Force custom settings when running in a console
-      $_CONFIG['application_default'] = $_CONFIG['application'];
-      array_update($_CONFIG['application'], array(
-         'log_file'          => STDERR,
-         'session_store'     => 'none',
-         'cache_store'       => 'memory',
-         'output_buffering'  => false,
-         'debug_toolbar'     => false,
-      ));
-   }
-
    # Auto-load class files
    function __autoload($class) {
       $name = underscore($class);
@@ -203,6 +178,38 @@
    }
 
    function config_init() {
+      global $_CONFIG;
+
+      $_CONFIG_CURRENT = (array) $_CONFIG['application'];
+
+      require CONFIG.'application.php';
+      require CONFIG.'routes.php';
+      require CONFIG.'database.php';
+
+      if (is_file($config = CONFIG.'environments/'.ENVIRONMENT.'.php')) {
+         require $config;
+      }
+
+      # Merge application settings
+      $_CONFIG['application'] = array_merge(
+         $_CONFIG['defaults'],
+         $_CONFIG['application'],
+         (array) $_CONFIG[ENVIRONMENT],
+         (array) $_CONFIG_CURRENT
+      );
+
+      if (PHP_SAPI == 'cli') {
+         # Force custom settings when running in a console
+         $_CONFIG['application_default'] = $_CONFIG['application'];
+         array_update($_CONFIG['application'], array(
+            'log_file'          => STDERR,
+            'session_store'     => 'none',
+            'cache_store'       => 'memory',
+            'output_buffering'  => false,
+            'debug_toolbar'     => false,
+         ));
+      }
+
       $config = config('application');
 
       # Sanitize the prefix
@@ -292,7 +299,7 @@
       putenv("LANG=C");
 
       # Set the default language if necessary
-      if (!config('language') and $lang = $config['languages'][0]) {
+      if (!config('language') and $lang = any($config['default_language'], $config['languages'][0])) {
          set_language($lang);
       }
 
