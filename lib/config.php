@@ -24,7 +24,7 @@
    # | @name@              | the application name, will be used as default in some places | basename of root directory |
    # | @prefix@            | the prefix used to reach the website | @/@ |
    # | @languages@         | an array of available languages, with the default first |
-   # | @default_language@  | specify the default language explicitly |
+   # | @default_languages@ | an array of languages to try as default, for use in custom initializion scripts |
    # | @locale@            | the internal locale, must be a valid and installed locale name | en_US.UTF-8 |
    # |_(title). General Settings  |_. |_(title). Default |
    # | @log_file@          | the path to the log file, or a file handle like STDERR | @ROOT/log/ENVIRONMENT.log@ |
@@ -69,7 +69,6 @@
       'name'              => basename(ROOT),
       'prefix'            => '/',
       'languages'         => null,
-      'default_language'  => null,
       'locale'            => 'en_US.UTF-8',
 
       'log_file'          => LOG.ENVIRONMENT.'.log',
@@ -298,9 +297,13 @@
       # Set C as global locale, to avoid subprocesses inheriting our locale
       putenv("LANG=C");
 
-      # Set the default language if necessary
-      if (!config('language') and $lang = any($config['default_language'], $config['languages'][0])) {
-         set_language($lang);
+      # Set the default language if not set already
+      if (!config('language')) {
+         foreach (array_merge((array) $config['default_languages'], (array) $config['languages']) as $lang) {
+            if (set_language($lang)) {
+               break;
+            }
+         }
       }
 
       # Work around magic quotes...
