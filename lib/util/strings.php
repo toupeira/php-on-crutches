@@ -88,4 +88,29 @@
       return $xml;
    }
 
+   define('KB', 1024);
+   define('MB', 1024 * KB);
+   define('GB', 1024 * MB);
+
+   function format_size($size, $format=null) {
+      if ($size < MB) {
+         $text = _("%s KB");
+         if ($size <= 0) {
+            $size = 0;
+         } elseif ($size < KB) {
+            $size = 1;
+         } else {
+            $size = sprintf(any($format, '%d'), $size / KB);
+         }
+      } elseif ($size < GB) {
+         $text = _("%s MB");
+         $size = sprintf(any($format, '%.1f'), $size / MB);
+      } else {
+         $text = _("%s GB");
+         $size = sprintf(any($format, '%.2f'), $size / GB);
+      }
+
+      return sprintf($text, $size);
+   }
+
 ?>
