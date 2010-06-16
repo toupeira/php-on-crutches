@@ -73,8 +73,7 @@
       # Build a fully-qualified URL
       if ($options['full'] or $options['host'] or isset($options['ssl'])) {
          # Use HTTPS if specified or the current site is already HTTPS
-         if ($options['ssl']
-            or (Dispatcher::$controller and Dispatcher::$controller->is_ssl() and $options['ssl'] !== false)) {
+         if ($options['ssl'] or (Dispatcher::$controller and Dispatcher::$controller->is_ssl() and $options['ssl'] !== false)) {
             $url = 'https';
          } else {
             $url = 'http';
