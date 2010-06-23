@@ -19,10 +19,6 @@
          }
       }
 
-      function __toString() {
-         parent::__toString($this->_model);
-      }
-
       function inspect() {
          return parent::inspect(array(
             'model' => $this->_model,

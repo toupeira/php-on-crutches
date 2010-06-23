@@ -10,8 +10,8 @@
    # Base class for all objects
    class Object
    {
-      function __toString($id=null) {
-         return $this->inspect($id);
+      function __toString() {
+         return $this->inspect();
       }
 
       function get_slug() {

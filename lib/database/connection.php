@@ -71,10 +71,6 @@
          );
       }
 
-      function __toString() {
-         return parent::__toString($this->_name);
-      }
-
       function inspect() {
          return parent::inspect($this->_options);
       }

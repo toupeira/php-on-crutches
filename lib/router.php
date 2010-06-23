@@ -165,10 +165,6 @@
          }
       }
 
-      function __toString() {
-         return parent::__toString($this->_route);
-      }
-
       function get_route() {
          return $this->_route;
       }

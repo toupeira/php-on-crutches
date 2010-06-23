@@ -67,10 +67,6 @@
          $this->_layout = $layout;
       }
 
-      function __toString() {
-         return parent::__toString($this->_template);
-      }
-
       function inspect() {
          return parent::inspect($this->_data);
       }
