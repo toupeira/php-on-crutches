@@ -273,7 +273,7 @@
             unset($params[$key]);
 
             if ($add or ($value and $value != $this->_defaults[$key])) {
-               $route = str_replace($symbol, str_replace('%', '%23', $value), $route);
+               $route = str_replace($symbol, $value, $route);
                $add = true;
             }
          }
