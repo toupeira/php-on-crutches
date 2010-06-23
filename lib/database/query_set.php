@@ -748,6 +748,8 @@
       function filtered() {
          if (is_array($filter = Dispatcher::$params['filter'])) {
             $keys = array();
+            $conditions = array();
+            $values = array();
 
             foreach ($filter as $key => $value) {
                $value = urldecode($value);
@@ -770,15 +772,19 @@
 
                $keys[] = $key;
                if ($like) {
-                  $conditions["$filter_key LIKE ?"] = "%$value%";
+                  $conditions[] = "$filter_key LIKE ?";
+                  $values[] = "%$value%";
                } else {
-                  $conditions["$filter_key = ?"] = $value;
+                  $conditions[] = "$filter_key = ?";
+                  $values[] = $value;
                }
             }
 
             if ($keys) {
                $this->_filtered_keys = $keys;
-               $this->where($conditions);
+
+               array_unshift($values, "(".implode(" OR ", $conditions).")");
+               $this->where($values);
             }
          }
 
