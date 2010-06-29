@@ -60,12 +60,12 @@
 
       function __destruct() {
          if ($this->running) {
-            fclose($this->_buffer);
+            @fclose($this->_buffer);
          }
       }
 
       function get_running() {
-         return is_resource($this->_buffer);
+         return (bool) @is_resource($this->_buffer);
       }
 
       function get_file() {

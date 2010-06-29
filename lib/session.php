@@ -53,33 +53,49 @@
             return;
          }
 
-         if ($model = config('auth_model')) {
-            if ($user = call_user_func(array($model, 'current'))) {
-               $user = $user->id;
+         try {
+            if ($model = config('auth_model')) {
+               if ($user = call_user_func(array($model, 'current'))) {
+                  $user = $user->id;
+               }
+
+               $key = foreign_key($model);
+
+               DB()->execute(
+                  "INSERT INTO sessions (id, $key, data)"
+                  . " VALUES (?, ?, ?)"
+                  . " ON DUPLICATE KEY UPDATE $key = ?, data = ?",
+                  $id, $user, $data, $user, $data
+               );
+            } else {
+               DB()->execute(
+                  'INSERT INTO sessions (id, data)'
+                  . ' VALUES (?, ?)'
+                  . ' ON DUPLICATE KEY UPDATE data = ?',
+                  $id, $data, $data
+               );
             }
-
-            $key = foreign_key($model);
-
-            DB()->execute(
-               "INSERT INTO sessions (id, $key, data)"
-               . " VALUES (?, ?, ?)"
-               . " ON DUPLICATE KEY UPDATE $key = ?, data = ?",
-               $id, $user, $data, $user, $data
-            );
-         } else {
-            DB()->execute(
-               'INSERT INTO sessions (id, data)'
-               . ' VALUES (?, ?)'
-               . ' ON DUPLICATE KEY UPDATE data = ?',
-               $id, $data, $data
-            );
+         } catch (Exception $e) {
+            if (log_running()) {
+               log_exception($e);
+            } else {
+               error_log(dump_exception($e));
+            }
          }
       }
 
       static function destroy($id) {
-         DB()->execute(
-            'DELETE FROM sessions WHERE id = ?', $id
-         );
+         try {
+            DB()->execute(
+               'DELETE FROM sessions WHERE id = ?', $id
+            );
+         } catch (Exception $e) {
+            if (log_running()) {
+               log_exception($e);
+            } else {
+               error_log(dump_exception($e));
+            }
+         }
       }
    }
 
