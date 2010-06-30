@@ -11,7 +11,7 @@
 
    class DocParser extends Object
    {
-      const DEFINITION = '{
+      const SYNTAX = '{
          (?:
             ^(\s*)
             ((?:abstract\ |static\ |final\ )*)
@@ -120,7 +120,7 @@
          # Add comment text
          } elseif (!$this->_function and preg_match('/^(\s+)#(?: (.+)$)?/', $line, $match)) {
             $this->log("adding comment text");
-            return $this->add_comment($match[2], strlen($match[1]));
+            return $this->add_comment($match[2], mb_strlen($match[1]));
          # Add a file comment
          } elseif (!blank($line) and is_null($this->_file_comment)) {
             if (count($this->_comment) >= 3 and $this->_comment[0] == '' and last($this->_comment) == '') {
@@ -132,7 +132,7 @@
             }
             return $this->parse_line($line);
          # Start a definition
-         } elseif (preg_match(self::DEFINITION, $line, $match)) {
+         } elseif (preg_match(self::SYNTAX, $line, $match)) {
             $this->add_definition($match);
          # End class
          } elseif ($this->_class and $this->is_indent($line, $this->_class_indent)) {
@@ -157,12 +157,12 @@
       }
 
       protected function is_indent($line, $indent) {
-         return substr($line, 0, $indent + 1) == str_repeat(' ', $indent).'}';
+         return mb_substr($line, 0, $indent + 1) == str_repeat(' ', $indent).'}';
       }
 
       protected function split($text, $sep='\s+') {
          if (is_array($text)) {
-            return (array) $text;
+            return $text;
          } elseif (blank($text)) {
             return array();
          } else {
@@ -212,8 +212,8 @@
                $this->error("Class constant definition outside class");
             }
          } elseif ($property) {
-            if (!$visibility) {
-               # Ignore variable assignments without a visibility keyword
+            if (!$visibility and !$flags) {
+               # Ignore variable assignments without flags or a visibility keyword
                return;
             } elseif ($this->_class) {
                $this->log("adding property $property");
@@ -234,7 +234,7 @@
 
          if ($block) {
             $data['closed'] = (bool) ${$block.'_closed'};
-            $this->start_block($block, $scope, $$block, strlen($indent), $data);
+            $this->start_block($block, $scope, $$block, mb_strlen($indent), $data);
          }
       }
 
@@ -282,9 +282,9 @@
       protected function add_source() {
          $source = array();
          foreach ((array) $this->_source as $line) {
-            if (blank(substr($line, 0, $this->_function_indent))) {
+            if (blank(mb_substr($line, 0, $this->_function_indent))) {
                # Remove the indent
-               $source[] = substr($line, $this->_function_indent);
+               $source[] = mb_substr($line, $this->_function_indent);
             } else {
                # Return original source if the indent isn't blank
                $source = (array) $this->_source;

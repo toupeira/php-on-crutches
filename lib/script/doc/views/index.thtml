@@ -22,7 +22,7 @@
       <h3>Functions</h3>
       <div><ul>
    <? foreach (sorted($all_functions) as $function => $template): ?>
-         <li><?= doc_link($function, $template, "#function_$function") ?></li>
+         <li><?= doc_link("$function()", $template, "#function_$function") ?></li>
    <? endforeach ?>
       </ul></div>
    </div>
