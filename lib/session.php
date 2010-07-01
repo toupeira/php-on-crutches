@@ -43,9 +43,17 @@
       static function read($id) {
          self::$_id = $id;
 
-         return self::$_data = (string) DB()->execute(
-            'SELECT data FROM sessions WHERE id = ?', $id
-         )->fetch_column();
+         try {
+            return self::$_data = (string) DB()->execute(
+               'SELECT data FROM sessions WHERE id = ?', $id
+            )->fetch_column();
+         } catch (Exception $e) {
+            if (log_running()) {
+               log_exception($e);
+            } else {
+               error_log(dump_exception($e));
+            }
+         }
       }
 
       static function write($id, $data) {
