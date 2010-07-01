@@ -193,7 +193,7 @@
          $recipients, config('notify_errors')
       );
 
-      if ($recipients and !ignore_exception($exception)) {
+      if ($recipients and !ignore_exception($exception) and !ignore_notification($exception)) {
          $controller = new ErrorsController();
 
          $mail = new Mail();
@@ -212,7 +212,19 @@
 
    # Check if an exception should be ignored
    function ignore_exception($exception) {
-      foreach (config('ignore_errors') as $class) {
+      foreach ((array) config('ignore_errors') as $class) {
+         # Use instanceof to also catch inherited classes
+         if ($exception instanceof $class) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   # Check if an exception should be notified
+   function ignore_notification($exception) {
+      foreach ((array) config('ignore_notifications') as $class) {
          # Use instanceof to also catch inherited classes
          if ($exception instanceof $class) {
             return true;
