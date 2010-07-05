@@ -25,7 +25,7 @@
          self::$db_queries = 0;
          self::$db_queries_sql = array();
 
-         $path = ltrim($path, '/');
+         $path = ltrim(to_utf8($path), '/');
          self::$path = "/$path";
          unset($_GET['path']);
 
