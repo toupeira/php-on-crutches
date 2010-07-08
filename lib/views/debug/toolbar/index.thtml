@@ -6,7 +6,7 @@
       'log',
       'template',
       'database',
-      'headers',
+      'environment',
    );
 ?>
 <div id="debug-toolbar-shadow">

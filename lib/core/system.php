@@ -148,7 +148,7 @@
       } else {
          $extension = strtolower(array_pop(explode('.', any($target_name, $path), 2)));
 
-         if ($type = getf(config('custom_mimetypes'), $extension)) {
+         if (function_exists('config') and $type = getf(config('custom_mimetypes'), $extension)) {
             return $type;
          } else {
             $path = escapeshellarg($path);
@@ -168,8 +168,12 @@
       protected $_path;
 
       function __construct($name=null, $suffix='XXXXXX') {
-         if (function_exists(config)) {
-            $name = any($name, config('name'));
+         if (!$name and function_exists(config)) {
+            $name = config('name');
+         }
+
+         if (!$name) {
+            throw new ValueError("No tempfile name given");
          }
 
          $tmpdir = sys_get_temp_dir();

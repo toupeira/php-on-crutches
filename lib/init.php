@@ -10,8 +10,8 @@
    # Always display errors until the framework is initialized
    ini_set('display_errors', true);
 
-   # Load utility libraries
-   require LIB.'util/init.php';
+   # Load core libraries
+   require LIB.'core/init.php';
 
    # Set the current environment
    define_default('ENVIRONMENT', any(

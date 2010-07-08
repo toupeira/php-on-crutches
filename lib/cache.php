@@ -7,7 +7,7 @@
 # $Id$
 #
 
-   function cache($key=null, $value=null) {
+   function cache($key) {
       if ($value = $GLOBALS['_CACHE_STORE']->get($key)) {
          log_debug("Reading cache fragment '$key'");
          return $value;

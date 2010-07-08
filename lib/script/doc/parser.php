@@ -13,35 +13,35 @@
    {
       const SYNTAX = '{
          (?:
-            ^(\s*)
-            ((?:abstract\ |static\ |final\ )*)
-            (?:(private|protected|public)\ )?
+            ^(\s*)                                                # $indent
+            ((?:abstract\ |static\ |final\ )*)                    # $flags
+            (?:(private|protected|public)\ )?                     # $visibility
             (?:
                # Class definitions
                class\ +
-                  ([\w_]+)
-                  (?:\ +extends\ +([\w_]+))?
-                  (?:\ +implements\ +([\w_,\ ]+))?
-                  (\ *\{.*\};?$)?|
+                  ([\w_]+)                                        # $class
+                  (?:\ +extends\ +([\w_]+))?                      # $parent
+                  (?:\ +implements\ +([\w_,\ ]+))?                # $interfaces
+                  (\ *\{.*\};?$)?|                                # $class_inline
 
                # Function and method definitions
                function\ +
-                  ([\w_]+)\ *
-                  \(([^\{]*)\)
-                  (\ *(?:\{.*\})?;?$)?|
+                  ([\w_]+)\ *                                     # $function
+                  \(([^\{]*)\)                                    # $arguments
+                  (\ *(?:\{.*\})?;?$)?|                           # $function_inline
 
                # Properties
-               \$([\w_]+)\ *
-                  (?:;|=\ *(.+)?\ *;\ *$|(.*[^;])$)
+               \$([\w_]+)\ *                                      # $property
+                  (?:;|=\ *(.+)?\ *;\ *$|(.*[^;])$)               # $property_value, $property_value_continued
             )|
 
             # Class constants
             const\ +
-               ([\w_]+)\ *=\ *
-               (?:(.+);\ *$|.*[^;]$)|
+               ([\w_]+)\ *=\ *                                    # $class_constant
+               (?:(.+);\ *$|.*[^;]$)|                             # $class_constant_value
 
             # Definitions using define() or define_default()
-            define(?:_default)?\([\'"]([^\'"]+)[\'"],\ *(.+)\);
+            define(?:_default)?\([\'"]([^\'"]+)[\'"],\ *(.+)\);   # $constant, $constant_value
          )
       }x';
 
@@ -103,9 +103,9 @@
          return $this->_classes or $this->_functions or $this->_constants;
       }
 
-      protected function log($message) {
+      protected function log($action, $type=null, $name=null) {
          if ($this->_verbose) {
-            print sprintf("%s:%-5d %s\n", $this->_path, $this->_line, $message);
+            print sprintf("    %5d:  %8s  %8s  %s\n", $this->_line, $action, $type, $name);
          }
       }
 
@@ -114,44 +114,57 @@
       }
 
       protected function parse_line($line) {
-         # Skip comments without indent and PHP tags
          if ($line[0] == '#' or $line == '<?') {
+            #
+            # Skip comments without indent and PHP tags
+            #
             return;
-         # Add comment text
          } elseif (!$this->_function and preg_match('/^(\s+)#(?: (.+)$)?/', $line, $match)) {
-            $this->log("adding comment text");
+            #
+            # Add comment text
+            #
             return $this->add_comment($match[2], mb_strlen($match[1]));
-         # Add a file comment
          } elseif (!blank($line) and is_null($this->_file_comment)) {
+            #
+            # Add a file comment
+            #
             if (count($this->_comment) >= 3 and $this->_comment[0] == '' and last($this->_comment) == '') {
-               $this->log("found file comment");
+               $this->log("adding", "file comment");
                $this->_file_comment = implode("\n", array_slice($this->_comment, 1, -1));
             } else {
-               $this->log("no file comment found");
                $this->_file_comment = false;
             }
             return $this->parse_line($line);
-         # Start a definition
          } elseif (preg_match(self::SYNTAX, $line, $match)) {
+            #
+            # Start a definition
+            #
             $this->add_definition($match);
-         # End class
          } elseif ($this->_class and $this->is_indent($line, $this->_class_indent)) {
-            $this->log("closing class {$this->_class}");
+            #
+            # End class
+            #
+            $this->log("closing", "class", $this->_class);
             $this->_class = null;
-         # End function
          } elseif ($this->_function and $this->is_indent($line, $this->_function_indent)) {
-            $this->log("closing function {$this->_function}");
+            #
+            # End function
+            #
+            if ($this->_class) {
+               $this->log("closing", "method", "{$this->_class}#{$this->_function}()");
+            } else {
+               $this->log("closing", "function", "{$this->_function}()");
+            }
             $this->add_source();
             $this->_function = null;
          }
 
          if ($this->_function) {
-            $this->log("adding source");
             $this->_source[] = $line;
          }
 
-         # Reset the current comment
          if (!is_null($this->_file_comment)) {
+            # Reset the current comment
             $this->_comment = null;
          }
       }
@@ -175,8 +188,8 @@
          list(
             $match,
             $indent, $flags, $visibility,
-            $class, $parent, $interfaces, $class_closed,
-            $function, $arguments, $function_closed,
+            $class, $parent, $interfaces, $class_inline,
+            $function, $arguments, $function_inline,
             $property, $property_value, $property_value_continued,
             $class_constant, $class_constant_value,
             $constant, $constant_value
@@ -195,16 +208,25 @@
                 . ($data['static'] ? 'class' : 'instance').'_';
 
          if ($class) {
+            #
+            # Add a class definition
+            #
             $block = 'class';
             $data['parent'] = $parent;
             $data['interfaces'] = $this->split($interfaces, ',\s*');
          } elseif ($function) {
+            #
+            # Add a function definition
+            #
             $block = 'function';
             $scope .= 'methods';
             $data['arguments'] = $this->split($arguments, ',\s*');
          } elseif ($class_constant) {
+            #
+            # Add a class constant
+            #
             if ($this->_class) {
-               $this->log("adding class constant $class_constant");
+               $this->log("adding", "constant", "{$this->_class}::$class_constant");
                $data['value'] = any($class_constant_value, '...');
                unset($data['visiblity']);
                $this->_classes[$this->_class]['constants'][$class_constant] = $data;
@@ -212,19 +234,25 @@
                $this->error("Class constant definition outside class");
             }
          } elseif ($property) {
+            #
+            # Add a class property
+            #
             if (!$visibility and !$flags) {
                # Ignore variable assignments without flags or a visibility keyword
                return;
             } elseif ($this->_class) {
-               $this->log("adding property $property");
+               $this->log("adding", "property", "{$this->_class}#$property");
                $scope .= 'properties';
                $data['value'] = ($property_value_continued ? '...' : $property_value);
-            } else {
+            } elseif ($visibility or $data['abstract'] or $data['final']) {
                $this->error("Property definition outside class");
             }
             $this->_classes[$this->_class][$scope][$property] = $data;
          } elseif ($constant) {
-            $this->log("adding constant $constant");
+            #
+            # Add a constant
+            #
+            $this->log("adding", "constant", $constant);
             $data['value'] = $constant_value;
             unset($data['visiblity']);
             $this->_constants[$constant] = $data;
@@ -233,7 +261,8 @@
          }
 
          if ($block) {
-            $data['closed'] = (bool) ${$block.'_closed'};
+            # Close the block
+            $data['closed'] = (bool) ${$block.'_inline'};
             $this->start_block($block, $scope, $$block, mb_strlen($indent), $data);
          }
       }
@@ -244,18 +273,18 @@
          }
 
          if ($type == 'class') {
-            $this->log("starting class $name");
+            $this->log("starting", "class", $name);
             $this->_classes[$name] = $data;
          } elseif ($type == 'function') {
             $this->_source = null;
 
             if ($this->_class) {
-               $this->log("starting method $name");
+               $this->log("starting", "method", "{$this->_class}#$name()");
                $this->_function_scope = $scope;
                $this->_classes[$this->_class]['methods'][$name] = $data;
                $this->_classes[$this->_class][$scope][$name] = $data;
             } else {
-               $this->log("starting function $name");
+               $this->log("starting", "function", "$name()");
                $this->_functions[$name] = $data;
             }
          } else {
@@ -263,10 +292,14 @@
          }
 
          if (array_delete($data, 'closed')) {
-            $this->log("closing $type $name");
+            $this->log("closing", "$type", "$name".($type == 'function' ? '()' : ''));
          } else {
             $this->{'_'.$type} = $name;
             $this->{'_'.$type.'_indent'} = $indent;
+         }
+
+         if (!$this->_verbose) {
+            print ".";
          }
       }
 

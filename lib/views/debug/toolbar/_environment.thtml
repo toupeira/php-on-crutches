@@ -1,0 +1,7 @@
+<?# $Id$ ?>
+<?
+   $environment = $_SERVER;
+   ksort($environment);
+?>
+<a><?= icon('framework/icons/environment') ?> Environment</a>
+<div><?= table_tag($environment) ?></div>

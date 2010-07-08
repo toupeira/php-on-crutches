@@ -13,6 +13,7 @@
    class DocGenerator extends Object
    {
       protected $_paths;
+      protected $_excludes;
       protected $_target;
       protected $_title;
       protected $_verbose;
@@ -24,8 +25,10 @@
       protected $_classes;
       protected $_functions;
 
-      function __construct($paths) {
-         $this->_paths = (is_array($paths) ? $paths : func_get_args());
+      function __construct(array $paths, array $excludes=null, $title=null) {
+         $this->_paths = $paths;
+         $this->_excludes = (array) $excludes;
+         $this->_title = $title;
          $this->_view_path = LIB.'script/doc/views/';
       }
 
@@ -45,16 +48,9 @@
          return (array) $this->_functions;
       }
 
-      function set_title($title) {
-         return $this->_title = $title;
-      }
-
-      function set_verbose($verbose) {
-         $this->_verbose = $verbose;
-      }
-
-      function generate($target, $force=false) {
+      function generate($target, $force=false, $verbose=false) {
          $this->_target = $target;
+         $this->_verbose = $verbose;
 
          print "\nGenerating documentation in [1m{$this->_target}[0m...\n";
 
@@ -76,7 +72,14 @@
             return false;
          }
 
-         $this->parse();
+         $this->_data = $this->_files = $this->_classes = $this->_functions = null;
+         foreach ($this->_paths as $path) {
+            $this->generate_path($path);
+         }
+
+         if (!$this->_verbose) {
+            print "\n";
+         }
 
          print "  rendering files: ";
          foreach ($this->_data as $file => $data) {
@@ -108,39 +111,52 @@
 
          print "  rendering index: ";
          $this->render('index');
-         print "\n";
+         print "\n\n";
 
-         print "Done.\n\n";
          return true;
       }
 
-      function parse() {
-         $this->_data = $this->_files = $this->_classes = $this->_functions = null;
-         foreach ($this->_paths as $path) {
-            print "  parsing $path: ";
+      protected function generate_path($path) {
+         static $_current;
+         static $_show_dir = false;
+
+         $path = rtrim($path, '/');
+         if (in_array(realpath($path), $this->_excludes)) {
+            return;
+         } elseif (is_dir($path)) {
+            $_current = str_replace(ROOT, '', $path);
+            $_show_dir = true;
+
+            $files = array();
+            $dirs = array();
+            foreach (glob("$path/*") as $path) {
+               if (is_file($path)) {
+                  $files[] = $path;
+               } elseif (is_dir($path)) {
+                  $dirs[] = $path;
+               }
+            }
+
+            foreach (sorted($files) as $file) { $this->generate_path($file); }
+            foreach (sorted($dirs) as $dir)   { $this->generate_path($dir); }
+
+         } elseif (is_file($path) and strtolower(substr($path, -4)) == '.php') {
+            if ($_show_dir and $_current) {
+               print "\n  $_current:\n";
+               $_show_dir = false;
+            }
+
+            printf("    %s: ", basename($path));
+
             if ($this->_verbose) {
                print "\n";
             }
-            $this->parse_path($path);
-            print "\n";
-         }
 
-         return !empty($this->_data);
-      }
-
-      protected function parse_path($path) {
-         $path = rtrim($path, '/');
-         if (is_dir($path)) {
-            foreach (glob("$path/*") as $path) {
-               $this->parse_path($path);
-            }
-         } elseif (is_file($path) and strtolower(substr($path, -4)) == '.php') {
             $parser = new DocParser($path);
             $parser->parse($this->_verbose);
             $this->merge($parser);
-            if (!$this->_verbose) {
-               print ".";
-            }
+
+            print "\n";
          }
       }
 

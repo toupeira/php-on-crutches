@@ -3,11 +3,13 @@
 <div>
    <?= icon_link_to('framework/icons/home', 'Homepage', '') ?>
    <br />
+<? if (config('debug_controller')): ?>
    <?= icon_link_to('framework/icons/system', 'System', ':debug/system') ?>
    <?= icon_link_to('framework/icons/database', 'Model Browser', ':debug/models') ?>
    <?= icon_link_to('framework/icons/database', 'SQL Console', ':debug/sql') ?>
    <?= icon_link_to('framework/icons/console', 'PHP Console', ':debug/php') ?>
    <br />
+<? endif ?>
    <?= link_to_function(
           icon('framework/icons/debug').'Hide toolbar',
           'DebugToolbar.close()'

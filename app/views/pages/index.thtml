@@ -1,6 +1,6 @@
 <?# $Id$ ?>
 <?
-   $layout = '';
+   $this->layout = '';
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -75,7 +75,6 @@
 <body>
 <div id="content">
 <?= image_tag('framework/php_on_crutches.png', array('id' => 'logo', 'width' => 147, 'height' => 200)) ?>
-<h1>woah... it actually works!</h1>
 <h3>About your system:</h3>
 <table id="info">
 <tr>

@@ -1,6 +1,6 @@
 <?# $Id$ ?>
 <?
-   $flags = implode(' ', $class['flags']);
+   $flags = implode(' ', (array) $class['flags']);
 ?>
 <div id="title"<?= $flags ? ' class="'.$flags.'"' : '' ?>>
    <h1>

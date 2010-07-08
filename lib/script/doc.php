@@ -16,6 +16,7 @@
 
    $title = humanize(config('name')).' Documentation';
    $target = WEBROOT.'doc';
+   $excludes = array();
    $force = false;
    $verbose = false;
 
@@ -27,6 +28,11 @@
             break;
          case '-d':
             $target = array_shift_arg($args);
+            break;
+         case '-e':
+            if ($arg = realpath(array_shift_arg($args))) {
+               $excludes[] = $arg;
+            }
             break;
          case '-f':
             $force = true;
@@ -40,6 +46,7 @@
                   . "\n"
                   . "  -t TITLE  Set the main title\n"
                   . "  -d PATH   Output directory for the documentation (default: WEBROOT/doc)\n"
+                  . "  -e PATH   Exclude a path, can be passed multiple times\n"
                   . "  -f        Force overwriting an existing directory\n"
                   . "  -v        Show debug messages\n"
                   . "\n";
@@ -55,9 +62,7 @@
       }
    }
 
-   $doc = new DocGenerator(any($paths, APP));
-   $doc->title = $title;
-   $doc->verbose = $verbose;
-   $doc->generate($target, $force);
+   $doc = new DocGenerator(any($paths, APP), $excludes, $title);
+   $doc->generate($target, $force, $verbose);
 
 ?>

@@ -1,7 +1,0 @@
-<?# $Id$ ?>
-<?
-   $headers = $_SERVER;
-   ksort($headers);
-?>
-<a><?= icon('framework/icons/headers') ?> Headers</a>
-<div><?= table_tag($headers) ?></div>

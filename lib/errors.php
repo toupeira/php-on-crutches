@@ -7,49 +7,6 @@
 # $Id$
 #
 
-   # Base class for all custom exceptions
-   class StandardError extends ErrorException {}
-
-   # PHP exceptions
-   class SyntaxError extends StandardError {}
-   class RuntimeError extends StandardError {}
-   class FatalError extends RuntimeError {}
-
-   class ValueError extends StandardError {
-      function __construct($value, $message=null) {
-         if ($message) {
-            $message = sprintf($message, $value);
-         } else {
-            $message = "Invalid value '$value'";
-         }
-
-         parent::__construct($message);
-      }
-   }
-
-   class TypeError extends StandardError {
-      function __construct($value, $message=null) {
-         $type = (is_object($value) ? get_class($value) : gettype($value));
-         if ($message) {
-            $message = sprintf($message, $type);
-         } else {
-            $message = "Invalid argument '$value' of type '$type'";
-         }
-
-         parent::__construct($message);
-      }
-   }
-
-   class UndefinedMethod extends StandardError {
-      function __construct($class, $method) {
-         if (is_object($class)) {
-            $class = get_class($class);
-         }
-
-         parent::__construct("Call to undefined method $class#$method()");
-      }
-   }
-
    # Framework exceptions
    class ApplicationError extends StandardError {}
    class NotImplemented extends ApplicationError {}
@@ -118,10 +75,12 @@
       }
    }
 
-   # Catch "fatal" PHP errors
+   # Catch "fatal" PHP errors by registering this as a shutdown function.
+   # Gets the last error and passes it to the exception handler.
    function fatal_error_handler() {
       if ($handler = config('exception_handler') and $error = error_get_last()) {
          if ((error_reporting() & $error['type']) == 0) {
+            # Ignore errors hidden by PHP's settings
             return;
          } elseif ($error['type'] == 4) {
             $exception = SyntaxError;
@@ -141,8 +100,13 @@
 
    # Handler for uncaught exceptions
    function exception_handler($exception) {
+      if ($GLOBALS['_EXCEPTION_CAUGHT']) {
+         return;
+      } else {
       $GLOBALS['_EXCEPTION_CAUGHT'] = true;
+      }
 
+      # Clear the output buffer
       while (ob_get_level()) {
          ob_end_clean();
       }
@@ -152,10 +116,12 @@
       } else {
          log_exception($exception);
 
+         # Generate an error report from a controller
          Dispatcher::$controller = new ErrorsController();
          print Dispatcher::$controller->show($exception);
 
          if (log_running() and log_level(LOG_INFO)) {
+            # Log the request footer if necessary
             Dispatcher::log_footer();
          }
 
@@ -174,6 +140,7 @@
             log_info($dump);
          } else {
             if (!log_level(LOG_INFO)) {
+               # Log the request header if necessary
                Dispatcher::log_header(
                   get_class(Dispatcher::$controller),
                   Dispatcher::$params['action'],
@@ -194,13 +161,16 @@
       );
 
       if ($recipients and !ignore_exception($exception) and !ignore_notification($exception)) {
-         $controller = new ErrorsController();
-
          $mail = new Mail();
          $mail->content_type = 'text/html';
+
+         # Generate the HTML body from a controller
+         $controller = new ErrorsController();
          $mail->body = $controller->debug($exception);
-         $mail->alt_body = dump_exception($exception);
          $mail->subject = $controller->get('title');
+
+         # Add a plain text dump of the exception
+         $mail->alt_body = dump_exception($exception);
 
          foreach ((array) $recipients as $address) {
             $mail->add_address($address);

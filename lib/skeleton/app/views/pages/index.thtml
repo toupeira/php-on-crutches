@@ -75,7 +75,6 @@
 <body>
 <div id="content">
 <?= image_tag('framework/php_on_crutches.png', array('id' => 'logo', 'width' => 147, 'height' => 200)) ?>
-<h1>woah... it actually works!</h1>
 <h3>About your system:</h3>
 <table id="info">
 <tr>

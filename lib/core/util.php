@@ -9,8 +9,8 @@
 
    # Check if a value is empty
    function blank($value) {
-      if ($value instanceof QuerySet) {
-         return $value->empty;
+      if (is_object($value) and method_exists($value, 'get_empty')) {
+         return $value->get_empty();
       } elseif (is_string($value)) {
          $value = trim($value);
          return empty($value) and $value !== '0';
@@ -19,7 +19,7 @@
       }
    }
 
-   # Require a file if it exists
+   # Load one or multiple files if they exist
    function try_require($files) {
       if (!is_array($files)) {
          $files = func_get_args();

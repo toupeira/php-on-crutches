@@ -23,7 +23,7 @@
  * @version 	1.0.1.b3 (2008-10-02)
  */
 class cssmin
-	{
+{
 	/**
 	 * Minifies stylesheet definitions
 	 *
@@ -136,7 +136,7 @@ class cssmin
 			}
 		return $r;
 		}
-	}
+}
 
 function cssmin_string_minify($match) {
    return preg_replace('/\n\s*/', '', $match[1]);
@@ -148,8 +148,7 @@ function cssmin_string_minify($match) {
  * @param	array		$array
  * @return	array
  */
-function cssmin_array_clean(array $array)
-	{
+function cssmin_array_clean(array $array) {
 	$r = array();
 	$c = count($v);
 	if (cssmin_array_is_assoc($array))
@@ -170,15 +169,14 @@ function cssmin_array_clean(array $array)
 			}
 		}
 	return $r;
-	}
+}
 /**
  * Return if a value is a associative array.
  *
  * @param	array		$array
  * @return	bool
  */
-function cssmin_array_is_assoc($array)
-	{
+function cssmin_array_is_assoc($array) {
 	if (!is_array($array))
 		{
 		return false;
@@ -188,25 +186,23 @@ function cssmin_array_is_assoc($array)
 		krsort($array, SORT_STRING);
 		return !is_numeric(key($array));
 		}
-	}
+}
 /**
  * Encodes a url() expression.
  *
  * @param	array	$match
  * @return	string
  */
-function cssmin_encode_url($match)
-	{
+function cssmin_encode_url($match) {
 	return "url(" . base64_encode(trim($match[1])) . ")";
-	}
+}
 /**
  * Decodes a url() expression.
  *
  * @param	array	$match
  * @return	string
  */
-function cssmin_decode_url($match)
-	{
+function cssmin_decode_url($match) {
 	return "url(" . base64_decode($match[1]) . ")";
-	}
+}
 ?>

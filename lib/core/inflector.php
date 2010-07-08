@@ -7,6 +7,8 @@
 # $Id$
 #
 
+   # Adapted from the Rails Inflector
+
    abstract class Inflector
    {
       static protected $_plurals;
