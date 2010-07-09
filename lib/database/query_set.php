@@ -478,6 +478,15 @@
          return $status;
       }
 
+      function update_all($attributes) {
+         $status = false;
+         foreach ($this->objects as $object) {
+            $status = $object->update($attributes);
+         }
+
+         return $status;
+      }
+
       # Automatic getters for boolean filters
       #   e.g.: DB(User)->activated
       #         DB(User)->not_activated
