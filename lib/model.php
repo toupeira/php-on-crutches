@@ -134,9 +134,9 @@
 
       function __set($key, $value) {
          if ($this->_frozen) {
-            throw new ApplicationError("Can't change frozen object");
+            throw new ApplicationError(sprintf("Can't change frozen %s instance", get_class($this)));
          } elseif (in_array($key, $this->_readonly)) {
-            throw new ApplicationError("Can't change read-only attribute '$key'");
+            throw new ApplicationError(sprintf("Can't change read-only attribute '$key' in %s instance", get_class($this)));
          } elseif (method_exists($this, $setter = "set_$key")) {
             $this->$setter(&$value);
          } elseif (array_key_exists($key, $this->_attributes)) {
