@@ -17,6 +17,8 @@
    class RoutingError extends NotFound {}
    class MissingTemplate extends NotFound {}
 
+   class DebugTrace extends Exception {}
+
    class InvalidRequest extends ApplicationError {
       function __construct($message=null) {
          if ($message) {
@@ -131,6 +133,11 @@
       exit(1);
    }
 
+   # Add a debug trace to be logged later if an exception occurs
+   function log_trace($msg) {
+      $GLOBALS['_TRACE'][] = new DebugTrace($msg);
+   }
+
    # Log an exception, with request header if necessary
    function log_exception($exception) {
       if (log_running()) {
@@ -146,6 +153,11 @@
                   Dispatcher::$params['action'],
                   true
                );
+            }
+
+            # Log any debug traces
+            foreach ((array) $GLOBALS['_TRACE'] as $trace) {
+               log_error(dump_exception($trace));
             }
 
             log_error($dump);
