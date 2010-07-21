@@ -11,11 +11,11 @@
    <br />
 <? endif ?>
    <?= link_to_function(
-          icon('framework/icons/debug').'Hide toolbar',
+          icon('framework/icons/debug')."Close toolbar",
           'DebugToolbar.close()'
        ) ?>
    <?= link_to_function(
-          icon('framework/icons/debug').'Toggle toolbar',
+          icon('framework/icons/debug')."Minimize toolbar",
           'DebugToolbar.toggle()'
        ) ?>
 </div>

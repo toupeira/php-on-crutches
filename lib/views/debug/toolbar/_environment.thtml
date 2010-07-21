@@ -1,6 +1,11 @@
 <?# $Id$ ?>
 <?
-   $environment = $_SERVER;
+   $environment = array();
+   foreach ($_SERVER as $key => $value) {
+      if (substr($key, 0, 5) != 'HTTP_') {
+         $environment[$key] = $value;
+      }
+   }
    ksort($environment);
 ?>
 <a><?= icon('framework/icons/environment') ?> Environment</a>

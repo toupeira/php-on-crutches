@@ -15,6 +15,18 @@
       }
    }
 
+   $headers = array();
+   foreach ($_SERVER as $key => $value) {
+      if (preg_match('/^HTTP_(.+)$/', $key, $match) and $match[1] != 'COOKIE') {
+         $key = str_replace(' ', '-', titleize($match[1]));
+         $headers[$key] = $value;
+      }
+   }
+
+   if ($headers) {
+      $request['Headers'] = dump($headers, true);
+   }
+
    if ($params = Dispatcher::$params) {
       $request['Parameters'] = dump($params, true);
    }

@@ -150,10 +150,6 @@
   width: 100%;
 }
 
-#debug-toolbar td, #debug-toolbar code {
-  white-space: normal;
-}
-
 #debug-toolbar td, #debug-toolbar pre, #debug-toolbar li li {
   padding: 0.4em;
   background: #eee;
@@ -187,4 +183,8 @@
 
 #debug-toolbar #debug-toolbar-menu > div {
   width: 12em;
+}
+
+#debug-toolbar-template td, #debug-toolbar-database code {
+  white-space: normal;
 }

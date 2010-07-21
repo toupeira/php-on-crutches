@@ -124,6 +124,8 @@
             $args[] = "[1;31m$status[0m";
          }
 
+         $text = str_repeat('-', strlen($text) + 5)."\n$text";
+
          array_unshift($args, $text);
 
          log_info(call_user_func_array('sprintf', $args));

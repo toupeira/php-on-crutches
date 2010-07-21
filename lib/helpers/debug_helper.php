@@ -21,7 +21,8 @@
       }
 
       if ($colored) {
-         return syntax_highlight($output);
+         # avoid comment highlighting for '/*'
+         return syntax_highlight(str_replace('/*', '∕*', $output));
       } else {
          return '<pre>'.h($output).'</pre>';
       }
