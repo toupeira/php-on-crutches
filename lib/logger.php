@@ -12,11 +12,18 @@
    define('LOG_ERROR',      LOG_ERR);
    define('LOG_WARN',       LOG_WARNING);
 
-   function log_msg($msg, $level=LOG_INFO) { return $GLOBALS['_LOGGER']->log($msg, $level); }
-   function log_error($msg) { log_msg($msg, LOG_ERROR); }
-   function log_warn($msg)  { log_msg($msg, LOG_WARN); }
-   function log_info($msg)  { log_msg($msg, LOG_INFO); }
-   function log_debug($msg) { log_msg($msg, LOG_DEBUG); }
+   function log_msg($msg, $level=LOG_INFO) {
+      if ($logger = $GLOBALS['_LOGGER']) {
+         return $logger->log($msg, $level);
+      } else {
+         return false;
+      }
+   }
+
+   function log_error($msg) { return log_msg($msg, LOG_ERROR); }
+   function log_warn($msg)  { return log_msg($msg, LOG_WARN); }
+   function log_info($msg)  { return log_msg($msg, LOG_INFO); }
+   function log_debug($msg) { return log_msg($msg, LOG_DEBUG); }
 
    function log_running() {
       return $GLOBALS['_LOGGER'] instanceof Logger;
@@ -119,6 +126,8 @@
             }
 
             return true;
+         } else {
+            return false;
          }
       }
    }
