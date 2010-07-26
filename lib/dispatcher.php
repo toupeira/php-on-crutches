@@ -108,7 +108,7 @@
          $status = any(Dispatcher::$status, Dispatcher::$controller->headers['Status'], 200);
          
          $text = 'Completed in %.5f (%d reqs/sec)';
-         $args = array($time, 1/ $time);
+         $args = array($time, 1 / $time);
 
          $text .= ' | Size: %.2fK';
          $args[] = strlen(self::$controller->output) / 1024;
