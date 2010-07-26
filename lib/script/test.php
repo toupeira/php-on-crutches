@@ -46,7 +46,7 @@
             . "\n"
             . "Available tests:\n";
       foreach ($_TEST_DIRS as $test) {
-         printf("  %-13s Run %s tests\n", $test, rtrim($test, 's'));
+         printf("  %-13s Run %s tests\n", $test, singularize($test));
       }
       print "\n";
       exit(255);

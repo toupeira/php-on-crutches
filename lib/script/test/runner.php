@@ -12,6 +12,7 @@
    }
 
    require 'simpletest/unit_tester.php';
+   require 'simpletest/web_tester.php';
    require 'simpletest/reporter.php';
 
    require LIB.'script/test/cases.php';

@@ -48,7 +48,7 @@
    # Initialize the framework
    config_init();
 
-   require CONTROLLERS.'application_controller.php';
+   try_require(CONTROLLERS.'application_controller.php');
    try_require(HELPERS.'application_helper.php');
 
 ?>
