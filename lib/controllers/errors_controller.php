@@ -60,7 +60,7 @@
          $message = preg_replace(
             "/([^a-z])('[^']+'|[^ ]+\(\))/",
             '$1<code>$2</code>',
-            to_utf8($exception->getMessage())
+            $exception->getMessage()
          );
          $file = $exception->getFile();
          $line = $exception->getLine();
