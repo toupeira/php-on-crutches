@@ -208,6 +208,7 @@
             'cache_store'       => 'memory',
             'output_buffering'  => false,
             'debug_toolbar'     => false,
+            'notify_errors'     => false,
          ));
       }
 

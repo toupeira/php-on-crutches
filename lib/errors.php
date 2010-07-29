@@ -105,7 +105,7 @@
       if ($GLOBALS['_EXCEPTION_CAUGHT']) {
          return;
       } else {
-      $GLOBALS['_EXCEPTION_CAUGHT'] = true;
+         $GLOBALS['_EXCEPTION_CAUGHT'] = true;
       }
 
       # Clear the output buffer
@@ -113,11 +113,9 @@
          ob_end_clean();
       }
 
-      if (PHP_SAPI == 'cli') {
-         print dump_exception($exception)."\n";
-      } else {
-         log_exception($exception);
+      log_exception($exception);
 
+      if (PHP_SAPI != 'cli') {
          # Generate an error report from a controller
          Dispatcher::$controller = new ErrorsController();
          print Dispatcher::$controller->show($exception);
@@ -141,6 +139,10 @@
    # Log an exception, with request header if necessary
    function log_exception($exception) {
       if (log_running()) {
+         if (!is_object($exception)) {
+            $exception = new DebugTrace($exception);
+         }
+
          $dump = "\n".dump_exception($exception);
 
          if (ignore_exception($exception)) {
