@@ -64,10 +64,6 @@
          }
 
          try {
-            if (mb_strlen($data) > 1024) {
-               log_error("big session data: ".to_utf8($data));
-            }
-
             if ($model = config('auth_model')) {
                if ($user = call_user_func(array($model, 'current'))) {
                   $user = $user->id;
