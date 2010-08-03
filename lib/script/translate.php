@@ -201,6 +201,8 @@ TXT;
             }
 
             if ($key) {
+               $key = str_replace("\\n", "\n", $key);
+
                if ($match[1]) {
                   $plurals[] = $key;
                } else {
@@ -223,7 +225,7 @@ TXT;
          foreach ($keys as $key) {
             if ($messages[$key]) {
                continue;
-            } elseif ($translation = _($key)) {
+            } elseif ($translation = _($key) and $translation != $key) {
                $messages[$key] = $translation;
             } else {
                $untranslated++;
@@ -248,8 +250,16 @@ TXT;
 
             $lines = array();
             foreach ($messages as $key => $translation) {
-               #$key = str_replace('"', '\"', $key);
-               #$translation = str_replace('"', '\"', $translation);
+               $key = strtr($key, array(
+                  "\\" => "\\\\",
+                  "\n" => "\\n",
+                  '"' => "\\\"",
+               ));
+               $translation = strtr($translation, array(
+                  "\\" => "\\\\",
+                  "\n" => "\\n",
+                  '"' => "\\\"",
+               ));
                $lines[] = "  \"$key\": \"$translation\"";
             }
 

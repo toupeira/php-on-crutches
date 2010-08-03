@@ -65,6 +65,17 @@
       }
    }
 
+   class ClientError extends ApplicationError {
+      protected $_trace;
+
+      function __construct($message, $file, $line, $trace=null) {
+         parent::__construct($message, 0, E_ERROR, $file, $line);
+         $this->_trace = $trace;
+      }
+
+      function getClientTrace() { return $this->_trace; }
+   }
+
    # Global variable to track if an exception was caught
    $_EXCEPTION_CAUGHT = false;
 
@@ -181,7 +192,7 @@
          # Generate the HTML body from a controller
          $controller = new ErrorsController();
          $mail->body = $controller->debug($exception);
-         $mail->subject = $controller->get('title');
+         $mail->subject = strtoupper(trim(`hostname -s`)).": ".$controller->get('title');
 
          # Add a plain text dump of the exception
          $mail->alt_body = dump_exception($exception);

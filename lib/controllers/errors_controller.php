@@ -11,6 +11,9 @@
    {
       protected $_valid_methods = true;
 
+      protected $_require_ajax = array('debug_client');
+      protected $_require_post = array('debug_client');
+
       function is_valid_request($action) {
          return true;
       }
@@ -64,15 +67,25 @@
          );
          $file = $exception->getFile();
          $line = $exception->getLine();
-         $trace = $exception->getTraceAsString();
 
-         try {
-            $title = $class;
+         $title = $class;
+
+         if ($exception instanceof ClientError) {
+            $trace = $exception->getClientTrace();
+
+            if ($controller = Dispatcher::$controller and $referer = $controller->request['referer']) {
+               $title .= " in $referer";
+            }
+         } else {
+            $trace = $exception->getTraceAsString();
+
             $params = Dispatcher::$params;
             if ($controller = camelize($params['controller']) and $action = $params['action']) {
                $title .= " in $controller#$action";
             }
+         }
 
+         try {
             # Get the current user
             if ($model = config('auth_model')) {
                $user = call_user_func(array($model, 'current'));
@@ -127,6 +140,20 @@
                  . "<pre>".$e->getTraceAsString()."</pre>";
 
          }
+      }
+
+      function debug_client() {
+         $exception = new ClientError(
+            $this->params['message'],
+            $this->params['file'],
+            $this->params['line'],
+            $this->params['trace']
+         );
+
+         log_exception($exception);
+         send_error_notification($exception, 'mk@softronics.ch');
+
+         $this->head(204);
       }
    }
 
