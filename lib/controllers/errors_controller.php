@@ -151,7 +151,7 @@
          );
 
          log_exception($exception);
-         send_error_notification($exception, 'mk@softronics.ch');
+         send_error_notification($exception);
 
          $this->head(204);
       }
