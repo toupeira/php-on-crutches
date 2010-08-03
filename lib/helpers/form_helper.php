@@ -252,9 +252,9 @@
 
       foreach (timezone_identifiers_list() as $zone) {
          if (preg_match('|^(Etc/)?([-+A-Z0-9]+)$|', $zone, $match)) {
-            $codes[] = $match[2];
+            $codes[$zone] = $match[2];
          } elseif ($zone != 'localtime' and substr($zone, 0, 8) != 'SystemV/') {
-            $locations[] = $zone;
+            $locations[$zone] = $zone;
          }
       }
 
