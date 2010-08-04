@@ -69,7 +69,7 @@
       protected $_trace;
 
       function __construct($message, $file, $line, $trace=null) {
-         parent::__construct($message, 0, E_ERROR, $file, $line);
+         parent::__construct($message, 0, E_ERROR, $file, intval($line));
          $this->_trace = $trace;
       }
 
