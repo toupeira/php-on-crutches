@@ -148,7 +148,7 @@
    }
 
    # Log an exception, with request header if necessary
-   function log_exception($exception) {
+   function log_exception($exception, $info=false) {
       if (log_running()) {
          if (!is_object($exception)) {
             $exception = new DebugTrace($exception);
@@ -159,7 +159,7 @@
          if (ignore_exception($exception)) {
             log_info($dump);
          } else {
-            if (!log_level(LOG_INFO)) {
+            if (!$info and !log_level(LOG_INFO) and PHP_SAPI != 'cli') {
                # Log the request header if necessary
                Dispatcher::log_header(
                   get_class(Dispatcher::$controller),
@@ -168,12 +168,18 @@
                );
             }
 
-            # Log any debug traces
-            foreach ((array) $GLOBALS['_TRACE'] as $trace) {
-               log_error(dump_exception($trace));
+            if ($info) {
+               $logger = 'log_info';
+            } else {
+               $logger = 'log_error';
             }
 
-            log_error($dump);
+            # Log any debug traces
+            foreach ((array) $GLOBALS['_TRACE'] as $trace) {
+               $logger(dump_exception($trace));
+            }
+
+            $logger($dump);
          }
       }
    }

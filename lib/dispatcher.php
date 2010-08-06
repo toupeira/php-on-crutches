@@ -85,7 +85,9 @@
          $text .= "\n  User-Agent: {$_SERVER['HTTP_USER_AGENT']}";
 
          # Log request parameters
-         $text .= "\n  Parameters: ".array_to_str(Dispatcher::$params);
+         if (is_array(Dispatcher::$params)) {
+            $text .= "\n  Parameters: ".array_to_str(Dispatcher::$params);
+         }
 
          # Log uploaded files, if any
          if ($_FILES) {

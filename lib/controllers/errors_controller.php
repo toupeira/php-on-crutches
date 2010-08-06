@@ -150,7 +150,7 @@
             $this->params['trace']
          );
 
-         log_exception($exception);
+         log_exception($exception, config('notify_errors'));
          send_error_notification($exception);
 
          $this->head(204);
