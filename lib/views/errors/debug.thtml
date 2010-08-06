@@ -100,7 +100,7 @@
 
 <? if ($trace): ?>
 <h3>Stack Trace:</h3>
-<div><pre><?= $trace ?></pre></div>
+<div><pre><?= h($trace) ?></pre></div>
 <? endif ?>
 
 <h3>Request</h3>
