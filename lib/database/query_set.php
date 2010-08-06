@@ -569,6 +569,7 @@
          } elseif (in_array($method, array('sum', 'avg', 'min', 'max'))) {
             # shortcuts for aggregate functions
             $this->replace_select("$method({$args[0]})");
+            $this->order();
             $value = $this->statement->fetch_column();
             $this->reset();
             return $value;
