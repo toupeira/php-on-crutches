@@ -72,10 +72,7 @@
 
          if ($exception instanceof ClientError) {
             $trace = $exception->getClientTrace();
-
-            if ($controller = Dispatcher::$controller and $referer = $controller->request['referer']) {
-               $title .= " in $referer";
-            }
+            $title .= " in $file";
          } else {
             $trace = $exception->getTraceAsString();
 
