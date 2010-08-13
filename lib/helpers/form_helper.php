@@ -251,9 +251,11 @@
       $locations = array();
 
       foreach (timezone_identifiers_list() as $zone) {
-         if (preg_match('|^(Etc/)?([-+A-Z0-9]+)$|', $zone, $match)) {
+         if ($zone == 'localtime' or substr($zone, 0, 3) == 'GMT' or substr($zone, 0, 8) == 'SystemV') {
+            continue;
+         } elseif (preg_match('|^(Etc/)?([-+A-Z0-9]+)$|', $zone, $match)) {
             $codes[$zone] = $match[2];
-         } elseif ($zone != 'localtime' and substr($zone, 0, 8) != 'SystemV/') {
+         } else {
             $locations[$zone] = $zone;
          }
       }
