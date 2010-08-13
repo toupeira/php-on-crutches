@@ -140,7 +140,7 @@
       }
 
       function debug_client() {
-         if (preg_match('/^(file://|mhtml:)/', $this->params['file'])) {
+         if (preg_match('#^(file://|mhtml:)#', $this->params['file'])) {
             throw new InvalidRequest();
          }
 
