@@ -80,7 +80,9 @@
          }
 
          $url .= '://'.any($options['host'], $_SERVER['HTTP_HOST']);
-      } 
+      }  else {
+         $url = '';
+      }
 
       # Add the site prefix for relative paths
       if ($path[0] != '/' and $path[0] != '#') {

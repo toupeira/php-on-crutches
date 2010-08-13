@@ -73,7 +73,7 @@
          $words = (is_array($words) ? $words : func_get_args());
          self::$_uncountables = array_unique(array_merge(
             (array) self::$_uncountables,
-            array_map(mb_strtolower, $words)
+            array_map('mb_strtolower', $words)
          ));
       }
 

@@ -52,7 +52,7 @@
    # Apply a callback with multiple argument values, and collect the return values in an array
    function apply($callback, $values=null) {
       $values = array_slice(func_get_args(), 1);
-      $count = max(array_map(count, $values));
+      $count = max(array_map('count', $values));
 
       $return = array();
       for ($i = 0; $i < $count; $i++) {

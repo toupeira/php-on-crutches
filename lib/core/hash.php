@@ -15,7 +15,7 @@
          $this->_data = (is_array($data) ? $data : func_get_args());
       }
 
-      function inspect() {
+      function inspect($data=null, $name=null) {
          return parent::inspect($this->_data);
       }
 

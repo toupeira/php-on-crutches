@@ -21,7 +21,7 @@
    function getf(&$object, $key=null) {
       if (is_object($object)) {
          return $object->$key;
-      } elseif (is_array($object)) {
+      } elseif (is_array($object) and isset($object[$key])) {
          return $object[$key];
       } else {
          return null;

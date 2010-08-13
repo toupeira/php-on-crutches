@@ -104,7 +104,7 @@
          return $this->name;
       }
 
-      function inspect() {
+      function inspect($data=null, $name=null) {
          return parent::inspect($this->params);
       }
 
@@ -259,6 +259,8 @@
 
       # Check request requirements
       function is_valid_request($action) {
+         $error = null;
+
          # Check for SSL requirements
          if (!$this->is_ssl() and $this->check_requirement($action, 'ssl')) {
             $this->redirect_to("https://{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}");

@@ -40,7 +40,8 @@
          if (method_exists($value, 'inspect')) {
             return $value->inspect();
          } else {
-            return Object::inspect(get_object_vars($value), get_class($value));
+            $o = new Object();
+            return $o->inspect(get_object_vars($value), get_class($value));
          }
       } elseif (is_resource($value)) {
          ob_start();

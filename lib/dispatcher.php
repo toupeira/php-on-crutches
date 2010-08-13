@@ -133,7 +133,7 @@
          log_info(call_user_func_array('sprintf', $args));
       }
 
-      function log_memory() {
+      static function log_memory() {
          if (log_level(LOG_DEBUG) or $limit = config('notify_memory')) {
             $memory = memory_get_usage(true);
             $peak = memory_get_peak_usage(true);

@@ -67,7 +67,7 @@
          $this->_layout = $layout;
       }
 
-      function inspect() {
+      function inspect($data=null, $name=null) {
          return parent::inspect($this->_data);
       }
 

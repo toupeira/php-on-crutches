@@ -12,12 +12,20 @@
 
    # Search for a substring at the beginning
    function starts_with($text, $search) {
-      return substr($text, 0, mb_strlen($search)) === $search;
+      return $text[0] == $search[0]
+         and (isset($search[1]) ? substr($text, 0, mb_strlen($search)) === $search
+                                : true);
    }
 
    # Search for a substring at the end
    function ends_with($text, $search) {
-      return substr($text, mb_strlen($text) - mb_strlen($search)) === $search;
+      $len_text = mb_strlen($text);
+      $len_search = mb_strlen($search);
+
+      return $text[$len_text - 1] == $search[$len_search - 1]
+         and $len_search <= $len_text
+         and ($len_search > 1 ? substr($text, $len_text - $len_search) === $search
+                              : true);
    }
 
    # Match a literal string or a regex

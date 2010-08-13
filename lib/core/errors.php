@@ -11,9 +11,18 @@
    class StandardError extends ErrorException {}
 
    # PHP exceptions
-   class SyntaxError extends StandardError {}
-   class RuntimeError extends StandardError {}
+   class RuntimeError extends StandardError {
+      function __construct($message, $code=null, $severity=null, $filename=null, $lineno=null) {
+         if ($severity == E_STRICT) {
+            $message = "Strict Error: $message";
+         }
+
+         parent::__construct($message, $code, $severity, $filename, $lineno);
+      }
+   }
+
    class FatalError extends RuntimeError {}
+   class SyntaxError extends RuntimeError {}
 
    class ValueError extends StandardError {
       function __construct($value, $message=null) {

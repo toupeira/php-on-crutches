@@ -16,6 +16,8 @@
          $open = true;
          unset($options['open']);
          unset($defaults['open']);
+      } else {
+         $open = false;
       }
 
       $html = build_tag($name, $options, $defaults).">$content";

@@ -47,6 +47,8 @@
             throw new ConfigurationError("Missing or invalid authentication model");
          }
 
+         $redirect = null;
+
          if ($id = $this->session['auth_id']) {
             # Login user from session
             if (!self::auth('login', $id)) {

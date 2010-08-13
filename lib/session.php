@@ -14,9 +14,9 @@
       static function close() { return true; }
       static function expire($maxlifetime) { }
 
-      abstract static function read($id);
-      abstract static function write($id, $data);
-      abstract static function destroy($id);
+      static function read($id)         { throw new NotImplemented(); }
+      static function write($id, $data) { throw new NotImplemented(); }
+      static function destroy($id)      { throw new NotImplemented(); }
    }
 
    class SessionStoreCache extends SessionStore
