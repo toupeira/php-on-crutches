@@ -140,6 +140,10 @@
       }
 
       function debug_client() {
+         if (preg_match('^(file://|mhtml:)', $this->params['file'])) {
+            throw new InvalidRequest();
+         }
+
          $exception = new ClientError(
             $this->params['message'],
             $this->params['file'],
