@@ -145,12 +145,10 @@
       function render($template=null, $layout=null) {
          if (!$template and !$template = $this->_template) {
             throw new ApplicationError("No template set");
-         } elseif (!is_file($this->_template = $template)) {
-            if (is_file($file = View::find_template($this->_template))) {
-               $this->_template = $file;
-            } else {
-               throw new MissingTemplate("Template '{$this->_template}' not found");
-            }
+         } elseif (is_string($template) and is_file($template)) {
+            $this->_template = $template;
+         } elseif (!is_file($this->_template = View::find_template($template))) {
+            throw new MissingTemplate("Template '$template' not found");
          }
 
          if (!is_null($layout)) {
