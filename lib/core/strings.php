@@ -52,7 +52,7 @@
       if (is_utf8($string)) {
          return $string;
       } else {
-         return iconv($charset, "UTF-8//TRANSLIT//IGNORE", $string);
+         return @iconv($charset, "UTF-8//TRANSLIT//IGNORE", $string);
       }
    }
 
