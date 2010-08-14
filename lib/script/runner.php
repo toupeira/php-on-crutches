@@ -16,6 +16,8 @@
             . "  -d       Use development environment\n"
             . "  -t       Use test environment\n"
             . "\n"
+            . "  -v       Be verbose\n"
+            . "  -l FILE  Use logfile\n"
             . "  -f       Fork to background\n"
             . "\n";
       exit(255);
@@ -24,6 +26,9 @@
    $args = array_slice($argv, 1);
    $code = array();
    $fork = false;
+
+   $log_level = null;
+   $log_file = null;
 
    while ($arg = array_shift($args)) {
       switch ($arg) {
@@ -46,6 +51,19 @@
          case '-f':
             $fork = true;
             break;
+         case '-v':
+            $log_level = LOG_INFO;
+            $log_file = STDERR;
+            break;
+         case '-l':
+            if (!$log_file = array_shift($args)) {
+               usage();
+            } elseif ($log_file == 'stdout') {
+               $log_file = STDOUT;
+            } elseif ($log_file == 'stderr') {
+               $log_file = STDERR;
+            }
+            break;
          default:
             if ($arg[0] == '-') {
                usage();
@@ -57,8 +75,9 @@
 
    if ($code) {
       require_once dirname(__FILE__).'/../script.php';
-      log_level_set(config('application_default', 'log_level'));
-      log_file_set(config('application_default', 'log_file'));
+
+      log_level_set(any($log_level, config('application_default', 'log_level')));
+      log_file_set(any($log_file, config('application_default', 'log_file')));
 
       if ($fork) {
          $pid = pcntl_fork();

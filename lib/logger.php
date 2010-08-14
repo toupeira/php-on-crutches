@@ -102,10 +102,13 @@
       function log($msg, $level=LOG_INFO) {
          if ($level <= $this->_level) {
             if (!$this->running) {
-               if (($this->_buffer = @fopen($this->_file, 'a')) === false) {
+               if (!is_resource($this->_buffer = @fopen($this->_file, 'a'))) {
                   print "<p><b>Warning:</b> the logfile <tt>{$this->_file}</tt> is not writable</p>";
                   $this->_level = LOG_DISABLED;
                   return false;
+               } elseif (posix_getuid() === 0) {
+                  # Make sure the logfile is writable by the webserver
+                  chmod($this->_file, 0660);
                }
             }
 
