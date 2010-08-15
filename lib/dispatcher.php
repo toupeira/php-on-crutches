@@ -57,7 +57,7 @@
          if (config('debug_toolbar')) {
             # Add the debug toolbar if enabled
             $log_level = log_level();
-            log_level_set(LOG_DISABLED);
+            log_level_set(LOG_ERROR);
 
             $view = new View();
             $toolbar = $view->render('debug/toolbar/index');

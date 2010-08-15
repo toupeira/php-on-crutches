@@ -18,7 +18,7 @@
       $_SERVER['HTTPS'] = $ssl ? 'on' : null;
    }
 
-   log_level_set(LOG_DISABLED);
+   log_level_set(LOG_ERROR);
    fake_request();
 
    # Disable all time limits
