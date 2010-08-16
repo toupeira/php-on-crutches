@@ -59,7 +59,11 @@
       print "\n";
       $errors = array();
       foreach (array_unique((array) $paths) as $path) {
-         run_tests($path) or $errors[] = $path;
+         try {
+            run_tests($path) or $errors[] = $path;
+         } catch (Exception $e) {
+            print dump_exception($e);
+         }
       }
 
       if ($errors) {

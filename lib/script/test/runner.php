@@ -49,9 +49,9 @@
          }
 
          try {
-            $group->run($reporter);
+            @$group->run($reporter);
          } catch (Exception $e) {
-            print "\nCaught $e\n";
+            print dump_exception($e);
          }
 
          print "\n";
