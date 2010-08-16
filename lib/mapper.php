@@ -19,7 +19,7 @@
          }
       }
 
-      function inspect($data=null, $name=null) {
+      function inspect() {
          return parent::inspect(array(
             'model' => $this->_model,
          ));

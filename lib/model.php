@@ -77,7 +77,7 @@
          return parent::__toString();
       }
 
-      function inspect($data=null, $name=null) {
+      function inspect() {
          return parent::inspect($this->attributes);
       }
 

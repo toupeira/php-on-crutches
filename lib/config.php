@@ -118,7 +118,6 @@
       'ignore_errors'        => array('NotFound', 'InvalidRequest', 'AccessDenied', 'ServiceUnavailable'),
       'ignore_notifications' => null,
       'ignore_php_errors'    => array(
-         "Declaration of",
          "Only variables should be passed by reference",
          "Undefined index",
          "Undefined offset",
@@ -241,12 +240,11 @@
       );
 
       # Configure error reporting
-      error_reporting(E_ALL | E_STRICT);
+      error_reporting(E_ALL);
       ini_set('display_errors', (config('debug') or PHP_SAPI == 'cli'));
 
       # Set global PHP error handler
       if ($handler = $config['error_handler']) {
-         #set_error_handler($handler, error_reporting());
          set_error_handler($handler, error_reporting());
       }
 

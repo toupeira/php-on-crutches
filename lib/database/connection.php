@@ -71,7 +71,7 @@
          );
       }
 
-      function inspect($data=null, $name=null) {
+      function inspect() {
          return parent::inspect($this->_options);
       }
 
