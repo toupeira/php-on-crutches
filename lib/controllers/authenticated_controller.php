@@ -65,7 +65,11 @@
 
          # Check if the action requires a logged in user
          if ($this->check_requirement($action, 'login') and !self::is_logged_in()) {
-            $this->session['return_to'] = Dispatcher::$path;
+            if ($this->request['method'] == 'GET' and !$this->is_ajax() and !$this->check_requirement($action, 'post')) {
+               # Store current URL for normal GET requests
+               $this->session['return_to'] = Dispatcher::$path;
+            }
+
             $redirect = array(
                'controller' => config('auth_controller'),
                'action'     => 'login',

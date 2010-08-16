@@ -185,12 +185,12 @@
 
       # Check if this is a POST request
       function is_post() {
-         return $_SERVER['REQUEST_METHOD'] == 'POST';
+         return $this->request['method'] == 'POST';
       }
 
       # Check if this is an Ajax request
       function is_ajax($method=null) {
-         if ($method and $_SERVER['REQUEST_METHOD'] != strtoupper($method)) {
+         if ($method and $this->request['method'] != strtoupper($method)) {
             return false;
          }
 
@@ -214,7 +214,7 @@
             throw new ConfigurationError('No hosts given');
          }
 
-         $client = $_SERVER['REMOTE_ADDR'];
+         $client = $this->request['ip'];
          $found = false;
          foreach ((array) $hosts as $host) {
             # Expand wildcards into subnet patterns
@@ -267,9 +267,9 @@
             return false;
 
          # Check for valid methods
-         } elseif ($this->_valid_methods !== true and !in_array($_SERVER['REQUEST_METHOD'], $this->_valid_methods)) {
+         } elseif ($this->_valid_methods !== true and !in_array($this->request['method'], $this->_valid_methods)) {
             $error = InvalidRequest;
-            $message = "invalid method {$_SERVER['REQUEST_METHOD']}";
+            $message = "invalid method {$this->request['method']}";
 
          # Check for POST requirements
          } elseif (!$this->is_post() and $this->check_requirement($action, 'post')) {
@@ -284,7 +284,7 @@
          # Check for trusted host requirements
          } elseif ($this->check_requirement($action, 'trusted') and !$this->is_trusted($action)) {
             $error = AccessDenied;
-            $message = "untrusted host {$_SERVER['REMOTE_ADDR']}";
+            $message = "untrusted host {$this->request['ip']}";
 
          # Check for cross site request forgery
          } elseif ($this->is_post() and !$this->is_ajax() and config('form_token') and $this->check_requirement($action, 'form_token')) {
@@ -453,10 +453,10 @@
          if ($path = $this->session['return_to']) {
             # Use path stored in session
             unset($this->session['return_to']);
-         } elseif ($url = $_SERVER['HTTP_REFERER'] and $options['referer'] !== false) {
+         } elseif ($url = $this->request['referer'] and $options['referer'] !== false) {
             # Use the HTTP referer if it points to the current host, and doesn't point to the current path
             $url = parse_url($url);
-            if ((!$url['host'] or $url['host'] == $_SERVER['HTTP_HOST']) and stristr($url['path'], Dispatcher::$path) === false) {
+            if ((!$url['host'] or $url['host'] == $this->request['host']) and stristr($url['path'], Dispatcher::$path) === false) {
                $path = $url['path'];
             }
          }
