@@ -109,7 +109,7 @@
          $time = microtime(true) - Dispatcher::$start_time;
          $status = any(Dispatcher::$status, Dispatcher::$controller->headers['Status'], 200);
          
-         $text = 'Completed in %.5f (%d reqs/sec)';
+         $text = 'Completed in %.5fs (%d reqs/sec)';
          $args = array($time, 1 / $time);
 
          $text .= ' | Size: %.2fK';
