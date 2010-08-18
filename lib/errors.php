@@ -191,6 +191,10 @@
          $recipients, config('notify_errors')
       );
 
+      if (!is_object($exception)) {
+         $exception = new DebugTrace($exception);
+      }
+
       if ($recipients and !ignore_exception($exception) and !ignore_notification($exception)) {
          $mail = new Mail();
          $mail->content_type = 'text/html';
