@@ -76,14 +76,20 @@
    }
 
    # Find all matching values
-   function array_find_all($array, $key, $value) {
+   function array_find_all($array, $key=null, $value=null) {
       if ($array instanceof QuerySet) {
          $array = $array->objects;
       }
 
+      $args = func_num_args();
+
       $objects = array();
       foreach ((array) $array as $object) {
-         if (getf($object, $key) == $value) {
+         if ($args == 3 and getf($object, $key) == $value) {
+            $objects[] = $object;
+         } elseif ($args == 2 and !blank(getf($object, $key))) {
+            $objects[] = $object;
+         } elseif ($args == 1 and !blank($object)) {
             $objects[] = $object;
          }
       }
