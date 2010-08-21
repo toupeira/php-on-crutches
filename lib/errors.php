@@ -84,7 +84,12 @@
       # Don't throw exceptions for PHP errors after an exception was already caught,
       # to avoid "Exception thrown without a stack frame" errors
       if (error_reporting() and !$GLOBALS['_EXCEPTION_CAUGHT'] and !ignore_php_error($errstr)) {
-         throw new RuntimeError($errstr, 0, $errno, $errfile, $errline);
+         $exception = new RuntimeError($errstr, 0, $errno, $errfile, $errline);
+         if ($errno == E_NOTICE) {
+            log_exception($exception);
+         } else {
+            throw $exception;
+         }
       }
    }
 

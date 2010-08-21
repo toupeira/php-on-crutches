@@ -153,7 +153,7 @@
       }
 
       static function transliterate($string) {
-         return str_replace('?', ' ', iconv('utf-8', 'ascii//translit', $string));
+         return str_replace('?', ' ', iconv('UTF-8', 'ASCII//TRANSLIT', $string));
       }
 
       static function tableize($class) {

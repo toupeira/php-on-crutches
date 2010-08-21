@@ -78,6 +78,7 @@ fi
 
    while (!feof(STDIN)) {
       prompt("php[".config('name')."] >>> ");
+      $_result = null;
       $_command = trim(fgets(STDIN));
 
       # Show help
@@ -285,6 +286,7 @@ fi
 
    # Generate a fake error so the fatal error handler
    # won't pick up syntax errors from eval
+   error_reporting(E_ALL & ~E_NOTICE);
    $fatal_error_handler['shut_up'];
 
    prompt("\n");
