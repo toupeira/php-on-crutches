@@ -54,7 +54,7 @@
             if (!self::auth('login', $id)) {
                unset($this->session['auth_id']);
             }
-         } elseif ($token = $this->cookies['auth_token'] or $token = $this->params['_auth_token']) {
+         } elseif ($token = $this->cookies['auth_token']) {
             # Login user from cookie
             if ($user = self::auth('login', self::auth('authenticate_token', $token))) {
                log_info("Logged in user from cookie");
