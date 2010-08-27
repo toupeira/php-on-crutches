@@ -45,15 +45,17 @@
    function form_token() {
       static $_token;
 
-      if (config('form_token') and $id = session_id() and !$_token) {
+      if (!$_token and config('form_token') and $controller = Dispatcher::$controller and $id = session_id()) {
          if (!$key = config('secret_key')) {
             throw new ConfigurationError("No secret key set");
          }
 
          $_token = sha1($id.$key);
 
-         $_SESSION['form_token'] = $_token;
-         $_SESSION['form_token_time'] = time();
+         $controller->session['form_token'] = $_token;
+         if (config('form_token_time')) {
+            $controller->session['form_token_time'] = time();
+         }
       }
 
       return $_token;

@@ -281,7 +281,7 @@
             $error = InvalidRequest;
             $message = 'needs Ajax';
 
-         # Check for trusted host requirements
+         # Check for trusted IP adresses
          } elseif ($this->check_requirement($action, 'trusted') and !$this->is_trusted($action)) {
             $error = AccessDenied;
             $message = "untrusted host {$this->request['ip']}";
@@ -318,7 +318,7 @@
          }
 
          # Start session if required
-         if ($this->check_requirement($action, 'session')) {
+         if ($start_session = $this->check_requirement($action, 'session')) {
             $this->start_session();
          }
 
@@ -361,6 +361,16 @@
             $this->call_filter("after_$action");
             $this->call_filter("after", $action);
             $this->call_filter("global_after", $action);
+         }
+
+         # Close session if it was started
+         if ($start_session) {
+            session_write_close();
+         }
+
+         # Close databases if configured
+         if (config('database')) {
+            DatabaseConnection::close_all();
          }
 
          $this->send_headers();
@@ -485,9 +495,6 @@
                header('Cache-Control: private');
                header('Pragma: cache');
             }
-
-            # Make sure the session handler can clean up
-            register_shutdown_function('session_write_close');
 
             # Load messages stored in the session
             if (is_array($this->session['msg'])) {

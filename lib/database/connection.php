@@ -9,10 +9,10 @@
 
    class DatabaseConnection extends Object
    {
-      static function load($name) {
-         static $_cache;
+      static protected $_cache;
 
-         if ($connection = $_cache[$name]) {
+      static function load($name) {
+         if ($connection = self::$_cache[$name]) {
             return $connection;
          }
 
@@ -45,13 +45,21 @@
                }
 
                $connection = new $adapter($real_name, $options);
-               return $_cache[$name] = $_cache[$real_name] = $connection;
+               return self::$_cache[$name] = self::$_cache[$real_name] = $connection;
             } else {
                throw new ConfigurationError("No driver set for database '$real_name'");
             }
          } else {
             throw new ConfigurationError("Unconfigured database '$real_name'");
          }
+      }
+
+      static function close_all() {
+         foreach (self::$_cache as $connection) {
+            $connection->close();
+         }
+
+         return true;
       }
 
       protected $_name;
@@ -61,14 +69,6 @@
       protected function __construct($name, array $options) {
          $this->_name = $name;
          $this->_options = $options;
-
-         list($user, $pass) = array_delete($options, 'username', 'password');
-         $this->_connection = new PDO(
-            $this->get_dsn($options), $user, $pass, array(
-               PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
-               PDO::ATTR_PERSISTENT       => true,
-            ) + (array) $this->get_attributes()
-         );
       }
 
       function inspect() {
@@ -85,6 +85,40 @@
 
       function get_options() {
          return $this->_options;
+      }
+
+      function get_connection() {
+         if (!$this->_connection) {
+            $this->open();
+         }
+
+         return $this->_connection;
+      }
+
+      function open() {
+         if ($this->_connection) {
+            return false;
+         } else {
+            log_debug("Opening database '{$this->_name}'");
+            $this->_connection = new PDO(
+               $this->get_dsn($this->_options), $this->_options['username'], $this->_options['password'], array(
+                  PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
+                  PDO::ATTR_PERSISTENT       => $this->_options['persistent'],
+               ) + (array) $this->get_attributes()
+            );
+
+            return true;
+         }
+      }
+
+      function close() {
+         if ($this->_connection) {
+            log_debug("Closing database '{$this->_name}'");
+            $this->_connection = null;
+            return true;
+         } else {
+            return false;
+         }
       }
 
       function execute($sql, $params=null) {
@@ -116,7 +150,7 @@
             }
          }
 
-         $stmt = $this->_connection->prepare(
+         $stmt = $this->connection->prepare(
             $sql, array(PDO::ATTR_STATEMENT_CLASS => array(DatabaseStatement))
          );
          $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -124,7 +158,7 @@
       }
 
       function insert_id() {
-         return $this->_connection->lastInsertId();
+         return $this->connection->lastInsertId();
       }
 
       function get_tables() {
@@ -137,7 +171,7 @@
       }
 
       function __get($key) {
-         if ($this->_connection and $table = $this->table($key) and !method_exists($this, "get_$key")) {
+         if ($this->connection and $table = $this->table($key) and !method_exists($this, "get_$key")) {
             return $table;
          } else {
             return parent::__get($key);
@@ -294,28 +328,28 @@
    }
 
    class DatabaseTransaction {
-      protected $connection;
-      protected $finished;
+      protected $_connection;
+      protected $_finished;
 
       function __construct(PDO $connection) {
-         $this->connection = $connection;
-         $this->connection->beginTransaction();
+         $this->_connection = $connection;
+         $this->_connection->beginTransaction();
       }
 
       function __destruct() {
-         if (!$this->finished) {
-            $this->connection->rollback();
+         if (!$this->_finished) {
+            $this->_connection->rollback();
          }
       }
 
       function commit() {
-         $this->connection->commit();
-         $this->finished = true;
+         $this->_connection->commit();
+         $this->_finished = true;
       }
 
       function rollback() {
-         $this->connection->rollback();
-         $this->finished = true;
+         $this->_connection->rollback();
+         $this->_finished = true;
       }
    }
 

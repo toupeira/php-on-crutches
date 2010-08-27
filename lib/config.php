@@ -47,7 +47,7 @@
    # | @mail_sender@          | the envelope-from sender |
    # |_(title). Security |_. |_(title). Default |
    # | @form_token@           | automatically add and check form tokens | @false@ |
-   # | @form_token_time@      | maximum expiration time for a token | @86400@ |
+   # | @form_token_time@      | maximum expiration time for form tokens in seconds, set 0 to disable | @86400@ |
    # | @cookie_defaults@      | the default settings for cookies | @path: /@ |
    # | @auth_model@           | the model to use for authentication |
    # | @auth_controller@      | the controller to use for authentication |

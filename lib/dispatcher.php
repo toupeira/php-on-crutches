@@ -68,7 +68,7 @@
             print self::$controller->output;
          }
 
-         return self::$controller;;
+         return self::$controller;
       }
 
       static function log_header($class, $action, $force=false) {
@@ -101,8 +101,8 @@
          }
       }
 
-      static function log_footer() {
-         if (!log_level(LOG_INFO)) {
+      static function log_footer($force=false) {
+         if (!$force and !log_level(LOG_INFO)) {
             return;
          }
 
@@ -127,10 +127,15 @@
          }
 
          $text = str_repeat('-', strlen($text) + 5)."\n$text";
-
          array_unshift($args, $text);
 
-         log_info(call_user_func_array('sprintf', $args));
+         $text = call_user_func_array('sprintf', $args);
+
+         if ($force) {
+            return log_error($text);
+         } else {
+            return log_info($text);
+         }
       }
 
       static function log_memory() {

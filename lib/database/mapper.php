@@ -12,16 +12,16 @@
 
    class DatabaseMapper extends ModelMapper
    {
-      static function load($model) {
-         static $_cache;
+      static protected $_cache;
 
+      static function load($model) {
          is_object($model) and $model = get_class($model);
 
-         if ($mapper = $_cache[$model]) {
+         if ($mapper = self::$_cache[$model]) {
             return $mapper;
          } else {
             $mapper = $model.'Mapper';
-            return $_cache[$model] = new $mapper();
+            return self::$_cache[$model] = new $mapper();
          }
       }
 

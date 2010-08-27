@@ -138,7 +138,7 @@
 
          if (log_running() and log_level(LOG_INFO)) {
             # Log the request footer if necessary
-            Dispatcher::log_footer();
+            Dispatcher::log_footer(true);
          }
 
          send_error_notification($exception);
