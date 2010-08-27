@@ -115,7 +115,7 @@
       'notify_errors'        => null,
       'notify_memory'        => null,
 
-      'ignore_errors'        => array('NotFound', 'InvalidRequest', 'AccessDenied', 'ServiceUnavailable'),
+      'ignore_errors'        => array('NotFound', 'AccessDenied', 'ServiceUnavailable'),
       'ignore_notifications' => null,
       'ignore_php_errors'    => array(
          "Only variables should be passed by reference",
