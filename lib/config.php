@@ -154,15 +154,10 @@
    # Auto-load class files
    function __autoload($class) {
       $name = underscore($class);
-      if (is_file($file = MODELS."$name.php")) {
-         return require $file;
-      } elseif (is_file($file = LIB."models/$name.php")) {
-         return require $file;
-      } elseif (substr($class, -6) == 'Mapper' and
-         is_file($file = MODELS.substr($name, 0, -7).'.php')) {
+
+      if (substr($class, -6) == 'Mapper') {
          class_exists(substr($class, 0, -6));
-      } elseif (substr($class, -8) == 'QuerySet' and
-         is_file($file = MODELS.substr($name, 0, -10).'.php')) {
+      } elseif (substr($class, -8) == 'QuerySet') {
          class_exists(substr($class, 0, -8));
       } elseif (substr($class, -10) == 'Controller') {
          if (is_file($file = CONTROLLERS."$name.php")) {
@@ -170,6 +165,10 @@
          } elseif (is_file($file = LIB."controllers/$name.php")) {
             return require $file;
          }
+      } elseif (is_file($file = MODELS."$name.php")) {
+         return require $file;
+      } elseif (is_file($file = LIB."models/$name.php")) {
+         return require $file;
       }
    }
 

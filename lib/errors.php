@@ -162,7 +162,7 @@
          $dump = "\n".dump_exception($exception);
 
          if (ignore_exception($exception)) {
-            log_info($dump);
+            return log_info($dump);
          } else {
             if (!$info and !log_level(LOG_INFO) and PHP_SAPI != 'cli') {
                # Log the request header if necessary
@@ -184,8 +184,10 @@
                $logger(dump_exception($trace));
             }
 
-            $logger($dump);
+            return $logger($dump);
          }
+      } else {
+         return false;
       }
    }
 
