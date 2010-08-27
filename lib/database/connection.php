@@ -55,7 +55,7 @@
       }
 
       static function close_all() {
-         foreach (self::$_cache as $connection) {
+         foreach ((array) self::$_cache as $connection) {
             $connection->close();
          }
 
