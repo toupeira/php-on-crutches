@@ -114,7 +114,7 @@
       'notify_errors'        => null,
       'notify_memory'        => null,
 
-      'ignore_errors'        => array('NotFound', 'AccessDenied', 'ServiceUnavailable'),
+      'ignore_errors'        => array('NotFound', 'AccessDenied', 'InvalidRequest', 'ServiceUnavailable'),
       'ignore_notifications' => null,
 
       'custom_mimetypes'     => array(
