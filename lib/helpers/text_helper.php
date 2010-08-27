@@ -25,26 +25,7 @@
    # Truncate text to a given length. If $add_title is set, the full text
    # will be added as a tooltip.
    function truncate($text, $max_length=40, $add_title=false, $add='...') {
-      $length = mb_strlen($text);
-      $lowercase = mb_strtolower($text);
-
-      for ($i = 0; $i < $max_length; $i++) {
-         $char = mb_substr($lowercase, $i, 1);
-         switch ($char) {
-            case 'm':
-            case 'w':
-               $max_length -= 0.7;
-               break;
-            case 'i':
-            case 'l':
-            case 't':
-            case '1':
-               $max_length += 0.5;
-               break;
-         }
-      }
-
-      if ($length > ceil($max_length)) {
+      if (mb_strlen($text) > ceil($max_length)) {
          $truncated = rtrim(mb_substr($text, 0, round($max_length)));
          if ($add_title) {
             return '<span title="'.h($text).'">'.h($truncated).$add.'</span>';
@@ -110,7 +91,7 @@
    function to_time($time) {
       if (is_numeric($time)) {
          return $time;
-      } elseif (!in_array($time, array('0000-00-00', '0000-00-00 00:00:00'))) {
+      } elseif ($time !== '0000-00-00' and $time !== '0000-00-00 00:00:00') {
          return strtotime($time);
       }
    }

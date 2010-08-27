@@ -83,7 +83,7 @@
    function error_handler($errno, $errstr, $errfile, $errline) {
       # Don't throw exceptions for PHP errors after an exception was already caught,
       # to avoid "Exception thrown without a stack frame" errors
-      if (error_reporting() and !$GLOBALS['_EXCEPTION_CAUGHT'] and !ignore_php_error($errstr)) {
+      if (error_reporting() and !$GLOBALS['_EXCEPTION_CAUGHT']) {
          $exception = new RuntimeError($errstr, 0, $errno, $errfile, $errline);
          if ($errno == E_NOTICE) {
             log_exception($exception);
@@ -97,7 +97,7 @@
    # Gets the last error and passes it to the exception handler.
    function fatal_error_handler() {
       if ($handler = config('exception_handler') and $error = error_get_last()) {
-         if ((error_reporting() & $error['type']) == 0 or ignore_php_error($error['message'])) {
+         if ((error_reporting() & $error['type']) == 0) {
             # Ignore errors hidden by PHP's settings
             return;
          } elseif ($error['type'] == 4) {
@@ -220,19 +220,6 @@
 
          $mail->send();
       }
-   }
-
-   # Check if a PHP error should be ignored
-   function ignore_php_error($message) {
-      if (is_array($errors = config('ignore_php_errors'))) {
-         foreach ($errors as $error => $length) {
-            if ($error[0] == $message[0] and $error == substr($message, 0, $length)) {
-               return true;
-            }
-         }
-      }
-
-      return false;
    }
 
    # Check if an exception should be ignored

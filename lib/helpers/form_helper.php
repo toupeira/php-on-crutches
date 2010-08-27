@@ -82,17 +82,17 @@
       }
 
       # Use request value if set, else use default value
-      if (!array_delete($options, 'force') and $request_value = form_element_value($key)) {
+      if (!$options['force'] and $request_value = form_element_value($key)) {
          $value = $request_value;
       } else {
          $value = $default_value;
       }
 
+      unset($options['force']);
+
       # Check if an error is set for this field
-      if ((array_delete($options, 'errors') or
-            (Dispatcher::$controller and Dispatcher::$controller->has_errors($key)))
-               and !in_array($options['type'], array('checkbox', 'radio')))
-      {
+      if ($options['type'] !== 'checkbox' and $options['type'] !== 'radio' and
+         ($options['errors'] or (Dispatcher::$controller and Dispatcher::$controller->has_errors($key)))) {
          $options['class'] .= ' error';
 
          if ($onchange = $options['onchange']) {
@@ -101,6 +101,8 @@
 
          $options['onchange'] = "$onchange$(this).removeClassName('error')";
       }
+
+      unset($options['errors']);
 
       # Build the actual tag
       if ($tag == 'input' and in_array($options['type'], array('checkbox', 'radio'))) {

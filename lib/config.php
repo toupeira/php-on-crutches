@@ -62,7 +62,6 @@
    # | @notify_memory@        | log memory usage if it exceeds this limit |
    # | @ignore_errors@        | exceptions to ignore |
    # | @ignore_notifications@ | exceptions which should not be notified |
-   # | @ignore_php_errors@    | PHP errors to ignore |
    # | @custom_mimetypes@     | custom MIME mappings for the mimetype() function |
    #
 
@@ -117,15 +116,6 @@
 
       'ignore_errors'        => array('NotFound', 'AccessDenied', 'ServiceUnavailable'),
       'ignore_notifications' => null,
-      'ignore_php_errors'    => array(
-         "Only variables should be passed by reference",
-         "Undefined index",
-         "Undefined offset",
-         "Undefined variable",
-         "Uninitialized string offset",
-         "Use of undefined constant",
-         "Undefined property",
-      ),
 
       'custom_mimetypes'     => array(
          # icons are detected as image/x-ico, which nobody seems to use...
@@ -239,22 +229,11 @@
       );
 
       # Configure error reporting
-      error_reporting(E_ALL);
       ini_set('display_errors', (config('debug') or PHP_SAPI == 'cli'));
 
       # Set global PHP error handler
       if ($handler = $config['error_handler']) {
          set_error_handler($handler, error_reporting());
-      }
-
-      # Cache ignored PHP errors
-      if (is_array($config['ignore_php_errors'])) {
-         $errors = array();
-         foreach ($config['ignore_php_errors'] as $error) {
-            $errors[$error] = strlen($error);
-         }
-
-         config_set('ignore_php_errors', $errors);
       }
 
       # Set global exception handler

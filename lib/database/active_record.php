@@ -49,15 +49,11 @@
          return round($this->id).($slug ? "-$slug" : '');
       }
 
-      function __get($key) {
-         try {
-            return parent::__get($key);
-         } catch (UndefinedMethod $e) {
-            if ($this->mapper->associations[$key]) {
-               return $this->load_association($key);
-            } else {
-               throw $e;
-            }
+      function __get_custom($key) {
+         if ($this->mapper->associations[$key]) {
+            return $this->load_association($key);
+         } else {
+            throw new UndefinedMethod($this, "get_$key");
          }
       }
 
@@ -208,7 +204,7 @@
                   continue;
                }
 
-               if ($options['size'] > 0 and in_array($options['type'], array('string', 'text'))) {
+               if ($options['size'] > 0 and ($options['type'] === 'string' or $options['type'] === 'text')) {
                   $this->has_length($key, 0, $options['size']);
                }
             }

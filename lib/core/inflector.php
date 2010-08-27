@@ -77,18 +77,8 @@
          ));
       }
 
-      static function pluralize($word, $singular=null, $plural=null, $translate=true) {
-         if ($singular and $plural) {
-            $count = $word;
-            if ($translate) {
-               $word = ngettext($singular, $plural, $count);
-            } else {
-               $word = ($count == 1 ? $singular : $plural);
-            }
-            return sprintf("%d %s", $count, $word);
-         } elseif ($singular) {
-            return self::pluralize($word, $singular, self::pluralize($singular), $translate);
-         } elseif (blank($word) or in_array(mb_strtolower($word), self::$_uncountables)) {
+      static function pluralize($word) {
+         if (blank($word) or in_array(mb_strtolower($word), self::$_uncountables)) {
             return $word;
          } else {
             foreach (array_reverse(self::$_plurals) as $rule => $replacement) {
@@ -192,7 +182,20 @@
    }
 
    function pluralize($word, $singular=null, $plural=null, $translate=true) {
-      return Inflector::pluralize($word, $singular, $plural, $translate);
+      if ($singular and $plural) {
+         $count = $word;
+         if ($translate) {
+            $word = ngettext($singular, $plural, $count);
+         } else {
+            $word = ($count == 1 ? $singular : $plural);
+         }
+
+         return sprintf("%d %s", $count, $word);
+      } elseif ($singular) {
+         return pluralize($word, $singular, Inflector::pluralize($singular), $translate);
+      } else {
+         return Inflector::pluralize($word);
+      }
    }
 
    function singularize($word) {

@@ -558,15 +558,15 @@
             # merge_* calls merge the given SQL options
             return $this->merge(substr($method, 6), $args);
 
-         } elseif (in_array($method, array('order', 'group'))) {
+         } elseif ($method === 'order' or $method === 'group') {
             # order() and group() replace by default
             return $this->replace($method, $args);
 
-         } elseif (in_array($method, array('limit', 'offset'))) {
+         } elseif ($method === 'limit' or $method === 'offset') {
             # limit() and offset() replace by default, and only have one argument
             return $this->replace($method, $args[0]);
 
-         } elseif (in_array($method, array('sum', 'avg', 'min', 'max'))) {
+         } elseif ($method === 'sum' or $method === 'avg' or $method === 'min' or $method === 'max') {
             # shortcuts for aggregate functions
             $this->replace_select("$method({$args[0]})");
             $this->order();

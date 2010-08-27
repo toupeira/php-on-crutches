@@ -34,18 +34,18 @@
          (array) $options
       );
 
-      if (!array_delete($options, 'force_class')
-            and $name == 'input'
-            and isset($options['type'])
-            and $options['type'] != 'hidden')
-      {
+      if ($force_class = $options['force_class']) {
+         unset($options['force_class']);
+      }
+
+      if (!$force_class and $name == 'input' and isset($options['type']) and $options['type'] != 'hidden') {
          $options['class'] .= ' '.$options['type'];
-         if (in_array($options['type'], array('submit', 'reset'))) {
+         if ($options['type'] === 'submit' or $options['type'] === 'reset') {
             $options['class'] .= ' button';
-         } elseif ($options['type'] == 'password') {
+         } elseif ($options['type'] === 'password') {
             $options['class'] .= ' text';
          }
-      } elseif ($name == 'textarea') {
+      } elseif ($name === 'textarea') {
          $options['class'] .= ' text';
       }
 

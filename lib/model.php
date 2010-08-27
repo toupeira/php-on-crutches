@@ -611,9 +611,11 @@
             }
          }
 
-         if (!$icon_title = array_delete($options, 'icon_title')) {
+         if (!$icon_title = $options['icon_title']) {
             $icon_title = strip_html($title);
          }
+
+         unset($options['icon_title']);
 
          $title = icon($icon, array('title' => $icon_title))
                 . any($title, truncate($this, 40, true));

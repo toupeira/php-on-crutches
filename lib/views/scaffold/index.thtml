@@ -17,7 +17,7 @@
 
          if ($column['type'] == 'bool') {
             $value = ($value ? 'true' : 'false');
-         } elseif (in_array($column['type'], array('integer', 'float'))) {
+         } elseif ($column['type'] === 'integer' or $column['type'] === 'float') {
             $right = ' class="right"';
          }
 
