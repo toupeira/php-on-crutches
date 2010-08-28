@@ -57,14 +57,14 @@
          } elseif ($size < KB) {
             $size = 1;
          } else {
-            $size = sprintf(any($format, '%d'), $size / KB);
+            $size = sprintf(any($format, '%d'), round($size / KB));
          }
       } elseif ($size < GB) {
          $text = _("%s MB");
-         $size = sprintf(any($format, '%.1f'), $size / MB);
+         $size = sprintf(any($format, '%.1f'), round($size / MB, 1));
       } else {
          $text = _("%s GB");
-         $size = sprintf(any($format, '%.2f'), $size / GB);
+         $size = sprintf(any($format, '%.2f'), round($size / GB, 1));
       }
 
       return sprintf($text, $size);
