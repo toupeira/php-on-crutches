@@ -146,7 +146,8 @@
       } elseif (!is_file($path)) {
          throw new ApplicationError("Path '$path' is not a file");
       } else {
-         $extension = strtolower(array_pop(explode('.', any($target_name, $path), 2)));
+         $name = any($target_name, $path);
+         $extension = substr($name, strrpos($name, '.') + 1);
 
          if (function_exists('config') and $type = getf(config('custom_mimetypes'), $extension)) {
             return $type;
