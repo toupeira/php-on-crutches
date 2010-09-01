@@ -143,7 +143,7 @@
             $memory = memory_get_usage(true);
             $peak = memory_get_peak_usage(true);
             if ($peak > $limit) {
-               log_warn(sprintf(
+               log_exception(sprintf(
                   'Memory usage: %s / Peak: %s',
                   format_size($memory), format_size($peak)
                ));

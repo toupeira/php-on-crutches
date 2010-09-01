@@ -606,7 +606,7 @@
       }
 
       # Replace given options
-      function replace($key, $options) {
+      function replace($key, $options=null) {
          if (array_key_exists($key, $this->_options)) {
             if ($options === array(null) or $options === array('')) {
                $options = null;
