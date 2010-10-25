@@ -145,7 +145,7 @@
                Dispatcher::$db_queries_sql[$this->name][] = $query;
             }
 
-            if (config('analyze_queries') and substr($sql, 0, 6) == 'SELECT') {
+            if (config('debug_queries') and substr($sql, 0, 6) == 'SELECT') {
                $this->analyze_query($sql, $params);
             }
          }
