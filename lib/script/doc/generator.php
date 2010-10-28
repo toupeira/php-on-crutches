@@ -25,10 +25,10 @@
       protected $_classes;
       protected $_functions;
 
-      function __construct(array $paths, array $excludes=null, $title=null) {
-         $this->_paths = $paths;
+      function __construct($paths, $excludes=null, $title=null) {
+         $this->_paths = (array) $paths;
          $this->_excludes = (array) $excludes;
-         $this->_title = $title;
+         $this->_title = any($title, humanize(config('name')).' Documentation');
          $this->_view_path = LIB.'script/doc/views/';
       }
 

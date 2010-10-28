@@ -14,7 +14,7 @@
 
    $paths = array();
 
-   $title = humanize(config('name')).' Documentation';
+   $title = null;
    $target = WEBROOT.'doc';
    $excludes = array();
    $force = false;
