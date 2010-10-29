@@ -39,12 +39,18 @@
    {
       static protected $_id;
       static protected $_data;
+      static protected $_database;
+
+      static function setup() {
+         self::$_database = any(config('session_store_database', 'default'));
+         return true;
+      }
 
       static function read($id) {
          self::$_id = $id;
 
          try {
-            return self::$_data = (string) DB()->execute(
+            return self::$_data = (string) DB(self::$_database)->execute(
                'SELECT data FROM sessions WHERE id = ?', $id
             )->fetch_column();
          } catch (Exception $e) {
@@ -71,14 +77,14 @@
 
                $key = foreign_key($model);
 
-               DB()->execute(
+               DB(self::$_database)->execute(
                   "INSERT INTO sessions (id, $key, data)"
                   . " VALUES (?, ?, ?)"
                   . " ON DUPLICATE KEY UPDATE $key = ?, data = ?",
                   $id, $user, $data, $user, $data
                );
             } else {
-               DB()->execute(
+               DB(self::$_database)->execute(
                   'INSERT INTO sessions (id, data)'
                   . ' VALUES (?, ?)'
                   . ' ON DUPLICATE KEY UPDATE data = ?',
@@ -98,7 +104,7 @@
 
       static function destroy($id) {
          try {
-            DB()->execute(
+            DB(self::$_database)->execute(
                'DELETE FROM sessions WHERE id = ?', $id
             );
          } catch (Exception $e) {

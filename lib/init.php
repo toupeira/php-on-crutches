@@ -49,7 +49,7 @@
    # Initialize the framework
    config_init();
 
-   try_require(CONTROLLERS.'application_controller.php');
-   try_require(HELPERS.'application_helper.php');
+   require CONTROLLERS.'application_controller.php';
+   require HELPERS.'application_helper.php';
 
 ?>

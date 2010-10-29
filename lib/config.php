@@ -21,104 +21,107 @@
    # settings.
    #
    # |_(title). Application Settings |_. |_(title). Default |
-   # | @name@                 | the application name, will be used as default in some places | basename of root directory |
-   # | @prefix@               | the prefix used to reach the website | @/@ |
-   # | @languages@            | an array of available languages, with the default first |
-   # | @default_languages@    | an array of languages to try as default, for use in custom initializion scripts |
-   # | @locale@               | the internal locale, must be a valid and installed locale name | en_US.UTF-8 |
-   # |_(title). General Settings  |_. |_(title). Default |
-   # | @log_file@             | the path to the log file, or a file handle like STDERR | @ROOT/log/ENVIRONMENT.log@ |
-   # | @log_level@            | the log level | @LOG_INFO@ |
-   # | @output_buffering@     | enable output buffering | @true@ |
-   # | @rewrite_urls@         | generate clean URLs | @true@ |
-   # | @error_handler@        | the handler function for PHP errors | @error_handler@ |
-   # | @exception_handler@    | the handler function for uncaught exceptions | @exception_handler@ |
+   # | @name@                    | the application name, will be used as default in some places | basename of root directory |
+   # | @prefix@                  | the prefix used to reach the website | @/@ |
+   # | @languages@               | an array of available languages, with the default first |
+   # | @default_languages@       | an array of languages to try as default, for use in custom initializion scripts |
+   # | @locale@                  | the internal locale, must be a valid and installed locale name | en_US.UTF-8 |
+   # |_(title). General Settings |_. |_(title). Default |
+   # | @log_file@                | the path to the log file, or a file handle like STDERR | @ROOT/log/ENVIRONMENT.log@ |
+   # | @log_level@               | the log level | @LOG_INFO@ |
+   # | @output_buffering@        | enable output buffering | @true@ |
+   # | @rewrite_urls@            | generate clean URLs | @true@ |
+   # | @error_handler@           | the handler function for PHP errors | @error_handler@ |
+   # | @exception_handler@       | the handler function for uncaught exceptions | @exception_handler@ |
    # |_(title). Sessions and Caching |_. |_(title). Default |
-   # | @session_store@        | the SessionStore to use | @php@ |
-   # | @cache_store@          | the CacheStore to use | @memory@ |
-   # | @cache_path@           | the cache directory for CacheStoreFile | @ROOT/tmp/cache@ |
-   # | @cache_views@          | enable view caching | @false@ |
-   # | @merge_assets@         | automatically combine stylesheets and scripts | @false@ |
-   # | @asset_host@           | hostname to use for all assets |
-   # |_(title). Mail Settings |_. |_(title). Default |
-   # | @send_mails@           | enable sending mails | @true@ |
-   # | @mail_from@            | the default sender address |
-   # | @mail_from_name@       | the default sender name |
-   # | @mail_sender@          | the envelope-from sender |
+   # | @session_store@           | the SessionStore to use | @php@ |
+   # | @session_store_database@  | the database to use for SessionStoreMysql | @php@ |
+   # | @cache_store@             | the CacheStore to use | @memory@ |
+   # | @cache_path@              | the cache directory for CacheStoreFile | @ROOT/tmp/cache@ |
+   # | @cache_views@             | enable view caching | @false@ |
+   # | @merge_assets@            | automatically combine stylesheets and scripts | @false@ |
+   # | @asset_host@              | hostname to use for all assets |
+   # |_(title). Mail Settings    |_. |_(title). Default |
+   # | @send_mails@              | enable sending mails | @true@ |
+   # | @mail_from@               | the default sender address |
+   # | @mail_from_name@          | the default sender name |
+   # | @mail_sender@             | the envelope-from sender |
    # |_(title). Security |_. |_(title). Default |
-   # | @form_token@           | automatically add and check form tokens | @false@ |
-   # | @form_token_time@      | maximum expiration time for form tokens in seconds, set 0 to disable | @86400@ |
-   # | @cookie_defaults@      | the default settings for cookies | @path: /@ |
-   # | @auth_model@           | the model to use for authentication |
-   # | @auth_controller@      | the controller to use for authentication |
-   # | @trusted_hosts@        | hosts and networks which are considered trusted | @127.0.0.1@ |
+   # | @form_token@              | automatically add and check form tokens | @false@ |
+   # | @form_token_time@         | maximum expiration time for form tokens in seconds, set 0 to disable | @86400@ |
+   # | @cookie_defaults@         | the default settings for cookies | @path: /@ |
+   # | @auth_model@              | the model to use for authentication |
+   # | @auth_controller@         | the controller to use for authentication |
+   # | @trusted_hosts@           | hosts and networks which are considered trusted | @127.0.0.1@ |
    # |_(title). Debug |_. |_(title). Default |
-   # | @debug@                | show error messages | @false@ |
-   # | @debug_toolbar@        | show the debug toolbar | @false@ |
-   # | @debug_redirects@      | show links on redirects | @false@ |
-   # | @debug_queries@        | analyze database queries | @false@ |
-   # | @custom_errors@        | use custom error pages |
-   # | @notify_errors@        | addresses to send error notifications to |
-   # | @notify_memory@        | log memory usage if it exceeds this limit |
-   # | @ignore_errors@        | exceptions to ignore |
-   # | @ignore_notifications@ | exceptions which should not be notified |
-   # | @custom_mimetypes@     | custom MIME mappings for the mimetype() function |
+   # | @debug@                   | show error messages | @false@ |
+   # | @debug_toolbar@           | show the debug toolbar | @false@ |
+   # | @debug_redirects@         | show links on redirects | @false@ |
+   # | @debug_queries@           | analyze database queries | @false@ |
+   # | @custom_errors@           | use custom error pages |
+   # | @notify_errors@           | addresses to send error notifications to |
+   # | @notify_memory@           | log memory usage if it exceeds this limit |
+   # | @ignore_errors@           | exceptions to ignore |
+   # | @ignore_notifications@    | exceptions which should not be notified |
+   # | @custom_mimetypes@        | custom MIME mappings for the mimetype() function |
    #
 
    # Default framework settings
    $_CONFIG['defaults'] = array(
-      'name'                 => basename(ROOT),
-      'prefix'               => '/',
-      'languages'            => null,
-      'locale'               => 'en_US.UTF-8',
+      'name'                   => basename(ROOT),
+      'prefix'                 => '/',
+      'languages'              => null,
+      'locale'                 => 'en_US.UTF-8',
 
-      'log_file'             => LOG.ENVIRONMENT.'.log',
-      'log_level'            => LOG_INFO,
+      'log_file'               => LOG.ENVIRONMENT.'.log',
+      'log_level'              => LOG_INFO,
 
-      'output_buffering'     => true,
-      'rewrite_urls'         => true,
+      'output_buffering'       => true,
+      'rewrite_urls'           => true,
 
-      'error_handler'        => 'error_handler',
-      'exception_handler'    => 'exception_handler',
+      'error_handler'          => 'error_handler',
+      'exception_handler'      => 'exception_handler',
 
-      'session_store'        => 'php',
-      'cache_store'          => 'memory',
-      'cache_path'           => TMP.'cache',
-      'cache_views'          => false,
-      'merge_assets'         => false,
-      'asset_host'           => null,
+      'session_store'          => 'php',
+      'session_store_database' => 'default',
+      'cache_store'            => 'memory',
+      'cache_path'             => TMP.'cache',
+      'cache_views'            => false,
+      'merge_assets'           => false,
+      'asset_host'             => null,
 
-      'send_mails'           => true,
-      'mail_from'            => '',
-      'mail_from_name'       => '',
+      'send_mails'             => true,
+      'mail_from'              => '',
+      'mail_from_name'         => '',
 
-      'form_token'           => false,
-      'form_token_time'      => 86400,
+      'form_token'             => false,
+      'form_token_time'        => 86400,
 
-      'cookie_defaults'      => array(
+      'cookie_defaults'        => array(
          'path' => '/',
       ),
 
-      'auth_model'           => null,
-      'auth_controller'      => null,
+      'auth_model'             => null,
+      'auth_controller'        => null,
 
-      'trusted_hosts'        => array('127.0.0.1'),
+      'trusted_hosts'          => array('127.0.0.1'),
 
-      'debug'                => false,
-      'debug_toolbar'        => false,
-      'debug_redirects'      => false,
-      'debug_queries'        => false,
-      'debug_controller'     => false,
+      'debug'                  => false,
+      'debug_toolbar'          => false,
+      'debug_redirects'        => false,
+      'debug_queries'          => false,
+      'debug_controller'       => false,
 
-      'custom_errors'        => true,
-      'notify_errors'        => null,
-      'notify_memory'        => null,
+      'custom_errors'          => true,
+      'notify_errors'          => null,
+      'notify_memory'          => null,
 
-      'ignore_errors'        => array('NotFound', 'AccessDenied', 'InvalidRequest', 'ServiceUnavailable'),
-      'ignore_notifications' => null,
+      'ignore_errors'          => array('NotFound', 'AccessDenied', 'InvalidRequest', 'ServiceUnavailable'),
+      'ignore_notifications'   => null,
 
-      'custom_mimetypes'     => array(
-         # icons are detected as image/x-ico, which nobody seems to use...
+      # Override MIME-types for specific file extensions
+      'custom_mimetypes'       => array(
+         # Icons are detected as image/x-ico, which nobody seems to use...
          'ico' => 'image/x-icon',
          # PowerPoint and Excel files are detected as Word documents...
          'pps' => 'application/vnd.ms-powerpoint',
