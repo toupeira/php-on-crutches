@@ -174,7 +174,7 @@
       }
 
       function set($key, $value=null) {
-         $this->_view->set($key, &$value);
+         $this->_view->set($key, $value);
          return $this;
       }
 
