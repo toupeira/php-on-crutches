@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
    $this->set('title', 'System Information');
-   $this->set('icon', 'system');
+   $this->set('icon', 'info');
 
    $server = array(
       'Hostname'         => `hostname -f`.'('.$_SERVER['SERVER_ADDR'].')',

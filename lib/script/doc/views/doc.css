@@ -8,12 +8,14 @@ body {
 a { color: #333; }
 a:visited { color: #777; }
 
+img.icon { margin-bottom: -3px; }
+
 #menu {
   position: fixed;
   top: 0.5em;
   left: 0.5em;
   bottom: 0.5em;
-  width: 20em;
+  width: 25em;
   border: 1px solid #ddd;
   background: #f8f8f8;
 }
@@ -45,10 +47,19 @@ a:visited { color: #777; }
   padding: 0.5em;
 }
 
+#menu li {
+  margin: 0.2em 0;
+  white-space: nowrap;
+}
+
+#menu .tree ul ul {
+  margin-left: 8px;
+}
+
 #content {
   position: fixed;
   top: 0.5em;
-  left: 21.5em;
+  left: 26.5em;
   bottom: 0.5em;
   right: 0.5em;
   border: 1px solid #ddd;

@@ -1,7 +1,7 @@
 <?# $Id$ ?>
 <?
    $this->set('title', 'PHP Console');
-   $this->set('icon', 'console');
+   $this->set('icon', 'window');
 ?>
 <div id="php-console">
 <div id="output" class="scroll"><?= $output ?></div>

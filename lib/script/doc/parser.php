@@ -244,10 +244,10 @@
                $this->log("adding", "property", "{$this->_class}#$property");
                $scope .= 'properties';
                $data['value'] = ($property_value_continued ? '...' : $property_value);
+               $this->_classes[$this->_class][$scope][$property] = $data;
             } elseif ($visibility or $data['abstract'] or $data['final']) {
                $this->error("Property definition outside class");
             }
-            $this->_classes[$this->_class][$scope][$property] = $data;
          } elseif ($constant) {
             #
             # Add a constant

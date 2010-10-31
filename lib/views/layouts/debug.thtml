@@ -26,13 +26,13 @@
 </div>
 
 <div id="menu">
-   <?= link_to(icon('framework/icons/system').' System', ':/system',
+   <?= link_to(icon('framework/icons/info').' System', ':/system',
           array('class' => $action == 'system' ? 'active' : '')) ?>
    <?= link_to(icon('framework/icons/database').' Model Browser', ':/models',
           array('class' => $action == 'models' ? 'active' : '')) ?>
    <?= link_to(icon('framework/icons/database').' SQL Console', ':/sql',
           array('class' => $action == 'sql' ? 'active' : '')) ?>
-   <?= link_to(icon('framework/icons/console').' PHP Console', ':/php',
+   <?= link_to(icon('framework/icons/window').' PHP Console', ':/php',
           array('class' => $action == 'php' ? 'active' : '')) ?>
    <p>Running in <strong><?= ENVIRONMENT ?></strong> environment</p>
 </div>

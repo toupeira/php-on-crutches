@@ -11,18 +11,18 @@
       return link_to($title, "./$template.html$anchor", array('target' => 'content'));
    }
 
-   function class_link($class) {
-      $link = content_tag('code', $class);
+   function class_link($class, $label=null) {
+      $link = any($label, $class);
       $classes = View::$current->get('all_classes');
       if ($template = $classes[$class]) {
-         $link = doc_link($link, $template);
+         $link = icon('./class').doc_link($link, $template);
       }
 
       return $link;
    }
 
-   function file_link($file) {
-      $link = content_tag('code', $file);
+   function file_link($file, $label=null) {
+      $link = any($label, $class);
       $files = View::$current->get('all_files');
       if ($template = $files[$file]) {
          $link = doc_link($link, $template);
@@ -87,6 +87,30 @@
       if ($output) {
          return $output.N;
       }
+   }
+
+   function render_tree($files) {
+      $tree = array();
+      foreach ($files as $file => $template) {
+         $parts = explode('/', trim($file, '/'));
+         $last = count($parts) - 1;
+
+         $parent = &$tree;
+         foreach ($parts as $i => $part) {
+            if ($i == $last) {
+               $parent[] = icon('./file').file_link($file, basename($file));
+            } else {
+               $label = icon('./folder').link_to_function($part, 'toggle_folder(this)');
+
+               if (!$parent[$label]) {
+                  $parent[$label] = array();
+               }
+               $parent = &$parent[$label];
+            }
+         }
+      }
+
+      return list_tag($tree, array('collapse' => 'true'));
    }
 
 ?>

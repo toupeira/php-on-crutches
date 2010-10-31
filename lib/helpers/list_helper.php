@@ -10,6 +10,11 @@
    function list_tag(array $items, array $options=null, array $item_options=null) {
       $escape = (bool) $options['escape'];
 
+      if ($collapse = $options['collapse']) {
+         unset($options['collapse']);
+         $options['style'] = 'display: none';
+      }
+
       $html = '';
       foreach ((array) $items as $key => $value) {
          if (is_array($value)) {
@@ -26,6 +31,10 @@
          }
 
          $html .= content_tag('li', $content, $item_options);
+      }
+
+      if ($collapse) {
+         unset($options['style']);
       }
 
       unset($options['escape']);

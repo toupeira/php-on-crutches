@@ -10,8 +10,18 @@
    <table>
    <tr>
       <th>File:</th>
-      <td><code><?= doc_link($class['file'], $all_files[$class['file']]) ?></code></td>
+      <td><?= doc_link($class['file'], $all_files[$class['file']]) ?></td>
    </tr>
+<? if ($related): ?>
+   <tr>
+      <th>Related:</th>
+      <td>
+<?    foreach ($related as $related_class): ?>
+         <?= class_link($related_class) ?>
+<?    endforeach ?>
+      </td>
+   </tr>
+<? endif ?>
 <? if ($parent = $class['parent']): ?>
    <tr>
       <th>Extends:</th>

@@ -8,5 +8,5 @@
    }
    ksort($environment);
 ?>
-<a><?= icon('framework/icons/environment') ?> Environment</a>
+<a><?= icon('framework/icons/settings') ?> Environment</a>
 <div><?= table_tag($environment) ?></div>

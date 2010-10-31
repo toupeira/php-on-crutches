@@ -67,7 +67,10 @@
          }
 
          if (!copy($this->_view_path.'doc.css', "{$this->_target}/doc.css") or
-                   !copy($this->_view_path.'doc.js', "{$this->_target}/doc.js")) {
+             !copy($this->_view_path.'doc.js', "{$this->_target}/doc.js") or
+             !copy(LIB.'assets/images/icons/folder.png', "{$this->_target}/folder.png") or
+             !copy(LIB.'assets/images/icons/debug.png', "{$this->_target}/class.png") or
+             !copy(LIB.'assets/images/icons/log.png', "{$this->_target}/file.png")) {
             print "Error: Could not copy assets.\n";
             return false;
          }
@@ -88,10 +91,14 @@
                $template = $this->_classes[$class];
                $classes[$class] = $template;
 
+               $related = sorted(array_keys($this->data[$class_data['file']]['classes']));
+               array_remove($related, $class);
+
                $this->render('class', $this->_classes[$class], array(
                   'title'      => $class,
                   'class_name' => $class,
                   'class'      => $class_data,
+                  'related'    => $related,
                ));
             }
 
@@ -137,8 +144,8 @@
                }
             }
 
-            foreach (sorted($files) as $file) { $this->generate_path($file); }
             foreach (sorted($dirs) as $dir)   { $this->generate_path($dir); }
+            foreach (sorted($files) as $file) { $this->generate_path($file); }
 
          } elseif (is_file($path) and strtolower(substr($path, -4)) == '.php') {
             if ($_show_dir and $_current) {
