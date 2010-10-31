@@ -127,7 +127,7 @@
 
       function set_default($key, $value) {
          if (!array_key_exists($key, (array) $this->_data)) {
-            $this->set($key, &$value);
+            $this->set($key, $value);
          }
 
          return $this;

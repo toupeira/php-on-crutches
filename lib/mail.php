@@ -49,7 +49,7 @@
 
       function __set($key, $value) {
          if (method_exists($this, $setter = "set_$key")) {
-            $this->$setter(&$value);
+            $this->$setter($value);
          } elseif (property_exists($this->_mailer, $key = camelize($key))) {
             $this->_mailer->$key = $value;
          } else {

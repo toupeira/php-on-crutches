@@ -140,7 +140,7 @@
    # Build a link button
    function button_to($title, $path=null, array $options=null, array $url_options=null) {
       $path = (is_null($path) ? $title : $path);
-      add_confirm_options(&$options);
+      add_confirm_options($options);
 
       $method = any($options['post'] ? 'POST' : null, $options['method'], 'GET');
       unset($options['post']);

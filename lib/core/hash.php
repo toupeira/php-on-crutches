@@ -68,7 +68,7 @@
       }
 
       function offsetSet($key, $value) {
-         return $this->__set($key, &$value);
+         return $this->__set($key, $value);
       }
 
       function offsetUnset($key) {

@@ -138,7 +138,7 @@
          } elseif (in_array($key, $this->_readonly)) {
             throw new ApplicationError(sprintf("Can't change read-only attribute '$key' in %s instance", get_class($this)));
          } elseif (method_exists($this, $setter = "set_$key")) {
-            $this->$setter(&$value);
+            $this->$setter($value);
          } elseif (array_key_exists($key, $this->_attributes)) {
             $this->write_attribute($key, $value);
          } else {

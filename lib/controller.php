@@ -82,7 +82,7 @@
 
          # Standard variables for the view
          $this->set('controller', $this);
-         $this->set('msg', &$this->msg);
+         $this->set('msg', $this->msg);
 
          # Collect all public methods defined in this controller
          $this->_actions = array();
@@ -179,7 +179,7 @@
       }
 
       function set_default($key, $value=null) {
-         $this->_view->set_default($key, &$value);
+         $this->_view->set_default($key, $value);
          return $this;
       }
 
@@ -690,7 +690,7 @@
 
          if (method_exists($this, $method = "scaffold_$action")) {
             $status = call_user_func(array($this, $method),
-               $model, &$options, $id, $params
+               $model, $options, $id, $params
             );
          } else {
             throw new ValueError("Invalid action '$action'");
@@ -759,7 +759,7 @@
          $this->set($object instanceof QuerySet ? 'objects' : 'object', $object);
       }
 
-      protected function scaffold_index($model, $options) {
+      protected function scaffold_index($model, &$options) {
          $objects = DB($model)->all;
 
          if ($options['order'] === false) {
@@ -784,7 +784,7 @@
          );
       }
 
-      protected function scaffold_show($model, $options, $id) {
+      protected function scaffold_show($model, &$options, $id) {
          if ($object = DB($model)->find($id)) {
             $this->scaffold_assign($object);
          } else {
@@ -792,7 +792,7 @@
          }
       }
 
-      protected function scaffold_create($model, $options, $id, $params) {
+      protected function scaffold_create($model, &$options, $id, $params) {
          $object = new $model($params);
          $this->scaffold_assign($object);
 
@@ -818,7 +818,7 @@
          }
       }
 
-      protected function scaffold_edit($model, $options, $id, $params) {
+      protected function scaffold_edit($model, &$options, $id, $params) {
          if ($object = DB($model)->find($id)) {
             $this->scaffold_assign($object);
 
@@ -841,7 +841,7 @@
          }
       }
 
-      protected function scaffold_destroy($model, $options, $id) {
+      protected function scaffold_destroy($model, &$options, $id) {
          if (!$this->is_post()) {
             throw new InvalidRequest('needs POST');
          }
