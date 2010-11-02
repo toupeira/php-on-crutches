@@ -15,7 +15,7 @@
       }
 
       $options = array_merge(array(
-         'action' => url_for(any($action, Dispatcher::$path)),
+         'action' => url_for(any($action, ltrim(Dispatcher::$path, '/'))),
          'method' => 'post', 'open' => true,
       ), (array) $options);
 

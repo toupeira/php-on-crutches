@@ -8,7 +8,9 @@
 # $Id$
 #
 
-   $_ENV['ENVIRONMENT'] = 'test';
+   if (!defined('ENVIRONMENT')) {
+      define('ENVIRONMENT', 'test');
+   }
 
    require_once dirname(__FILE__).'/../script.php';
    require_once LIB.'script/test/runner.php';
