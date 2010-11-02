@@ -121,7 +121,7 @@
    if ($add_externals and !is_dir('lib/.svn')) {
       status('externals', 'lib');
       rename('lib', 'lib.old');
-      if (run("svn propset svn:externals %s .", "lib	http://dev.diarrhea.ch/svn/php-on-crutches/trunk/lib")) {
+      if (run("svn propset svn:externals %s .", "lib	http://dev.zwietracht.ch/svn/php-on-crutches/trunk/lib")) {
          rename('lib.old', 'lib');
       }
 
