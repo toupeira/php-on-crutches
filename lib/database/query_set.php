@@ -23,6 +23,7 @@
       protected $_options = array();
 
       protected $_sorted_key;
+      protected $_sorted_name;
       protected $_filtered_keys;
 
       protected $_paginate = false;
@@ -375,6 +376,10 @@
 
       function get_sorted_key() {
          return $this->_sorted_key;
+      }
+
+      function get_sorted_name() {
+         return $this->_sorted_name;
       }
 
       function get_filtered_keys() {
@@ -741,7 +746,7 @@
 
       # Sort the query set by the current request parameters
       function sorted() {
-         $sort_key = Dispatcher::$params['sort'];
+         $sort_key = $sort_name = Dispatcher::$params['sort'];
          $type = $this->has_key($sort_key);
 
          if ($type == 'table') {
@@ -753,6 +758,7 @@
          }
 
          $this->_sorted_key = $sort_key;
+         $this->_sorted_name = $sort_name;
          $this->order($sort_key.(isset(Dispatcher::$params['desc']) ? ' DESC' : ' ASC'));
 
          return $this;

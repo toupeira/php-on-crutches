@@ -210,6 +210,23 @@
       return $value;
    }
 
+   function value_changed($value) {
+      static $_value;
+      static $_first_run = true;
+
+      if ($_first_run) {
+         $_first_run = false;
+         $_value = !$value;
+      }
+
+      if ($value === $_value) {
+         return false;
+      } else {
+         $_value = $value;
+         return true;
+      }
+   }
+
    function textilize($text) {
       static $_textile;
       if (!$_textile) $_textile = new Textile();
