@@ -189,13 +189,14 @@
       ));
    }
 
-   function cycle($values=null) {
+   function cycle($values=null, $reset=false) {
       static $_cycle;
 
-      if ($values === false) {
+      if ($reset) {
          $_cycle = 0;
-         return;
-      } elseif (func_num_args()) {
+      }
+
+      if (func_num_args()) {
          $values = func_get_args();
       } else {
          $values = array('odd', 'even');
@@ -210,9 +211,13 @@
       return $value;
    }
 
-   function value_changed($value) {
+   function value_changed($value, $reset=false) {
       static $_value;
       static $_first_run = true;
+
+      if ($reset) {
+         $_first_run = true;
+      }
 
       if ($_first_run) {
          $_first_run = false;
