@@ -448,6 +448,7 @@
 
       function reset() {
          $this->_statement = $this->_count = $this->_objects = null;
+         return $this;
       }
 
       function find($conditions) {

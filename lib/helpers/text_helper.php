@@ -70,30 +70,31 @@
       return sprintf($text, $size);
    }
 
-   define_default('FORMAT_DATE', '%Y-%m-%d');
-   define_default('FORMAT_DB_DATE', '%Y-%m-%d');
-
-   function format_date($date, $format=FORMAT_DATE) {
-      if ($date = to_time($date)) {
-         return strftime(_($format), $date);
-      }
-   }
-
-   define_default('FORMAT_TIME', '%Y-%m-%d %T');
-   define_default('FORMAT_DB_TIME', '%Y-%m-%d %T');
-
-   function format_time($time, $format=FORMAT_TIME) {
-      if ($time = to_time($time)) {
-         return strftime(_($format), $time);
-      }
-   }
-
    function to_time($time) {
       if (is_numeric($time)) {
          return $time;
       } elseif ($time !== '0000-00-00' and $time !== '0000-00-00 00:00:00') {
          return strtotime($time);
       }
+   }
+
+   define_default('FORMAT_TIME', '%Y-%m-%d %T');
+   define_default('FORMAT_DB_TIME', '%Y-%m-%d %T');
+
+   function format_time($time=null, $format=FORMAT_TIME) {
+      $format = _($format);
+      if (is_null($time)) {
+         return strftime($format);
+      } elseif ($time = to_time($time)) {
+         return strftime($format, $time);
+      }
+   }
+
+   define_default('FORMAT_DATE', '%Y-%m-%d');
+   define_default('FORMAT_DB_DATE', '%Y-%m-%d');
+
+   function format_date($date=null, $format=FORMAT_DATE) {
+      return format_time($date, $format);
    }
 
    define('MINUTE', 60);
