@@ -237,9 +237,9 @@
    # Return a sorted array
    function sorted(array $array, $reverse=false) {
       if (isset($array[0])) {
-         sort($array);
+         sort($array, SORT_LOCALE_STRING);
       } elseif (!empty($array)) {
-         ksort($array);
+         ksort($array, SORT_LOCALE_STRING);
       }
 
       return $reverse ? array_reverse($array) : $array;
@@ -252,7 +252,8 @@
 
       $reverse = ($reverse ? -1 : 1);
       return uasort($array,
-         proc("$reverse * compare(getf(\$a, '$key'), getf(\$b, '$key'))", 2));
+         proc("$reverse * compare(getf(\$a, '$key'), getf(\$b, '$key'))", 2)
+      );
    }
 
    function compare($a, $b) {
