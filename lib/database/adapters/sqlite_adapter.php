@@ -36,7 +36,7 @@
          $attributes = array();
          $columns = $this->execute("PRAGMA table_info(`$table`)")->fetch_all();
          foreach ($columns as $column) {
-            list($type, $size) = $this->parse_type($column['type']);
+            list($type, $full_type, $size) = $this->parse_type($column['type']);
 
             if ($type == 'date' or $type == 'time') {
                $default = null;
@@ -49,6 +49,7 @@
             $attributes[$column['name']] = array(
                'key'         => (bool) $column['pk'],
                'type'        => $type,
+               'full_type'   => $full_type,
                'size'        => $size,
                'null'        => $column['notnull'] == 0,
                'default'     => $default,

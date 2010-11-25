@@ -99,6 +99,11 @@
             $value = $value->id;
          }
 
+         $type = $this->mapper->attributes[$key]['full_type'];
+         if (is_numeric($value) and in_array($type, array('date', 'time', 'datetime'))) {
+            $value = format_time($value, $type == 'date' ? FORMAT_DB_DATE : FORMAT_DB_TIME);
+         }
+
          return parent::write_attribute($key, $value);
       }
 

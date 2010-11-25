@@ -44,7 +44,7 @@
          $attributes = array();
          $columns = $this->execute("DESCRIBE `$table`")->fetch_all();
          foreach ($columns as $column) {
-            list($type, $size) = $this->parse_type($column['Type']);
+            list($type, $full_type, $size) = $this->parse_type($column['Type']);
 
             if ($type == 'date' or $type == 'time') {
                $default = null;
@@ -57,6 +57,7 @@
             $attributes[$column['Field']] = array(
                'key'         => $column['Key'] == 'PRI',
                'type'        => $type,
+               'full_type'   => $full_type,
                'size'        => $size,
                'null'        => $column['Null'] == 'YES',
                'default'     => $default,

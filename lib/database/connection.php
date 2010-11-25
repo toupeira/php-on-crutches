@@ -203,7 +203,7 @@
             $size = -1;
          }
 
-         $type = strtolower($type);
+         $type = $full_type = strtolower($type);
 
          if (substr($type, -3) == 'int') {
             $type = ($size > 1 ? 'integer' : 'bool');
@@ -219,7 +219,7 @@
             $type = 'time';
          }
 
-         return array($type, $size);
+         return array($type, $full_type, $size);
       }
 
       function get_dsn() {
