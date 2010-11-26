@@ -143,6 +143,26 @@
       return $values;
    }
 
+   # Return the first object for which the callback returns true
+   function array_detect($array, $callback) {
+      foreach ($array as $i => $object) {
+         if ($callback($object)) {
+            return $object;
+         }
+      }
+   }
+
+   # Return all objects for which the callback returns true
+   function array_select($array, $callback) {
+      foreach ($array as $i => $object) {
+         if (!$callback($object)) {
+            unset($array[$i]);
+         }
+      }
+
+      return $array;
+   }
+
    # Delete one or more keys from an array and return the values
    function array_delete(array &$array=null, $keys) {
       if (!is_array($array)) {

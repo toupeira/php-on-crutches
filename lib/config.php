@@ -145,7 +145,7 @@
    );
 
    # Auto-load class files
-   function __autoload($class) {
+   function config_autoload($class) {
       $name = underscore($class);
 
       if (substr($class, -6) == 'Mapper') {
@@ -216,6 +216,9 @@
       }
 
       $config = config('application');
+
+      # Configure the class autoloader
+      spl_autoload_register('config_autoload');
 
       # Sanitize the prefix
       config_set('prefix', rtrim($config['prefix'], '/').'/');
