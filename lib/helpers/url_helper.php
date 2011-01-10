@@ -152,7 +152,7 @@
          $options['onclick'] = "location.href = '$path'; return false";
       }
 
-      return form_tag($path, array('method' => $method))
+      return form_tag($path, array('method' => $method, 'style' => 'display: inline'))
            . submit_button($title, $options) . "</form>\n";
    }
 

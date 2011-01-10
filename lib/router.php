@@ -291,7 +291,9 @@
                         '%5B' => '[', '%5D' => ']'
                      ));
                   } else {
-                     $query[] = urlencode($key).'='.urlencode($value);
+                     $query[] = strtr(urlencode($key), array(
+                        '%5B' => '[', '%5D' => ']'
+                     )).'='.urlencode($value);
                   }
                }
             }

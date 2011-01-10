@@ -459,6 +459,11 @@
          }
       }
 
+      function clear_errors() {
+         $this->_errors = array();
+         return true;
+      }
+
       function is_valid() {
          $this->call_filter('before_validation');
 

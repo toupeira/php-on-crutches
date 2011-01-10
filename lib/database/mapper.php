@@ -375,7 +375,11 @@
 
                   # Add array value as parameter for each placeholder
                   for ($i = 0; $i < $count; $i++) {
-                     $params[] = $value;
+                     if (is_array($value)) {
+                        $params[] = $value[$i];
+                     } else {
+                        $params[] = $value;
+                     }
                   }
 
                } else {
