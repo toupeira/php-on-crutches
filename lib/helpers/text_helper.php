@@ -144,8 +144,8 @@
    }
 
    function is_reachable_email($email) {
-      return @dns_get_mx($domain = array_pop(explode('@', $email, 2)), $mx) or
-             @dns_get_record($domain, DNS_A);
+      $domain = array_pop(explode('@', $email, 2));
+      return (bool) @dns_get_record($domain, DNS_MX | DNS_A);
    }
 
    function auto_link($text) {
