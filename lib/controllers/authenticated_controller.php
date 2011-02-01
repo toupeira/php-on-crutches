@@ -22,7 +22,7 @@
       }
 
       static function is_admin() {
-         if ($user = is_logged_in() and $user->admin and !$user->changed) {
+         if ($user = is_logged_in() and $user->admin and !$user->changed('admin')) {
             return $user;
          } else {
             return false;
