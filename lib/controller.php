@@ -417,13 +417,7 @@
       }
 
       function render_json($object, $status=200) {
-         if (method_exists($object, 'to_json')) {
-            $json = $object->to_json();
-         } else {
-            $json = to_json($object);
-         }
-
-         return $this->head($status, $json, 'application/json');
+         return $this->head($status, to_json($object), 'application/json');
       }
 
       function render_xml($object, $status=200) {
@@ -433,7 +427,7 @@
             $xml = to_xml($object);
          }
 
-         return $this->head($status, $xml, 'text/xml');
+         return $this->head($status, to_xml($object), 'text/xml');
       }
 
       # Redirect to a path

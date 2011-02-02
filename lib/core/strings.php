@@ -76,24 +76,32 @@
    }
 
    function to_json($data) {
-      return json_encode($data);
+      if (is_object($data) and method_exists($data, 'to_json')) {
+         return $data->to_json();
+      } else {
+         return json_encode($data);
+      }
    }
 
    function to_xml($data=null) {
-      $data = is_array($data) ? $data : func_get_args();
+      if (is_object($data) and method_exists($data, 'to_xml')) {
+         return $data->to_xml();
+      } else {
+         $data = is_array($data) ? $data : func_get_args();
 
-      $xml = '';
-      foreach ($data as $key => $value) {
-         if (is_array($value)) {
-            $value = to_xml($value);
-         } else {
-            $value = h(to_string($value));
+         $xml = '';
+         foreach ($data as $key => $value) {
+            if (is_array($value)) {
+               $value = to_xml($value);
+            } else {
+               $value = h(to_string($value));
+            }
+
+            $xml .= content_tag($key, $value);
          }
 
-         $xml .= content_tag($key, $value);
+         return $xml;
       }
-
-      return $xml;
    }
 
 ?>
