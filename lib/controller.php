@@ -23,6 +23,7 @@
       protected $_action;
       protected $_cached;
 
+      protected $_request;
       protected $_actions;
       protected $_errors;
 
@@ -146,10 +147,8 @@
 
       # Get shortcuts for request headers
       function get_request() {
-         static $_request;
-
-         if (is_null($_request)) {
-            $_request = array(
+         if (is_null($this->_request)) {
+            $this->_request = array(
                'host'     => $_SERVER['HTTP_HOST'],
                'method'   => $_SERVER['REQUEST_METHOD'],
                'uri'      => $_SERVER['REQUEST_URI'],
@@ -165,7 +164,7 @@
             );
          }
 
-         return $_request;
+         return $this->_request;
       }
 
       # Get and set template values

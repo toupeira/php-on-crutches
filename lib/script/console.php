@@ -94,8 +94,9 @@ fi
          print "\n";
          print "  Helpers:\n";
          print "    get(\$path, \$params)\n";
-         print "    post(\$path, \$params)\n";
+         print "    post(\$path, \$params), post(\$params)\n";
          print "    follow()\n";
+         print "    click(\$label)\n";
          print "\n";
          continue;
       }
@@ -324,12 +325,12 @@ fi
       $_SERVER['REQUEST_METHOD'] = $method;
       $_SERVER['REQUEST_URI'] = $GLOBALS['_path'] = '/'.ltrim($path, '/');
 
-      $c = $GLOBALS['_controller'] = Dispatcher::run($path);
-      if ($c->msg) {
-         var_export($c->msg);
+      $controller = $GLOBALS['_controller'] = Dispatcher::run($path);
+      if ($controller->msg) {
+         var_export($controller->msg);
       }
 
-      return $c;
+      return $controller;
    }
 
    # Wrapper for GET requests
@@ -345,10 +346,10 @@ fi
    # Wrapper for POST requests
    function post($path, array $params=null) {
       if (is_array($path) and is_null($params)) {
-         if ($c = $GLOBALS['_controller'] and
-               preg_match('/<form.*? action="([^"]+)"/', $c->output, $match)) {
+         if ($controller = $GLOBALS['_controller'] and
+               preg_match('|<form.*? action="(https?://[^/]+)?([^"]+)"|i', $controller->output, $match)) {
             $params = $path;
-            $path = $match[1];
+            $path = $match[2];
          } else {
             print "\n  Couldn't find current form\n\n";
             return;
@@ -361,9 +362,9 @@ fi
 
    # Follow a redirect
    function follow() {
-      if ($c = $GLOBALS['_controller'] and
-          $location = $c->headers['Location'] and
-          $c->headers['Status'])
+      if ($controller = $GLOBALS['_controller'] and
+          $location = $controller->headers['Location'] and
+          $controller->headers['Status'])
       {
          $path = str_replace('http://www.example.com/', '', $location);
          return get($path);
@@ -371,12 +372,12 @@ fi
    }
 
    # Follow a link
-   function click($link) {
-      if ($c = $GLOBALS['_controller'] and
-          preg_match('/<a[^>]* href="([^"]+)"[^>]*>\s*'.preg_quote($link).'/', $c->output, $match)) {
+   function click($label) {
+      if ($controller = $GLOBALS['_controller'] and
+          preg_match('/<a[^>]* href="([^"]+)"[^>]*>\s*'.preg_quote($label).'/', $controller->output, $match)) {
          return get($match[1]);
       } else {
-         print "  Couldn't find link '$link'";
+         print "  Couldn't find link '$label'";
       }
    }
 
