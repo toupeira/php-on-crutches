@@ -60,6 +60,7 @@
    # | @debug_queries@           | analyze database queries | @false@ |
    # | @custom_errors@           | use custom error pages |
    # | @notify_errors@           | addresses to send error notifications to |
+   # | @notify_time@             | log request time if it exceeds this limit |
    # | @notify_memory@           | log memory usage if it exceeds this limit |
    # | @ignore_errors@           | exceptions to ignore |
    # | @ignore_notifications@    | exceptions which should not be notified |
@@ -114,6 +115,7 @@
 
       'custom_errors'          => true,
       'notify_errors'          => null,
+      'notify_time'            => null,
       'notify_memory'          => null,
 
       'ignore_errors'          => array('NotFound', 'AccessDenied', 'InvalidRequest', 'ServiceUnavailable'),

@@ -16,6 +16,8 @@
       static public $status;
 
       static public $start_time = 0;
+      static public $duration;
+
       static public $db_queries = 0;
       static public $db_queries_sql = array();
 
@@ -50,8 +52,10 @@
          self::$controller = new $class(self::$params);
          self::$controller->perform($action, $args);
 
+         # Set the request duration
+         self::$duration = microtime(true) - self::$start_time;
+
          self::log_footer();
-         self::log_memory();
 
          # Print the output
          if (config('debug_toolbar')) {
@@ -67,6 +71,8 @@
          } else {
             print self::$controller->output;
          }
+
+         self::log_warnings();
 
          return self::$controller;
       }
@@ -106,11 +112,10 @@
             return;
          }
 
-         $time = microtime(true) - Dispatcher::$start_time;
          $status = any(Dispatcher::$status, Dispatcher::$controller->headers['Status'], 200);
          
          $text = 'Completed in %.5fs (%d reqs/sec)';
-         $args = array($time, 1 / $time);
+         $args = array(self::$duration, 1 / self::$duration);
 
          $text .= ' | Size: %.2fK';
          $args[] = strlen(self::$controller->output) / 1024;
@@ -138,13 +143,22 @@
          }
       }
 
-      static function log_memory() {
-         if (log_level(LOG_DEBUG) or $limit = config('notify_memory')) {
+      static function log_warnings() {
+         if (is_numeric($time_limit = config('notify_time')) and self::$duration > $time_limit) {
+            log_exception(sprintf(
+               'Warning - Request time too long: %.2fs / Output: %.2fs',
+               self::$duration, microtime(true) - self::$start_time - self::$duration
+            ));
+         }
+
+         $memory_limit = log_level(LOG_DEBUG) ? 0 : config('notify_memory');
+
+         if (is_numeric($memory_limit)) {
             $memory = memory_get_usage(true);
             $peak = memory_get_peak_usage(true);
-            if ($peak > $limit) {
+            if ($peak > $memory_limit) {
                log_exception(sprintf(
-                  'Memory usage: %s / Peak: %s',
+                  'Warning - Memory usage too high: %s / Peak: %s',
                   format_size($memory), format_size($peak)
                ));
             }
