@@ -124,15 +124,17 @@
    }
 
    function form_element_value($key) {
+      $params = &Dispatcher::$params;
+
       if (preg_match('/^(\w+)((?:\[\w+\])+)$/', $key, $match)) {
          # Get value from nested key
          list($m, $object, $keys) = $match;
-         $value = &$_REQUEST[$object];
+         $value = &$params[$object];
          foreach (explode('][', trim($keys, '][')) as $key) {
             $value = &$value[$key];
          }
-      } elseif (isset($_REQUEST[$key])) {
-         $value = $_REQUEST[$key];
+      } elseif (isset($params[$key])) {
+         $value = $params[$key];
       }
 
       return $value;
