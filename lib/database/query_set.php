@@ -595,6 +595,7 @@
                $this->_options['joins'][] = $args[0];
             }
 
+            $this->_sql = null;
             return $this;
 
          } elseif (array_key_exists($method, $this->_options)) {
