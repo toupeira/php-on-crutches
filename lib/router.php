@@ -283,7 +283,7 @@
             $query = array();
 
             foreach ($params as $key => $value) {
-               if (!is_null($value) and $value != $this->_defaults[$key]) {
+               if (!is_null($value) and (!array_key_exists($key, $this->_defaults) or $value != $this->_defaults[$key])) {
                   if (is_numeric($key)) {
                      $query[] = urlencode($value);
                   } elseif (is_array($value)) {
