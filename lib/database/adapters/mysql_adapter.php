@@ -54,7 +54,7 @@
                $has_default = ($default === '0' or !empty($default));
             }
 
-            $attributes[$column['Field']] = array(
+            $attributes[strtolower($column['Field'])] = array(
                'key'         => $column['Key'] == 'PRI',
                'type'        => $type,
                'full_type'   => $full_type,

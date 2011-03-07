@@ -46,7 +46,7 @@
                $has_default = !empty($default);
             }
 
-            $attributes[$column['name']] = array(
+            $attributes[strtolower($column['name'])] = array(
                'key'         => (bool) $column['pk'],
                'type'        => $type,
                'full_type'   => $full_type,
