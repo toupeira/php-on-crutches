@@ -32,10 +32,10 @@
          return $tables;
       }
 
-      function fetch_attributes($table) {
-         $attributes = array();
-         $columns = $this->execute("PRAGMA table_info(`$table`)")->fetch_all();
-         foreach ($columns as $column) {
+      function fetch_columns($table) {
+         $columns = array();
+         $query = $this->execute("PRAGMA table_info(`$table`)")->fetch_all();
+         foreach ($query as $column) {
             list($type, $full_type, $size) = $this->parse_type($column['type']);
 
             if ($type == 'date' or $type == 'time') {
@@ -46,7 +46,7 @@
                $has_default = !empty($default);
             }
 
-            $attributes[$column['name']] = array(
+            $columns[$column['name']] = array(
                'key'         => (bool) $column['pk'],
                'type'        => $type,
                'full_type'   => $full_type,
@@ -61,14 +61,14 @@
          foreach ($indices as $index) {
             if ($index['unique']) {
                if ($info = $this->execute("PRAGMA index_info(`{$index['name']}`)")->fetch()) {
-                  $attributes[$info['name']]['unique'] = true;
+                  $columns[$info['name']]['unique'] = true;
                } else {
                   throw new ApplicationError("Invalid index '{$index['name']}'");
                }
             }
          }
 
-         return $attributes;
+         return $columns;
       }
    }
 

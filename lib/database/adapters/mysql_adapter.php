@@ -19,7 +19,7 @@
 
       function get_attributes() {
          return array(
-            # emulate prepared statements because poor MySQL can't
+            # emulate prepared statements because MySQL can't
             # use its query cache with prepared statements
             # (will be fixed in MySQL 5.1)
             PDO::ATTR_EMULATE_PREPARES => true,
@@ -40,10 +40,10 @@
          return $tables;
       }
 
-      function fetch_attributes($table) {
-         $attributes = array();
-         $columns = $this->execute("DESCRIBE `$table`")->fetch_all();
-         foreach ($columns as $column) {
+      function fetch_columns($table) {
+         $columns = array();
+         $query = $this->execute("DESCRIBE `$table`")->fetch_all();
+         foreach ($query as $column) {
             list($type, $full_type, $size) = $this->parse_type($column['Type']);
 
             if ($type == 'date' or $type == 'time') {
@@ -54,7 +54,7 @@
                $has_default = ($default === '0' or !empty($default));
             }
 
-            $attributes[$column['Field']] = array(
+            $columns[$column['Field']] = array(
                'key'         => $column['Key'] == 'PRI',
                'type'        => $type,
                'full_type'   => $full_type,
@@ -66,7 +66,7 @@
             );
          }
 
-         return $attributes;
+         return $columns;
       }
 
       function analyze_query($sql, array $params) {

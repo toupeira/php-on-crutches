@@ -100,11 +100,18 @@
             return false;
          } else {
             log_debug("Opening database '{$this->_name}'");
+
+            $attributes = array(
+               PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION,
+               PDO::ATTR_PERSISTENT => $this->_options['persistent'],
+            ) + (array) array_delete($this->_options, 'attributes')
+              + (array) $this->get_attributes();
+
             $this->_connection = new PDO(
-               $this->get_dsn($this->_options), $this->_options['username'], $this->_options['password'], array(
-                  PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
-                  PDO::ATTR_PERSISTENT       => $this->_options['persistent'],
-               ) + (array) $this->get_attributes()
+               $this->get_dsn($this->_options),
+               $this->_options['username'],
+               $this->_options['password'],
+               $attributes
             );
 
             return true;
@@ -189,7 +196,7 @@
          if ($attributes = cache($key)) {
             return $attributes;
          } elseif (in_array($table, $this->tables)) {
-            return cache_set($key, $this->fetch_attributes($table));
+            return cache_set($key, $this->fetch_columns($table));
          } else {
             throw new ConfigurationError("Table '{$this->options['database']}.$table' doesn't exist");
          }
@@ -237,8 +244,8 @@
          throw new NotImplemented(get_class()." doesn't implement 'fetch_tables'");
       }
 
-      function fetch_attributes($table) {
-         throw new NotImplemented(get_class()." doesn't implement 'fetch_attributes'");
+      function fetch_columns($table) {
+         throw new NotImplemented(get_class()." doesn't implement 'fetch_columns'");
       }
 
       function analyze_query($sql, array $params) {
