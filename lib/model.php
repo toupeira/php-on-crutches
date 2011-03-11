@@ -147,7 +147,12 @@
       }
 
       function get_mapper() {
-         throw new NotImplemented("Model '".get_class($this)."'doesn't have a mapper");
+         if (is_null($this->_mapper)) {
+            $mapper = get_class($this).'Mapper';
+            $this->_mapper = new $mapper();
+         }
+
+         return $this->_mapper;
       }
 
       function get_exists() {

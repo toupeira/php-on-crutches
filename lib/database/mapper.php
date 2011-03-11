@@ -15,7 +15,9 @@
       static protected $_cache;
 
       static function load($model) {
-         is_object($model) and $model = get_class($model);
+         if (is_object($model)) {
+            $model = get_class($model);
+         }
 
          if ($mapper = self::$_cache[$model]) {
             return $mapper;
