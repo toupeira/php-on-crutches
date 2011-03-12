@@ -21,9 +21,10 @@
 
          if ($mapper = self::$_cache[$model]) {
             return $mapper;
-         } else {
-            $mapper = $model.'Mapper';
+         } elseif (class_exists($mapper = $model.'Mapper')) {
             return self::$_cache[$model] = new $mapper();
+         } else {
+            return self::$_cache[$model] = new DatabaseMapper(null, null, $model);
          }
       }
 
