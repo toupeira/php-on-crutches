@@ -60,6 +60,7 @@
                log_info("Logged in user from cookie");
                $this->session['auth_id'] = self::auth('current')->id;
                $this->send_auth_token();
+               $user->call_filter('after_login');
             }
          }
 

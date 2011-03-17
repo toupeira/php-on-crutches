@@ -32,6 +32,7 @@
             if ($user) {
                self::auth('login', $user);
                $this->session['auth_id'] = $user->id;
+               $user->call_filter('after_login');
 
                if ($this->params['remember']) {
                   $this->send_auth_token();

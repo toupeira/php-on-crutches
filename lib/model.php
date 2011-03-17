@@ -285,7 +285,7 @@
             throw new ApplicationError("Can't change frozen object");
          }
 
-         $old_value = $this->read_attribute($key);
+         $old_value = $this->_attributes[$key];
 
          if (is_string($value) and !in_array($key, $this->_skip_trim)) {
             $value = trim($value);
