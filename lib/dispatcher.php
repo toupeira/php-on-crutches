@@ -114,10 +114,12 @@
 
          $status = any(Dispatcher::$status, Dispatcher::$controller->headers['Status'], 200);
          
-         if (!is_null(self::$duration)) {
-            $text = 'Completed in %.5fs (%d reqs/sec)';
-            $args = array(self::$duration, 1 / self::$duration);
+         if (is_null(self::$duration)) {
+            self::$duration = microtime(true) - self::$start_time;
          }
+
+         $text = 'Completed in %.5fs (%d reqs/sec)';
+         $args = array(self::$duration, 1 / self::$duration);
 
          $text .= ' | Size: %.2fK';
          $args[] = strlen(self::$controller->output) / 1024;
