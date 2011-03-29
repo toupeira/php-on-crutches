@@ -287,7 +287,7 @@
 
          $old_value = $this->_attributes[$key];
 
-         if (is_string($value) and !in_array($key, $this->_skip_trim)) {
+         if (is_string($value) and $this->_skip_trim !== true and !in_array($key, $this->_skip_trim)) {
             $value = trim($value);
          }
 
