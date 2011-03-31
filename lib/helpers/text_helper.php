@@ -64,7 +64,7 @@
          $size = sprintf(any($format, '%.1f'), round($size / MB, 1));
       } else {
          $text = _("%s GB");
-         $size = sprintf(any($format, '%.2f'), round($size / GB, 1));
+         $size = sprintf(any($format, '%.2f'), round($size / GB, 2));
       }
 
       return sprintf($text, $size);
