@@ -140,6 +140,18 @@
       return $value;
    }
 
+   # Add necessary options for confirmation, used in buttons and link_to()
+   function add_confirm_options(array &$options=null) {
+      $confirm = $options['confirm'];
+      unset($options['confirm']);
+
+      if ($confirm) {
+         $message = ($confirm === true ? _("Are you sure?") : $confirm);
+         $options['onclick'] = "return confirm('$message')";
+         return $message;
+      }
+   }
+
    function label($key, $label=null, array $options=null) {
       return content_tag('label', any($label, humanize($key)), array_merge(
          (array) $options, array('for' => form_element_id($key))
@@ -227,6 +239,8 @@
    }
 
    function submit_button($title=null, array $options=null) {
+      add_confirm_options($options);
+
       if (array_delete($options, 'block')) {
          $options['onclick'] = 'this.onclick = function() { return false; }';
       }
@@ -237,6 +251,8 @@
    }
 
    function button_tag($title, array $options=null) {
+      add_confirm_options($options);
+
       return tag('input', $options, array(
          'type' => 'button', 'value' => $title
       ));

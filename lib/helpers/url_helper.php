@@ -156,16 +156,4 @@
            . submit_button($title, $options) . "</form>\n";
    }
 
-   # Add necessary options for confirmation, used in link_to() and button_to()
-   function add_confirm_options(array &$options=null) {
-      $confirm = $options['confirm'];
-      unset($options['confirm']);
-
-      if ($confirm) {
-         $message = ($confirm === true ? _("Are you sure?") : $confirm);
-         $options['onclick'] = "return confirm('$message')";
-         return $message;
-      }
-   }
-
 ?>
