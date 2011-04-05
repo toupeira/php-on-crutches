@@ -179,7 +179,7 @@
       if (preg_match('/<a\s/i', $match[1])) {
          return $all;
       } else {
-         return "$a<a href=\"".h(($b == 'www.' ? 'http://www.' : $b).$c)."\">".h($b.$c)."</a>$d";
+         return "$a<a href=\"".h(($b == 'www.' ? 'http://www.' : $b).$c)."\" target=\"blank\">".h($b.$c)."</a>$d";
       }
    }
 
