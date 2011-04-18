@@ -185,7 +185,7 @@
                if ($format = $this->_formats[$key] and !preg_match($format, $value)) {
                   # Check for format specification
                   return;
-               } elseif ($value) {
+               } elseif (!is_null($value) and $value !== '') {
                   # Add value if not empty
                   $params[$key] = $value;
                }
@@ -272,7 +272,7 @@
             $value = $params[$key];
             unset($params[$key]);
 
-            if ($add or ($value and $value != $this->_defaults[$key])) {
+            if ($add or (!is_null($value) and $value !== '' and $value != $this->_defaults[$key])) {
                $route = str_replace($symbol, $value, $route);
                $add = true;
             }

@@ -32,6 +32,7 @@
 
          $this->assertGenerates('pages/edit', array('action' => 'edit'));
          $this->assertRouting('pages/edit', array('controller' => 'pages', 'action' => 'edit'));
+         $this->assertRouting('pages/bar/0', array('controller' => 'pages', 'action' => 'bar', 'id' => '0'));
          $this->assertRouting('pages/bar/3', array('controller' => 'pages', 'action' => 'bar', 'id' => '3'));
          $this->assertRouting('debug/bar/3/9/81/6561', array('controller' => 'debug', 'action' => 'bar', 'id' => '3/9/81/6561'));
       }
