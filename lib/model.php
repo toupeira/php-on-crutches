@@ -654,6 +654,10 @@
       function form_element($attribute, $tag, array $options=null) {
          $key = underscore(get_class($this))."[$attribute]";
 
+         if (($tag == 'text_field' or $tag == 'text_area') and !isset($options['maxlength'])) {
+            $options['maxlength'] = $this->mapper->attributes[$attribute]['size'];
+         }
+
          if (!$value = array_delete($options, 'value')) {
             $value = $this->_attributes[$attribute];
             $options['force'] = true;

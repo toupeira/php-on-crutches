@@ -395,7 +395,7 @@
       }
 
       function get_page_size() {
-         return $this->_mapper->page_size;
+         return any($this->_options['page_size'], $this->_mapper->page_size);
       }
 
       function get_next_page() {
@@ -411,7 +411,7 @@
       }
 
       function get_page_start() {
-         return $this->_mapper->page_size * ($this->page - 1) + 1;
+         return $this->page_size * ($this->page - 1) + 1;
       }
 
       function get_page_end() {
@@ -814,7 +814,11 @@
       }
 
       # Paginate the query set by the current request parameters
-      function paginated() {
+      function paginated($page_size=null) {
+         if ($page_size) {
+            $this->_options['page_size'] = $page_size;
+         }
+
          $this->_paginate = true;
          $this->_sql = null;
          return $this;
