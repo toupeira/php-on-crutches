@@ -447,7 +447,12 @@
       }
 
       function reset() {
+         if ($options = func_get_args()) {
+            array_delete($this->_options, $options);
+         }
+
          $this->_statement = $this->_count = $this->_objects = null;
+
          return $this;
       }
 
@@ -604,8 +609,7 @@
 
          } elseif (array_key_exists($method, $this->_mapper->attributes)) {
             # Filter by key
-            array_unshift($args, $method);
-            return $this->merge('where', $args);
+            return $this->merge('where', array($method => $args));
 
          } else {
             throw new UndefinedMethod($this, $method);

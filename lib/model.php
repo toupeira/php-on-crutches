@@ -610,7 +610,7 @@
          $path = $this->to_params($action);
          return link_to($title, $path, $options, $url_options);
       }
-      
+
       function icon_link_to($action=null, $title=null, $icon=null, array $options=null, array $url_options=null) {
          $action = any($action, 'show');
 
