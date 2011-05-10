@@ -74,6 +74,11 @@
 
       function clear() {
          $this->_mailer->ClearAllRecipients();
+         $this->_to = array();
+         $this->_cc = array();
+         $this->_bcc = array();
+
+         return true;
       }
 
       function add_cc($address, $name=null) {
