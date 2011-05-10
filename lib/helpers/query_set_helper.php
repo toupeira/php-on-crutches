@@ -9,14 +9,14 @@
 
    # Build pagination links for a QuerySet
    if (!function_exists('page_links')) {
-      function page_links($query_set) {
+      function page_links($query_set, $offset=5) {
          $current = $query_set->page;
          $pages = $query_set->pages;
 
-         $start = max(1, $current - 5);
-         $end = min($pages, $current + 5);
-         if ($start == 1) $end = min($pages, 11);
-         if ($end == $pages) $start = max(1, $pages - 10);
+         $start = max(1, $current - $offset);
+         $end = min($pages, $current + $offset);
+         if ($start == 1) $end = min($pages, 2 * $offset + 1);
+         if ($end == $pages) $start = max(1, $pages - 2 * $offset);
 
          $links = array();
          for ($page = $start; $page <= $end; $page++) {
@@ -32,11 +32,11 @@
          $links = implode(' ', $links);
 
          if ($start > 1) {
-            $links = "... $links";
+            $links = page_link(1)."... $links";
          }
 
          if ($end < $pages) {
-            $links .= " ...";
+            $links .= " ...".page_link($pages);
          }
 
          return $links;

@@ -778,6 +778,10 @@
             $values = array();
 
             foreach ($filter as $key => $value) {
+               if ($value === '') {
+                  continue;
+               }
+
                $value = urldecode($value);
 
                if (substr($key, -5) == '_like') {
@@ -792,6 +796,9 @@
                   $filter_key = "`{$this->table}`.`$key`";
                } elseif ($type == 'alias') {
                   $filter_key = "`$key`";
+               } elseif (method_exists($this, "filter_$key")) {
+                  $this->{"filter_$key"}($value);
+                  continue;
                } else {
                   continue;
                }
