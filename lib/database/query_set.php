@@ -746,7 +746,7 @@
                }
             }
          }
-         
+
          return false;
       }
 
@@ -771,7 +771,7 @@
       }
 
       # Filter the query set by the current request parameters
-      function filtered() {
+      function filtered($inclusive=false) {
          if (is_array($filter = Dispatcher::$params['filter'])) {
             $keys = array();
             $conditions = array();
@@ -816,7 +816,9 @@
             if ($keys) {
                $this->_filtered_keys = $keys;
 
-               array_unshift($values, "(".implode(" OR ", $conditions).")");
+               $operator = ($inclusive ? ' AND ' : ' OR ');
+
+               array_unshift($values, "(".implode($operator, $conditions).")");
                $this->where($values);
             }
          }
