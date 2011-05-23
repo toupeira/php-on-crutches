@@ -275,14 +275,14 @@
       foreach (timezone_identifiers_list() as $zone) {
          if ($zone == 'localtime' or substr($zone, 0, 3) == 'GMT' or substr($zone, 0, 8) == 'SystemV') {
             continue;
-         } elseif (preg_match('|^(Etc/)?([-+A-Z0-9]+)$|', $zone, $match)) {
+         } elseif (preg_match('#^(Etc/|SystemV/)?([^/]+)$#', $zone, $match)) {
             $codes[$zone] = $match[2];
          } else {
             $locations[$zone] = $zone;
          }
       }
 
-      return array_merge(sorted($codes), sorted($locations));
+      return array_merge(sorted($locations), sorted($codes));
    }
 
 ?>
