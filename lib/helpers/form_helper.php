@@ -129,9 +129,16 @@
       if (preg_match('/^(\w+)((?:\[\w+\])+)$/', $key, $match)) {
          # Get value from nested key
          list($m, $object, $keys) = $match;
-         $value = &$params[$object];
-         foreach (explode('][', trim($keys, '][')) as $key) {
-            $value = &$value[$key];
+         if (isset($params[$object])) {
+            $value = &$params[$object];
+
+            foreach (explode('][', trim($keys, '][')) as $key) {
+               if (isset($value[$key])) {
+                  $value = &$value[$key];
+               } else {
+                  return;
+               }
+            }
          }
       } elseif (isset($params[$key])) {
          $value = $params[$key];
