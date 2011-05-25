@@ -32,11 +32,11 @@
          $links = implode(' ', $links);
 
          if ($start > 1) {
-            $links = page_link(1)."... $links";
+            $links = page_link(1).($start > 2 ? "... " : " ").$links;
          }
 
          if ($end < $pages) {
-            $links .= " ...".page_link($pages);
+            $links .= ($end < $pages - 1 ? " ..." : " ").page_link($pages);
          }
 
          return $links;

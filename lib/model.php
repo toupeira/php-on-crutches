@@ -218,7 +218,7 @@
 
          $action = ($this->_new_record ? 'create' : 'update');
 
-         $this->call_filter("before_$action");
+         $this->call_filter("before_$action", $action);
          $this->call_filter("before_save");
 
          if (!$skip_validation and !empty($this->_errors)) {
@@ -245,7 +245,7 @@
 
          $this->_new_record = false;
 
-         $this->call_filter("after_save");
+         $this->call_filter("after_save", $action);
          $this->call_filter("after_$action");
 
          $this->_changed_attributes = array();
