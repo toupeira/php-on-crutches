@@ -150,7 +150,7 @@
       static function log_warnings() {
          if (is_numeric($time_limit = config('notify_time')) and self::$duration > $time_limit) {
             log_exception(sprintf(
-               'Warning - Request time too long: %.2fs / Output: %.2fs',
+               'Warning - Long request time: %.2fs / Output: %.2fs',
                self::$duration, microtime(true) - self::$start_time - self::$duration
             ));
          }
@@ -162,7 +162,7 @@
             $peak = memory_get_peak_usage(true);
             if ($peak > $memory_limit) {
                log_exception(sprintf(
-                  'Warning - Memory usage too high: %s / Peak: %s',
+                  'Warning - High memory usage: %s / Peak: %s',
                   format_size($memory), format_size($peak)
                ));
             }
