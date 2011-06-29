@@ -153,7 +153,7 @@
       unset($options['confirm']);
 
       if ($confirm) {
-         $message = ($confirm === true ? _("Are you sure?") : $confirm);
+         $message = ($confirm === true ? _("Are you sure?") : str_replace("'", "\\'", $confirm));
          $options['onclick'] = "return confirm('$message')";
          return $message;
       }
