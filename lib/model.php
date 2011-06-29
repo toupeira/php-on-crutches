@@ -659,7 +659,10 @@
             $options['maxlength'] = $size;
          }
 
-         if (!$value = array_delete($options, 'value')) {
+         if (isset($options['value'])) {
+            $value = $options['value'];
+            unset($options['value']);
+         } else {
             $value = $this->_attributes[$attribute];
             $options['force'] = true;
          }
@@ -676,6 +679,8 @@
             case 'check_box':
                return hidden_field($key, '0', array('id' => null))
                     . check_box($key, '1', $value, $options);
+            case 'radio_button':
+               return radio_button($key, $value, $value == $this->_attributes[$attribute], $options);
             case 'select_tag':
                return select_tag($key, array_delete($options, 'values'), any(array_delete($options, 'selected'), $value), $options);
             default:
@@ -724,6 +729,11 @@
 
       function check_box($key, array $options=null) {
          return $this->form_element($key, 'check_box', $options);
+      }
+
+      function radio_button($key, $value, array $options=null) {
+         $options['value'] = $value;
+         return $this->form_element($key, 'radio_button', $options);
       }
 
       function select_tag($key, $values, array $options=null) {
