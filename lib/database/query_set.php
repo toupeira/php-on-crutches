@@ -124,13 +124,7 @@
 
       function fetch_column($key) {
          $this->replace_select($key);
-         if (is_array($key)) {
-            $key = array_shift($key);
-         }
-
-         if ($object = $this->fetch()) {
-            return getf($object, $key);
-         }
+         return $this->statement->fetch_column();
       }
 
       function preload(array $data) {
