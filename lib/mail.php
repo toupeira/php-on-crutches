@@ -102,7 +102,7 @@
          if ($this->body == '') {
             $this->body = $this->render();
             if ($this->content_type == 'text/html') {
-               $this->alt_body = trim(strip_html($this->body));
+               $this->alt_body = strip_html($this->body);
             }
          }
 

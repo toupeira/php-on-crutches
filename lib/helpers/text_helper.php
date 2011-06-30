@@ -19,7 +19,7 @@
    }
 
    function strip_html($text) {
-      return html_entity_decode(strip_tags($text), ENT_COMPAT, 'UTF-8');
+      return trim(preg_replace('/\n\n\n+/m', "\n\n", html_entity_decode(strip_tags($text), ENT_COMPAT, 'UTF-8')));
    }
 
    # Truncate text to a given length. If $add_title is set, the full text
