@@ -65,6 +65,7 @@
       protected $_name;
       protected $_options;
       protected $_connection;
+      protected $_transaction;
 
       protected function __construct($name, array $options) {
          $this->_name = $name;
@@ -234,6 +235,40 @@
       }
 
       function get_attributes() {
+      }
+
+      function begin() {
+         if ($this->_transaction) {
+            new ApplicationError(sprintf("Transaction already active in database '%s'", $this->name));
+         }
+
+         return $this->_transaction = new DatabaseTransaction($this->connection);
+      }
+
+      function commit() {
+         if (!$this->_transaction) {
+            new ApplicationError(sprintf("No active transaction in database '%s'", $this->name));
+         }
+
+         if ($this->_transaction->commit()) {
+            $this->_transaction = null;
+            return true;
+         } else {
+            return false;
+         }
+      }
+
+      function rollback() {
+         if (!$this->_transaction) {
+            new ApplicationError(sprintf("No active transaction in database '%s'", $this->name));
+         }
+
+         if ($this->_transaction->rollback()) {
+            $this->_transaction = null;
+            return true;
+         } else {
+            return false;
+         }
       }
 
       function get_timestamp() {
