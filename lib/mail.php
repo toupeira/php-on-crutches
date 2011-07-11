@@ -115,7 +115,7 @@
                throw new MailerError($this->error_info);
             }
          } else {
-            $GLOBALS['_SENT_MAILS'][] = array(
+            $data = array(
                'from'      => $this->from,
                'from_name' => $this->from_name,
                'to'        => $this->_to,
@@ -126,6 +126,9 @@
                'layout'    => $this->layout,
                'body'      => $this->body,
             );
+
+            $GLOBALS['_SENT_MAILS'][] = $data;
+            log_debug($data);
 
             return true;
          }
