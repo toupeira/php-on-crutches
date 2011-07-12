@@ -44,7 +44,7 @@
 
    # Check if a string is UTF8-encoded
    function is_utf8($string, $charsets="ISO-8859-15") {
-      return is_string($string) and mb_detect_encoding($string, "UTF-8, $charsets, ASCII") == "UTF-8";
+      return is_string($string) and mb_detect_encoding($string, "UTF-8, $charsets, ASCII", true) == "UTF-8";
    }
 
    # Convert a string to UTF8 if necessary
