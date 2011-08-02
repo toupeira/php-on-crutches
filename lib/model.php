@@ -678,7 +678,7 @@
          switch ($tag) {
             case 'check_box':
                return hidden_field($key, '0', array('id' => null))
-                    . check_box($key, isset($checkbox) ? $checkbox : 1, $value == $this->_attributes[$attribute], $options);
+                    . check_box($key, isset($checkbox) ? $checkbox : 1, $value and $value == $this->_attributes[$attribute], $options);
             case 'radio_button':
                return radio_button($key, $value, $value == $this->_attributes[$attribute], $options);
             case 'select_tag':
