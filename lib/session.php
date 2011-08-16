@@ -54,13 +54,7 @@
                'SELECT data FROM sessions WHERE id = ?', $id
             )->fetch_column();
          } catch (Exception $e) {
-            if (config('debug')) {
-               throw $e;
-            } elseif (log_running()) {
-               log_exception($e);
-            } else {
-               error_log(dump_exception($e));
-            }
+            self::exception_handler($e);
          }
       }
 
@@ -92,13 +86,7 @@
                );
             }
          } catch (Exception $e) {
-            if (config('debug')) {
-               throw $e;
-            } elseif (log_running()) {
-               log_exception($e);
-            } else {
-               error_log(dump_exception($e));
-            }
+            self::exception_handler($e);
          }
       }
 
@@ -108,13 +96,17 @@
                'DELETE FROM sessions WHERE id = ?', $id
             );
          } catch (Exception $e) {
-            if (config('debug')) {
-               throw $e;
-            } elseif (log_running()) {
-               log_exception($e);
-            } else {
-               error_log(dump_exception($e));
-            }
+            self::exception_handler($e);
+         }
+      }
+
+      static protected function exception_handler($exception) {
+         if (config('debug')) {
+            throw $exception;
+         } else {
+            log_exception($exception);
+            send_error_notification($exception);
+            throw new ServiceUnavailable();
          }
       }
    }
