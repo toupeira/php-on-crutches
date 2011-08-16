@@ -301,7 +301,7 @@
       if (!setlocale(LC_MESSAGES, $config['locale']) or
           !setlocale(LC_CTYPE, $config['locale']))
       {
-         log_warn("Couldn't load UTF-8 locale");
+         log_warn("Couldn't load default locale");
       }
 
       # Set C as global locale, to avoid subprocesses inheriting our locale
