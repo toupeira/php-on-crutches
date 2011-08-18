@@ -10,8 +10,8 @@
    class PagesController extends ApplicationController
    {
       function show($path) {
-         # Catch path traversal attacks
-         $path = str_replace('..', '', trim($this->params['id'], '/'));
+         # Catch path traversal attacks and escape wildcard characters
+         $path = escapeshellcmd(str_replace('..', '', trim($this->params['id'], '/')));
 
          if ($template = View::find_template("pages/$path") or
              $template = View::find_template("pages/$path/index")) {
