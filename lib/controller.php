@@ -27,6 +27,8 @@
       protected $_actions;
       protected $_errors;
 
+      protected $_requirements;
+
       protected $_require_post;
       protected $_require_ajax;
       protected $_require_ssl;
@@ -238,22 +240,44 @@
       }
 
       # Check for a requirement for the given action
-      function check_requirement($action, $requirement) {
-         $requirement = '_require_'.$requirement;
-         $requirement = $this->$requirement;
+      function check_requirement($action, $name) {
+         $property = "_require_$name";
 
-         if ($except = $requirement['except']) {
-            if (count($requirement) > 1) {
+         # Return false if the controller doesn't have the requirement set
+         if (!property_exists($this, $property)) {
+            return false;
+         } else {
+            $options = $this->$property;
+         }
+
+         # Check if the action is specified as an exception
+         if ($except = $options['except']) {
+            if (count($options) > 1) {
                throw new ApplicationError("Can't combine 'exclude' with other arguments");
             } else {
                return !in_array($action, (array) $except);
             }
          }
 
-         return $requirement === true
-             or in_array($action, (array) $requirement)
-             or array_key_exists('all', (array) $requirement)
-             or array_key_exists($action, (array) $requirement);
+         # Check if the action is allowed
+         if (
+            # Allow all actions with true or 'all'
+            $options === true
+            or array_key_exists('all', (array) $options)
+
+            # Allow specific actions by listing them as array values or keys
+            or in_array($action, (array) $options)
+            or array_key_exists($action, (array) $options))
+         {
+            $this->_requirements[$name] = true;
+            return true;
+         } else {
+            return false;
+         }
+      }
+
+      function has_requirement($name) {
+         return (bool) $this->_requirements[$name];
       }
 
       # Check request requirements
