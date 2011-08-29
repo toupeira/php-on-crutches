@@ -97,9 +97,6 @@
             foreach ($emails as $email) {
                $this->add_address($email);
             }
-         } elseif ($this->_cc) {
-            # PHPMailer doesn't add the Cc: header when using the mail() function, even though it works perfectly fine...
-            $this->_mailer->AddCustomHeader($this->_mailer->AddrAppend("Cc", $this->_mailer->cc));
          }
 
          if ($this->body == '') {
