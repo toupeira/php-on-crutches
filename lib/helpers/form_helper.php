@@ -27,10 +27,12 @@
          $options['method'] = strtolower($options['method']);
       }
 
+      $token = array_delete($options, 'token');
+
       $form = content_tag('form', null, $options).N;
 
       # Add a token to POST forms
-      if ($options['method'] == 'post' and $token = form_token()) {
+      if ($options['method'] == 'post' and $token !== false and $token = form_token()) {
          $form .= hidden_field('_form_token', $token, array('id' => null, 'force' => true)).N;
       }
 

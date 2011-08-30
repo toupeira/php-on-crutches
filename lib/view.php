@@ -155,20 +155,12 @@
             $this->_layout = $layout;
          }
 
-         if ($this->_layout and !is_file($this->_layout)) {
-            if (is_file($_file = View::find_template("layouts/{$this->_layout}"))) {
-               $this->_layout = $_file;
-            } else {
-               throw new MissingTemplate("Layout '{$this->_layout}' not found");
-            }
-         }
-
          # Use the template path as default cache key
          if ($this->_cache_key === true) {
             $this->_cache_key = "view_".urlencode($this->_template);
          }
 
-         # Render the template
+         # Check if the template is cached
          if ($this->_cache_key and $output = cache($this->_cache_key)) {
             if ($this->_cache_full) {
                # Return the full cached page
@@ -197,6 +189,14 @@
          $this->set('content_for_layout', $output);
 
          # Render the layout
+         if ($this->_layout and !is_file($this->_layout)) {
+            if (is_file($_file = View::find_template("layouts/{$this->_layout}"))) {
+               $this->_layout = $_file;
+            } else {
+               throw new MissingTemplate("Layout '{$this->_layout}' not found");
+            }
+         }
+
          if (is_file($this->_layout)) {
             $this->log('Rendering template within', $this->_layout);
             $output = $this->compile($this->_layout, $this->_data);
@@ -273,7 +273,7 @@
             log_info($message.' '.strtr($template, array(
                VIEWS        => '',
                LIB.'views/' => '',
-            ))); 
+            )));
          }
       }
 

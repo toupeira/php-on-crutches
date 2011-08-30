@@ -14,34 +14,34 @@
       const SYNTAX = '{
          (?:
             ^(\s*)                                                # $indent
-            ((?:abstract\ |static\ |final\ )*)                    # $flags
-            (?:(private|protected|public)\ )?                     # $visibility
+            ((?:abstract\s+|static\s+|final\s+)*)                 # $flags
+            (?:(private|protected|public)\s+)?                    # $visibility
             (?:
                # Class definitions
-               class\ +
+               class\s+
                   ([\w_]+)                                        # $class
-                  (?:\ +extends\ +([\w_]+))?                      # $parent
-                  (?:\ +implements\ +([\w_,\ ]+))?                # $interfaces
-                  (\ *\{.*\};?$)?|                                # $class_inline
+                  (?:\s+extends\s+([\w_]+))?                      # $parent
+                  (?:\s+implements\s+([\w\s_,]+))?                # $interfaces
+                  (\s*\{.*\};?$)?|                                # $class_inline
 
                # Function and method definitions
-               function\ +
-                  ([\w_]+)\ *                                     # $function
+               function\s+
+                  ([\w_]+)\s*                                     # $function
                   \(([^\{]*)\)                                    # $arguments
-                  (\ *(?:\{.*\})?;?$)?|                           # $function_inline
+                  (\s*(?:\{.*\})?;?$)?|                           # $function_inline
 
                # Properties
-               \$([\w_]+)\ *                                      # $property
-                  (?:;|=\ *(.+)?\ *;\ *$|(.*[^;])$)               # $property_value, $property_value_continued
+               \$([\w_]+)\s*                                      # $property
+                  (?:;|=\s*(.+)?\s*;\s*$|(.*[^;])$)               # $property_value, $property_value_continued
             )|
 
             # Class constants
-            const\ +
-               ([\w_]+)\ *=\ *                                    # $class_constant
-               (?:(.+);\ *$|.*[^;]$)|                             # $class_constant_value
+            const\s+
+               ([\w_]+)\s*=\s*                                    # $class_constant
+               (?:(.+);\s*$|.*[^;]$)|                             # $class_constant_value
 
             # Definitions using define() or define_default()
-            define(?:_default)?\([\'"]([^\'"]+)[\'"],\ *(.+)\);   # $constant, $constant_value
+            define(?:_default)?\([\'"]([^\'"]+)[\'"],\s*(.+)\);   # $constant, $constant_value
          )
       }x';
 
@@ -119,7 +119,7 @@
             # Skip comments without indent and PHP tags
             #
             return;
-         } elseif (!$this->_function and preg_match('/^(\s+)#(?: (.+)$)?/', $line, $match)) {
+         } elseif (!$this->_function and preg_match('/^(\s+)#(?:\s*(.+)$)?/', $line, $match)) {
             #
             # Add comment text
             #
