@@ -128,6 +128,16 @@
          return $this->mapper->update($this, array("`$key` = `$key` - ?" => $step));
       }
 
+      # Add 'maxlength' attribute to text fields
+      function form_element($attribute, $tag, array $options=null) {
+         $size = $this->mapper->attributes[$attribute]['size'];
+         if ($size > 0 and !isset($options['maxlength']) and ($tag == 'text_field' or $tag == 'text_area')) {
+            $options['maxlength'] = $size;
+         }
+
+         return parent::form_element($attribute, $tag, $options);
+      }
+
       # Generate automatic form fields based on database schema
       function auto_field($key) {
          $args = func_get_args();

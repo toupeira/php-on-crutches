@@ -654,11 +654,6 @@
       function form_element($attribute, $tag, array $options=null) {
          $key = underscore(get_class($this))."[$attribute]";
 
-         $size = $this->mapper->attributes[$attribute]['size'];
-         if ($size > 0 and !isset($options['maxlength']) and ($tag == 'text_field' or $tag == 'text_area')) {
-            $options['maxlength'] = $size;
-         }
-
          if (isset($options['value'])) {
             $value = $checkbox = $options['value'];
             unset($options['value']);
