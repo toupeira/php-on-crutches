@@ -148,6 +148,9 @@
          } elseif (is_string($template) and is_file($template)) {
             $this->_template = $template;
          } elseif (!is_file($this->_template = View::find_template($template))) {
+            if (is_array($template)) {
+               $template = '{'.implode(',', $template).'}';
+            }
             throw new MissingTemplate("Template '$template' not found");
          }
 
