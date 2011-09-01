@@ -870,6 +870,8 @@
                   'redirect' => 'index',
                );
             } catch (PDOException $e) {
+               log_exception($e);
+
                return array(
                   'object'   => $object,
                   'error'    => array(_("Couldn't delete %s '%s'"), $object),
