@@ -706,9 +706,7 @@
          $params = $this->params[underscore($model)];
 
          if (method_exists($this, $method = "scaffold_$action")) {
-            $status = call_user_func(array($this, $method),
-               $model, $options, $id, $params
-            );
+            $status = $this->$method($model, $options, $id, $params);
          } else {
             throw new ValueError("Invalid action '$action'");
          }
