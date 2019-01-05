@@ -5,6 +5,7 @@
 # PHP on Crutches
 
 <img src="http://i.imgur.com/6YOGWTF.png" alt="PHP on Crutches" align="right" />
+
 PHP on Crutches is a web application framework for PHP with a focus on convention over configuration. It's loosely based on [Ruby on Rails](http://www.rubyonrails.org) and clones like [CakePHP](http://www.cakephp.org).
 
 ## Features
